@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block container %}
+    <div class="span12">
+        <div class="page-header">
+            <h1 id="workername">{{ worker.name }}</h1>
+        </div>
+    </div>
+
+	<div class="span12 tabbable">
+	  <ul class="nav nav-tabs">
+	    <li class="active"><a href="#tab-pool" data-toggle="tab">Pool</a></li>
+	    <li><a href="#tab-broker" data-toggle="tab">Broker</a></li>
+	    <li><a href="#tab-queues" data-toggle="tab">Queues</a></li>
+	    <li><a href="#tab-tasks" data-toggle="tab">Tasks</a></li>
+	    <li><a href="#tab-limits" data-toggle="tab">Limits</a></li>
+	  </ul>
+	  <div class="tab-content">
+	    <div class="tab-pane active" id="tab-pool">
+	    
+	    	<div class="row">
+			    <div class="span6">
+			        <table class="table table-bordered table-striped">
+                        <caption>Worker pool options</caption>
+			            <tbody>
+			                {% for name,value in worker.stats['pool'].iteritems() %}
+			                    <tr>
+			                        <td>{{ humanize(name) }}</td>
+			                        <td>{{ humanize(value) }}</td>
+			                    </tr>
+			                {% end %}
+			        </table>
+			     </div>
+			
+				<div class="span6">
+                    <div class="form-horizontal">
+                        <fieldset>
+                            <legend>Pool size control</legend>
+                            <div class="control-group">
+                                    <label class="control-label" for="pool-size">Pool size</label>
+                                    <div class="controls">
+                                    <div class="input-append">
+                                        <select class="span1" id="pool-size">
+                                            <option>1</option>
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                        </select>
+                                        <button class="btn" type="button" onclick="on_pool_grow(event)">Grow</button>
+                                        <button class="btn" type="button" onclick="on_pool_shrink(event)">Shrink</button>
+                                    </div>
+                                    </div>
+                            </div>
+                        
+                            <div class="control-group">
+                                    <label class="control-label" for="min-autoscale">Min/Max autoscale</label>
+                                    <div class="controls">
+                                    <div class="input-append">
+                                        <input class="span1" id="min-autoscale" size="6" type="text">
+                                        <input class="span1" id="max-autoscale" size="6" type="text">
+                                        <button class="btn" type="button" onclick="on_pool_autoscale(event)">Apply</button>
+                                    </div>
+                                    </div>
+                            </div>
+
+                        </fieldset>
+
+                    </div>
+			    </div>	     
+		    </div>
+		    
+	    </div> <!-- end pool tab -->
+	    
+	    <div class="tab-pane" id="tab-broker">
+		    <div class="span6">
+		        <table class="table table-bordered table-striped">
+                    <caption>Broker options</caption>
+		            <tbody>
+		                {% for name,value in worker.stats['consumer']['broker'].iteritems() %}
+		                    <tr>
+		                        <td>{{ humanize(name) }}</td>
+		                        <td>{{ value }}</td>
+		                    </tr>
+		                {% end %}
+		        </table>
+		    </div>    
+	    </div> <!-- end broker tab -->
+	    
+	    <div class="tab-pane" id="tab-queues">	    	   
+	        <h3>Active  <small>queues being consumed from</small></h3>
+	        <table class="table table-bordered table-striped">
+	            <thead>
+	                <tr>
+	                    <th>Name</th>
+	                    <th>Exclusive</th>
+	                    <!-- <th>Exchange</th> -->
+	                    <th>Durable</th>
+	                    <th>Routing key</th>
+	                    <th>No ACK</th>
+	                    <th>Alias</th>
+	                    <th>Queue arguments</th>
+	                    <th>Binding arguments</th>
+	                    <th>Auto delete</th>
+	                    <th></th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                {% for queue in worker.active_queues %}
+	                    <tr>
+	                        <td>{{ queue['name'] }}</td>
+	                        <td>{{ queue['exclusive'] }}</td>
+	                        <!-- <td>{{ queue['exchange'] }}</td> -->
+	                        <td>{{ queue['durable'] }}</td>
+	                        <td>{{ queue['routing_key'] }}</td>
+	                        <td>{{ queue['no_ack'] }}</td>
+	                        <td>{{ queue['alias'] }}</td>
+	                        <td>{{ queue['queue_arguments'] }}</td>
+	                        <td>{{ queue['binding_arguments'] }}</td>
+	                        <td>{{ queue['auto_delete'] }}</td>
+	                        <td><button class="btn btn-danger" onclick="on_cancel_consumer(event)">Cancel Consumer</button></td>
+	                    </tr>
+	                {% end %}
+	        </table>		 
+	           
+		     <div class="control-group">
+	             <div class="controls offset4">
+	               <div class="input-append">
+	                   <input class="span2" id="add-consumer-name" size="16" type="text">
+	                   <button class="btn" type="button" onclick="on_add_consumer(event)">Add Consumer</button>
+	               </div>
+	             </div>
+	     	</div>  
+	    </div> <!-- end queues tab -->
+	    
+	    <div class="tab-pane" id="tab-tasks">
+	        <h2>Processed <small>Number of completed tasks</small></h2>
+	        <table class="table table-bordered table-striped">
+	            <tbody>
+	                {% for name,value in worker.stats['total'].iteritems() %}
+	                    <tr>
+	                        <td>{{ name }}</td>
+	                        <td>{{ value }}</td>
+	                    </tr>
+	                {% end %}
+	        </table>
+		    
+	        <h2>Active  <small>Currently executing tasks</small></h2>
+	        <table class="table table-bordered table-striped">
+	            <thead>
+	                <tr>
+	                    <th>Name</th>
+	                    <th>ID</th>
+	                    <th>Start time</th>
+	                    <th>Ack</th>
+	                    <th>PID</th>
+	                    <th>args</th>
+	                    <th>kwargs</th>
+	                </tr>
+	                </tr>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                {% for task in worker.active_tasks %}
+	                    <tr>
+	                        <td>{{ task['name'] }}</td>
+	                        <td>{{ task['id'] }}</td>
+	                        <td>{{ humanize(task['time_start'], type='time') }}</td>
+	                        <td>{{ task['acknowledged'] }}</td>
+	                        <td>{{ task['worker_pid'] }}</td>
+	                        <td>{{ task['args'] }}</td>
+	                        <td>{{ task['kwargs'] }}</td>
+	                    </tr>
+	                {% end %}
+	        </table>
+		    
+	        <h2>Scheduled  <small>Scheduled (ETA) tasks</small></h2>
+	        <table class="table table-bordered table-striped">
+	            <thead>
+	                <tr>
+	                    <th>Name</th>
+	                    <th>ID</th>
+	                    <th>args</th>
+	                    <th>kwargs</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                {% for task in worker.reserved_tasks %}
+	                    <tr>
+	                        <td>{{ task['name'] }}</td>
+	                        <td>{{ task['id'] }}</td>
+	                        <td>{{ task['args'] }}</td>
+	                        <td>{{ task['kwargs'] }}</td>
+	                    </tr>
+	                {% end %}
+	        </table>
+	
+	        <h2>Reserved  <small>Tasks that has been received, but is still waiting to be executed</small></h2>
+	        <table class="table table-bordered table-striped">
+	            <thead>
+	                <tr>
+	                    <th>Name</th>
+	                    <th>ID</th>
+	                    <th>args</th>
+	                    <th>kwargs</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                {% for task in worker.reserved_tasks %}
+	                    <tr>
+	                        <td>{{ task['name'] }}</td>
+	                        <td>{{ task['id'] }}</td>
+	                        <td>{{ task['args'] }}</td>
+	                        <td>{{ task['kwargs'] }}</td>
+	                    </tr>
+	                {% end %}
+	        </table>
+		
+	        <h2>Revoked  <small>Cancelled tasks</small></h2>
+	        <table class="table table-bordered table-striped">
+	            <thead>
+	                <tr>
+	                    <th>Name</th>
+	                    <th>ID</th>
+	                    <th>args</th>
+	                    <th>kwargs</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                {% for task in worker.reserved_tasks %}
+	                    <tr>
+	                        <td>{{ task['name'] }}</td>
+	                        <td>{{ task['id'] }}</td>
+	                        <td>{{ task['args'] }}</td>
+	                        <td>{{ task['kwargs'] }}</td>
+	                    </tr>
+	                {% end %}
+	        </table>
+	    </div> <!-- end tasks tab -->
+	    
+	    <div class="tab-pane" id="tab-limits">	    
+		    <h3>Task limits</h3>
+		    <table class="table table-bordered table-striped">
+	            <thead>
+	                <tr>
+	                    <th>Task name</th>
+	                    <th>Rate limit</th>
+	                    <th>Timeouts</th>
+	                </tr>
+	            </thead>
+		        {% for taskname in worker.registered_tasks %}
+		            <tr>
+		                <td>{{ taskname }}</td>
+		                <td>
+		                    <div class="control-group">
+		                        <div class="controls">
+		                            <div class="input-append">
+		                                <input class="span1 input-small" size="6" type="text">
+		                                <button class="btn btn-success" type="button" onclick="on_task_rate_limit(event)">Apply</button>
+		                            </div>
+		                        </div>
+		                    </div>
+		                </td>
+		                <td>
+		                    <div class="control-group">
+		                        <div class="controls">
+		                            <div class="input-append">
+		                                <input class="span1 input-small" size="6" type="text">
+		                                <button class="btn btn-success" type="button" onclick="on_task_timeout(event)">Soft</button>
+		                                <button class="btn btn-success" type="button" onclick="on_task_timeout(event)">Hard</button>
+		                            </div>
+		                        </div>
+		                    </div>
+		                </td>
+		            </tr>
+		        {% end %}
+		    </table>
+    </div> <!-- end limits tab -->
+	    
+	  </div>
+	</div>
+
+{% end %}
