@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block tabs %}
+<li><a href="/workers">Workers</a></li>
+<li class="active"><a href="/tasks?limit=100">Tasks</a></li>
+{% end %}
+
+{% block container %}
+
+    <div class="span6">
+    <form id="task-filter-form" class="form-horizontal" action="/tasks" method="GET">
+        <fieldset>
+            <legend>Filter tasks</legend>
+            <div class="control-group">
+                <label class="control-label" for="input-limit">Limit:</label>
+                <div class="controls">
+                    <input name="limit" type="text" class="input-small" id="input-limit" value="{{ limit or '' }}">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="select-worker">Workers:</label>
+                <div class="controls">
+                    <select name="worker" id="select-worker">
+                        <option>All</option>
+                        {% for name in workers %}
+                            <option {% if name==worker %} selected {% end %}>{{ name }}</option>
+                        {% end %}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="select-task">Seen task types:</label>
+                <div class="controls">
+                    <select name="type" id="select-task">
+                        <option>All</option>
+                        {% for name in task_types %}
+                            <option {% if name==type %} selected {% end %}>{{ name }}</option>
+                        {% end %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Apply filter</button>
+                <button class="btn" onclick="on_cancel_task_filter(event)">Cancel</button>
+            </div>
+        </fieldset>
+    </form>
+    </div>
+
+    <div class="span12">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>UUID</th>
+                    <th>Status</th>
+                    <th>args</th>
+                    <th>kwargs</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for uuid, task in tasks %}
+                    <tr>
+                        <td>{{ task.name }}</td>
+                        <td><a href="/task/{{ task.uuid }}">{{ task.uuid }}</a></td>
+                        <td>
+                            {% if task.state == "SUCCESS" %}
+                                <span class="label label-success">{{ task.state }}</span>
+                            {% elif task.state == "FAILURE" %}
+                                <span class="label label-important">{{ task.state }}</span>
+                            {% else %}
+                                <span class="label label-default">{{ task.state }}</span>
+                            {% end %}
+                        </td>
+                        <td>{{ task.args }}</td>
+                        <td>{{ task.kwargs }}</td>
+                        <td>{{ task.result }}</td>
+                    </tr>
+                {% end %}
+        </table>	
+    <div>
+{% end %}

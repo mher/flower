@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block tabs %}
+<li class="active"><a href="/workers">Workers</a></li>
+<li><a href="/tasks?limit=100">Tasks</a></li>
+{% end %}
+
 {% block container %}
     <div class="span12">
         <div class="page-header">
@@ -53,7 +58,7 @@
 
     <div class="span12">
         <p>
-            <span class="label label-info">Note:</span> You can get more info by clicking on worker names
+            <span class="label label-info">Note:</span> You can get more info by clicking on worker name
         </p>
     </div>
 

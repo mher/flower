@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block tabs %}
+<li class="active"><a href="/workers">Workers</a></li>
+<li><a href="/tasks?limit=100">Tasks</a></li>
+{% end %}
+
 {% block container %}
     <div class="span12">
         <div class="page-header">
@@ -150,7 +155,7 @@
 	            <thead>
 	                <tr>
 	                    <th>Name</th>
-	                    <th>ID</th>
+	                    <th>UUID</th>
 	                    <th>Start time</th>
 	                    <th>Ack</th>
 	                    <th>PID</th>
@@ -164,7 +169,7 @@
 	                {% for task in worker.active_tasks %}
 	                    <tr>
 	                        <td>{{ task['name'] }}</td>
-	                        <td>{{ task['id'] }}</td>
+                            <td><a href="/task/{{ task['id'] }}">{{ task['id'] }}</a></td>
 	                        <td>{{ humanize(task['time_start'], type='time') }}</td>
 	                        <td>{{ task['acknowledged'] }}</td>
 	                        <td>{{ task['worker_pid'] }}</td>
@@ -179,7 +184,7 @@
 	            <thead>
 	                <tr>
 	                    <th>Name</th>
-	                    <th>ID</th>
+	                    <th>UUID</th>
 	                    <th>args</th>
 	                    <th>kwargs</th>
 	                </tr>
@@ -188,7 +193,7 @@
 	                {% for task in worker.reserved_tasks %}
 	                    <tr>
 	                        <td>{{ task['name'] }}</td>
-	                        <td>{{ task['id'] }}</td>
+                            <td><a href="/task/{{ task['id'] }}">{{ task['id'] }}</a></td>
 	                        <td>{{ task['args'] }}</td>
 	                        <td>{{ task['kwargs'] }}</td>
 	                    </tr>
@@ -200,7 +205,7 @@
 	            <thead>
 	                <tr>
 	                    <th>Name</th>
-	                    <th>ID</th>
+	                    <th>UUID</th>
 	                    <th>args</th>
 	                    <th>kwargs</th>
 	                </tr>
@@ -209,7 +214,7 @@
 	                {% for task in worker.reserved_tasks %}
 	                    <tr>
 	                        <td>{{ task['name'] }}</td>
-	                        <td>{{ task['id'] }}</td>
+                            <td><a href="/task/{{ task['id'] }}">{{ task['id'] }}</a></td>
 	                        <td>{{ task['args'] }}</td>
 	                        <td>{{ task['kwargs'] }}</td>
 	                    </tr>
@@ -227,12 +232,12 @@
 	                </tr>
 	            </thead>
 	            <tbody>
-	                {% for task in worker.reserved_tasks %}
+	                {% for task in worker.revoked_tasks %}
 	                    <tr>
-	                        <td>{{ task['name'] }}</td>
-	                        <td>{{ task['id'] }}</td>
-	                        <td>{{ task['args'] }}</td>
-	                        <td>{{ task['kwargs'] }}</td>
+	                        <td></td>
+	                        <td>{{ task }}</td>
+	                        <td></td>
+	                        <td></td>
 	                    </tr>
 	                {% end %}
 	        </table>
@@ -256,7 +261,7 @@
 		                        <div class="controls">
 		                            <div class="input-append">
 		                                <input class="span1 input-small" size="6" type="text">
-		                                <button class="btn btn-success" type="button" onclick="on_task_rate_limit(event)">Apply</button>
+		                                <button class="btn" type="button" onclick="on_task_rate_limit(event)">Apply</button>
 		                            </div>
 		                        </div>
 		                    </div>
@@ -266,8 +271,8 @@
 		                        <div class="controls">
 		                            <div class="input-append">
 		                                <input class="span1 input-small" size="6" type="text">
-		                                <button class="btn btn-success" type="button" onclick="on_task_timeout(event)">Soft</button>
-		                                <button class="btn btn-success" type="button" onclick="on_task_timeout(event)">Hard</button>
+		                                <button class="btn" type="button" onclick="on_task_timeout(event)">Soft</button>
+		                                <button class="btn" type="button" onclick="on_task_timeout(event)">Hard</button>
 		                            </div>
 		                        </div>
 		                    </div>

@@ -268,9 +268,23 @@ function on_workers_table_update(update)
         stat.text($(this).attr('status') ? "Online" : "Offline");
         stat.removeClass("label-success label-important");
         stat.addClass($(this).attr('status') ? "label-success" : "label-important");
-        concurrency.text($(this).attr('concurrency'))
-        completed_tasks.text($(this).attr('completed_tasks'))
-        running_tasks.text($(this).attr('running_tasks'))
-        queues.text($(this).attr('queues').toString().replace(/,/g, ', '))
+        concurrency.text($(this).attr('concurrency'));
+        completed_tasks.text($(this).attr('completed_tasks'));
+        running_tasks.text($(this).attr('running_tasks'));
+        queues.text($(this).attr('queues').toString().replace(/,/g, ', '));
     });
+}
+
+
+function on_cancel_task_filter(event)
+{
+    event.prevetDefault;
+    event.stopPropagation;
+
+    $('#task-filter-form').each (function(){
+        $(this).find('INPUT:text').val('');
+        $(this).find('SELECT').val('');
+    });
+
+    $('#task-filter-form').submit();
 }

@@ -43,12 +43,12 @@
           <a class="brand" href="/">Celery Admin</a>
           <div class="nav-collapse">
             <ul class="nav">
-              <li class="active"><a href="/workers">Workers</a></li>
-              <li><a href="#tasks">Tasks</a></li>
-              <li><a href="#backend">Backend</a></li>
-              <li><a href="#broker">Broker</a></li>
+              {% block tabs %}
+                    <li><a href="/workers">Workers</a></li>
+                    <li><a href="/tasks?limit=100">Tasks</a></li>
+              {% end %}
               <li><a href="http://docs.celeryproject.org/en/latest/index.html" target="_blank">Docs</a></li>
-              <li><a href="#about">About</a></li>
+              <li><a href="https://github.com/mher/celery-admin" target="_blank">About</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>

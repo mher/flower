@@ -7,6 +7,11 @@ from .views.worker import (
         WorkerView,
         )
 
+from .views.tasks import (
+        TaskView,
+        TasksView,
+        )
+
 from .views.control import (
         ShutdownWorker,
         RestartWorkerPool,
@@ -31,6 +36,8 @@ handlers = [
     (r"/", WorkersView),
     (r"/workers", WorkersView),
     (r"/worker/(.+)", WorkerView),
+    (r"/task/(.+)", TaskView),
+    (r"/tasks", TasksView),
     # Commands
     (r"/shut-down-worker/(.+)", ShutdownWorker),
     (r"/restart-pool-worker/(.+)", RestartWorkerPool),

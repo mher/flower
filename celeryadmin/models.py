@@ -1,8 +1,11 @@
 from __future__ import absolute_import
+from __future__ import with_statement
 
 from collections import OrderedDict
 
 from .state import state
+from .events import tasks
+from .events import state as event_state
 
 
 class BaseModel(object):
@@ -35,6 +38,10 @@ class WorkersModel(BaseModel):
         return WorkersModel(state)
 
     @classmethod
+    def get_workers(cls):
+        return state.stats.keys()
+
+    @classmethod
     def is_worker(cls, workername):
         return WorkerModel(workername, state) is not None
 
@@ -51,6 +58,7 @@ class WorkerModel(BaseModel):
         self.name = name
         self.stats = state.stats[name]
         self.active_tasks = state.active_tasks[name]
+        self.scheduled_tasks = state.scheduled_tasks[name]
         self.active_queues = state.active_queues[name]
         self.revoked_tasks = state.revoked_tasks[name]
         self.registered_tasks = filter(lambda x: not x.startswith('celery.'),
@@ -69,4 +77,44 @@ class WorkerModel(BaseModel):
                self.active_queues == other.active_queues and\
                self.revoked_tasks == other.revoked_tasks and\
                self.registered_tasks == other.registered_tasks and\
+               self.scheduled_tasks == other.scheduled_tasks and\
                self.reserved_tasks == other.reserved_tasks
+
+
+class TaskModel(BaseModel):
+    def __init__(self, task_id):
+        super(BaseModel, self).__init__()
+
+        task = tasks[task_id]
+
+        self._fields = task._defaults.keys()
+        for name, value in task.info(fields=self._fields).iteritems():
+            setattr(self, name, value)
+
+    @classmethod
+    def get_task_by_id(cls, task_id):
+        try:
+            return TaskModel(task_id)
+        except KeyError:
+            return None
+
+    @classmethod
+    def iter_tasks(cls, limit=None, type=None, worker=None):
+        i = 0
+        for uuid, task in event_state._sort_tasks_by_time(
+                event_state.itertasks()):
+            if type and task.name != type:
+                continue
+            if worker and task.worker.hostname != worker:
+                continue
+            yield uuid, task
+            i += 1
+            if i == limit:
+                break
+
+    @classmethod
+    def seen_task_types(cls):
+        return event_state.task_types()
+
+    def __dir__(self):
+        return self._fields
