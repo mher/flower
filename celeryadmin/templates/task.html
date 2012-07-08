@@ -46,7 +46,7 @@
                 </tr>
                 <tr>
                     <td>Result</td>
-                    <td>{{ task.result }}</td>
+                    <td>{{ getattr(task, 'result', None) }}</td>
                 </tr>
             </tbody>
 	    </table>

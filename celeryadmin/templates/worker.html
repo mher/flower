@@ -139,7 +139,7 @@
 	    </div> <!-- end queues tab -->
 	    
 	    <div class="tab-pane" id="tab-tasks">
-	        <h2>Processed <small>Number of completed tasks</small></h2>
+	        <h2>Processed <small>number of completed tasks</small></h2>
 	        <table class="table table-bordered table-striped">
 	            <tbody>
 	                {% for name,value in worker.stats['total'].iteritems() %}
@@ -150,7 +150,7 @@
 	                {% end %}
 	        </table>
 		    
-	        <h2>Active  <small>Currently executing tasks</small></h2>
+	        <h2>Active  <small>currently executing tasks</small></h2>
 	        <table class="table table-bordered table-striped">
 	            <thead>
 	                <tr>
@@ -179,7 +179,7 @@
 	                {% end %}
 	        </table>
 		    
-	        <h2>Scheduled  <small>Scheduled (ETA) tasks</small></h2>
+	        <h2>Scheduled  <small>scheduled (ETA) tasks</small></h2>
 	        <table class="table table-bordered table-striped">
 	            <thead>
 	                <tr>
@@ -190,7 +190,7 @@
 	                </tr>
 	            </thead>
 	            <tbody>
-	                {% for task in worker.reserved_tasks %}
+	                {% for task in worker.scheduled_tasks and [] %}
 	                    <tr>
 	                        <td>{{ task['name'] }}</td>
                             <td><a href="/task/{{ task['id'] }}">{{ task['id'] }}</a></td>
@@ -200,7 +200,7 @@
 	                {% end %}
 	        </table>
 	
-	        <h2>Reserved  <small>Tasks that has been received, but is still waiting to be executed</small></h2>
+	        <h2>Reserved  <small>tasks that has been received, but is still waiting to be executed</small></h2>
 	        <table class="table table-bordered table-striped">
 	            <thead>
 	                <tr>
@@ -221,7 +221,7 @@
 	                {% end %}
 	        </table>
 		
-	        <h2>Revoked  <small>Cancelled tasks</small></h2>
+	        <h2>Revoked  <small>cancelled tasks</small></h2>
 	        <table class="table table-bordered table-striped">
 	            <thead>
 	                <tr>
