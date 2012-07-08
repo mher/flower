@@ -28,6 +28,7 @@ setup(
     url='https://github.com/mher/celery-admin',
     packages=find_packages(),
     install_requires=['celery', 'tornado'],
+    package_data={'celeryadmin': ['templates/*', 'static/**/*']},
     entry_points={
         'console_scripts': [
             'celeryadmin = celeryadmin.__main__:main',
