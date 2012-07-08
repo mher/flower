@@ -22,7 +22,7 @@ def main():
         state.start()
         EventCollector().start()
         ioloop.IOLoop.instance().start()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         pass
 
 

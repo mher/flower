@@ -26,7 +26,7 @@ class DumpCam(Polaroid):
 class EventCollector(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.deamon = True
+        self.daemon = True
 
     def run(self):
         logging.info("Enabling events")
@@ -39,6 +39,9 @@ class EventCollector(threading.Thread):
                             connection, handlers={"*": state.event})
                     with DumpCam(state, freq=1.0):
                         recv.capture(limit=None, timeout=None)
+            except (KeyboardInterrupt, SystemExit):
+                import thread
+                thread.interrupt_main()
             except Exception as e:
                 logging.error("An error occurred while capturing events"
                               ": %s" % e)

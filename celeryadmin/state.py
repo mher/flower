@@ -14,7 +14,7 @@ from .settings import CELERY_INSPECT_INTERVAL
 class State(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.deamon = True
+        self.daemon = True
 
         self._update_lock = threading.Lock()
         self._stats = {}
@@ -48,11 +48,15 @@ class State(threading.Thread):
                     self._revoked_tasks = revoked
                     self._ping = ping
                     self._active_queues = active_queues
+
+                time.sleep(CELERY_INSPECT_INTERVAL / 1000)
+            except (KeyboardInterrupt, SystemExit):
+                import thread
+                thread.interrupt_main()
             except Exception as e:
                 logging.error("An error occurred while inspecting workers"
                               ": %s" % e)
 
-            time.sleep(CELERY_INSPECT_INTERVAL / 1000)
 
     @property
     def stats(self):
