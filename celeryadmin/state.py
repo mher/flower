@@ -82,7 +82,7 @@ class State(threading.Thread):
     @property
     def revoked_tasks(self):
         with self._update_lock:
-            return copy.deepcopy(self._reserved_tasks)
+            return copy.deepcopy(self._revoked_tasks)
 
     @property
     def ping(self):
