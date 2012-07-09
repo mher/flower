@@ -1,4 +1,4 @@
 include MANIFEST.in
 include README.rst
-recursive-include celeryadmin/static *
-recursive-include celeryadmin/templates *
+recursive-include flower/static *
+recursive-include flower/templates *

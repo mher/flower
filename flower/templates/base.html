@@ -2,14 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Celery Admin</title>
+    <title>Celery Flower</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
 
     <!-- Le styles -->
     <link href="/static/css/bootstrap.css" rel="stylesheet">
-    <link href="/static/css/celery-admin.css" rel="stylesheet">
+    <link href="/static/css/flower.css" rel="stylesheet">
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -40,7 +40,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/">Celery Admin</a>
+          <a class="brand" href="/">Celery Flower</a>
           <div class="nav-collapse">
             <ul class="nav">
               {% block tabs %}
@@ -48,7 +48,7 @@
                     <li><a href="/tasks?limit=100">Tasks</a></li>
               {% end %}
               <li><a href="http://docs.celeryproject.org/en/latest/index.html" target="_blank">Docs</a></li>
-              <li><a href="https://github.com/mher/celery-admin" target="_blank">About</a></li>
+              <li><a href="https://github.com/mher/flower" target="_blank">About</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -80,6 +80,6 @@
     <script src="/static/js/bootstrap-carousel.js"></script>
     <script src="/static/js/bootstrap-typeahead.js"></script>
 
-    <script src="/static/js/celery-admin.js"></script>
+    <script src="/static/js/flower.js"></script>
   </body>
 </html>

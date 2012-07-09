@@ -11,7 +11,7 @@ version = re.compile(r'VERSION\s*=\s*\((.*?)\)')
 def get_package_version():
     "returns package version without importing it"
     base = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(base, "celeryadmin/__init__.py")) as initf:
+    with open(os.path.join(base, "flower/__init__.py")) as initf:
         for line in initf:
             m = version.match(line.strip())
             if not m:
@@ -20,21 +20,21 @@ def get_package_version():
 
 
 setup(
-    name='celeryadmin',
+    name='flower',
     version=get_package_version(),
-    description='Celery Web Admin',
+    description='Celery Flower',
     long_description=open('README.rst').read(),
     author='Mher Movsisyan',
-    url='https://github.com/mher/celery-admin',
+    url='https://github.com/mher/flower',
     packages=find_packages(),
     install_requires=['celery', 'tornado'],
-    package_data={'celeryadmin': ['templates/*', 'static/**/*']},
+    package_data={'flower': ['templates/*', 'static/**/*']},
     entry_points={
         'console_scripts': [
-            'celeryadmin = celeryadmin.__main__:main',
+            'flower = flower.__main__:main',
         ],
         'celery.commands': [
-            'ui = celeryadmin.command:Admin',
+            'flower = flower.command:Admin',
         ],
     },
 )
