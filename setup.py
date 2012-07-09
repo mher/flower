@@ -32,6 +32,9 @@ setup(
     entry_points={
         'console_scripts': [
             'celeryadmin = celeryadmin.__main__:main',
-        ]
+        ],
+        'celery.commands': [
+            'ui = celeryadmin.command:Admin',
+        ],
     },
 )
