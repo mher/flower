@@ -10,11 +10,11 @@ Usage
 
 Launch the server and open http://localhost:8008: ::
 
-    $ flower --port 8008
+    $ flower --port=8008
 
 Or launch from celery: ::
 
-    $ celery flower --port 8008
+    $ celery flower --port=8008
 
 Installation
 ------------
