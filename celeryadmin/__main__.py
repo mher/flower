@@ -12,10 +12,12 @@ from .settings import APP_SETTINGS
 define("port", default=8008, help="run on the given port", type=int)
 
 
-def main():
-    parse_command_line()
+def main(argv=None):
+    parse_command_line(argv)
 
     application = Application(handlers, **APP_SETTINGS)
+
+    print('> visit me at http://localhost:%s' % options.port)
 
     application.listen(options.port)
     try:
