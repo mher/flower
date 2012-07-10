@@ -54,8 +54,9 @@
                     <th>Name</th>
                     <th>UUID</th>
                     <th>Status</th>
-                    <th>args</th>
-                    <th>kwargs</th>
+                    <th>Args</th>
+                    <th>Kwargs</th>
+                    <th>Dest</th>
                     <th>Result</th>
                 </tr>
             </thead>
@@ -75,9 +76,16 @@
                         </td>
                         <td>{{ task.args }}</td>
                         <td>{{ task.kwargs }}</td>
+                        <td>
+                            {% if task.routing_key == task.exchange %}
+                                {{ task.routing_key }}
+                            {% else %}
+                                {{ task.routing_key}} [{{ task.exchange }}]
+                                {% end %}
+                        </td>
                         <td>{{ task.result }}</td>
                     </tr>
                 {% end %}
-        </table>	
+        </table>
     <div>
 {% end %}
