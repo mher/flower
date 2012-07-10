@@ -57,7 +57,6 @@ class State(threading.Thread):
                 logging.error("An error occurred while inspecting workers"
                               ": %s" % e)
 
-
     @property
     def stats(self):
         with self._update_lock:

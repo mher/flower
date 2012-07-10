@@ -1,16 +1,15 @@
 from __future__ import absolute_import
+from __future__ import with_statement
 
 import logging
 import threading
 
-import celery
+from celery import current_app as celery
 
 from celery.events import EventReceiver
 from celery.messaging import establish_connection
 from celery.events.state import state
 from celery.events.snapshot import Polaroid
-
-celery = celery.current_app
 
 
 class DumpCam(Polaroid):
