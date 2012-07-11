@@ -7,17 +7,19 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <!-- Le styles -->
+    <!-- bootstap overwtitable styles -->
+    <style type="text/css">
+      body { padding-top: 60px; }
+    </style>
+
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <link href="/static/css/flower.css" rel="stylesheet">
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-    </style>
     <link href="/static/css/bootstrap-responsive.css" rel="stylesheet">
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!-- bootstap overwting styles -->
+    {% block extra_styles %}
+    {% end %}
+
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -31,10 +33,9 @@
   </head>
 
   <body>
-
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container">
+        <div class="container-fluid">
           <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -43,22 +44,22 @@
           <a class="brand" href="/">Celery Flower</a>
           <div class="nav-collapse">
             <ul class="nav">
-              {% block tabs %}
-                    <li><a href="/workers">Workers</a></li>
-                    <li><a href="/tasks?limit=100">Tasks</a></li>
-              {% end %}
+              <li {% if active_tab == "workers" %}class="active"{% end %}><a href="/workers">Workers</a></li>
+              <li {% if active_tab == "tasks" %}class="active"{% end %}><a href="/tasks?limit=100">Tasks</a></li>
               <li><a href="http://docs.celeryproject.org/en/latest/index.html" target="_blank">Docs</a></li>
               <li><a href="https://github.com/mher/flower" target="_blank">About</a></li>
             </ul>
-          </div><!--/.nav-collapse -->
+          </div>
         </div>
       </div>
     </div>
 
-    <div id="alert" class="alert alert-success hide span6 offset3">  
-        <a class="close" onclick="on_alert_close(event)">×</a>  
-        <p id="alert-message"></p>  
-    </div>  
+    <div class="container-fluid">
+      <div id="alert" class="alert alert-success hide">
+        <a class="close" onclick="on_alert_close(event)">×</a>
+        <p id="alert-message"></p>
+      </div>
+    </div>
 
     {% block container %}
     {% end %}

@@ -12,7 +12,7 @@ class TaskView(BaseHandler):
         if task is None:
             raise web.HTTPError(404)
 
-        self.render("task.html", task=task)
+        self.render("task.html", active_tab="tasks", task=task)
 
 
 class TasksView(BaseHandler):
@@ -29,7 +29,8 @@ class TasksView(BaseHandler):
         workers = WorkersModel.get_workers()
         seen_task_types = TaskModel.seen_task_types()
 
-        self.render("tasks.html", tasks=tasks,
+        self.render("tasks.html", active_tab="tasks",
+                                  tasks=tasks,
                                   task_types=seen_task_types,
                                   workers=workers,
                                   limit=limit,
