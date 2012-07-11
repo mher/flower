@@ -8,8 +8,7 @@ from ..models import WorkersModel, WorkerModel
 
 class WorkersView(BaseHandler):
     def get(self):
-        self.render("workers.html",
-                    workers=WorkersModel.get_latest().workers)
+        self.render("workers.html", workers=WorkersModel.get_latest().workers)
 
 
 class WorkerView(BaseHandler):
