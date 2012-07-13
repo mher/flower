@@ -100,17 +100,12 @@ class TaskModel(BaseModel):
 
     @classmethod
     def iter_tasks(cls, limit=None, type=None, worker=None):
-        i = 0
-        for uuid, task in event_state._sort_tasks_by_time(
-                event_state.itertasks()):
+        for uuid, task in event_state.tasks_by_timestamp(limit):
             if type and task.name != type:
                 continue
             if worker and task.worker.hostname != worker:
                 continue
             yield uuid, task
-            i += 1
-            if i == limit:
-                break
 
     @classmethod
     def seen_task_types(cls):

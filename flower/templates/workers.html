@@ -1,65 +1,54 @@
 {% extends "base.html" %}
 
-{% block tabs %}
-<li class="active"><a href="/workers">Workers</a></li>
-<li><a href="/tasks?limit=100">Tasks</a></li>
-{% end %}
-
 {% block container %}
-    <div class="span12">
-        <div class="page-header">
-            <h1>Workers</h1>
-        </div>
-    </div>
+  <div class="container-fluid">
+    <h1>Workers</h1>
 
-    <div class="span12">
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th>Concurrency</th>
-                    <th>Completed Tasks</th>
-                    <th>Running Tasks</th>
-                    <th>Queues</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-                <tbody>
-            {% for name,info in workers.iteritems() %}
-                    <tr id="{{ name }}">
-                        <td><a href="/worker/{{ name }}">{{ name }}</a></td>
-                        <td>
-                            {% if info['status'] %}
-                                <span class="label label-success">Online</span>
-                            {% else %}
-                                <span class="label label-important">Offline</span>
-                            {% end %}
-                        </td>
-                        <td>{{ info['concurrency'] }}</td>
-                        <td>{{ info['completed_tasks'] }}</td>
-                        <td>{{ info['running_tasks'] }}</td>
-                        <td>{{ humanize(info['queues']) }}</td>
-                        <td>
-                            <div class="btn-group">
-                                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Shut Down<span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#" onclick="worker_command(event)">Shut Down</a></li>
-                                    <li><a href="#" onclick="worker_command(event)">Restart Pool</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-            {% end %}
-                </tbody>
+    <p>
+      <strong>Note:</strong> You can get more info by clicking on worker name
+    </p>
 
-        </table>
-    </div>
-
-    <div class="span12">
-        <p>
-            <span class="label label-info">Note:</span> You can get more info by clicking on worker name
-        </p>
-    </div>
-
+    <table class="table table-bordered table-striped">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Concurrency</th>
+        <th>Completed Tasks</th>
+        <th>Running Tasks</th>
+        <th>Queues</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for name,info in workers.iteritems() %}
+      <tr id="{{ name }}">
+        <td><a href="/worker/{{ name }}">{{ name }}</a></td>
+        <td>
+          {% if info['status'] %}
+          <span class="label label-success">Online</span>
+          {% else %}
+          <span class="label label-important">Offline</span>
+          {% end %}
+        </td>
+        <td>{{ info['concurrency'] }}</td>
+        <td>{{ info['completed_tasks'] }}</td>
+        <td>{{ info['running_tasks'] }}</td>
+        <td>{{ humanize(info['queues']) }}</td>
+        <td>
+          <div class="btn-group">
+            <a class="btn" href="#" onclick="worker_command(event)">Shut Down</a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown"><span
+              class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a href="#" onclick="worker_command(event)">Shut Down</a></li>
+              <li><a href="#" onclick="worker_command(event)">Restart Pool</a></li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+      {% end %}
+      </tbody>
+    </table>
+  </div>
 {% end %}

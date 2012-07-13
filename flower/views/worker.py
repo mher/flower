@@ -9,6 +9,7 @@ from ..models import WorkersModel, WorkerModel
 class WorkersView(BaseHandler):
     def get(self):
         self.render("workers.html",
+                    active_tab="workers",
                     workers=WorkersModel.get_latest().workers)
 
 
@@ -18,4 +19,4 @@ class WorkerView(BaseHandler):
         if worker is None:
             raise web.HTTPError(404)
 
-        self.render("worker.html", worker=worker)
+        self.render("worker.html", active_tab="workers", worker=worker)
