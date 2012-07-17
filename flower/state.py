@@ -56,6 +56,7 @@ class State(threading.Thread):
             except Exception as e:
                 logging.error("An error occurred while inspecting workers"
                               ": %s" % e)
+                time.sleep(1)
 
 
     @property
