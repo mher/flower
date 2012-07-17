@@ -49,6 +49,11 @@ class State(threading.Thread):
                     self._ping = ping
                     self._active_queues = active_queues
 
+                # Periodically enable events for workers
+                # launched after flower
+                logging.debug("Enabling events")
+                celery.current_app.control.enable_events()
+
                 time.sleep(CELERY_INSPECT_INTERVAL / 1000)
             except (KeyboardInterrupt, SystemExit):
                 import thread
