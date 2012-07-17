@@ -22,7 +22,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 kwargs['exc_info'][0] == tornado.web.HTTPError:
                     message = kwargs['exc_info'][1].log_message
             self.render('404.html', message=message)
-        else:
+        elif status_code == 500:
             error_trace = ""
             for line in traceback.format_exception(*kwargs['exc_info']):
                 error_trace += line
@@ -30,3 +30,11 @@ class BaseHandler(tornado.web.RequestHandler):
             self.render('error.html',
                         status_code=status_code,
                         error_trace=error_trace)
+        else:
+            message = None
+            if 'exc_info' in kwargs and\
+                kwargs['exc_info'][0] == tornado.web.HTTPError:
+                    message = kwargs['exc_info'][1].log_message
+                    self.set_header('Content-Type', 'text/plain')
+                    self.write(message)
+            self.set_status(status_code)
