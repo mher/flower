@@ -58,7 +58,6 @@ class State(threading.Thread):
                               ": %s" % e)
                 time.sleep(1)
 
-
     @property
     def stats(self):
         with self._update_lock:

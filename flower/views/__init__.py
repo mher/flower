@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import inspect
+import traceback
 
 import tornado
 
@@ -13,3 +14,19 @@ class BaseHandler(tornado.web.RequestHandler):
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.iterkeys())
         kwargs.update(functions)
         super(BaseHandler, self).render(*args, **kwargs)
+
+    def write_error(self, status_code, **kwargs):
+        if status_code == 404:
+            message = None
+            if 'exc_info' in kwargs and\
+                kwargs['exc_info'][0] == tornado.web.HTTPError:
+                    message = kwargs['exc_info'][1].log_message
+            self.render('404.html', message=message)
+        else:
+            error_trace = ""
+            for line in traceback.format_exception(*kwargs['exc_info']):
+                error_trace += line
+
+            self.render('error.html',
+                        status_code=status_code,
+                        error_trace=error_trace)

@@ -190,7 +190,7 @@
 	                </tr>
 	            </thead>
 	            <tbody>
-	                {% for task in worker.scheduled_tasks and [] %}
+	                {% for task in worker.scheduled_tasks %}
 	                    <tr>
 	                        <td>{{ task['name'] }}</td>
                             <td><a href="/task/{{ task['id'] }}">{{ task['id'] }}</a></td>
