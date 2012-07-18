@@ -254,10 +254,12 @@ function on_task_rate_limit(event)
 function on_workers_table_update(update)
 {
     $.each(update, function(name){
-        id = "#"+name.replace(/(:|\.)/g,'\\$1');
-        tr = $(id)
-        if (!tr){
-            return;
+        id = name.replace(/(:|\.)/g,'\\$1');
+        tr = $('#'+id)
+        if (tr.length == 0){
+            $('table tr:last').clone().attr('id',id).appendTo('table');
+            tr = $('#'+id)
+            tr.children('td').children('a').attr('href','/worker/'+id).text(id)
         }
         stat = tr.children('td:eq(1)').children();
         concurrency = tr.children('td:eq(2)');

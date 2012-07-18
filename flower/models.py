@@ -28,9 +28,9 @@ class WorkersModel(BaseModel):
                     status=(workername in state.ping),
                     concurrency=stat['pool']['max-concurrency'],
                     completed_tasks=sum(stat['total'].itervalues()),
-                    running_tasks=len(state.active_tasks[workername]),
+                    running_tasks=len(state.active_tasks.get(workername, [])),
                     queues=map(lambda x: x['name'],
-                               state.active_queues[workername]),
+                               state.active_queues.get(workername, [])),
                     )
 
     @classmethod
