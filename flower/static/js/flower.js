@@ -257,9 +257,9 @@ function on_workers_table_update(update)
         id = name.replace(/(:|\.)/g,'\\$1');
         tr = $('#'+id)
         if (tr.length == 0){
-            $('table tr:last').clone().attr('id',id).appendTo('table');
+            $('#workers-table-row').clone().removeClass('hidden').attr('id', name).appendTo('tbody')
             tr = $('#'+id)
-            tr.children('td').children('a').attr('href','/worker/'+id).text(id)
+            tr.children('td').children('a').attr('href','/worker/'+id).text(name)
         }
         stat = tr.children('td:eq(1)').children();
         concurrency = tr.children('td:eq(2)');
