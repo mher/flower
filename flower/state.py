@@ -28,6 +28,16 @@ class State(threading.Thread):
         self._confs = {}
 
     def run(self):
+        transport = celery.current_app.connection().transport.driver_type
+        if transport not in ('amqp', 'redis', 'mongodb'):
+            logging.error("Dashboard and worker management commands are "
+                    "not available for '%s' transport" % transport)
+            return
+
+        if celery.__version__.rsplit('.', 1)[0]  < '3.1':
+            logging.warning("Configuration viewer is not available for "
+                "Celery versions prior to 3.1")
+
         i = celery.current_app.control.inspect()
         while True:
             try:
