@@ -19,6 +19,7 @@
 	    <li><a href="#tab-queues" data-toggle="tab">Queues</a></li>
 	    <li><a href="#tab-tasks" data-toggle="tab">Tasks</a></li>
 	    <li><a href="#tab-limits" data-toggle="tab">Limits</a></li>
+	    <li><a href="#tab-config" data-toggle="tab">Config</a></li>
 	  </ul>
 	  <div class="tab-content">
 	    <div class="tab-pane active" id="tab-pool">
@@ -34,6 +35,7 @@
 			                        <td>{{ humanize(value) }}</td>
 			                    </tr>
 			                {% end %}
+                        </tbody>
 			        </table>
 			     </div>
 			
@@ -88,6 +90,7 @@
 		                        <td>{{ value }}</td>
 		                    </tr>
 		                {% end %}
+                    </tbody>
 		        </table>
 		    </div>    
 	    </div> <!-- end broker tab -->
@@ -126,6 +129,7 @@
 	                        <td><button class="btn btn-danger" onclick="on_cancel_consumer(event)">Cancel Consumer</button></td>
 	                    </tr>
 	                {% end %}
+                </tbody>
 	        </table>		 
 	           
 		     <div class="control-group">
@@ -148,6 +152,7 @@
 	                        <td>{{ value }}</td>
 	                    </tr>
 	                {% end %}
+                </tbody>
 	        </table>
 		    
 	        <h2>Active  <small>currently executing tasks</small></h2>
@@ -177,6 +182,7 @@
 	                        <td>{{ task['kwargs'] }}</td>
 	                    </tr>
 	                {% end %}
+                </tbody>
 	        </table>
 		    
 	        <h2>Scheduled  <small>scheduled (ETA) tasks</small></h2>
@@ -198,6 +204,7 @@
 	                        <td>{{ task['kwargs'] }}</td>
 	                    </tr>
 	                {% end %}
+                </tbody>
 	        </table>
 	
 	        <h2>Reserved  <small>tasks that has been received, but is still waiting to be executed</small></h2>
@@ -219,6 +226,7 @@
 	                        <td>{{ task['kwargs'] }}</td>
 	                    </tr>
 	                {% end %}
+                </tbody>
 	        </table>
 		
 	        <h2>Revoked  <small>cancelled tasks</small></h2>
@@ -240,6 +248,7 @@
 	                        <td></td>
 	                    </tr>
 	                {% end %}
+                </tbody>
 	        </table>
 	    </div> <!-- end tasks tab -->
 	    
@@ -281,6 +290,24 @@
 		        {% end %}
 		    </table>
     </div> <!-- end limits tab -->
+
+	    <div class="tab-pane" id="tab-config">
+		    <div class="span8">
+		        <table class="table table-bordered table-striped">
+                    <caption>Configuration options</caption>
+		            <tbody>
+		                {% for name,value in sorted(worker.conf.iteritems()) %}
+                            {% if value is not None %}
+		                    <tr>
+                                <td><a href="http://docs.celeryproject.org/en/latest/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
+		                        <td>{{ value }}</td>
+		                    </tr>
+                            {% end %}
+		                {% end %}
+                    </tbody>
+		        </table>
+		    </div>
+	    </div> <!-- end config tab -->
 	    
 	  </div>
 	</div>

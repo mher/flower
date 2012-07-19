@@ -25,6 +25,7 @@ class State(threading.Thread):
         self._revoked_tasks = {}
         self._ping = {}
         self._active_queues = {}
+        self._confs = {}
 
     def run(self):
         i = celery.current_app.control.inspect()
@@ -38,6 +39,8 @@ class State(threading.Thread):
                 revoked = i.revoked() or {}
                 ping = i.ping() or {}
                 active_queues = i.active_queues() or {}
+                # Inspect.conf was introduced in Celery 3.0.2
+                conf = hasattr(i, 'conf') and i.conf() or {}
 
                 with self._update_lock:
                     self._stats = stats
@@ -48,6 +51,7 @@ class State(threading.Thread):
                     self._revoked_tasks = revoked
                     self._ping = ping
                     self._active_queues = active_queues
+                    self._conf = conf
 
                 # Periodically enable events for workers
                 # launched after flower
@@ -102,6 +106,11 @@ class State(threading.Thread):
     def active_queues(self):
         with self._update_lock:
             return copy.deepcopy(self._active_queues)
+
+    @property
+    def conf(self):
+        with self._update_lock:
+            return copy.deepcopy(self._conf)
 
 
 state = State()

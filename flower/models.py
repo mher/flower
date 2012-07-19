@@ -57,13 +57,14 @@ class WorkerModel(BaseModel):
     def initialize(self, name, state):
         self.name = name
         self.stats = state.stats[name]
-        self.active_tasks = state.active_tasks[name]
-        self.scheduled_tasks = state.scheduled_tasks[name]
-        self.active_queues = state.active_queues[name]
-        self.revoked_tasks = state.revoked_tasks[name]
+        self.active_tasks = state.active_tasks.get(name, {})
+        self.scheduled_tasks = state.scheduled_tasks.get(name, {})
+        self.active_queues = state.active_queues.get(name, {})
+        self.revoked_tasks = state.revoked_tasks.get(name, [])
         self.registered_tasks = filter(lambda x: not x.startswith('celery.'),
-                                       state.registered_tasks[name])
-        self.reserved_tasks = state.reserved_tasks[name]
+                                       state.registered_tasks.get(name, {}))
+        self.reserved_tasks = state.reserved_tasks.get(name, {})
+        self.conf = state.conf.get(name, {})
 
     @classmethod
     def get_worker(self, name):
@@ -78,7 +79,8 @@ class WorkerModel(BaseModel):
                self.revoked_tasks == other.revoked_tasks and\
                self.registered_tasks == other.registered_tasks and\
                self.scheduled_tasks == other.scheduled_tasks and\
-               self.reserved_tasks == other.reserved_tasks
+               self.reserved_tasks == other.reserved_tasks and\
+               self.conf == other.conf
 
 
 class TaskModel(BaseModel):
