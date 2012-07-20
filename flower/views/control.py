@@ -16,7 +16,7 @@ celery = celery.current_app
 class ShutdownWorker(BaseHandler):
     def post(self, workername):
         if not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         logging.info("Shutting down '%s' worker" % workername)
         celery.control.broadcast('shutdown', destination=[workername])
@@ -26,7 +26,7 @@ class ShutdownWorker(BaseHandler):
 class RestartWorkerPool(BaseHandler):
     def post(self, workername):
         if not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         logging.info("Restarting '%s' worker's pool" % workername)
         response = celery.control.broadcast('pool_restart',
@@ -45,7 +45,7 @@ class RestartWorkerPool(BaseHandler):
 class TaskRateLimit(BaseHandler):
     def post(self, workername=None):
         if workername is not None and not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         taskname = self.get_argument('taskname', None)
         ratelimit = int(self.get_argument('ratelimit'))
@@ -68,7 +68,7 @@ class TaskRateLimit(BaseHandler):
 class TaskTimout(BaseHandler):
     def post(self, workername=None):
         if workername is not None and not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         taskname = self.get_argument('taskname', None)
         hard = self.get_argument('hard-timeout', None)
@@ -92,7 +92,7 @@ class TaskTimout(BaseHandler):
 class WorkerPoolGrow(BaseHandler):
     def post(self, workername):
         if not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         n = int(self.get_argument('n', 1))
 
@@ -112,7 +112,7 @@ class WorkerPoolGrow(BaseHandler):
 class WorkerPoolShrink(BaseHandler):
     def post(self, workername):
         if not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         n = int(self.get_argument('n', 1))
 
@@ -133,7 +133,7 @@ class WorkerPoolShrink(BaseHandler):
 class WorkerPoolAutoscale(BaseHandler):
     def post(self, workername):
         if not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         min = int(self.get_argument('min'))
         max = int(self.get_argument('max'))
@@ -157,7 +157,7 @@ class WorkerPoolAutoscale(BaseHandler):
 class WorkerQueueAddConsumer(BaseHandler):
     def post(self, workername):
         if not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         queue = self.get_argument('queue')
 
@@ -180,7 +180,7 @@ class WorkerQueueAddConsumer(BaseHandler):
 class WorkerQueueCancelConsumer(BaseHandler):
     def post(self, workername):
         if not is_worker(workername):
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         queue = self.get_argument('queue')
 

@@ -10,7 +10,7 @@ class TaskView(BaseHandler):
     def get(self, task_id):
         task = TaskModel.get_task_by_id(task_id)
         if task is None:
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown task '%s'" % task_id)
 
         self.render("task.html", active_tab="tasks", task=task)
 

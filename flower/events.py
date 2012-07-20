@@ -9,17 +9,6 @@ from celery import current_app as celery
 from celery.events import EventReceiver
 from celery.messaging import establish_connection
 from celery.events.state import state
-from celery.events.snapshot import Polaroid
-
-
-class DumpCam(Polaroid):
-    def __init__(self, state, freq=1.0):
-        Polaroid.__init__(self, state, freq)
-
-    def on_shutter(self, state):
-        if not state.event_count:
-            # No new events since last snapshot.
-            return
 
 
 class EventCollector(threading.Thread):
@@ -35,9 +24,8 @@ class EventCollector(threading.Thread):
             try:
                 with establish_connection() as connection:
                     recv = EventReceiver(
-                            connection, handlers={"*": state.event})
-                    with DumpCam(state, freq=1.0):
-                        recv.capture(limit=None, timeout=None)
+                                connection, handlers={"*": state.event})
+                    recv.capture(limit=None, timeout=None)
             except (KeyboardInterrupt, SystemExit):
                 import thread
                 thread.interrupt_main()

@@ -28,6 +28,7 @@ from .views.update import (
         UpdateWorkers,
         )
 
+from .views.error import NotFoundErrorHandler
 from .settings import APP_SETTINGS
 
 
@@ -51,5 +52,8 @@ handlers = [
     # WebSocket Updates
     (r"/update-workers", UpdateWorkers),
     # Static
-    (r"/(.*)", StaticFileHandler, {"path": APP_SETTINGS['static_path']})
+    (r"/static/(.*)", StaticFileHandler,
+                        {"path": APP_SETTINGS['static_path']}),
+    # Error
+    (r".*", NotFoundErrorHandler),
 ]

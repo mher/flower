@@ -17,6 +17,6 @@ class WorkerView(BaseHandler):
     def get(self, workername):
         worker = WorkerModel.get_worker(workername)
         if worker is None:
-            raise web.HTTPError(404)
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         self.render("worker.html", active_tab="workers", worker=worker)
