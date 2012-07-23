@@ -332,8 +332,16 @@ var flower = (function () {
         select_all_workers: select_all_workers,
         select_none_workers: select_none_workers,
         shutdown_selected: shutdown_selected,
-        restart_selected: restart_selected
-
+        restart_selected: restart_selected,
+        on_alert_close: on_alert_close,
+        on_pool_grow: on_pool_grow,
+        on_pool_shrink: on_pool_shrink,
+        on_pool_autoscale: on_pool_autoscale,
+        on_add_consumer: on_add_consumer,
+        on_cancel_consumer: on_cancel_consumer,
+        on_task_timeout: on_task_timeout,
+        on_task_rate_limit: on_task_rate_limit,
+        on_cancel_task_filter: on_cancel_task_filter,
     }
 
 }(jQuery));
