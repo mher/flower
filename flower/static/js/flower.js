@@ -177,6 +177,9 @@ var flower = (function () {
             },
             success: function (data) {
                 show_success_alert(data.message);
+                setTimeout( function () {
+                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
+                }, 10000)
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -201,6 +204,9 @@ var flower = (function () {
             },
             success: function (data) {
                 show_success_alert(data.message);
+                setTimeout( function () {
+                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
+                }, 10000)
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -256,6 +262,9 @@ var flower = (function () {
             },
             success: function (data) {
                 show_success_alert(data.message);
+                setTimeout( function () {
+                    $('#tab-limits').load('/worker/' + workername + ' #tab-limits').fadeIn('show');
+                }, 10000)
             },
             error: function (data) {
                 show_error_alert(data.responseText);
