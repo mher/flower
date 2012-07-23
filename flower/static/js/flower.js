@@ -274,11 +274,11 @@ var flower = (function () {
                 tr.children('td').children('a').attr('href', '/worker/' + id).text(name);
             }
 
-            var stat = tr.children('td:eq(1)').children(),
-                concurrency = tr.children('td:eq(2)'),
-                completed_tasks = tr.children('td:eq(3)'),
-                running_tasks = tr.children('td:eq(4)'),
-                queues = tr.children('td:eq(5)');
+            var stat = tr.children('td:eq(2)').children(),
+                concurrency = tr.children('td:eq(3)'),
+                completed_tasks = tr.children('td:eq(4)'),
+                running_tasks = tr.children('td:eq(5)'),
+                queues = tr.children('td:eq(6)');
 
             stat.text($(this).attr('status') ? "Online" : "Offline");
             stat.removeClass("label-success label-important");
