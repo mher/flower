@@ -1,4 +1,4 @@
-(function () {
+var flower = (function () {
     "use strict";
     /*jslint browser: true */
     /*global $, WebSocket, jQuery */
@@ -21,28 +21,68 @@
         $("#alert").show();
     }
 
-    function worker_command(event) {
-        event.preventDefault();
-        event.stopPropagation();
+    function _get_selected_workers(){
+        return $('#workers-table tr').has('td.is_selected > input:checked');
+    }
 
-        var workername = $(event.target).closest("tr").find("a").html(),
-            command = $(event.target).html().toLowerCase();
+    function toggle_selected_workers(event){
+        var $checkbox = $('#select-workers-toggler');
 
-        command = command.replace(' ', '-');
+        $checkbox.is(':checked') ? select_all_workers()
+                                 : select_none_workers();
+    }
 
-        $.ajax({
-            type: 'POST',
-            url: '/' + command + '-worker/' + workername,
-            dataType: 'json',
-            data: {
-                'workername': workername,
-            },
-            success: function (data) {
-                show_success_alert(data.message);
-            },
-            error: function (data) {
-                show_error_alert(data.responseText);
-            }
+    function select_all_workers(){
+        $('#workers-table td.is_selected > input').filter(':not(:checked)').click();
+    }
+
+    function select_none_workers(){
+        $('#workers-table td.is_selected > input:checked').click();
+    }
+
+    function shutdown_selected(event) {
+        var $selected_workes = _get_selected_workers();
+
+        /* atomic would be better with list of ids (not-names) */
+        $selected_workes.each(function(){
+            var $worker = $(this),
+                worker_name = $worker.attr('id');
+
+            $.ajax({
+                type: 'POST',
+                url: '/shut-down-worker/' + worker_name,
+                dataType: 'json',
+                data: { workername: worker_name },
+                success: function (data) {
+                    show_success_alert(data.message);
+                },
+                error: function (data) {
+                    show_error_alert(data.responseText);
+                }
+            });
+        });
+    }
+
+    function restart_selected(event) {
+        var $selected_workes = _get_selected_workers();
+
+        /* atomic would be better with list of ids (not-names) */
+        $selected_workes.each(function(){
+            var $worker = $(this),
+                worker_name = $worker.attr('id');
+
+            $.ajax({
+                type: 'POST',
+                url: '/restart-pool-worker/' + worker_name,
+                dataType: 'json',
+                data: { workername: worker_name },
+                success: function (data) {
+                    show_success_alert(data.message);
+                },
+                error: function (data) {
+                    show_error_alert(data.responseText);
+                }
+            });
         });
     }
 
@@ -286,5 +326,14 @@
         });
 
     });
+
+    return {
+        toggle_selected_workers: toggle_selected_workers,
+        select_all_workers: select_all_workers,
+        select_none_workers: select_none_workers,
+        shutdown_selected: shutdown_selected,
+        restart_selected: restart_selected
+
+    }
 
 }(jQuery));
