@@ -314,7 +314,7 @@ var flower = (function () {
 
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), ['/', '/workers'])) {
+        if ($.inArray($(location).attr('pathname'), ['', '/workers'])) {
             var host = $(location).attr('host'),
                 ws = new WebSocket("ws://" + host + "/update-workers");
             ws.onmessage = function (event) {
