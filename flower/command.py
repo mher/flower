@@ -8,4 +8,3 @@ class Admin(Command):
     def run_from_argv(self, prog_name, argv=None):
         argv = self.setup_app_from_commandline(argv)
         return main(argv)
-

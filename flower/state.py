@@ -34,13 +34,14 @@ class State(threading.Thread):
                     "not available for '%s' transport" % transport)
             return
 
-        if celery.__version__.rsplit('.', 1)[0]  < '3.1':
+        if celery.__version__.rsplit('.', 1)[0] < '3.1':
             logging.warning("Configuration viewer is not available for "
                 "Celery versions prior to 3.1")
 
         i = celery.current_app.control.inspect()
         while True:
             try:
+                logging.debug('Inspecting workers')
                 stats = i.stats() or {}
                 registered = i.registered() or {}
                 scheduled = i.scheduled() or {}

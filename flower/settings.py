@@ -2,12 +2,12 @@ from __future__ import absolute_import
 
 from os.path import join, abspath, dirname
 
+
 PROJECT_ROOT = abspath(dirname(__file__))
 
 APP_SETTINGS = dict(
     template_path=join(PROJECT_ROOT, "templates"),
     static_path=join(PROJECT_ROOT, "static"),
-    debug=True,
 )
 
 PAGE_UPDATE_INTERVAL = 2000
