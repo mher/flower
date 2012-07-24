@@ -1,0 +1,33 @@
+Celery Flower
+=============
+
+Here you can see the full list of changes between each release.
+
+Version 0.2
+-----------
+
+Released on Jul 24 2012
+
+- configuration viewer for each worker
+- improves UI
+- adds error pages
+- warns about unsupported transports
+- periodically enables events
+
+Version 0.1
+-----------
+
+Released on Jul 09 2012
+
+- workers dashboard with auto refresh
+- worker pool control commands (restart, grow/shrink, autoscale)
+- worker pool options viewer
+- broker options viewer
+- active queues options viewer
+- consumer addition and cancellation
+- processed tasks statistics
+- active tasks viewer
+- scheduled tasks viewer
+- reserved tasks viewer
+- task options viewer
+- task limit control (rate limits, hard and soft timeouts)
