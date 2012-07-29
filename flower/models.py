@@ -7,8 +7,7 @@ except ImportError:
     from celery.utils.compat import OrderedDict
 
 from .state import state
-from .events import tasks
-from .events import state as event_state
+from .events import EventCollector
 
 
 class BaseModel(object):
@@ -90,7 +89,7 @@ class TaskModel(BaseModel):
     def __init__(self, task_id):
         super(BaseModel, self).__init__()
 
-        task = tasks[task_id]
+        task = EventCollector().state.tasks[task_id]
 
         self._fields = task._defaults.keys()
         for name, value in task.info(fields=self._fields).iteritems():
@@ -106,8 +105,9 @@ class TaskModel(BaseModel):
     @classmethod
     def iter_tasks(cls, limit=None, type=None, worker=None):
         i = 0
-        for uuid, task in event_state._sort_tasks_by_time(
-                event_state.itertasks()):
+        state = EventCollector().state
+        for uuid, task in state._sort_tasks_by_time(
+                state.itertasks()):
             if type and task.name != type:
                 continue
             if worker and task.worker.hostname != worker:
@@ -119,7 +119,7 @@ class TaskModel(BaseModel):
 
     @classmethod
     def seen_task_types(cls):
-        return event_state.task_types()
+        return EventCollector().state.task_types()
 
     def __dir__(self):
         return self._fields
