@@ -6,6 +6,7 @@ Here you can see the full list of changes between each release.
 Version 0.3
 -----------
 
+- worker view shows autoscaler options
 - worker view shows worker's PID
 
 Version 0.2

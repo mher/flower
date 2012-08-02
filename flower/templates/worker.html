@@ -35,10 +35,10 @@
                           <td>{{ humanize(value) }}</td>
                         </tr>
                       {% end %}
-                      <tr>
-                          <td>Worker PID</td>
-                          <td>{{ worker.stats.get('pid', '')}}</td>
-                      </tr>
+                        <tr>
+                            <td>Worker PID</td>
+                            <td>{{ worker.stats.get('pid', '')}}</td>
+                        </tr>
                     </tbody>
                   </table>
                 </div>
@@ -78,6 +78,25 @@
                   </div>
                 </div>
               </div>
+
+              {% if worker.stats['autoscaler'] %}
+                <div class="row-fluid">
+                    <div class="span6">
+                        <table class="table table-bordered table-striped">
+                            <caption>Autoscaler options</caption>
+                            <tbody>
+                            {% for name,value in worker.stats['autoscaler'].iteritems() %}
+                                <tr>
+                                <td>{{ humanize(name) }}</td>
+                                <td>{{ humanize(value) }}</td>
+                                </tr>
+                            {% end %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+              {% end %}
+
             </div> <!-- end pool tab -->
 	    
             <div class="tab-pane" id="tab-broker">
