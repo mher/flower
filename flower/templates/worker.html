@@ -35,6 +35,10 @@
                           <td>{{ humanize(value) }}</td>
                         </tr>
                       {% end %}
+                      <tr>
+                          <td>Worker PID</td>
+                          <td>{{ worker.stats.get('pid', '')}}</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
