@@ -22,6 +22,7 @@ from .views.control import (
         WorkerQueueCancelConsumer,
         TaskRateLimit,
         TaskTimout,
+        TaskRevoke,
         )
 
 from .views.update import (
@@ -49,6 +50,7 @@ handlers = [
     (r"/worker-queue-cancel-consumer/(.+)", WorkerQueueCancelConsumer),
     (r"/task-timeout/(.+)", TaskTimout),
     (r"/task-rate-limit/(.+)", TaskRateLimit),
+    (r"/task-revoke/(.+)", TaskRevoke),
     # WebSocket Updates
     (r"/update-workers", UpdateWorkers),
     # Static

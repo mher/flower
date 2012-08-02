@@ -206,7 +206,7 @@
                 </tbody>
               </table>
 
-              <h2>Scheduled <small>scheduled (ETA) tasks</small></h2>
+              <h2>Scheduled <small>scheduled (eta/countdown/retry) tasks</small></h2>
               <table class="table table-bordered table-striped">
                 <thead>
                   <tr>
@@ -219,10 +219,10 @@
                 <tbody>
                   {% for task in worker.scheduled_tasks %}
                     <tr>
-                      <td>{{ task['name'] }}</td>
-                        <td><a href="/task/{{ task['id'] }}">{{ task['id'] }}</a></td>
-                      <td>{{ task['args'] }}</td>
-                      <td>{{ task['kwargs'] }}</td>
+                      <td>{{ task['request']['name'] }}</td>
+                        <td><a href="/task/{{ task['request']['id'] }}">{{ task['request']['id'] }}</a></td>
+                      <td>{{ task['request']['args'] }}</td>
+                      <td>{{ task['request']['kwargs'] }}</td>
                     </tr>
                   {% end %}
                   </tbody>
@@ -264,7 +264,7 @@
                   {% for task in worker.revoked_tasks %}
                     <tr>
                       <td></td>
-                      <td>{{ task }}</td>
+                      <td><a href="/task/{{ task }}">{{ task }}</a></td>
                       <td></td>
                       <td></td>
                     </tr>

@@ -198,3 +198,11 @@ class WorkerQueueCancelConsumer(BaseHandler):
             self.set_status(403)
             self.write("Failed to cancel '%s' consumer from '%s' worker: %s" %
                        (queue, workername, error))
+
+
+class TaskRevoke(BaseHandler):
+    def post(self, taskid):
+        logging.info("Revoking task '%s'" % taskid)
+        terminate = self.get_argument('terminate', False)
+        celery.control.revoke(taskid, terminate=terminate)
+        self.write(dict(message="Revoked '%s'" % taskid))

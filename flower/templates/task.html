@@ -5,12 +5,18 @@
 {% end %}
 
 {% block container %}
-  <div class="container-fluid">
+  <div id='task-page' class="container-fluid">
     <div class="row-fluid">
       <div class="span12">
         <div class="page-header">
-          <h2 id="taskid">{{ task.name }}
+          <p id="taskid" class="hidden">{{ task.uuid }}</p>
+          <h2>{{ task.name }}
             <small>{{ task.uuid }}</small>
+            {% if task.state == "STARTED" %}
+                <button style="float: right" class="btn btn-danger" onclick="flower.on_task_terminate(event)">Terminate</button>
+            {% elif task.state == "RECEIVED" %}
+                <button  style="float: right" class="btn btn-danger" onclick="flower.on_task_revoke(event)">Revoke</button>
+            {% end %}
           </h2>
         </div>
         <div class="row-fluid">

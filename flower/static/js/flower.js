@@ -272,6 +272,50 @@ var flower = (function () {
         });
     }
 
+    function on_task_revoke(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var taskid = $('#taskid').text();
+
+        $.ajax({
+            type: 'POST',
+            url: '/task-revoke/' + taskid,
+            dataType: 'json',
+            data: {
+                'terminate': false,
+            },
+            success: function (data) {
+                show_success_alert(data.message);
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
+    function on_task_terminate(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var taskid = $('#taskid').text();
+
+        $.ajax({
+            type: 'POST',
+            url: '/task-revoke/' + taskid,
+            dataType: 'json',
+            data: {
+                'terminate': true,
+            },
+            success: function (data) {
+                show_success_alert(data.message);
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
     function on_workers_table_update(update) {
         $.each(update, function (name) {
             var id = name.replace(/(:|\.)/g, '\\$1'),
@@ -351,6 +395,8 @@ var flower = (function () {
         on_task_timeout: on_task_timeout,
         on_task_rate_limit: on_task_rate_limit,
         on_cancel_task_filter: on_cancel_task_filter,
+        on_task_revoke: on_task_revoke,
+        on_task_terminate: on_task_terminate,
     }
 
 }(jQuery));
