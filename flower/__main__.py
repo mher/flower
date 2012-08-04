@@ -11,7 +11,7 @@ from flower.events import EventCollector
 from flower.urls import handlers
 from flower.settings import APP_SETTINGS
 
-define("port", default=8008, help="run on the given port", type=int)
+define("port", default=5555, help="run on the given port", type=int)
 define("debug", default=False, help="run in debug mode", type=bool)
 
 
