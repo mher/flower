@@ -121,3 +121,20 @@ class TaskModel(BaseModel):
 
     def __dir__(self):
         return self._fields
+
+
+class SysInfoModel(BaseModel):
+    def __init__(self):
+        super(BaseModel, self).__init__()
+
+    def get_mem_usage(self):
+        return {workername:info['memusage']
+                    for workername,info in state.sysinfo.items()}
+
+    def get_total_mem(self):
+        return {workername:info['memtotal']
+                    for workername,info in state.sysinfo.items()}
+
+    @property
+    def sysinfo(self):
+        return state.sysinfo

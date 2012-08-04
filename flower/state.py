@@ -121,3 +121,8 @@ class State(threading.Thread):
     def conf(self):
         with self._update_lock:
             return copy.deepcopy(self._conf)
+
+    @property
+    def sysinfo(self):
+        with self._update_lock:
+            return copy.deepcopy(self._sysinfo)

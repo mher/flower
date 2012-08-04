@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  {% module Template("navbar.html", active_tab="system") %}
+{% end %}
+
+{% block container %}
+    <div class="container-fluid">
+    {% for workername in sysinfo %} 
+        <div class="row-fluid">
+        <div class="span12">
+            <div class="page-header">
+                <h2>{{ workername }}</h2>
+            </div>
+        </div>
+            <div class="span6">
+                <div id="memory-chart-{{ workername }}" style="width: 600px; height: 300px;"></div>
+            </div>
+            <div class="span4">
+                <div id="cpu-chart-{{ workername }}" style="width: 600px; height: 300px;"></div>
+            </div>
+        </div>
+    {% end %}
+    </div>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+{% for workername in sysinfo %} 
+        var memdata_{{ workername }} = google.visualization.arrayToDataTable([
+            ['Memory', 'MBs per Process'],
+        {% for pid, ratio in sysinfo[workername]['memusage'].items() %}
+            ['{{ pid }}', {{ ratio*sysinfo[workername]['memtotal'] }}],
+        {% end %}
+            ['Other', {{ sysinfo[workername]['memtotal'] - sum(sysinfo[workername]['memusage'].values()) }}],
+        ]);
+
+        var cpudata_{{ workername }} = google.visualization.arrayToDataTable([
+            ['CPU', 'Percent'],
+        {% for pid, fraction in sysinfo[workername]['cpuusage'].items() %}
+            ['{{ pid }}', {{ fraction }}],
+        {% end %}
+            ['Other', {{ 100 - sum(sysinfo[workername]['cpuusage'].values()) }}],
+        ]);
+
+        var memchart_{{ workername }} = new google.visualization.PieChart(document.getElementById('memory-chart-{{ workername }}'));
+        memchart_{{ workername }}.draw(memdata_{{ workername }}, {title: 'Memory'});
+
+        var cpuchart_{{ workername }} = new google.visualization.PieChart(document.getElementById('cpu-chart-{{ workername }}'));
+        cpuchart_{{ workername }}.draw(cpudata_{{ workername }}, {title: 'CPU'});
+{% end %}
+    }
+</script>
+
+{% end %}
