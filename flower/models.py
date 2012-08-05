@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from celery.utils.compat import OrderedDict
 
 from .state import state
 from .events import tasks
