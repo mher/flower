@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
-from collections import OrderedDict
+from celery.utils.compat import ordereddict
 
 from .state import state
 from .events import tasks
