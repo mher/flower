@@ -25,6 +25,10 @@ classes = """
     License :: OSI Approved :: BSD License
     Topic :: System :: Distributed Computing
     Programming Language :: Python
+    Programming Language :: Python :: 2
+    Programming Language :: Python :: 2.6
+    Programming Language :: Python :: 2.7
+    Programming Language :: Python :: Implementation :: CPython
     Operating System :: OS Independent
 """
 classifiers = [s.strip() for s in classes.split('\n') if s]
