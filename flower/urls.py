@@ -29,6 +29,12 @@ from .views.update import (
         UpdateWorkers,
         )
 
+from .views.monitor import (
+        Monitor,
+        TaskNumberMonitor,
+        )
+
+
 from .views.error import NotFoundErrorHandler
 from .settings import APP_SETTINGS
 
@@ -53,6 +59,9 @@ handlers = [
     (r"/task-revoke/(.+)", TaskRevoke),
     # WebSocket Updates
     (r"/update-workers", UpdateWorkers),
+    # Monitors
+    (r"/monitor", Monitor),
+    (r"/monitor/task-number", TaskNumberMonitor),
     # Static
     (r"/static/(.*)", StaticFileHandler,
                         {"path": APP_SETTINGS['static_path']}),

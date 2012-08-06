@@ -7,7 +7,7 @@ from tornado.web import Application
 from tornado.options import define, options, parse_command_line
 
 from flower.state import state
-from flower.events import EventCollector
+from flower.events import Events
 from flower.urls import handlers
 from flower.settings import APP_SETTINGS
 
@@ -28,7 +28,7 @@ def main(argv=None):
     application.listen(options.port)
     try:
         state.start()
-        EventCollector().start()
+        Events().start()
         ioloop.IOLoop.instance().start()
     except (KeyboardInterrupt, SystemExit):
         pass

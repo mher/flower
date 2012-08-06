@@ -1,7 +1,7 @@
 var flower = (function () {
     "use strict";
     /*jslint browser: true */
-    /*global $, WebSocket, jQuery */
+    /*global $, WebSocket, jQuery, Rickshaw */
 
     function on_alert_close(event) {
         event.preventDefault();
@@ -21,30 +21,30 @@ var flower = (function () {
         $("#alert").show();
     }
 
-    function _get_selected_workers(){
+    function get_selected_workers() {
         return $('#workers-table tr').has('td.is_selected > input:checked');
     }
 
-    function toggle_selected_workers(event){
+    function select_all_workers() {
+        $('#workers-table td.is_selected > input').filter(':not(:checked)').click();
+    }
+
+    function select_none_workers() {
+        $('#workers-table td.is_selected > input:checked').click();
+    }
+
+    function toggle_selected_workers(event) {
         var $checkbox = $('#select-workers-toggler');
 
         $checkbox.is(':checked') ? select_all_workers()
                                  : select_none_workers();
     }
 
-    function select_all_workers(){
-        $('#workers-table td.is_selected > input').filter(':not(:checked)').click();
-    }
-
-    function select_none_workers(){
-        $('#workers-table td.is_selected > input:checked').click();
-    }
-
     function shutdown_selected(event) {
-        var $selected_workes = _get_selected_workers();
+        var $selected_workes = get_selected_workers();
 
         /* atomic would be better with list of ids (not-names) */
-        $selected_workes.each(function(){
+        $selected_workes.each(function () {
             var $worker = $(this),
                 worker_name = $worker.attr('id');
 
@@ -64,10 +64,10 @@ var flower = (function () {
     }
 
     function restart_selected(event) {
-        var $selected_workes = _get_selected_workers();
+        var $selected_workes = get_selected_workers();
 
         /* atomic would be better with list of ids (not-names) */
-        $selected_workes.each(function(){
+        $selected_workes.each(function () {
             var $worker = $(this),
                 worker_name = $worker.attr('id');
 
@@ -177,9 +177,9 @@ var flower = (function () {
             },
             success: function (data) {
                 show_success_alert(data.message);
-                setTimeout( function () {
+                setTimeout(function () {
                     $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
-                }, 10000)
+                }, 10000);
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -204,9 +204,9 @@ var flower = (function () {
             },
             success: function (data) {
                 show_success_alert(data.message);
-                setTimeout( function () {
+                setTimeout(function () {
                     $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
-                }, 10000)
+                }, 10000);
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -262,9 +262,9 @@ var flower = (function () {
             },
             success: function (data) {
                 show_success_alert(data.message);
-                setTimeout( function () {
+                setTimeout(function () {
                     $('#tab-limits').load('/worker/' + workername + ' #tab-limits').fadeIn('show');
-                }, 10000)
+                }, 10000);
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -356,6 +356,94 @@ var flower = (function () {
         $('#task-filter-form').submit();
     }
 
+    function create_graph(data, id, width, height) {
+        id = id || '';
+        width = width || 700;
+        height = height || 300;
+
+        var seriesData = []
+        for (var name in data){
+            seriesData.push({name: name});
+        }
+
+        var palette = new Rickshaw.Color.Palette();
+
+        var graph = new Rickshaw.Graph({
+            element: document.getElementById("chart"+id),
+            width: width,
+            height: height,
+            renderer: 'area',
+            stroke: false,
+            series: new Rickshaw.Series(seriesData),
+        });
+
+        var ticksTreatment = 'glow';
+
+        var xAxis = new Rickshaw.Graph.Axis.Time({
+            graph: graph,
+            ticksTreatment: ticksTreatment
+        });
+
+        xAxis.render();
+
+        var yAxis = new Rickshaw.Graph.Axis.Y({
+            graph: graph,
+            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+            ticksTreatment: ticksTreatment
+        });
+
+        yAxis.render();
+        var slider = new Rickshaw.Graph.RangeSlider({
+            graph: graph,
+            element: $('#slider'+id)
+        });
+
+        var hoverDetail = new Rickshaw.Graph.HoverDetail({
+            graph: graph
+        });
+
+        var legend = new Rickshaw.Graph.Legend({
+            graph: graph,
+            element: document.getElementById('legend'+id)
+        });
+
+        var shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
+            graph: graph,
+            legend: legend
+        });
+
+        var order = new Rickshaw.Graph.Behavior.Series.Order({
+            graph: graph,
+            legend: legend
+        });
+
+        var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
+            graph: graph,
+            legend: legend
+        });
+
+        legend.shelving = shelving;
+        graph.series.legend = legend;
+
+        graph.render();
+        return graph;
+    }
+
+    function update_graph(graph, lastquery) {
+        $.ajax({
+            type: 'GET',
+            url: '/monitor/task-number',
+            data: {lastquery: lastquery},
+            success: function (data) {
+                graph.series.addData(data);
+                graph.update();
+            },
+        });
+    }
+
+    function current_unix_time() {
+        return new Date().getTime() / 1000;
+    }
 
     $(document).ready(function () {
         if ($.inArray($(location).attr('pathname'), ['', '/workers'])) {
@@ -378,6 +466,30 @@ var flower = (function () {
             });
         });
 
+        if ($(location).attr('pathname') === '/monitor') {
+            var lastupdate = current_unix_time(),
+                updateinterval = 3000,
+                graph = null;
+
+            $.ajax({
+                type: 'GET',
+                url: '/monitor/task-number',
+                data: {lastquery: current_unix_time()},
+                success: function (data) {
+                    graph = create_graph(data)
+                    graph.update();
+
+                    graph.series.setTimeInterval(updateinterval);
+                    setInterval(function () {
+                        update_graph(graph, lastupdate);
+                        lastupdate = current_unix_time();
+                    }, updateinterval);
+
+                },
+            });
+
+        }
+
     });
 
     return {
@@ -397,6 +509,6 @@ var flower = (function () {
         on_cancel_task_filter: on_cancel_task_filter,
         on_task_revoke: on_task_revoke,
         on_task_terminate: on_task_terminate,
-    }
+    };
 
 }(jQuery));

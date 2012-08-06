@@ -12,12 +12,12 @@ from celery.events.state import State
 celery = celery.current_app
 
 
-class EventCollector(threading.Thread):
+class Events(threading.Thread):
     state = State()
     _instance = None
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(EventCollector, cls).__new__(
+            cls._instance = super(Events, cls).__new__(
                     cls, *args, **kwargs)
         return cls._instance
 

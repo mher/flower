@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  {% module Template("navbar.html", active_tab="monitor") %}
+{% end %}
+
+{% block container %}
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div id="content">
+            <form id="side_panel">
+                <h3>Succeeded tasks</h3>
+                <section><div id="legend"></div></section>
+            </form>
+            <div id="chart_container">
+                <div id="chart"></div>
+                <div id="timeline"></div>
+                <div id="slider"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% end %}
