@@ -4,7 +4,6 @@ import logging
 import threading
 
 from celery.events import EventReceiver
-from celery.messaging import establish_connection
 from celery.events.state import State
 
 
@@ -29,9 +28,9 @@ class Events(threading.Thread):
 
         while True:
             try:
-                with establish_connection() as connection:
-                    recv = EventReceiver(
-                            connection, handlers={"*": self.on_event})
+                with self._celery_app.connection() as conn:
+                    recv = EventReceiver(conn,
+                                handlers={"*": self.on_event})
                     recv.capture(limit=None, timeout=None)
             except (KeyboardInterrupt, SystemExit):
                 import thread
