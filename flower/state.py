@@ -8,7 +8,7 @@ import threading
 
 import celery
 
-from .settings import CELERY_INSPECT_INTERVAL
+from .settings import CELERY_INSPECT_TIMEOUT
 
 
 class State(threading.Thread):
@@ -39,7 +39,8 @@ class State(threading.Thread):
             logging.warning("Configuration viewer is not available for "
                 "Celery versions prior to 3.1")
 
-        i = self._celery_app.control.inspect()
+        timeout = CELERY_INSPECT_TIMEOUT / 1000.0
+        i = self._celery_app.control.inspect(timeout=timeout)
         while True:
             try:
                 logging.debug('Inspecting workers')
@@ -51,7 +52,7 @@ class State(threading.Thread):
                 revoked = i.revoked() or {}
                 ping = i.ping() or {}
                 active_queues = i.active_queues() or {}
-                # Inspect.conf was introduced in Celery 3.0.2
+                # Inspect.conf was introduced in Celery 3.1
                 conf = hasattr(i, 'conf') and i.conf() or {}
 
                 with self._update_lock:
@@ -65,12 +66,6 @@ class State(threading.Thread):
                     self._active_queues = active_queues
                     self._conf = conf
 
-                # Periodically enable events for workers
-                # launched after flower
-                logging.debug("Enabling events")
-                self._celery_app.control.enable_events()
-
-                time.sleep(CELERY_INSPECT_INTERVAL / 1000)
             except (KeyboardInterrupt, SystemExit):
                 import thread
                 thread.interrupt_main()
