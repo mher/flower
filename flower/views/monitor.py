@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from collections import defaultdict
 
 from ..views import BaseHandler
-from ..events import Events
 
 
 class Monitor(BaseHandler):
@@ -14,7 +13,7 @@ class Monitor(BaseHandler):
 class TaskNumberMonitor(BaseHandler):
     def get(self):
         timestamp = float(self.get_argument('lastquery'))
-        state = Events().state
+        state = self.application.events.state
 
         data = defaultdict(int)
         for _, task in state.itertasks():

@@ -2,31 +2,33 @@ from __future__ import absolute_import
 
 import logging
 
-import celery
-
 from tornado import web
 
 from ..views import BaseHandler
 from ..models import WorkersModel
 
-is_worker = WorkersModel.is_worker
-celery = celery.current_app
+
+class ControlHandler(BaseHandler):
+    def is_worker(self, name):
+        return WorkersModel.is_worker(self.application, name)
 
 
-class ShutdownWorker(BaseHandler):
+class ShutdownWorker(ControlHandler):
     def post(self, workername):
-        if not is_worker(workername):
+        if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         logging.info("Shutting down '%s' worker" % workername)
         celery.control.broadcast('shutdown', destination=[workername])
         self.write(dict(message="Shutting down!"))
 
 
-class RestartWorkerPool(BaseHandler):
+class RestartWorkerPool(ControlHandler):
     def post(self, workername):
-        if not is_worker(workername):
+        if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         logging.info("Restarting '%s' worker's pool" % workername)
         response = celery.control.broadcast('pool_restart',
@@ -42,10 +44,11 @@ class RestartWorkerPool(BaseHandler):
             self.write("Failed to restart the '%s' pool" % workername)
 
 
-class TaskRateLimit(BaseHandler):
+class TaskRateLimit(ControlHandler):
     def post(self, workername=None):
-        if workername is not None and not is_worker(workername):
+        if workername is not None and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         taskname = self.get_argument('taskname', None)
         ratelimit = int(self.get_argument('ratelimit'))
@@ -65,10 +68,11 @@ class TaskRateLimit(BaseHandler):
                        response[0][workername]['error'])
 
 
-class TaskTimout(BaseHandler):
+class TaskTimout(ControlHandler):
     def post(self, workername=None):
-        if workername is not None and not is_worker(workername):
+        if workername is not None and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         taskname = self.get_argument('taskname', None)
         hard = self.get_argument('hard-timeout', None)
@@ -89,10 +93,11 @@ class TaskTimout(BaseHandler):
                        response[0][workername]['error'])
 
 
-class WorkerPoolGrow(BaseHandler):
+class WorkerPoolGrow(ControlHandler):
     def post(self, workername):
-        if not is_worker(workername):
+        if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         n = int(self.get_argument('n', 1))
 
@@ -109,10 +114,11 @@ class WorkerPoolGrow(BaseHandler):
             self.write("Failed to grow '%s' worker's pool" % workername)
 
 
-class WorkerPoolShrink(BaseHandler):
+class WorkerPoolShrink(ControlHandler):
     def post(self, workername):
-        if not is_worker(workername):
+        if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         n = int(self.get_argument('n', 1))
 
@@ -130,10 +136,11 @@ class WorkerPoolShrink(BaseHandler):
             self.write("Failed to restart '%s' worker's pool" % workername)
 
 
-class WorkerPoolAutoscale(BaseHandler):
+class WorkerPoolAutoscale(ControlHandler):
     def post(self, workername):
-        if not is_worker(workername):
+        if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         min = int(self.get_argument('min'))
         max = int(self.get_argument('max'))
@@ -154,10 +161,11 @@ class WorkerPoolAutoscale(BaseHandler):
                        (workername, error))
 
 
-class WorkerQueueAddConsumer(BaseHandler):
+class WorkerQueueAddConsumer(ControlHandler):
     def post(self, workername):
-        if not is_worker(workername):
+        if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         queue = self.get_argument('queue')
 
@@ -177,10 +185,11 @@ class WorkerQueueAddConsumer(BaseHandler):
                        (queue, workername, error))
 
 
-class WorkerQueueCancelConsumer(BaseHandler):
+class WorkerQueueCancelConsumer(ControlHandler):
     def post(self, workername):
-        if not is_worker(workername):
+        if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
 
         queue = self.get_argument('queue')
 

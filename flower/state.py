@@ -12,9 +12,10 @@ from .settings import CELERY_INSPECT_INTERVAL
 
 
 class State(threading.Thread):
-    def __init__(self):
+    def __init__(self, celery_app):
         threading.Thread.__init__(self)
         self.daemon = True
+        self._celery_app = celery_app
 
         self._update_lock = threading.Lock()
         self._stats = {}
@@ -28,7 +29,7 @@ class State(threading.Thread):
         self._confs = {}
 
     def run(self):
-        transport = celery.current_app.connection().transport.driver_type
+        transport = self._celery_app.connection().transport.driver_type
         if transport not in ('amqp', 'redis', 'mongodb'):
             logging.error("Dashboard and worker management commands are "
                     "not available for '%s' transport" % transport)
@@ -38,7 +39,7 @@ class State(threading.Thread):
             logging.warning("Configuration viewer is not available for "
                 "Celery versions prior to 3.1")
 
-        i = celery.current_app.control.inspect()
+        i = self._celery_app.control.inspect()
         while True:
             try:
                 logging.debug('Inspecting workers')
@@ -67,7 +68,7 @@ class State(threading.Thread):
                 # Periodically enable events for workers
                 # launched after flower
                 logging.debug("Enabling events")
-                celery.current_app.control.enable_events()
+                self._celery_app.control.enable_events()
 
                 time.sleep(CELERY_INSPECT_INTERVAL / 1000)
             except (KeyboardInterrupt, SystemExit):
@@ -122,6 +123,3 @@ class State(threading.Thread):
     def conf(self):
         with self._update_lock:
             return copy.deepcopy(self._conf)
-
-
-state = State()

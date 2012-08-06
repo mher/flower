@@ -3,13 +3,10 @@ from __future__ import absolute_import
 import logging
 import threading
 
-import celery
-
 from celery.events import EventReceiver
 from celery.messaging import establish_connection
 from celery.events.state import State
 
-celery = celery.current_app
 
 
 class Events(threading.Thread):
@@ -21,13 +18,14 @@ class Events(threading.Thread):
                     cls, *args, **kwargs)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self, celery_app):
         threading.Thread.__init__(self)
         self.daemon = True
+        self._celery_app = celery_app
 
     def run(self):
         logging.info("Enabling events")
-        celery.control.enable_events()
+        self._celery_app.control.enable_events()
 
         while True:
             try:
