@@ -50,7 +50,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'POST',
-                url: '/shut-down-worker/' + worker_name,
+                url: '/api/worker/shutdown/' + worker_name,
                 dataType: 'json',
                 data: { workername: worker_name },
                 success: function (data) {
@@ -73,7 +73,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'POST',
-                url: '/restart-pool-worker/' + worker_name,
+                url: '/api/worker/pool/restart/' + worker_name,
                 dataType: 'json',
                 data: { workername: worker_name },
                 success: function (data) {
@@ -95,7 +95,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/worker-pool-grow/' + workername,
+            url: '/api/worker/pool/grow/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -119,7 +119,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/worker-pool-shrink/' + workername,
+            url: '/api/worker/pool/shrink/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -144,7 +144,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/worker-pool-autoscale/' + workername,
+            url: '/api/worker/pool/autoscale/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -169,7 +169,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/worker-queue-add-consumer/' + workername,
+            url: '/api/worker/queue/add-consumer/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -196,7 +196,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/worker-queue-cancel-consumer/' + workername,
+            url: '/api/worker/queue/cancel-consumer/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -227,7 +227,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/task-timeout/' + workername,
+            url: '/api/task/timeout/' + workername,
             dataType: 'json',
             data: {
                 'taskname': taskname,
@@ -254,7 +254,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/task-rate-limit/' + workername,
+            url: '/api/task/rate-limit/' + workername,
             dataType: 'json',
             data: {
                 'taskname': taskname,
@@ -280,7 +280,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/task-revoke/' + taskid,
+            url: '/api/task/revoke/' + taskid,
             dataType: 'json',
             data: {
                 'terminate': false,
@@ -302,7 +302,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/task-revoke/' + taskid,
+            url: '/api/task/revoke/' + taskid,
             dataType: 'json',
             data: {
                 'terminate': true,

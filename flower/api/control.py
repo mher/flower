@@ -13,7 +13,7 @@ class ControlHandler(BaseHandler):
         return WorkersModel.is_worker(self.application, name)
 
 
-class ShutdownWorker(ControlHandler):
+class WorkerShutDown(ControlHandler):
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -24,7 +24,7 @@ class ShutdownWorker(ControlHandler):
         self.write(dict(message="Shutting down!"))
 
 
-class RestartWorkerPool(ControlHandler):
+class WorkerPoolRestart(ControlHandler):
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -212,6 +212,7 @@ class WorkerQueueCancelConsumer(ControlHandler):
 class TaskRevoke(BaseHandler):
     def post(self, taskid):
         logging.info("Revoking task '%s'" % taskid)
+        celery = self.application.celery_app
         terminate = self.get_argument('terminate', False)
         celery.control.revoke(taskid, terminate=terminate)
         self.write(dict(message="Revoked '%s'" % taskid))

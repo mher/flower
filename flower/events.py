@@ -8,6 +8,7 @@ from tornado.ioloop import PeriodicCallback
 from celery.events import EventReceiver
 from celery.events.state import State
 
+from . import api
 from .settings import CELERY_EVENTS_ENABLE_INTERVAL
 
 
@@ -52,13 +53,8 @@ class Events(threading.Thread):
             logging.error("An error occurred while enabling events: %s" % e)
 
     def on_event(self, event):
-        handler = getattr(self, 'on_' + event['type'].replace('-', '_'), None)
-        if handler:
-            handler(event)
+        classname = api.events.getClassName(event['type'])
+        cls = getattr(api, classname, None)
+        if cls:
+            cls.send_message(event)
         self.state.event(event)
-
-    def on_task_succeeded(self, event):
-        pass
-
-    def on_task_failed(self, event):
-        pass

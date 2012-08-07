@@ -4,7 +4,6 @@ import inspect
 import traceback
 
 import tornado
-import tornado.websocket
 
 from ..utils import template
 
@@ -40,23 +39,3 @@ class BaseHandler(tornado.web.RequestHandler):
                     self.write(message)
             self.set_status(status_code)
 
-
-class BaseWebSocketHandler(tornado.websocket.WebSocketHandler):
-    listeners = []
-
-    def open(self):
-        listeners = self.listeners
-        listeners.append(self)
-
-    def on_message(self, message):
-        pass
-
-    def on_close(self):
-        listeners = self.listeners
-        if self in listeners:
-            listeners.remove(self)
-
-    @classmethod
-    def send_update(cls, update):
-        for l in cls.listeners:
-            l.write_message(update)
