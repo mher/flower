@@ -26,11 +26,11 @@ class Events(threading.Thread):
         self._timer.start()
 
     def run(self):
-        logging.info("Enabling events")
-        self._celery_app.control.enable_events()
-
         while True:
             try:
+                logging.info("Enabling events")
+                self._celery_app.control.enable_events()
+
                 with self._celery_app.connection() as conn:
                     recv = EventReceiver(conn,
                                 handlers={"*": self.on_event})
@@ -46,7 +46,10 @@ class Events(threading.Thread):
         # Periodically enable events for workers
         # launched after flower
         logging.debug('Enabling events')
-        self._celery_app.control.enable_events()
+        try:
+            self._celery_app.control.enable_events()
+        except Exception as e:
+            logging.error("An error occurred while enabling events: %s" % e)
 
     def on_event(self, event):
         handler = getattr(self, 'on_' + event['type'].replace('-', '_'), None)
@@ -55,4 +58,7 @@ class Events(threading.Thread):
         self.state.event(event)
 
     def on_task_succeeded(self, event):
+        pass
+
+    def on_task_failed(self, event):
         pass
