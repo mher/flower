@@ -359,29 +359,29 @@ var flower = (function () {
     function create_graph(data, id, width, height) {
         id = id || '';
         width = width || 700;
-        height = height || 300;
+        height = height || 400;
 
         var seriesData = []
         for (var name in data){
             seriesData.push({name: name});
         }
 
-        var palette = new Rickshaw.Color.Palette();
+        var palette = new Rickshaw.Color.Palette({scheme: 'colorwheel'});
 
         var graph = new Rickshaw.Graph({
             element: document.getElementById("chart"+id),
             width: width,
             height: height,
-            renderer: 'area',
-            stroke: false,
-            series: new Rickshaw.Series(seriesData),
+            renderer: 'stack',
+            series: new Rickshaw.Series(seriesData, palette),
+            maxDataPoints: 1000,
         });
 
         var ticksTreatment = 'glow';
 
         var xAxis = new Rickshaw.Graph.Axis.Time({
             graph: graph,
-            ticksTreatment: ticksTreatment
+            ticksTreatment: ticksTreatment,
         });
 
         xAxis.render();
@@ -393,6 +393,7 @@ var flower = (function () {
         });
 
         yAxis.render();
+
         var slider = new Rickshaw.Graph.RangeSlider({
             graph: graph,
             element: $('#slider'+id)
