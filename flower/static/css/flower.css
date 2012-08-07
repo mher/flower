@@ -1,61 +1,61 @@
-#content {
+.graph .content {
 	width: 1200px;
 }
-#chart {
+.graph .chart {
 	display: inline-block;
 }
-#chart path {
+.graph .chart path {
 	-webkit-transition: opacity 0.2s linear;
 }
-#slider {
+.graph .slider {
 	margin-top: 10px;
 }
-#legend {
+.graph .legend {
 	display: inline-block;
 	position: relative;
 	left: 8px;
 }
-#legend_container {
+.graph .legend-container {
 	position: absolute;
 	right: 0;
 	bottom: 26px;
 	width: 0;
 }
-#chart_container {
+.graph .chart-container {
 	position: relative;
 	display: inline-block;
 }
-#smoother {
+.graph .smoother {
 	margin: 0 0 10px 16px;
 	width: 100px;
 }
 .rickshaw_graph .detail {
 	left: -1000;
 }
-#chart {
+.graph .chart {
 	border: 1px solid #f0f0f0;
 }
-#side_panel {
+.graph .side-panel {
 	padding: 0 20px 20px 0;
 	width: 240px;
 	display: inline-block;
 	vertical-align: top;
 }
-#side_panel section {
+.graph .side-panel section {
 	color: #505050;
 	font-size: 12px;
 }
-#side_panel section h6 {
+.graph .side-panel section h6 {
 	margin: 0 0 1em 0;
 	font-size: 12px;
 	font-weight: normal;
 }
-#side_panel .ui-slider-horizontal {
+.graph .side-panel .ui-slider-horizontal {
 	height: 1px !important;
 	border-color: #e0e0e0;
 	margin-bottom: 10px;
 }
-#side_panel .ui-slider-handle {
+.graph .side-panel .ui-slider-handle {
 	border-color: #a0a0a0;
 	height: 9px !important;
 	width: 9px !important;
@@ -64,33 +64,33 @@
 	outline: none;
 	cursor: pointer;
 }
-#legend {
+.graph .legend {
 	background-color: white;
 	margin-left: 0;
 	padding: 0;
 	left: 0;
 }
-#legend .label {
+.graph .legend .label {
 	color: #404040;
 	background-color: white;
 }
-#legend .action {
+.graph .legend .action {
 	color: black;
 	opacity: 0.5;
 }
-#legend ul {
+.graph .legend ul {
 	padding: 0;
 }
-section {
+.graph section {
 	border: none;
 	border-top: 1px solid #eaeaea;
 	padding: 15px 0;
 }
-#smoother {
+.graph .smoother {
 	margin: 5px 0 0 10px;
 	width: 90%;
 }
-#legend .label.disabled {
+.graph .legend .label.disabled {
 	opacity: 0.4;
 }
 #renderer_form.toggler {
@@ -120,25 +120,4 @@ section {
 	position: relative;
 	margin: 0 7px;
 	cursor: pointer;
-}
-#interpolation_form,
-#offset_form {
-	vertical-align: top;
-	display: inline-block;
-	width: 45%;
-}
-#interpolation_form label,
-#offset_form label {
-	display: block;
-}
-#offset_form label,
-#interpolation_form label {
-	background-repeat: no-repeat;
-	background-position: 2em center;
-	cursor: pointer;
-	cursor: hand;
-}
-#offset_form label span,
-#interpolation_form label span {
-	padding-left: 36px;
 }

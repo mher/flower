@@ -374,7 +374,7 @@ var flower = (function () {
             height: height,
             renderer: 'stack',
             series: new Rickshaw.Series(seriesData, palette),
-            maxDataPoints: 1000,
+            maxDataPoints: 10000,
         });
 
         var ticksTreatment = 'glow';
@@ -430,10 +430,10 @@ var flower = (function () {
         return graph;
     }
 
-    function update_graph(graph, lastquery) {
+    function update_graph(graph, url, lastquery) {
         $.ajax({
             type: 'GET',
-            url: '/monitor/task-number',
+            url: url,
             data: {lastquery: lastquery},
             success: function (data) {
                 graph.series.addData(data);
@@ -468,26 +468,50 @@ var flower = (function () {
         });
 
         if ($(location).attr('pathname') === '/monitor') {
-            var lastupdate = current_unix_time(),
+            var sts = current_unix_time(),
+                fts = current_unix_time(),
                 updateinterval = 3000,
-                graph = null;
+                succeeded_graph = null,
+                failed_graph = null;
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/task-number',
+                url: '/monitor/succeeded-tasks',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
-                    graph = create_graph(data)
-                    graph.update();
+                    succeeded_graph = create_graph(data, '-succeeded')
+                    succeeded_graph.update();
 
-                    graph.series.setTimeInterval(updateinterval);
+                    succeeded_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
-                        update_graph(graph, lastupdate);
-                        lastupdate = current_unix_time();
+                        update_graph(succeeded_graph,
+                                     '/monitor/succeeded-tasks',
+                                     sts);
+                        sts = current_unix_time();
                     }, updateinterval);
 
                 },
             });
+
+            $.ajax({
+                type: 'GET',
+                url: '/monitor/failed-tasks',
+                data: {lastquery: current_unix_time()},
+                success: function (data) {
+                    failed_graph = create_graph(data, '-failed')
+                    failed_graph.update();
+
+                    failed_graph.series.setTimeInterval(updateinterval);
+                    setInterval(function () {
+                        update_graph(failed_graph,
+                                     '/monitor/failed-tasks',
+                                     fts);
+                        fts = current_unix_time();
+                    }, updateinterval);
+
+                },
+            });
+
 
         }
 

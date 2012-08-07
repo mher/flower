@@ -31,7 +31,8 @@ from .views.update import (
 
 from .views.monitor import (
         Monitor,
-        TaskNumberMonitor,
+        SucceededTaskMonitor,
+        FailedTaskMonitor,
         )
 
 
@@ -61,7 +62,8 @@ handlers = [
     (r"/update-workers", UpdateWorkers),
     # Monitors
     (r"/monitor", Monitor),
-    (r"/monitor/task-number", TaskNumberMonitor),
+    (r"/monitor/succeeded-tasks", SucceededTaskMonitor),
+    (r"/monitor/failed-tasks", FailedTaskMonitor),
     # Static
     (r"/static/(.*)", StaticFileHandler,
                         {"path": APP_SETTINGS['static_path']}),
