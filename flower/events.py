@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import time
 import logging
 import threading
 
@@ -24,7 +25,7 @@ class EventsState(State):
         if cls:
             cls.send_message(event)
 
-        # Save event
+        # Save the event
         super(EventsState, self).event(event)
 
 
@@ -45,21 +46,26 @@ class Events(threading.Thread):
         self._timer.start()
 
     def run(self):
+        try_interval = 1
         while True:
             try:
-                logging.info("Enabling events")
-                self._celery_app.control.enable_events()
+                try_interval *= 2
 
                 with self._celery_app.connection() as conn:
                     recv = EventReceiver(conn,
-                                handlers={"*": self.on_event})
+                                handlers={"*": self.on_event},
+                                app=self._celery_app)
                     recv.capture(limit=None, timeout=None)
+
+                try_interval = 1
             except (KeyboardInterrupt, SystemExit):
                 import thread
                 thread.interrupt_main()
             except Exception as e:
-                logging.error("An error occurred while capturing events"
-                              ": %s" % e)
+                logging.error("Failed to capture events: '%s', "
+                              "trying again in %s seconds."
+                              % (e, try_interval))
+                time.sleep(try_interval)
 
     def on_enable_events(self):
         # Periodically enable events for workers
@@ -68,7 +74,7 @@ class Events(threading.Thread):
         try:
             self._celery_app.control.enable_events()
         except Exception as e:
-            logging.error("An error occurred while enabling events: %s" % e)
+            logging.debug("Failed to enable events: '%s'" % e)
 
     def on_event(self, event):
         # Call EventsState.event in ioloop thread to avoid synchronization

@@ -41,8 +41,10 @@ class State(threading.Thread):
 
         timeout = CELERY_INSPECT_TIMEOUT / 1000.0
         i = self._celery_app.control.inspect(timeout=timeout)
+        try_interval = 1
         while True:
             try:
+                try_interval *= 2
                 logging.debug('Inspecting workers')
                 stats = i.stats() or {}
                 registered = i.registered() or {}
@@ -66,13 +68,14 @@ class State(threading.Thread):
                     self._active_queues = active_queues
                     self._conf = conf
 
+                try_interval = 1
             except (KeyboardInterrupt, SystemExit):
                 import thread
                 thread.interrupt_main()
             except Exception as e:
-                logging.error("An error occurred while inspecting workers"
-                              ": %s" % e)
-                time.sleep(1)
+                logging.error("Failed to inspect workers: '%s', trying "
+                              "again in %s seconds" % (e, try_interval))
+                time.sleep(try_interval)
 
     @property
     def stats(self):
