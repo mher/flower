@@ -49,13 +49,13 @@ handlers = [
     (r"/api/task/rate-limit/(.+)", control.TaskRateLimit),
     (r"/api/task/revoke/(.+)", control.TaskRevoke),
     # WebSocket API
-    (r"/api/task/events/task-sent/(.+)", events.TaskSent),
-    (r"/api/task/events/task-received/(.+)", events.TaskReceived),
-    (r"/api/task/events/task-started/(.+)", events.TaskStarted),
-    (r"/api/task/events/task-succeeded/(.+)", events.TaskSucceeded),
-    (r"/api/task/events/task-failed/(.+)", events.TaskFailed),
-    (r"/api/task/events/task-revoked/(.+)", events.TaskRevoked),
-    (r"/api/task/events/task-retried/(.+)", events.TaskRetried),
+    (r"/api/task/events/task-sent/(.*)", events.TaskSent),
+    (r"/api/task/events/task-received/(.*)", events.TaskReceived),
+    (r"/api/task/events/task-started/(.*)", events.TaskStarted),
+    (r"/api/task/events/task-succeeded/(.*)", events.TaskSucceeded),
+    (r"/api/task/events/task-failed/(.*)", events.TaskFailed),
+    (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
+    (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
     # WebSocket Updates
     (r"/update-workers", UpdateWorkers),
     # Monitors

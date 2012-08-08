@@ -2,7 +2,7 @@ import tornado.websocket
 
 
 class BaseWebSocketHandler(tornado.websocket.WebSocketHandler):
-    listeners = []
+    # listeners = [], should be created in derived class
 
     def open(self):
         listeners = self.listeners
@@ -20,4 +20,3 @@ class BaseWebSocketHandler(tornado.websocket.WebSocketHandler):
     def send_message(cls, message):
         for l in cls.listeners:
             l.write_message(message)
-

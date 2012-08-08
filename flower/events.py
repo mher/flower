@@ -16,7 +16,7 @@ from .settings import CELERY_EVENTS_ENABLE_INTERVAL
 
 
 class EventsState(State):
-    # EventState object is created and accessed only in ioloop thread
+    # EventsState object is created and accessed only from ioloop thread
     def event(self, event):
         # Send event to api subscribers (via websockets)
         classname = api.events.getClassName(event['type'])
