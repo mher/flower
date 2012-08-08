@@ -15,6 +15,7 @@ from flower.settings import APP_SETTINGS
 
 define("port", default=5555, help="run on the given port", type=int)
 define("debug", default=False, help="run in debug mode", type=bool)
+define("inspect", default=True, help="Inspect workers", type=bool)
 
 
 def main(argv=None):
@@ -31,7 +32,8 @@ def main(argv=None):
     events = Events(celery_app)
     events.start()
     state = State(celery_app)
-    state.start()
+    if options.inspect:
+        state.start()
 
     app = Application(celery_app, events, state, handlers, **APP_SETTINGS)
 
