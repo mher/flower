@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+
+<meta charset="utf-8" />
+
+<title>Flower event API example</title>
+
+<script language="javascript" type="text/javascript">
+    var ws = new WebSocket('ws://localhost:5555/api/task/events/task-succeeded/');
+    ws.onmessage = function (event) {
+        var div = document.getElementById("output");
+        var p = document.createElement('p');
+        p.innerText = event.data;
+        div.appendChild(p);
+    }
+</script>
+
+<h2>Flower event API</h2>
+<p>This example shows how to get task events</p>
+<div id="output"></div>
+</html>
