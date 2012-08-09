@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from tornado.web import StaticFileHandler
 
-from .views.worker import (
+from .views.workers import (
         WorkersView,
         WorkerView,
         )

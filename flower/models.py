@@ -44,7 +44,7 @@ class WorkersModel(BaseModel):
 
     @classmethod
     def is_worker(cls, app, workername):
-        return WorkerModel(app, workername) is not None
+        return WorkerModel.get_worker(app, workername) is not None
 
     def __eq__(self, other):
         return other is not None and self.workers == other.workers

@@ -1,0 +1,19 @@
+import time
+
+from tests import AsyncHTTPTestCase
+
+
+class MonitorTest(AsyncHTTPTestCase):
+    def test_monitor_page(self):
+        r = self.get('/monitor')
+        self.assertEqual(200, r.code)
+        self.assertTrue('Succeeded tasks' in r.body)
+        self.assertTrue('Failed tasks' in r.body)
+
+    def test_monitor_succeeded_tasks(self):
+        r = self.get('/monitor/succeeded-tasks?lastquery=%s' % time.time())
+        self.assertEqual(200, r.code)
+
+    def test_monitor_failed_tasks(self):
+        r = self.get('/monitor/failed-tasks?lastquery=%s' % time.time())
+        self.assertEqual(200, r.code)

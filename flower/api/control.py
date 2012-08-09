@@ -44,55 +44,6 @@ class WorkerPoolRestart(ControlHandler):
             self.write("Failed to restart the '%s' pool" % workername)
 
 
-class TaskRateLimit(ControlHandler):
-    def post(self, workername=None):
-        if workername is not None and not self.is_worker(workername):
-            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
-
-        taskname = self.get_argument('taskname', None)
-        ratelimit = int(self.get_argument('ratelimit'))
-
-        logging.info("Setting '%s' rate limit for '%s' task" %
-                     (ratelimit, taskname))
-        response = celery.control.rate_limit(taskname,
-                                              ratelimit,
-                                              reply=True,
-                                              destination=[workername])
-        if 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
-        else:
-            logging.error(response)
-            self.set_status(403)
-            self.write("Failed to set rate limit: '%s'" %
-                       response[0][workername]['error'])
-
-
-class TaskTimout(ControlHandler):
-    def post(self, workername=None):
-        if workername is not None and not self.is_worker(workername):
-            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
-
-        taskname = self.get_argument('taskname', None)
-        hard = self.get_argument('hard-timeout', None)
-        soft = self.get_argument('soft-timeout', None)
-        hard = hard and float(hard)
-        soft = soft and float(soft)
-
-        logging.info("Setting timeouts for '%s' task" % taskname)
-        response = celery.control.time_limit(taskname, hard, soft,
-                                             reply=True,
-                                             destination=[workername])
-        if 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
-        else:
-            logging.error(response)
-            self.set_status(403)
-            self.write("Failed to set timeouts: '%s'" %
-                       response[0][workername]['error'])
-
-
 class WorkerPoolGrow(ControlHandler):
     def post(self, workername):
         if not self.is_worker(workername):
@@ -213,6 +164,55 @@ class TaskRevoke(BaseHandler):
     def post(self, taskid):
         logging.info("Revoking task '%s'" % taskid)
         celery = self.application.celery_app
-        terminate = self.get_argument('terminate', False)
+        terminate = bool(self.get_argument('terminate', False))
         celery.control.revoke(taskid, terminate=terminate)
         self.write(dict(message="Revoked '%s'" % taskid))
+
+
+class TaskTimout(ControlHandler):
+    def post(self, workername=None):
+        if workername is not None and not self.is_worker(workername):
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
+
+        taskname = self.get_argument('taskname', None)
+        hard = self.get_argument('hard-timeout', None)
+        soft = self.get_argument('soft-timeout', None)
+        hard = hard and float(hard)
+        soft = soft and float(soft)
+
+        logging.info("Setting timeouts for '%s' task" % taskname)
+        response = celery.control.time_limit(taskname, hard, soft,
+                                             reply=True,
+                                             destination=[workername])
+        if 'ok' in response[0][workername]:
+            self.write(dict(message=response[0][workername]['ok']))
+        else:
+            logging.error(response)
+            self.set_status(403)
+            self.write("Failed to set timeouts: '%s'" %
+                       response[0][workername]['error'])
+
+
+class TaskRateLimit(ControlHandler):
+    def post(self, workername=None):
+        if workername is not None and not self.is_worker(workername):
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+        celery = self.application.celery_app
+
+        taskname = self.get_argument('taskname', None)
+        ratelimit = int(self.get_argument('ratelimit'))
+
+        logging.info("Setting '%s' rate limit for '%s' task" %
+                     (ratelimit, taskname))
+        response = celery.control.rate_limit(taskname,
+                                              ratelimit,
+                                              reply=True,
+                                              destination=[workername])
+        if 'ok' in response[0][workername]:
+            self.write(dict(message=response[0][workername]['ok']))
+        else:
+            logging.error(response)
+            self.set_status(403)
+            self.write("Failed to set rate limit: '%s'" %
+                       response[0][workername]['error'])
