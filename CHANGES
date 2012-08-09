@@ -6,6 +6,10 @@ Here you can see the full list of changes between each release.
 Version 0.3
 -----------
 
+- flower --inspect option for disabling worker inspects
+- websocket api for getting real-time task events
+- real-time monitoring graphs for succeeded and failed tasks
+- api for managing workers and tasks
 - tasks can be revoked and terminated
 - worker view shows autoscaler options
 - worker view shows worker's PID
