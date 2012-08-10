@@ -6,6 +6,8 @@ import copy
 import logging
 import threading
 
+from pprint import pformat
+
 import celery
 
 from .settings import CELERY_INSPECT_TIMEOUT
@@ -47,6 +49,7 @@ class State(threading.Thread):
                 try_interval *= 2
                 logging.debug('Inspecting workers')
                 stats = i.stats() or {}
+                logging.debug('Stats: %s' % pformat(stats))
                 registered = i.registered() or {}
                 scheduled = i.scheduled() or {}
                 active = i.active() or {}
