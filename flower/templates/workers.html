@@ -56,7 +56,7 @@
           <span class="label label-important">Offline</span>
           {% end %}
         </td>
-        <td>{{ info['concurrency'] }}</td>
+        <td>{{ humanize(info['concurrency']) }}</td>
         <td>{{ info['completed_tasks'] }}</td>
         <td>{{ info['running_tasks'] }}</td>
         <td>{{ humanize(info['queues']) }}</td>

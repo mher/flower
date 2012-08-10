@@ -27,7 +27,7 @@ class WorkersModel(BaseModel):
         for workername, stat in sorted(state.stats.iteritems()):
             self.workers[workername] = dict(
                     status=(workername in state.ping),
-                    concurrency=stat['pool']['max-concurrency'],
+                    concurrency=stat['pool']['max-concurrency'] if stat['pool'] else None,
                     completed_tasks=sum(stat['total'].itervalues()),
                     running_tasks=len(state.active_tasks.get(workername, [])),
                     queues=map(lambda x: x['name'],
