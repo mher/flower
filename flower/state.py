@@ -27,6 +27,7 @@ class State(threading.Thread):
         self._ping = {}
         self._active_queues = {}
         self._confs = {}
+        self._sysinfo = {}
 
     def run(self):
         transport = self._celery_app.connection().transport.driver_type

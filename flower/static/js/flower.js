@@ -446,6 +446,20 @@ var flower = (function () {
         return new Date().getTime() / 1000;
     }
 
+    function render_memory_chart() {
+        var workername = $('#workername').text();
+        var jsonData = $.ajax({
+                url: "/api/worker/sysinfo/"+workername,
+                dataType:"json",
+                async: false
+        }).responseText;
+          
+      var data = new google.visualization.DataTable(jsonData);
+
+      var chart = new google.visualization.PieChart(document.getElementById('memory_chart'));
+      chart.draw(data, {width: 400, height: 240});
+    }
+
     $(document).ready(function () {
         if ($.inArray($(location).attr('pathname'), ['', '/workers'])) {
             var host = $(location).attr('host'),
@@ -511,9 +525,10 @@ var flower = (function () {
 
                 },
             });
-
-
         }
+
+
+        //google.load('visualization', '1', {'packages':['corechart']});
 
     });
 

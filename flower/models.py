@@ -124,17 +124,19 @@ class TaskModel(BaseModel):
 
 
 class SysInfoModel(BaseModel):
-    def __init__(self):
-        super(BaseModel, self).__init__()
+    def __init__(self, app):
+        super(SysInfoModel, self).__init__(app)
 
     def get_mem_usage(self):
+        state = self.app.events.state
         return {workername:info['memusage']
                     for workername,info in state.sysinfo.items()}
 
     def get_total_mem(self):
+        state = self.app.events.state
         return {workername:info['memtotal']
                     for workername,info in state.sysinfo.items()}
 
     @property
     def sysinfo(self):
-        return state.sysinfo
+        return self.app.state.sysinfo

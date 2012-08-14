@@ -14,6 +14,7 @@ from .views.tasks import (
 
 from .api import events
 from .api import control
+from .api import system
 
 from .views.update import (
         UpdateWorkers,
@@ -45,6 +46,7 @@ handlers = [
     (r"/api/worker/pool/autoscale/(.+)", control.WorkerPoolAutoscale),
     (r"/api/worker/queue/add-consumer/(.+)", control.WorkerQueueAddConsumer),
     (r"/api/worker/queue/cancel-consumer/(.+)", control.WorkerQueueCancelConsumer),
+    (r"/api/worker/sysinfo/(.+)", system.SysInfo),
     (r"/api/task/timeout/(.+)", control.TaskTimout),
     (r"/api/task/rate-limit/(.+)", control.TaskRateLimit),
     (r"/api/task/revoke/(.+)", control.TaskRevoke),
