@@ -65,7 +65,7 @@ Or launch from celery: ::
 Screenshots
 -----------
 
-.. image:: https://raw.github.com/mher/flower/master/docs/screenshots/dashborad.png
+.. image:: https://raw.github.com/mher/flower/master/docs/screenshots/dashboard.png
    :width: 800px
 
 .. image:: https://raw.github.com/mher/flower/master/docs/screenshots/pool.png
