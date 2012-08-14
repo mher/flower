@@ -6,6 +6,8 @@ Here you can see the full list of changes between each release.
 Version 0.3
 -----------
 
+Released on Aug 14 2012
+
 - flower --inspect option for disabling worker inspects
 - websocket api for getting real-time task events
 - real-time monitoring graphs for succeeded and failed tasks
