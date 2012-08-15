@@ -7,12 +7,7 @@ from pprint import pformat
 from tornado import ioloop
 from tornado.options import define, options, parse_command_line
 
-import celery
-
-from flower.events import Events
-from flower.state import State
-from flower.urls import handlers
-from flower.app import Application
+from flower.app import create_application
 from flower.settings import APP_SETTINGS
 
 define("port", default=5555, help="run on the given port", type=int)
@@ -25,19 +20,9 @@ def main(argv=None):
 
     APP_SETTINGS['debug'] = options.debug
 
-    celery_app = celery.Celery()
-    try:
-        celery_app.config_from_object('celeryconfig')
-    except ImportError:
-        pass
-
-    events = Events(celery_app)
-    events.start()
-    state = State(celery_app)
+    app = create_application()
     if options.inspect:
-        state.start()
-
-    app = Application(celery_app, events, state, handlers, **APP_SETTINGS)
+        app.state.start()
 
     print('> Visit me at http://localhost:%s' % options.port)
 
