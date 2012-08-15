@@ -1,34 +1,27 @@
 import tornado.web
+from tornado import ioloop
 
 import celery
 
 from flower.events import Events
 from flower.state import State
 from flower.urls import handlers
-from flower.settings import APP_SETTINGS
 
 
-class Application(tornado.web.Application):
-    def __init__(self, celery_app, events, state, *args, **kwargs):
-        super(Application, self).__init__(*args, **kwargs)
+class Flower(tornado.web.Application):
+    def __init__(self, celery_app=None, events=None, state=None,
+                       io_loop=None, **kwargs):
+        kwargs.update(handlers=handlers)
+        super(Flower, self).__init__(**kwargs)
+        self.io_loop = io_loop or ioloop.IOLoop.instance()
 
-        self.celery_app = celery_app
-        self.events = events
-        self.state = state
+        self.celery_app = celery_app or celery.Celery()
+        self.events = events or Events(celery_app, io_loop)
+        self.state = State(celery_app)
 
-
-def create_application(options):
-    celery_app = celery.Celery()
-    try:
-        celery_app.config_from_object('celeryconfig')
-    except ImportError:
-        pass
-
-    events = Events(celery_app)
-    events.start()
-
-    state = State(celery_app)
-    if options.inspect:
-        state.start()
-
-    return Application(celery_app, events, state, handlers, **APP_SETTINGS)
+    def start(self, port, inspect=True):
+        self.events.start()
+        if inspect:
+            self.state.start()
+        self.listen(port)
+        self.io_loop.start()
