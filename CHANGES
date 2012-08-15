@@ -3,6 +3,11 @@ Celery Flower
 
 Here you can see the full list of changes between each release.
 
+Version 0.4
+-----------
+
+- tasks can be invoked via REST API
+
 Version 0.3
 -----------
 

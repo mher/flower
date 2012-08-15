@@ -14,6 +14,7 @@ from .views.tasks import (
 
 from .api import events
 from .api import control
+from .api import tasks
 
 from .views.update import (
         UpdateWorkers,
@@ -37,7 +38,7 @@ handlers = [
     (r"/worker/(.+)", WorkerView),
     (r"/task/(.+)", TaskView),
     (r"/tasks", TasksView),
-    # API
+    # Worker API
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),
     (r"/api/worker/pool/restart/(.+)", control.WorkerPoolRestart),
     (r"/api/worker/pool/grow/(.+)", control.WorkerPoolGrow),
@@ -45,10 +46,13 @@ handlers = [
     (r"/api/worker/pool/autoscale/(.+)", control.WorkerPoolAutoscale),
     (r"/api/worker/queue/add-consumer/(.+)", control.WorkerQueueAddConsumer),
     (r"/api/worker/queue/cancel-consumer/(.+)", control.WorkerQueueCancelConsumer),
+    # Task API
+    (r"/api/task/async-apply/(.+)", tasks.TaskAsyncApply),
+    (r"/api/task/result/(.+)", tasks.TaskResult),
     (r"/api/task/timeout/(.+)", control.TaskTimout),
     (r"/api/task/rate-limit/(.+)", control.TaskRateLimit),
     (r"/api/task/revoke/(.+)", control.TaskRevoke),
-    # WebSocket API
+    # Events WebSocket API
     (r"/api/task/events/task-sent/(.*)", events.TaskSent),
     (r"/api/task/events/task-received/(.*)", events.TaskReceived),
     (r"/api/task/events/task-started/(.*)", events.TaskStarted),
