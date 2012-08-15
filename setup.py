@@ -44,7 +44,7 @@ setup(
     url='https://github.com/mher/flower',
     license='BSD',
     classifiers=classifiers,
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=['celery', 'tornado'],
     package_data={'flower': ['templates/*', 'static/**/*']},
     entry_points={
