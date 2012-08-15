@@ -17,7 +17,7 @@ class Application(tornado.web.Application):
         self.state = state
 
 
-def create_application(**options):
+def create_application(options):
     celery_app = celery.Celery()
     try:
         celery_app.config_from_object('celeryconfig')
@@ -28,5 +28,7 @@ def create_application(**options):
     events.start()
 
     state = State(celery_app)
+    if options.inspect:
+        state.start()
 
     return Application(celery_app, events, state, handlers, **APP_SETTINGS)

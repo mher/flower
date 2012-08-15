@@ -17,15 +17,11 @@ define("inspect", default=True, help="inspect workers", type=bool)
 
 def main(argv=None):
     parse_command_line(argv)
-
     APP_SETTINGS['debug'] = options.debug
 
-    app = create_application()
-    if options.inspect:
-        app.state.start()
+    app = create_application(options)
 
     print('> Visit me at http://localhost:%s' % options.port)
-
     logging.debug('Settings: %s' % pformat(APP_SETTINGS))
 
     app.listen(options.port)
