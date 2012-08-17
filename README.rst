@@ -62,6 +62,10 @@ Or launch from celery: ::
 
     $ celery flower --port=5555
 
+Broker URL and other configuration options can be passed through the standard Celery options: ::
+
+    $ celery flower --broker=amqp://guest:guest@localhost:5672//
+
 Screenshots
 -----------
 
