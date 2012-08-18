@@ -1,10 +1,7 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from celery.utils.compat import OrderedDict
+from celery.utils.compat import OrderedDict
 
 
 class BaseModel(object):
