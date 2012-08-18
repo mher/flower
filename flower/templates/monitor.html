@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+  {% module Template("navbar.html", active_tab="monitor") %}
+{% end %}
+
+{% block container %}
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="graph content">
+            <form class="side-panel">
+                <h3>Succeeded tasks</h3>
+                <section><div id="legend-succeeded" class="legend"></div></section>
+            </form>
+            <div class="chart-container">
+                <div id="chart-succeeded" class="chart"></div>
+                <div id="timeline-succeeded" class="timeline"></div>
+                <div id="slider-succeeded" class="slide"></div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <div class="row-fluid">
+        <div class="graph content">
+            <form class="side-panel">
+                <h3>Failed tasks</h3>
+                <section><div id="legend-failed" class="legend"></div></section>
+            </form>
+            <div class="chart-container">
+                <div id="chart-failed" class="chart"></div>
+                <div id="timeline-failed" class="timeline"></div>
+                <div id="slider-failed" class="slider"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% end %}

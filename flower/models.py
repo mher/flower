@@ -1,14 +1,16 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
-from celery.utils.compat import ordereddict
-
-from .state import state
-from .events import tasks
-from .events import state as event_state
+try:
+    from collections import OrderedDict
+except ImportError:
+    from celery.utils.compat import OrderedDict
 
 
 class BaseModel(object):
+    def __init__(self, app):
+        self.app = app
+
     def __eq__(self, other):
         raise NotImplementedError
 
@@ -17,16 +19,15 @@ class BaseModel(object):
 
 
 class WorkersModel(BaseModel):
-    def __init__(self, state):
-        super(WorkersModel, self).__init__()
+    def __init__(self, app):
+        super(WorkersModel, self).__init__(app)
         self.workers = OrderedDict()
-        self.initialize(state)
 
-    def initialize(self, state):
+        state = self.app.state
         for workername, stat in sorted(state.stats.iteritems()):
             self.workers[workername] = dict(
                     status=(workername in state.ping),
-                    concurrency=stat['pool']['max-concurrency'],
+                    concurrency=stat['pool']['max-concurrency'] if stat['pool'] else None,
                     completed_tasks=sum(stat['total'].itervalues()),
                     running_tasks=len(state.active_tasks.get(workername, [])),
                     queues=map(lambda x: x['name'],
@@ -34,27 +35,26 @@ class WorkersModel(BaseModel):
                     )
 
     @classmethod
-    def get_latest(cls):
-        return WorkersModel(state)
+    def get_latest(cls, app):
+        return WorkersModel(app)
 
     @classmethod
-    def get_workers(cls):
-        return state.stats.keys()
+    def get_workers(cls, app):
+        return app.state.stats.keys()
 
     @classmethod
-    def is_worker(cls, workername):
-        return WorkerModel(workername, state) is not None
+    def is_worker(cls, app, workername):
+        return WorkerModel.get_worker(app, workername) is not None
 
     def __eq__(self, other):
         return other is not None and self.workers == other.workers
 
 
 class WorkerModel(BaseModel):
-    def __init__(self, workername, state):
-        super(BaseModel, self).__init__()
-        self.initialize(workername, state)
+    def __init__(self, app, name):
+        super(WorkerModel, self).__init__(app)
 
-    def initialize(self, name, state):
+        state = self.app.state
         self.name = name
         self.stats = state.stats[name]
         self.active_tasks = state.active_tasks.get(name, {})
@@ -67,10 +67,10 @@ class WorkerModel(BaseModel):
         self.conf = state.conf.get(name, {})
 
     @classmethod
-    def get_worker(self, name):
-        if name not in state.stats:
+    def get_worker(self, app, name):
+        if name not in app.state.stats:
             return None
-        return WorkerModel(name, state)
+        return WorkerModel(app, name)
 
     def __eq__(self, other):
         return self.name == other.name and self.stats == other.stats and\
@@ -84,27 +84,28 @@ class WorkerModel(BaseModel):
 
 
 class TaskModel(BaseModel):
-    def __init__(self, task_id):
-        super(BaseModel, self).__init__()
+    def __init__(self, app, task_id):
+        super(TaskModel, self).__init__(app)
 
-        task = tasks[task_id]
+        task = app.events.state.tasks[task_id]
 
         self._fields = task._defaults.keys()
         for name, value in task.info(fields=self._fields).iteritems():
             setattr(self, name, value)
 
     @classmethod
-    def get_task_by_id(cls, task_id):
+    def get_task_by_id(cls, app, task_id):
         try:
-            return TaskModel(task_id)
+            return TaskModel(app, task_id)
         except KeyError:
             return None
 
     @classmethod
-    def iter_tasks(cls, limit=None, type=None, worker=None):
+    def iter_tasks(cls, app, limit=None, type=None, worker=None):
         i = 0
-        for uuid, task in event_state._sort_tasks_by_time(
-                event_state.itertasks()):
+        state = app.events.state
+        for uuid, task in state._sort_tasks_by_time(
+                state.itertasks()):
             if type and task.name != type:
                 continue
             if worker and task.worker.hostname != worker:
@@ -115,8 +116,8 @@ class TaskModel(BaseModel):
                 break
 
     @classmethod
-    def seen_task_types(cls):
-        return event_state.task_types()
+    def seen_task_types(cls, app):
+        return app.events.state.task_types()
 
     def __dir__(self):
         return self._fields

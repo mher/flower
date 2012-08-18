@@ -8,12 +8,15 @@ from ..models import WorkersModel, WorkerModel
 
 class WorkersView(BaseHandler):
     def get(self):
-        self.render("workers.html", workers=WorkersModel.get_latest().workers)
+        app = self.application
+        self.render("workers.html",
+                workers=WorkersModel.get_latest(app).workers)
 
 
 class WorkerView(BaseHandler):
     def get(self, workername):
-        worker = WorkerModel.get_worker(workername)
+        app = self.application
+        worker = WorkerModel.get_worker(app, workername)
         if worker is None:
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 

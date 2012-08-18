@@ -25,6 +25,10 @@ classes = """
     License :: OSI Approved :: BSD License
     Topic :: System :: Distributed Computing
     Programming Language :: Python
+    Programming Language :: Python :: 2
+    Programming Language :: Python :: 2.6
+    Programming Language :: Python :: 2.7
+    Programming Language :: Python :: Implementation :: CPython
     Operating System :: OS Independent
 """
 classifiers = [s.strip() for s in classes.split('\n') if s]
@@ -40,7 +44,7 @@ setup(
     url='https://github.com/mher/flower',
     license='BSD',
     classifiers=classifiers,
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=['celery', 'tornado'],
     package_data={'flower': ['templates/*', 'static/**/*']},
     entry_points={
@@ -48,7 +52,7 @@ setup(
             'flower = flower.__main__:main',
         ],
         'celery.commands': [
-            'flower = flower.command:Admin',
+            'flower = flower.command:FlowerCommand',
         ],
     },
 )

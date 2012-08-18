@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 import logging
 
+from functools import partial
+
 from tornado import websocket
 from tornado.ioloop import PeriodicCallback
 
@@ -15,13 +17,15 @@ class UpdateWorkers(websocket.WebSocketHandler):
     workers = None
 
     def open(self):
+        app = self.application
         listeners = UpdateWorkers.listeners
         periodic_callback = UpdateWorkers.periodic_callback
 
         if not listeners:
             logging.debug('Starting a timer for dashboard updates')
             periodic_callback = periodic_callback or PeriodicCallback(
-                    UpdateWorkers.on_update_time, PAGE_UPDATE_INTERVAL)
+                    partial(UpdateWorkers.on_update_time, app),
+                    PAGE_UPDATE_INTERVAL)
             periodic_callback.start()
         listeners.append(self)
 
@@ -38,8 +42,8 @@ class UpdateWorkers(websocket.WebSocketHandler):
             periodic_callback.stop()
 
     @classmethod
-    def on_update_time(cls):
-        workers = WorkersModel.get_latest()
+    def on_update_time(cls, app):
+        workers = WorkersModel.get_latest(app)
 
         if workers != cls.workers:
             logging.debug('Sending dashboard updates')
