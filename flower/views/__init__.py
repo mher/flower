@@ -38,4 +38,3 @@ class BaseHandler(tornado.web.RequestHandler):
                     self.set_header('Content-Type', 'text/plain')
                     self.write(message)
             self.set_status(status_code)
-

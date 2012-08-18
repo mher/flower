@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import sys
 
 from ..api import BaseWebSocketHandler
@@ -15,12 +17,12 @@ class EventsApiHandler(BaseWebSocketHandler):
                 l.write_message(event)
 
 
-EVENTS = ('task-sent', 'task-received','task-started','task-succeeded',
+EVENTS = ('task-sent', 'task-received', 'task-started', 'task-succeeded',
           'task-failed', 'task-revoked', 'task-retried')
 
 
 def getClassName(eventname):
-    return ''.join(map(lambda x:x[0].upper()+x[1:], eventname.split('-')))
+    return ''.join(map(lambda x: x[0].upper() + x[1:], eventname.split('-')))
 
 
 # Dynamically generates handler classes
@@ -28,7 +30,7 @@ thismodule = sys.modules[__name__]
 for event in EVENTS:
     classname = getClassName(event)
     setattr(thismodule, classname,
-            type(classname, (EventsApiHandler,), {'listeners':[]}))
+            type(classname, (EventsApiHandler, ), {'listeners': []}))
 
 
 __all__ = map(getClassName, EVENTS)

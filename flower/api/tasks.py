@@ -42,5 +42,5 @@ class TaskResult(BaseTaskHandler):
             raise HTTPError(503)
         response = {'task-id': taskid, 'state': result.state}
         if result.ready():
-            response.update({'result': result.result}) 
+            response.update({'result': result.result})
         self.write(response)
