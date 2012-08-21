@@ -10,7 +10,7 @@ from pprint import pformat
 
 import celery
 
-from .settings import CELERY_INSPECT_TIMEOUT
+from . import settings
 
 
 class State(threading.Thread):
@@ -41,35 +41,43 @@ class State(threading.Thread):
             logging.warning("Configuration viewer is not available for "
                 "Celery versions prior to 3.1")
 
-        timeout = CELERY_INSPECT_TIMEOUT / 1000.0
+        timeout = settings.CELERY_INSPECT_TIMEOUT / 1000.0
         i = self._celery_app.control.inspect(timeout=timeout)
         try_interval = 1
         while True:
             try:
                 try_interval *= 2
                 logging.debug('Inspecting workers')
-                stats = i.stats() or {}
+                stats = i.stats()
                 logging.debug('Stats: %s' % pformat(stats))
-                registered = i.registered() or {}
-                scheduled = i.scheduled() or {}
-                active = i.active() or {}
-                reserved = i.reserved() or {}
-                revoked = i.revoked() or {}
-                ping = i.ping() or {}
-                active_queues = i.active_queues() or {}
+                registered = i.registered()
+                logging.debug('Registered: %s' % pformat(registered))
+                scheduled = i.scheduled()
+                logging.debug('Scheduled: %s' % pformat(scheduled))
+                active = i.active()
+                logging.debug('Active: %s' % pformat(active))
+                reserved = i.reserved()
+                logging.debug('Reserved: %s' % pformat(reserved))
+                revoked = i.revoked()
+                logging.debug('Revoked: %s' % pformat(revoked))
+                ping = i.ping()
+                logging.debug('Ping: %s' % pformat(ping))
+                active_queues = i.active_queues()
+                logging.debug('Active queues: %s' % pformat(active_queues))
                 # Inspect.conf was introduced in Celery 3.1
-                conf = hasattr(i, 'conf') and i.conf() or {}
+                conf = hasattr(i, 'conf') and i.conf()
+                logging.debug('Conf: %s' % pformat(conf))
 
                 with self._update_lock:
-                    self._stats = stats
-                    self._registered_tasks = registered
-                    self._scheduled_tasks = scheduled
-                    self._active_tasks = active
-                    self._reserved_tasks = reserved
-                    self._revoked_tasks = revoked
-                    self._ping = ping
-                    self._active_queues = active_queues
-                    self._conf = conf
+                    self._stats = stats or {}
+                    self._registered_tasks = registered or {}
+                    self._scheduled_tasks = scheduled or {}
+                    self._active_tasks = active or {}
+                    self._reserved_tasks = reserved or {}
+                    self._revoked_tasks = revoked or {}
+                    self._ping = ping or {}
+                    self._active_queues = active_queues or {}
+                    self._conf = conf or {}
 
                 try_interval = 1
             except (KeyboardInterrupt, SystemExit):
