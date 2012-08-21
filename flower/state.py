@@ -69,7 +69,7 @@ class State(threading.Thread):
                 logging.debug('Conf: %s' % pformat(conf))
 
                 with self._update_lock:
-                    self._stats = stats or {}
+                    self._stats.update(stats or {})
                     self._registered_tasks = registered or {}
                     self._scheduled_tasks = scheduled or {}
                     self._active_tasks = active or {}
