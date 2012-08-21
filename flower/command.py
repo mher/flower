@@ -20,7 +20,7 @@ define("inspect_timeout", default=1000, type=float,
 
 class FlowerCommand(Command):
 
-    def handle_argv(self, prog_name, argv=None):
+    def run_from_argv(self, prog_name, argv=None):
         app_settings = settings.APP_SETTINGS
         argv = filter(self.flower_option, argv)
         parse_command_line([prog_name] + argv)
@@ -37,6 +37,9 @@ class FlowerCommand(Command):
             flower.start(options.port, inspect=options.inspect)
         except (KeyboardInterrupt, SystemExit):
             pass
+
+    def handle_argv(self, prog_name, argv=None):
+        return self.run_from_argv(prog_name, argv)
 
     @staticmethod
     def flower_option(arg):
