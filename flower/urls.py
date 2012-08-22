@@ -45,7 +45,8 @@ handlers = [
     (r"/api/worker/pool/shrink/(.+)", control.WorkerPoolShrink),
     (r"/api/worker/pool/autoscale/(.+)", control.WorkerPoolAutoscale),
     (r"/api/worker/queue/add-consumer/(.+)", control.WorkerQueueAddConsumer),
-    (r"/api/worker/queue/cancel-consumer/(.+)", control.WorkerQueueCancelConsumer),
+    (r"/api/worker/queue/cancel-consumer/(.+)",
+        control.WorkerQueueCancelConsumer),
     # Task API
     (r"/api/task/async-apply/(.+)", tasks.TaskAsyncApply),
     (r"/api/task/result/(.+)", tasks.TaskResult),

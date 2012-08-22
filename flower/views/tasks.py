@@ -26,7 +26,8 @@ class TasksView(BaseHandler):
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
 
-        tasks = TaskModel.iter_tasks(app, limit=limit, type=type, worker=worker)
+        tasks = TaskModel.iter_tasks(app,
+                                     limit=limit, type=type, worker=worker)
         workers = WorkersModel.get_workers(app)
         seen_task_types = TaskModel.seen_task_types(app)
 
