@@ -1,10 +1,7 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from celery.utils.compat import OrderedDict
+from celery.utils.compat import OrderedDict
 
 
 class BaseModel(object):
@@ -25,9 +22,10 @@ class WorkersModel(BaseModel):
 
         state = self.app.state
         for workername, stat in sorted(state.stats.iteritems()):
+            pool = stat.get('pool') or {}
             self.workers[workername] = dict(
                     status=(workername in state.ping),
-                    concurrency=stat['pool']['max-concurrency'] if stat['pool'] else None,
+                    concurrency=pool.get('max-concurrency'),
                     completed_tasks=sum(stat['total'].itervalues()),
                     running_tasks=len(state.active_tasks.get(workername, [])),
                     queues=map(lambda x: x['name'],

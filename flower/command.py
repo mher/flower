@@ -46,4 +46,3 @@ class FlowerCommand(Command):
         name, _, value = arg.lstrip('-').partition("=")
         name = name.replace('-', '_')
         return name in options
-
