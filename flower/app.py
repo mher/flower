@@ -21,9 +21,9 @@ class Flower(tornado.web.Application):
         self.events = events or Events(celery_app, io_loop)
         self.state = State(celery_app)
 
-    def start(self, port, inspect=True):
+    def start(self, port, address='', inspect=True):
         self.events.start()
         if inspect:
             self.state.start()
-        self.listen(port)
+        self.listen(port, address=address)
         self.io_loop.start()
