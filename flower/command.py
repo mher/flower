@@ -13,6 +13,7 @@ from .app import Flower
 
 define("port", default=5555, help="run on the given port", type=int)
 define("address", default='', help="run on the given address", type=str)
+define("prefix", default='', help="expect requests to have this prefix", type=str)
 define("debug", default=False, help="run in debug mode", type=bool)
 define("inspect", default=True, help="inspect workers", type=bool)
 define("inspect_timeout", default=1000, type=float,
@@ -28,10 +29,10 @@ class FlowerCommand(Command):
         app_settings['debug'] = options.debug
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
 
-        flower = Flower(celery_app=self.app, **app_settings)
+        flower = Flower(celery_app=self.app, prefix=options.prefix, **app_settings)
 
-        logging.info('Visit me at http://%s:%s' %
-                (options.address or 'localhost', options.port))
+        logging.info('Visit me at http://%s:%s%s' %
+                (options.address or 'localhost', options.port, options.prefix))
         logging.info('Broker: %s', self.app.connection().as_uri())
         logging.debug('Settings: %s' % pformat(app_settings))
 

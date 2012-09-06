@@ -33,7 +33,7 @@ from .settings import APP_SETTINGS
 
 handlers = [
     # App
-    (r"/", WorkersView),
+    (r"/?", WorkersView),
     (r"/workers", WorkersView),
     (r"/worker/(.+)", WorkerView),
     (r"/task/(.+)", TaskView),
