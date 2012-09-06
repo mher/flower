@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import tornado.web
 from tornado import ioloop
+from tornado.web import URLSpec
 
 import celery
 
@@ -11,9 +12,10 @@ from flower.urls import handlers
 
 
 class Flower(tornado.web.Application):
-    def __init__(self, celery_app=None, events=None, state=None,
+    def __init__(self, celery_app=None, prefix='', events=None, state=None,
                        io_loop=None, **kwargs):
-        kwargs.update(handlers=handlers)
+        prefixed_handlers = [URLSpec(*(prefix + handler[0],) + handler[1:]) for handler in handlers]
+        kwargs.update(handlers=prefixed_handlers)
         super(Flower, self).__init__(**kwargs)
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
