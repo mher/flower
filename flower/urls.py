@@ -33,11 +33,12 @@ from .settings import APP_SETTINGS
 
 handlers = [
     # App
-    (r"/?", WorkersView),
-    (r"/workers", WorkersView),
-    (r"/worker/(.+)", WorkerView),
-    (r"/task/(.+)", TaskView),
-    (r"/tasks", TasksView),
+    (r"", WorkersView, None, 'Prefix'),
+    (r"/", WorkersView, None, 'Root'),
+    (r"/workers", WorkersView, None, 'Workers'),
+    (r"/worker/(.+)", WorkerView, None, 'Worker'),
+    (r"/task/(.+)", TaskView, None, 'Task'),
+    (r"/tasks", TasksView, None, 'Tasks'),
     # Worker API
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),
     (r"/api/worker/pool/restart/(.+)", control.WorkerPoolRestart),
@@ -64,12 +65,12 @@ handlers = [
     # WebSocket Updates
     (r"/update-workers", UpdateWorkers),
     # Monitors
-    (r"/monitor", Monitor),
-    (r"/monitor/succeeded-tasks", SucceededTaskMonitor),
-    (r"/monitor/failed-tasks", FailedTaskMonitor),
+    (r"/monitor", Monitor, None, 'Monitor'),
+    (r"/monitor/succeeded-tasks", SucceededTaskMonitor, None, 'SucceededTaskMonitor'),
+    (r"/monitor/failed-tasks", FailedTaskMonitor, None, 'FailedTaskMonitor'),
     # Static
     (r"/static/(.*)", StaticFileHandler,
-                        {"path": APP_SETTINGS['static_path']}),
+                        {"path": APP_SETTINGS['static_path']}, 'Static'),
     # Error
     (r".*", NotFoundErrorHandler),
 ]
