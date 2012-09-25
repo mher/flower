@@ -7,6 +7,8 @@ Version 0.4
 -----------
 
 - tasks can be invoked via REST API
+- inspect timeout can be changed with --inspect_timeout option
+
 
 Version 0.3
 -----------
