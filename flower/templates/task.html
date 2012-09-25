@@ -10,7 +10,7 @@
       <div class="span12">
         <div class="page-header">
           <p id="taskid" class="hidden">{{ task.uuid }}</p>
-          <h2>{{ task.name }}
+          <h2>{{ getattr(task, 'name') }}
             <small>{{ task.uuid }}</small>
             {% if task.state == "STARTED" %}
                 <button style="float: right" class="btn btn-danger" onclick="flower.on_task_terminate(event)">Terminate</button>
