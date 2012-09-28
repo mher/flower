@@ -8,6 +8,7 @@ Version 0.4
 
 - tasks can be invoked via REST API
 - inspect timeout can be changed with --inspect_timeout option
+- flower --address option allows to bind to specific IP address
 
 
 Version 0.3

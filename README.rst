@@ -60,7 +60,7 @@ Launch the server and open http://localhost:5555: ::
 
 Or launch from celery: ::
 
-    $ celery flower --port=5555
+    $ celery flower --ddress=127.0.0.1 --port=5555
 
 Broker URL and other configuration options can be passed through the standard Celery options: ::
 
