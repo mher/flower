@@ -31,6 +31,10 @@ class TasksView(BaseHandler):
         workers = WorkersModel.get_workers(app)
         seen_task_types = TaskModel.seen_task_types(app)
 
+        if self.get_argument('mimetype', None) == 'application/json':
+            self.write({'tasks': [task for task in tasks]})
+            return
+
         self.render("tasks.html", tasks=tasks,
                                   task_types=seen_task_types,
                                   workers=workers,
