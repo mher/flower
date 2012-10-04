@@ -16,6 +16,9 @@ class TaskView(BaseHandler):
 
 
 class TasksView(BaseHandler):
+    def initialize(self, mimetype):
+        self.mimetype = mimetype
+
     def get(self):
         app = self.application
         limit = self.get_argument('limit', None)
@@ -30,6 +33,10 @@ class TasksView(BaseHandler):
                                      limit=limit, type=type, worker=worker)
         workers = WorkersModel.get_workers(app)
         seen_task_types = TaskModel.seen_task_types(app)
+
+        if self.mimetype == 'json':
+            self.write({'tasks': [task for task in tasks]})
+            return
 
         self.render("tasks.html", tasks=tasks,
                                   task_types=seen_task_types,

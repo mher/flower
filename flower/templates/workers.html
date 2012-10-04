@@ -58,7 +58,7 @@
         </td>
         <td>{{ humanize(info['concurrency']) }}</td>
         <td>{{ info['completed_tasks'] }}</td>
-        <td>{{ info['running_tasks'] }}</td>
+        <td>{{ len(info['running_tasks']) }}</td>
         <td>{{ humanize(info['queues']) }}</td>
       </tr>
       {% end %}

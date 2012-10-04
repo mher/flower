@@ -34,10 +34,12 @@ from .settings import APP_SETTINGS
 handlers = [
     # App
     (r"/", WorkersView),
-    (r"/workers", WorkersView),
+    (r"/workers", WorkersView, {"mimetype": "html"}),
     (r"/worker/(.+)", WorkerView),
     (r"/task/(.+)", TaskView),
-    (r"/tasks", TasksView),
+    (r"/tasks", TasksView, {"mimetype": "html"}),
+    # Workers API
+    (r"/api/workers", WorkersView, {"mimetype": "json"}),
     # Worker API
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),
     (r"/api/worker/pool/restart/(.+)", control.WorkerPoolRestart),
@@ -47,6 +49,8 @@ handlers = [
     (r"/api/worker/queue/add-consumer/(.+)", control.WorkerQueueAddConsumer),
     (r"/api/worker/queue/cancel-consumer/(.+)",
         control.WorkerQueueCancelConsumer),
+    # Tasks API
+    (r"/api/tasks", TasksView, {"mimetype": "json"}),
     # Task API
     (r"/api/task/async-apply/(.+)", tasks.TaskAsyncApply),
     (r"/api/task/result/(.+)", tasks.TaskResult),
