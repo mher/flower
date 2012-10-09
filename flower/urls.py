@@ -15,6 +15,7 @@ from .views.tasks import (
 from .api import events
 from .api import control
 from .api import tasks
+from .api import workers
 
 from .views.update import (
         UpdateWorkers,
@@ -38,6 +39,8 @@ handlers = [
     (r"/worker/(.+)", WorkerView),
     (r"/task/(.+)", TaskView),
     (r"/tasks", TasksView),
+    # Workers API
+    (r"/api/workers", workers.ListWorkers),
     # Worker API
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),
     (r"/api/worker/pool/restart/(.+)", control.WorkerPoolRestart),
@@ -47,6 +50,8 @@ handlers = [
     (r"/api/worker/queue/add-consumer/(.+)", control.WorkerQueueAddConsumer),
     (r"/api/worker/queue/cancel-consumer/(.+)",
         control.WorkerQueueCancelConsumer),
+    # Tasks API
+    (r"/api/tasks", tasks.ListTasks),
     # Task API
     (r"/api/task/async-apply/(.+)", tasks.TaskAsyncApply),
     (r"/api/task/result/(.+)", tasks.TaskResult),

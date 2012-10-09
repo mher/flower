@@ -44,3 +44,22 @@ class TaskResult(BaseTaskHandler):
         if result.ready():
             response.update({'result': result.result})
         self.write(response)
+
+
+class ListTasks(BaseHandler):
+    def get(self):
+        app = self.application
+        limit = self.get_argument('limit', None)
+        worker = self.get_argument('worker', None)
+        type = self.get_argument('type', None)
+
+        limit = limit and int(limit)
+        worker = worker if worker != 'All' else None
+        type = type if type != 'All' else None
+
+        tasks = {}
+        for (id, task) in TaskModel.iter_tasks(app,
+                                         limit=limit, type=type, worker=worker):
+          tasks[id] = task 
+
+        self.write(tasks)

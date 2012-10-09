@@ -9,8 +9,9 @@ from ..models import WorkersModel, WorkerModel
 class WorkersView(BaseHandler):
     def get(self):
         app = self.application
-        self.render("workers.html",
-                workers=WorkersModel.get_latest(app).workers)
+        workers = WorkersModel.get_latest(app).workers
+
+        self.render("workers.html", workers=workers)
 
 
 class WorkerView(BaseHandler):
