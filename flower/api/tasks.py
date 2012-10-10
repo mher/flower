@@ -8,6 +8,7 @@ from tornado.web import RequestHandler, HTTPError
 from celery.result import AsyncResult
 from celery.backends.base import DisabledBackend
 
+from ..models import TaskModel
 
 class BaseTaskHandler(RequestHandler):
     def get_task_args(self):
@@ -46,7 +47,7 @@ class TaskResult(BaseTaskHandler):
         self.write(response)
 
 
-class ListTasks(BaseHandler):
+class ListTasks(BaseTaskHandler):
     def get(self):
         app = self.application
         limit = self.get_argument('limit', None)
@@ -59,7 +60,7 @@ class ListTasks(BaseHandler):
 
         tasks = {}
         for (id, task) in TaskModel.iter_tasks(app,
-                                         limit=limit, type=type, worker=worker):
+                                               limit=limit, type=type, worker=worker):
           tasks[id] = task 
 
         self.write(tasks)
