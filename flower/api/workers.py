@@ -1,8 +1,9 @@
 from __future__ import absolute_import
 
-from tornado.web import RequestHandler, HTTPError
+from tornado.web import RequestHandler
 
 from ..models import WorkersModel
+
 
 class ListWorkers(RequestHandler):
     def get(self):

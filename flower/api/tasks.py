@@ -10,6 +10,7 @@ from celery.backends.base import DisabledBackend
 
 from ..models import TaskModel
 
+
 class BaseTaskHandler(RequestHandler):
     def get_task_args(self):
         options = json_decode(self.request.body)
@@ -59,8 +60,8 @@ class ListTasks(BaseTaskHandler):
         type = type if type != 'All' else None
 
         tasks = {}
-        for (id, task) in TaskModel.iter_tasks(app,
-                                               limit=limit, type=type, worker=worker):
-          tasks[id] = task 
+        for (id, task) in TaskModel.iter_tasks(app, limit=limit,
+                                               type=type, worker=worker):
+            tasks[id] = task
 
         self.write(tasks)

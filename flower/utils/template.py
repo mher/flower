@@ -24,5 +24,5 @@ def humanize(obj, type=None, length=None):
         if all(map(lambda x: isinstance(x, (int, float, basestring)), obj)):
             obj = ', '.join(map(str, obj))
     if length is not None and len(obj) > length:
-        obj = obj[:length-4] + ' ...'
+        obj = obj[:length - 4] + ' ...'
     return obj

@@ -126,6 +126,7 @@ def readme(options):
 def bump(options):
     sh("extra/release/bump_version.py flower/__init__.py")
 
+
 @task
 @cmdopts([
     ('coverage', 'c', 'Enable coverage'),
