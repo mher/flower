@@ -4,7 +4,7 @@ import tornado.testing
 
 import celery
 
-from flower.app import Application
+from flower.app import Flower
 from flower.urls import handlers
 from flower.events import Events
 from flower.state import State
@@ -16,8 +16,8 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
         celery_app = celery_app or celery.Celery()
         events = events or Events(celery_app)
         state = state or State(celery_app)
-        self.app = Application(celery_app, events, state,
-                               handlers, **APP_SETTINGS)
+        self.app = Flower(celery_app, events, state,
+                          handlers, **APP_SETTINGS)
         return self.app
 
     def get(self, url, **kwargs):
