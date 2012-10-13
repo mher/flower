@@ -10,8 +10,9 @@ class WorkersView(BaseHandler):
     def get(self):
         app = self.application
         workers = WorkersModel.get_latest(app).workers
+        broker = app.celery_app.connection().as_uri()
 
-        self.render("workers.html", workers=workers)
+        self.render("workers.html", workers=workers, broker=broker)
 
 
 class WorkerView(BaseHandler):
