@@ -10,6 +10,8 @@ Version 0.4
 - inspect timeout can be changed with --inspect_timeout option
 - flower --address option allows to bind to specific IP address
 - tasks can be filtered by state
+- broker url is available on workers page
+- long args/kwargs are truncated on tasks page
 
 
 Version 0.3
