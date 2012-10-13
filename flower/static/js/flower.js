@@ -361,15 +361,15 @@ var flower = (function () {
         width = width || 700;
         height = height || 400;
 
-        var seriesData = []
-        for (var name in data){
+        var name, seriesData = [];
+        for (name in data) {
             seriesData.push({name: name});
         }
 
         var palette = new Rickshaw.Color.Palette({scheme: 'colorwheel'});
 
         var graph = new Rickshaw.Graph({
-            element: document.getElementById("chart"+id),
+            element: document.getElementById("chart" + id),
             width: width,
             height: height,
             renderer: 'stack',
@@ -396,7 +396,7 @@ var flower = (function () {
 
         var slider = new Rickshaw.Graph.RangeSlider({
             graph: graph,
-            element: $('#slider'+id)
+            element: $('#slider' + id)
         });
 
         var hoverDetail = new Rickshaw.Graph.HoverDetail({
@@ -405,7 +405,7 @@ var flower = (function () {
 
         var legend = new Rickshaw.Graph.Legend({
             graph: graph,
-            element: document.getElementById('legend'+id)
+            element: document.getElementById('legend' + id)
         });
 
         var shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
@@ -479,7 +479,7 @@ var flower = (function () {
                 url: '/monitor/succeeded-tasks',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
-                    succeeded_graph = create_graph(data, '-succeeded')
+                    succeeded_graph = create_graph(data, '-succeeded');
                     succeeded_graph.update();
 
                     succeeded_graph.series.setTimeInterval(updateinterval);
@@ -498,7 +498,7 @@ var flower = (function () {
                 url: '/monitor/failed-tasks',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
-                    failed_graph = create_graph(data, '-failed')
+                    failed_graph = create_graph(data, '-failed');
                     failed_graph.update();
 
                     failed_graph.series.setTimeInterval(updateinterval);
