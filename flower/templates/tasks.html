@@ -61,6 +61,18 @@
                 </select>
               </div>
             </div>
+            <div class="control-group">
+              <label class="control-label" for="select-state">State:</label>
+
+              <div class="controls">
+                <select name="state" id="select-state">
+                  <option>All</option>
+                  {% for name in all_states %}
+                  <option {% if name==state %} selected {% end %}>{{ name }}</option>
+                  {% end %}
+                </select>
+              </div>
+            </div>
             <div class="form-actions">
               <button class="btn btn-primary" type="submit">Apply filter</button>
               <button class="btn" onclick="flower.on_cancel_task_filter(event)">Cancel
@@ -78,7 +90,7 @@
     <tr>
       <th>Name</th>
       <th>UUID</th>
-      <th>Status</th>
+      <th>State</th>
       <th>args</th>
       <th>kwargs</th>
       <th>Result</th>

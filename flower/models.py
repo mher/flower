@@ -99,14 +99,16 @@ class TaskModel(BaseModel):
             return None
 
     @classmethod
-    def iter_tasks(cls, app, limit=None, type=None, worker=None):
+    def iter_tasks(cls, app, limit=None, type=None, worker=None, state=None):
         i = 0
-        state = app.events.state
-        for uuid, task in state._sort_tasks_by_time(
-                state.itertasks()):
+        events_state = app.events.state
+        for uuid, task in events_state._sort_tasks_by_time(
+                events_state.itertasks()):
             if type and task.name != type:
                 continue
             if worker and task.worker.hostname != worker:
+                continue
+            if state and task.state != state:
                 continue
             yield uuid, task
             i += 1
