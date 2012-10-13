@@ -9,6 +9,7 @@ from ..models import TaskModel, WorkersModel
 
 
 class TaskView(BaseHandler):
+    @web.authenticated
     def get(self, task_id):
         task = TaskModel.get_task_by_id(self.application, task_id)
         if task is None:
@@ -18,6 +19,7 @@ class TaskView(BaseHandler):
 
 
 class TasksView(BaseHandler):
+    @web.authenticated
     def get(self):
         app = self.application
         limit = self.get_argument('limit', None)

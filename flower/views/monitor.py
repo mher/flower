@@ -2,17 +2,20 @@ from __future__ import absolute_import
 
 from collections import defaultdict
 
+from tornado import web
 from celery import states
 
 from ..views import BaseHandler
 
 
 class Monitor(BaseHandler):
+    @web.authenticated
     def get(self):
         self.render("monitor.html")
 
 
 class SucceededTaskMonitor(BaseHandler):
+    @web.authenticated
     def get(self):
         timestamp = float(self.get_argument('lastquery'))
         state = self.application.events.state
@@ -29,6 +32,7 @@ class SucceededTaskMonitor(BaseHandler):
 
 
 class FailedTaskMonitor(BaseHandler):
+    @web.authenticated
     def get(self):
         timestamp = float(self.get_argument('lastquery'))
         state = self.application.events.state

@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import logging
 
+from tornado import web
 from tornado.escape import json_decode
 from tornado.web import RequestHandler, HTTPError
 
@@ -22,8 +23,18 @@ class BaseTaskHandler(RequestHandler):
     def backend_configured(result):
         return not isinstance(result.backend, DisabledBackend)
 
+    def get_current_user(self):
+        if not self.application.auth:
+            return True
+        user = self.get_secure_cookie('user')
+        if user and user in self.application.auth:
+            return user
+        else:
+            return None
+
 
 class TaskAsyncApply(BaseTaskHandler):
+    @web.authenticated
     def post(self, taskname):
         celery = self.application.celery_app
 
@@ -38,6 +49,7 @@ class TaskAsyncApply(BaseTaskHandler):
 
 
 class TaskResult(BaseTaskHandler):
+    @web.authenticated
     def get(self, taskid):
         result = AsyncResult(taskid)
         if not self.backend_configured(result):
@@ -49,6 +61,7 @@ class TaskResult(BaseTaskHandler):
 
 
 class ListTasks(BaseTaskHandler):
+    @web.authenticated
     def get(self):
         app = self.application
         limit = self.get_argument('limit', None)

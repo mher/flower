@@ -38,3 +38,12 @@ class BaseHandler(tornado.web.RequestHandler):
                     self.set_header('Content-Type', 'text/plain')
                     self.write(message)
             self.set_status(status_code)
+
+    def get_current_user(self):
+        if not self.application.auth:
+            return True
+        user = self.get_secure_cookie('user')
+        if user and user in self.application.auth:
+            return user
+        else:
+            return None

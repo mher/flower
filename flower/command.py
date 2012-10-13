@@ -17,6 +17,7 @@ define("debug", default=False, help="run in debug mode", type=bool)
 define("inspect", default=True, help="inspect workers", type=bool)
 define("inspect_timeout", default=1000, type=float,
         help="inspect timeout (in milliseconds)")
+define("auth", default='', help="comma separated list of emails", type=str)
 
 
 class FlowerCommand(Command):
@@ -25,10 +26,11 @@ class FlowerCommand(Command):
         app_settings = settings.APP_SETTINGS
         argv = filter(self.flower_option, argv)
         parse_command_line([prog_name] + argv)
+        auth = map(str.strip, options.auth.split(',')) if options.auth else []
         app_settings['debug'] = options.debug
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
 
-        flower = Flower(celery_app=self.app, **app_settings)
+        flower = Flower(celery_app=self.app, auth=auth, **app_settings)
 
         logging.info('Visit me at http://%s:%s' %
                 (options.address or 'localhost', options.port))

@@ -7,6 +7,7 @@ from ..models import WorkersModel, WorkerModel
 
 
 class WorkersView(BaseHandler):
+    @web.authenticated
     def get(self):
         app = self.application
         workers = WorkersModel.get_latest(app).workers
@@ -16,6 +17,7 @@ class WorkersView(BaseHandler):
 
 
 class WorkerView(BaseHandler):
+    @web.authenticated
     def get(self, workername):
         app = self.application
         worker = WorkerModel.get_worker(app, workername)

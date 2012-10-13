@@ -14,6 +14,7 @@ class ControlHandler(BaseHandler):
 
 
 class WorkerShutDown(ControlHandler):
+    @web.authenticated
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -25,6 +26,7 @@ class WorkerShutDown(ControlHandler):
 
 
 class WorkerPoolRestart(ControlHandler):
+    @web.authenticated
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -45,6 +47,7 @@ class WorkerPoolRestart(ControlHandler):
 
 
 class WorkerPoolGrow(ControlHandler):
+    @web.authenticated
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -66,6 +69,7 @@ class WorkerPoolGrow(ControlHandler):
 
 
 class WorkerPoolShrink(ControlHandler):
+    @web.authenticated
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -88,6 +92,7 @@ class WorkerPoolShrink(ControlHandler):
 
 
 class WorkerPoolAutoscale(ControlHandler):
+    @web.authenticated
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -113,6 +118,7 @@ class WorkerPoolAutoscale(ControlHandler):
 
 
 class WorkerQueueAddConsumer(ControlHandler):
+    @web.authenticated
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -137,6 +143,7 @@ class WorkerQueueAddConsumer(ControlHandler):
 
 
 class WorkerQueueCancelConsumer(ControlHandler):
+    @web.authenticated
     def post(self, workername):
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -161,6 +168,7 @@ class WorkerQueueCancelConsumer(ControlHandler):
 
 
 class TaskRevoke(BaseHandler):
+    @web.authenticated
     def post(self, taskid):
         logging.info("Revoking task '%s'" % taskid)
         celery = self.application.celery_app
@@ -170,6 +178,7 @@ class TaskRevoke(BaseHandler):
 
 
 class TaskTimout(ControlHandler):
+    @web.authenticated
     def post(self, workername=None):
         if workername is not None and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
@@ -195,6 +204,7 @@ class TaskTimout(ControlHandler):
 
 
 class TaskRateLimit(ControlHandler):
+    @web.authenticated
     def post(self, workername=None):
         if workername is not None and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)

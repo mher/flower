@@ -12,6 +12,8 @@ from .views.tasks import (
         TasksView,
         )
 
+from .views import auth
+
 from .api import events
 from .api import control
 from .api import tasks
@@ -39,9 +41,8 @@ handlers = [
     (r"/worker/(.+)", WorkerView),
     (r"/task/(.+)", TaskView),
     (r"/tasks", TasksView),
-    # Workers API
-    (r"/api/workers", workers.ListWorkers),
     # Worker API
+    (r"/api/workers", workers.ListWorkers),
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),
     (r"/api/worker/pool/restart/(.+)", control.WorkerPoolRestart),
     (r"/api/worker/pool/grow/(.+)", control.WorkerPoolGrow),
@@ -50,9 +51,8 @@ handlers = [
     (r"/api/worker/queue/add-consumer/(.+)", control.WorkerQueueAddConsumer),
     (r"/api/worker/queue/cancel-consumer/(.+)",
         control.WorkerQueueCancelConsumer),
-    # Tasks API
-    (r"/api/tasks", tasks.ListTasks),
     # Task API
+    (r"/api/tasks", tasks.ListTasks),
     (r"/api/task/async-apply/(.+)", tasks.TaskAsyncApply),
     (r"/api/task/result/(.+)", tasks.TaskResult),
     (r"/api/task/timeout/(.+)", control.TaskTimout),
@@ -75,6 +75,10 @@ handlers = [
     # Static
     (r"/static/(.*)", StaticFileHandler,
                         {"path": APP_SETTINGS['static_path']}),
+    # Auth
+    (r"/login", auth.LoginHandler),
+    (r"/logout", auth.LogoutHandler),
+
     # Error
     (r".*", NotFoundErrorHandler),
 ]
