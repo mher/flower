@@ -9,7 +9,7 @@ KEYWORDS_DOWN = ('args', 'kwargs')
 UUID_REGEX = re.compile(r'^[\w]{8}(-[\w]{4}){3}-[\w]{12}$')
 
 
-def humanize(obj, type=None):
+def humanize(obj, type=None, length=None):
     if obj is None:
         obj = ''
     elif type == 'time':
@@ -23,4 +23,6 @@ def humanize(obj, type=None):
     elif isinstance(obj, list):
         if all(map(lambda x: isinstance(x, (int, float, basestring)), obj)):
             obj = ', '.join(map(str, obj))
+    if length is not None and len(obj) > length:
+        obj = obj[:length-4] + ' ...'
     return obj
