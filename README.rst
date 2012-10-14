@@ -22,6 +22,7 @@ Features
 * View all task options (arguments, start time, runtime, etc.)
 * Revoke or terminate tasks
 * View real-time execution graphs
+* Google OpenID authentication
 
 API
 ---

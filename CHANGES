@@ -12,6 +12,7 @@ Version 0.4
 - tasks can be filtered by state
 - broker url is available on workers page
 - long args/kwargs are truncated on tasks page
+- Google OpenID authentication
 
 
 Version 0.3
