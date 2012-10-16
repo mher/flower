@@ -6,6 +6,8 @@ Here you can see the full list of changes between each release.
 Version 0.4
 -----------
 
+Released on Oct 16 2012
+
 - tasks can be invoked via REST API
 - inspect timeout can be changed with --inspect_timeout option
 - flower --address option allows to bind to specific IP address
@@ -13,7 +15,6 @@ Version 0.4
 - broker url is available on workers page
 - long args/kwargs are truncated on tasks page
 - Google OpenID authentication
-
 
 Version 0.3
 -----------
