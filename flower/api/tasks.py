@@ -6,6 +6,7 @@ from tornado import web
 from tornado.escape import json_decode
 from tornado.web import RequestHandler, HTTPError
 
+from celery import states
 from celery.result import AsyncResult
 from celery.backends.base import DisabledBackend
 
@@ -56,8 +57,16 @@ class TaskResult(BaseTaskHandler):
             raise HTTPError(503)
         response = {'task-id': taskid, 'state': result.state}
         if result.ready():
-            response.update({'result': result.result})
-        self.write(response)
+            if result.state == states.FAILURE:
+                response.update({'result': repr(result.result),
+                                 'traceback': result.traceback})
+            else:
+                response.update({'result': result.result})
+
+        try:
+            self.write(response)
+        except TypeError:
+            self.write('Unable to json encode the task result')
 
 
 class ListTasks(BaseTaskHandler):
