@@ -43,6 +43,7 @@ handlers = [
     (r"/tasks", TasksView),
     # Worker API
     (r"/api/workers", workers.ListWorkers),
+    (r"/api/workers/untrack/(.+)", workers.UntrackWorkers),
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),
     (r"/api/worker/pool/restart/(.+)", control.WorkerPoolRestart),
     (r"/api/worker/pool/grow/(.+)", control.WorkerPoolGrow),

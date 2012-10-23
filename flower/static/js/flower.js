@@ -40,21 +40,22 @@ var flower = (function () {
                                  : select_none_workers();
     }
 
-    function shutdown_selected(event) {
+    function post_selected_workers_to_api(api_url, success_callback) {
         var $selected_workes = get_selected_workers();
-
         /* atomic would be better with list of ids (not-names) */
         $selected_workes.each(function () {
             var $worker = $(this),
                 worker_name = $worker.attr('id');
-
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/shutdown/' + worker_name,
+                url: api_url + worker_name,
                 dataType: 'json',
                 data: { workername: worker_name },
                 success: function (data) {
                     show_success_alert(data.message);
+                    if (success_callback) {
+                        success_callback.apply(this, [$worker, data]);
+                    }
                 },
                 error: function (data) {
                     show_error_alert(data.responseText);
@@ -63,27 +64,17 @@ var flower = (function () {
         });
     }
 
+    function shutdown_selected(event) {
+        post_selected_workers_to_api('/api/worker/shutdown/');
+    }
+
+    function remove_selected(event) {
+        var cb = function (worker, data) { worker.remove(); }
+        post_selected_workers_to_api('/api/workers/untrack/', cb);
+    }
+
     function restart_selected(event) {
         var $selected_workes = get_selected_workers();
-
-        /* atomic would be better with list of ids (not-names) */
-        $selected_workes.each(function () {
-            var $worker = $(this),
-                worker_name = $worker.attr('id');
-
-            $.ajax({
-                type: 'POST',
-                url: '/api/worker/pool/restart/' + worker_name,
-                dataType: 'json',
-                data: { workername: worker_name },
-                success: function (data) {
-                    show_success_alert(data.message);
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
-        });
     }
 
     function on_pool_grow(event) {
@@ -523,6 +514,7 @@ var flower = (function () {
         select_none_workers: select_none_workers,
         shutdown_selected: shutdown_selected,
         restart_selected: restart_selected,
+        remove_selected: remove_selected,
         on_alert_close: on_alert_close,
         on_pool_grow: on_pool_grow,
         on_pool_shrink: on_pool_shrink,
