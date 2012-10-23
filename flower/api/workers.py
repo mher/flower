@@ -11,3 +11,13 @@ class ListWorkers(BaseHandler):
     def get(self):
         app = self.application
         self.write(WorkersModel.get_latest(app).workers)
+
+class UntrackWorkers(BaseHandler):
+    @web.authenticated
+    def post(self, workername):
+        state = self.application.state
+        # with state._update_lock:
+        for i in range(1):
+            if workername in state._stats:
+                del state._stats[workername]
+        self.write(dict(message="Removed from the worker list successfully"))
