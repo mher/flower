@@ -14,6 +14,7 @@ from . import settings
 
 
 class State(threading.Thread):
+
     def __init__(self, celery_app):
         threading.Thread.__init__(self)
         self.daemon = True
@@ -31,6 +32,7 @@ class State(threading.Thread):
         self._confs = {}
 
     def run(self):
+        self.pin_requested()
         transport = self._celery_app.connection().transport.driver_type
         if transport not in ('amqp', 'redis', 'mongodb'):
             logging.error("Dashboard and worker management commands are "
@@ -45,6 +47,12 @@ class State(threading.Thread):
         i = self._celery_app.control.inspect(timeout=timeout)
         try_interval = 1
         while True:
+
+            if not self.should_sleep():
+                logging.debug('Inspection is in sleep mode...')
+                time.sleep(5)
+                continue
+
             try:
                 try_interval *= 2
                 logging.debug('Inspecting workers')
@@ -87,6 +95,15 @@ class State(threading.Thread):
                 logging.error("Failed to inspect workers: '%s', trying "
                               "again in %s seconds" % (e, try_interval))
                 time.sleep(try_interval)
+
+    def pin_requested(self):
+        with self._update_lock:
+            self.last_user_access = time.time()
+
+    def should_sleep(self):
+        if settings.CELERY_INSPECT_SLEEP == 0:
+            return True
+        return settings.CELERY_INSPECT_SLEEP > (time.time() - self.last_user_access)
 
     @property
     def stats(self):
