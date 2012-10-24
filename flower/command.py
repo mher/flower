@@ -18,6 +18,7 @@ define("inspect", default=True, help="inspect workers", type=bool)
 define("inspect_timeout", default=1000, type=float,
         help="inspect timeout (in milliseconds)")
 define("auth", default='', help="comma separated list of emails", type=str)
+define("sleep", default=0, help="inspect sleep period (in seconds)", type=int)
 
 
 class FlowerCommand(Command):
@@ -29,6 +30,7 @@ class FlowerCommand(Command):
         auth = map(str.strip, options.auth.split(',')) if options.auth else []
         app_settings['debug'] = options.debug
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
+        settings.CELERY_INSPECT_SLEEP = options.sleep
 
         flower = Flower(celery_app=self.app, auth=auth, **app_settings)
 
