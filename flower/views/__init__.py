@@ -11,7 +11,7 @@ from ..utils import template
 class BaseHandler(tornado.web.RequestHandler):
 
     def prepare(self):
-        self.application.state.pin_requested()
+        self.application.state.resume()
 
     def render(self, *args, **kwargs):
         functions = inspect.getmembers(template, inspect.isfunction)
