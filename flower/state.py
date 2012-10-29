@@ -110,55 +110,11 @@ class State(threading.Thread):
         self._inspect.set()
         self._last_access = time.time()
 
-    @property
-    def stats(self):
-        with self._update_lock:
-            return copy.deepcopy(self._stats)
-
-    @property
-    def registered_tasks(self):
-        with self._update_lock:
-            self._last_access = time.time()
-            return copy.deepcopy(self._registered_tasks)
-
-    @property
-    def scheduled_tasks(self):
-        with self._update_lock:
-            self._last_access = time.time()
-            return copy.deepcopy(self._scheduled_tasks)
-
-    @property
-    def active_tasks(self):
-        with self._update_lock:
-            self._last_access = time.time()
-            return copy.deepcopy(self._active_tasks)
-
-    @property
-    def reserved_tasks(self):
-        with self._update_lock:
-            self._last_access = time.time()
-            return copy.deepcopy(self._reserved_tasks)
-
-    @property
-    def revoked_tasks(self):
-        with self._update_lock:
-            self._last_access = time.time()
-            return copy.deepcopy(self._revoked_tasks)
-
-    @property
-    def ping(self):
-        with self._update_lock:
-            self._last_access = time.time()
-            return copy.deepcopy(self._ping)
-
-    @property
-    def active_queues(self):
-        with self._update_lock:
-            self._last_access = time.time()
-            return copy.deepcopy(self._active_queues)
-
-    @property
-    def conf(self):
-        with self._update_lock:
-            self._last_access = time.time()
-            return copy.deepcopy(self._conf)
+    def __getattr__(self, name):
+        if name in ['stats', 'registered_tasks', 'scheduled_tasks',
+                    'active_tasks', 'reserved_tasks', 'revoked_tasks',
+                    'ping', 'active_queues', 'conf']:
+            with self._update_lock:
+                self._last_access = time.time()
+                return copy.deepcopy(getattr(self, '_' + name))
+        super(State, self).__getattr__(name)
