@@ -14,12 +14,17 @@ from . import settings
 
 
 class State(threading.Thread):
+
     def __init__(self, celery_app):
         threading.Thread.__init__(self)
         self.daemon = True
         self._celery_app = celery_app
 
         self._update_lock = threading.Lock()
+        self._inspect = threading.Event()
+        self._inspect.set()
+        self._last_access = time.time()
+
         self._stats = {}
         self._registered_tasks = {}
         self._scheduled_tasks = {}
@@ -47,7 +52,7 @@ class State(threading.Thread):
         while True:
             try:
                 try_interval *= 2
-                logging.debug('Inspecting workers')
+                logging.debug('Inspecting workers...')
                 stats = i.stats()
                 logging.debug('Stats: %s' % pformat(stats))
                 registered = i.registered()
@@ -80,6 +85,12 @@ class State(threading.Thread):
                     self._conf = conf or {}
 
                 try_interval = 1
+
+                if time.time() - self._last_access > 60 * timeout:
+                    self.pause()
+
+                self._inspect.wait()
+
             except (KeyboardInterrupt, SystemExit):
                 import thread
                 thread.interrupt_main()
@@ -88,47 +99,22 @@ class State(threading.Thread):
                               "again in %s seconds" % (e, try_interval))
                 time.sleep(try_interval)
 
-    @property
-    def stats(self):
-        with self._update_lock:
-            return copy.deepcopy(self._stats)
+    def pause(self):
+        "stop inspecting workers until resume is called"
+        logging.debug('Stopping inspecting workers...')
+        self._inspect.clear()
 
-    @property
-    def registered_tasks(self):
-        with self._update_lock:
-            return copy.deepcopy(self._registered_tasks)
+    def resume(self):
+        "resume inspecting workers"
+        logging.debug('Resuming inspecting workers...')
+        self._inspect.set()
+        self._last_access = time.time()
 
-    @property
-    def scheduled_tasks(self):
-        with self._update_lock:
-            return copy.deepcopy(self._scheduled_tasks)
-
-    @property
-    def active_tasks(self):
-        with self._update_lock:
-            return copy.deepcopy(self._active_tasks)
-
-    @property
-    def reserved_tasks(self):
-        with self._update_lock:
-            return copy.deepcopy(self._reserved_tasks)
-
-    @property
-    def revoked_tasks(self):
-        with self._update_lock:
-            return copy.deepcopy(self._revoked_tasks)
-
-    @property
-    def ping(self):
-        with self._update_lock:
-            return copy.deepcopy(self._ping)
-
-    @property
-    def active_queues(self):
-        with self._update_lock:
-            return copy.deepcopy(self._active_queues)
-
-    @property
-    def conf(self):
-        with self._update_lock:
-            return copy.deepcopy(self._conf)
+    def __getattr__(self, name):
+        if name in ['stats', 'registered_tasks', 'scheduled_tasks',
+                    'active_tasks', 'reserved_tasks', 'revoked_tasks',
+                    'ping', 'active_queues', 'conf']:
+            with self._update_lock:
+                self._last_access = time.time()
+                return copy.deepcopy(getattr(self, '_' + name))
+        super(State, self).__getattr__(name)

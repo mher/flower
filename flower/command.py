@@ -17,7 +17,8 @@ define("debug", default=False, help="run in debug mode", type=bool)
 define("inspect", default=True, help="inspect workers", type=bool)
 define("inspect_timeout", default=1000, type=float,
         help="inspect timeout (in milliseconds)")
-define("auth", default='', help="comma separated list of emails", type=str)
+define("auth", default='', type=str,
+        help="comma separated list of emails to grant access")
 
 
 class FlowerCommand(Command):
