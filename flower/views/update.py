@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import logging
 
 from functools import partial
+from pprint import pformat
 
 from tornado import websocket
 from tornado.ioloop import PeriodicCallback
@@ -44,9 +45,10 @@ class UpdateWorkers(websocket.WebSocketHandler):
     @classmethod
     def on_update_time(cls, app):
         workers = WorkersModel.get_latest(app)
+        changes = workers.workers
 
-        if workers != cls.workers:
-            logging.debug('Sending dashboard updates')
+        if workers != cls.workers and changes:
+            logging.debug('Sending dashboard updates: %s' % pformat(changes))
             for l in cls.listeners:
-                l.write_message(workers.workers)
+                l.write_message(changes)
             cls.workers = workers
