@@ -319,7 +319,11 @@ var flower = (function () {
     function on_workers_table_update(update) {
         $.each(update, function (name) {
             var id = name.replace(/(:|\.)/g, '\\$1'),
-                tr = $('#' + id);
+
+            //escape special chars
+            id = id.replace(/([!"#$%&'()*+,./:;?@[\]^`{|}~])/g, "\\$1")
+
+            var tr = $('#' + id);
 
             if (tr.length === 0) {
                 $('#workers-table-row').clone().removeClass('hidden').attr('id', name).appendTo('tbody');
