@@ -102,8 +102,7 @@ class TaskModel(BaseModel):
     def iter_tasks(cls, app, limit=None, type=None, worker=None, state=None):
         i = 0
         events_state = app.events.state
-        for uuid, task in events_state._sort_tasks_by_time(
-                events_state.itertasks()):
+        for uuid, task in events_state.tasks_by_time():
             if type and task.name != type:
                 continue
             if worker and task.worker.hostname != worker:
