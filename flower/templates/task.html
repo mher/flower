@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="tasks") %}
+  {% module Template("navbar.html", active_tab="tasks", absolute_url=absolute_url) %}
 {% end %}
 
 {% block container %}
@@ -73,7 +73,7 @@
                     {{ humanize(getattr(task, name), type='time') }}
                     {% elif name == 'worker' %}
                     <a
-                      href="/worker/{{ task.worker.hostname }}">{{ task.worker.hostname }}</a>
+                        href="{{ absolute_url('/worker/' + task.worker.hostname) }}">{{ task.worker.hostname }}</a>
                     {% else %}
                     {{ getattr(task, name) }}
                     {% end %}

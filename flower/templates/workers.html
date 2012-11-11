@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="workers") %}
+  {% module Template("navbar.html", active_tab="workers", absolute_url=absolute_url) %}
 {% end %}
 
 {% block container %}
@@ -48,7 +48,7 @@
       {% for name,info in workers.iteritems() %}
       <tr id="{{ name }}">
         <td class="is_selected"><input type="checkbox"></td>
-        <td><a href="/worker/{{ name }}">{{ name }}</a></td>
+        <td><a href="{{ absolute_url('worker/' + name) }}">{{ name }}</a></td>
         <td>
           {% if info['status'] %}
           <span class="label label-success">Online</span>

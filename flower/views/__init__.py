@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import inspect
 import traceback
 
+from urlparse import urljoin
+
 import tornado
 
 from ..utils import template
@@ -17,6 +19,7 @@ class BaseHandler(tornado.web.RequestHandler):
         functions = inspect.getmembers(template, inspect.isfunction)
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.iterkeys())
         kwargs.update(functions)
+        kwargs.update(absolute_url=self.absolute_url)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
@@ -51,3 +54,11 @@ class BaseHandler(tornado.web.RequestHandler):
             return user
         else:
             return None
+
+    def absolute_url(self, url):
+        base = "{}://{}/".format(self.request.protocol, self.request.host)
+        if url.startswith('/'):
+            url = url[1:]
+        aurl = urljoin(base, url)
+        aurl = aurl[:-1] if aurl.endswith('/') else aurl
+        return aurl
