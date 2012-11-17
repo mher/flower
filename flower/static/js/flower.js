@@ -178,7 +178,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
+                    $('#tab-queues').load(url_prefix() + '/worker/' + workername + ' #tab-queues').fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -205,7 +205,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
+                    $('#tab-queues').load(url_prefix() + '/worker/' + workername + ' #tab-queues').fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -263,7 +263,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-limits').load('/worker/' + workername + ' #tab-limits').fadeIn('show');
+                    $('#tab-limits').load(url_prefix() + '/worker/' + workername + ' #tab-limits').fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -328,7 +328,7 @@ var flower = (function () {
             if (tr.length === 0) {
                 $('#workers-table-row').clone().removeClass('hidden').attr('id', name).appendTo('tbody');
                 tr = $('#' + id);
-                tr.children('td').children('a').attr('href', '/worker/' + id).text(name);
+                tr.children('td').children('a').attr('href', url_prefix() + '/worker/' + id).text(name);
             }
 
             var stat = tr.children('td:eq(2)').children(),
@@ -451,17 +451,17 @@ var flower = (function () {
     }
 
     function url_prefix() {
-        // host is initialized in base.html
-        if (location.host != host && host.slice(0, location.host.length) == location.host) {
-            return host.slice(location.host.length);
+        // prefix is initialized in base.html
+        if (prefix) {
+            return '/' + prefix;
         }
         return '';
     }
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), ['', '/workers'])) {
+        if ($.inArray($(location).attr('pathname'), [url_prefix(), url_prefix() + '/workers'])) {
             var host = $(location).attr('host'),
-                ws = new WebSocket("ws://" + host + "/update-workers");
+                ws = new WebSocket("ws://" + host + url_prefix() + "/update-workers");
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
                 on_workers_table_update(update);
@@ -479,7 +479,7 @@ var flower = (function () {
             });
         });
 
-        if ($(location).attr('pathname') === '/monitor') {
+        if ($(location).attr('pathname') === url_prefix() + '/monitor') {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
                 updateinterval = 3000,
@@ -488,7 +488,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/succeeded-tasks',
+                url: url_prefix() + '/monitor/succeeded-tasks',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     succeeded_graph = create_graph(data, '-succeeded');
@@ -497,7 +497,7 @@ var flower = (function () {
                     succeeded_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(succeeded_graph,
-                                     '/monitor/succeeded-tasks',
+                                     url_prefix() + '/monitor/succeeded-tasks',
                                      sts);
                         sts = current_unix_time();
                     }, updateinterval);
@@ -507,7 +507,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/failed-tasks',
+                url: url_prefix() + '/monitor/failed-tasks',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     failed_graph = create_graph(data, '-failed');
@@ -516,7 +516,7 @@ var flower = (function () {
                     failed_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(failed_graph,
-                                     '/monitor/failed-tasks',
+                                     url_prefix() + '/monitor/failed-tasks',
                                      fts);
                         fts = current_unix_time();
                     }, updateinterval);

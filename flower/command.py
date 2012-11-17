@@ -19,8 +19,7 @@ define("inspect_timeout", default=1000, type=float,
         help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
         help="comma separated list of emails to grant access")
-define("static_url_prefix", type=str,
-        help="serve static urls with this prefix")
+define("url_prefix", type=str, help="base url prefix")
 
 
 class FlowerCommand(Command):
@@ -31,8 +30,10 @@ class FlowerCommand(Command):
         parse_command_line([prog_name] + argv)
         auth = map(str.strip, options.auth.split(',')) if options.auth else []
         app_settings['debug'] = options.debug
-        if options.static_url_prefix:
-            app_settings['static_url_prefix'] = options.static_url_prefix
+        if options.url_prefix:
+            prefix = options.url_prefix.strip('/')
+            app_settings['static_url_prefix'] = '/{}/static/'.format(prefix)
+            settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
 
         flower = Flower(celery_app=self.app, auth=auth, **app_settings)

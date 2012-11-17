@@ -7,6 +7,7 @@ from urlparse import urljoin
 
 import tornado
 
+from .. import settings
 from ..utils import template
 
 
@@ -20,6 +21,7 @@ class BaseHandler(tornado.web.RequestHandler):
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.iterkeys())
         kwargs.update(functions)
         kwargs.update(absolute_url=self.absolute_url)
+        kwargs.update(url_prefix=settings.URL_PREFIX)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
@@ -57,8 +59,8 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def absolute_url(self, url):
         base = "{}://{}/".format(self.request.protocol, self.request.host)
-        if url.startswith('/'):
-            url = url[1:]
-        aurl = urljoin(base, url)
+        if settings.URL_PREFIX:
+            base += settings.URL_PREFIX + '/'
+        aurl = urljoin(base, url[1:] if url.startswith('/') else url)
         aurl = aurl[:-1] if aurl.endswith('/') else aurl
         return aurl
