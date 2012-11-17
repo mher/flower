@@ -318,17 +318,14 @@ var flower = (function () {
 
     function on_workers_table_update(update) {
         $.each(update, function (name) {
-            var id = name.replace(/(:|\.)/g, '\\$1'),
-
-            //escape special chars
-            id = id.replace(/([!"#$%&'()*+,./:;?@[\]^`{|}~])/g, "\\$1")
-
-            var tr = $('#' + id);
+            var id = encodeURIComponent(name),
+                sel = id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/%@])/g,'\\$1'),
+                tr = $('#' + sel);
 
             if (tr.length === 0) {
-                $('#workers-table-row').clone().removeClass('hidden').attr('id', name).appendTo('tbody');
-                tr = $('#' + id);
-                tr.children('td').children('a').attr('href', url_prefix() + '/worker/' + id).text(name);
+                $('#workers-table-row').clone().removeClass('hidden').attr('id', id).appendTo('tbody');
+                tr = $('#' + sel);
+                tr.children('td').children('a').attr('href', url_prefix() + '/worker/' + name).text(name);
             }
 
             var stat = tr.children('td:eq(2)').children(),
