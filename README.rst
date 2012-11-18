@@ -6,23 +6,27 @@ Flower is a web based tool for monitoring and administrating Celery clusters.
 Features
 --------
 
-* Shutdown or restart workers
-* View workers status (completed, running tasks, etc.)
-* View worker pool options (timeouts, processes, etc.)
-* Control worker pool size
-* View message broker options
-* View active queues, add or cancel queues
-* View processed task stats by type
-* View currently running tasks
-* View scheduled tasks
-* View reserved and revoked tasks
-* Apply time and rate limits
-* View all active configuration options
-* View all tasks (by type, by worker, etc.)
-* View all task options (arguments, start time, runtime, etc.)
-* Revoke or terminate tasks
-* View real-time execution graphs
-* Google OpenID authentication
+- Real-time monitoring using Celery Events
+
+    - Task progress and history
+    - Ability to show task details (arguments, start time, runtime, and more)
+    - Graphs and statistics
+
+- Remote Control
+
+    - View worker status and statistics
+    - Shutdown and restart worker instances
+    - Control worker pool size and autoscale settings
+    - View and modify the queues a worker instance consumes from
+    - View currently running tasks
+    - View scheduled tasks (ETA/countdown)
+    - View reserved and revoked tasks
+    - Apply time and rate limits
+    - Configuration viewer
+    - Revoke or terminate tasks
+
+- HTTP API
+- OpenID authentication
 
 API
 ---
