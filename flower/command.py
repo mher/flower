@@ -32,7 +32,7 @@ class FlowerCommand(Command):
         app_settings['debug'] = options.debug
         if options.url_prefix:
             prefix = options.url_prefix.strip('/')
-            app_settings['static_url_prefix'] = '/{}/static/'.format(prefix)
+            app_settings['static_url_prefix'] = '/{0}/static/'.format(prefix)
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
 
