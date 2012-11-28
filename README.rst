@@ -31,12 +31,16 @@ Features
 API
 ---
 
-Flower API enables to control the cluster via REST api and receive task
+Flower API enables to manage the cluster via REST api, call tasks and receive task
 events in real-time via WebSockets.
 
 For example you can restart worker's pool by: ::
 
     $ curl -X POST http://localhost:5555/api/worker/pool/restart/myworker
+
+Or call a task by: ::
+
+    $ curl -X POST -d '{"args":[1,2]}' http://localhost:5555/api/task/async-apply/tasks.add
 
 Or terminate executing task by: ::
 
