@@ -1,6 +1,12 @@
+from __future__ import absolute_import
+import urllib
+
+from urlparse import urlparse, parse_qsl
+
 import tornado.web
 import tornado.auth
 
+from .. import settings
 from ..views import BaseHandler
 
 
@@ -10,7 +16,15 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
         if self.get_argument("openid.mode", None):
             self.get_authenticated_user(self.async_callback(self._on_auth))
             return
-        self.authenticate_redirect()
+
+        callback_uri = None
+        if settings.URL_PREFIX:
+            qs = dict(parse_qsl(urlparse(self.request.uri).query))
+            next = qs.get('next', '/')
+            callback_uri = self.absolute_url('/login')
+            callback_uri += '?' + urllib.urlencode(dict(next=next))
+
+        self.authenticate_redirect(callback_uri=callback_uri)
 
     def _on_auth(self, user):
         if not user:
@@ -21,7 +35,12 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
                     "add your email to flower --auth".format(**user))
 
         self.set_secure_cookie("user", str(user['email']))
-        self.redirect(self.get_argument('next', '/'))
+
+        next = self.get_argument('next', '/')
+        if settings.URL_PREFIX:
+            next = self.absolute_url(next)
+
+        self.redirect(next)
 
 
 class LogoutHandler(BaseHandler):

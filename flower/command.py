@@ -33,6 +33,7 @@ class FlowerCommand(Command):
         if options.url_prefix:
             prefix = options.url_prefix.strip('/')
             app_settings['static_url_prefix'] = '/{0}/static/'.format(prefix)
+            app_settings['login_url'] = '/{0}/login'.format(prefix)
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
 
