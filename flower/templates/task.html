@@ -10,7 +10,7 @@
       <div class="span12">
         <div class="page-header">
           <p id="taskid" class="hidden">{{ task.uuid }}</p>
-          <h2>{{ getattr(task, 'name') }}
+          <h2>{{ getattr(task, 'name', None) }}
             <small>{{ task.uuid }}</small>
             {% if task.state == "STARTED" %}
                 <button style="float: right" class="btn btn-danger" onclick="flower.on_task_terminate(event)">Terminate</button>
@@ -70,12 +70,12 @@
                   <td>{{ humanize(name) }}</td>
                   <td>
                     {% if name in ['received', 'started', 'succeeded', 'timestamp'] %}
-                    {{ humanize(getattr(task, name), type='time') }}
+                    {{ humanize(getattr(task, name, None), type='time') }}
                     {% elif name == 'worker' %}
                     <a
                         href="{{ absolute_url('/worker/' + task.worker.hostname) }}">{{ task.worker.hostname }}</a>
                     {% else %}
-                    {{ getattr(task, name) }}
+                    {{ getattr(task, name, None) }}
                     {% end %}
                   </td>
                 </tr>
