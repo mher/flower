@@ -79,7 +79,7 @@
                 </div>
               </div>
 
-              {% if worker.stats['autoscaler'] %}
+              {% if worker.stats.get('autoscaler', None) %}
                 <div class="row-fluid">
                     <div class="span6">
                         <table class="table table-bordered table-striped">
@@ -104,7 +104,7 @@
                 <table class="table table-bordered table-striped">
                   <caption>Broker options</caption>
                   <tbody>
-                    {% for name,value in worker.stats['consumer']['broker'].iteritems() %}
+                    {% for name,value in (worker.stats.get('consumer', None) or worker.stats)['broker'].iteritems() %}
                       <tr>
                         <td>{{ humanize(name) }}</td>
                         <td>{{ value }}</td>
