@@ -37,7 +37,7 @@ class WorkerPoolRestart(ControlHandler):
                                              arguments={'reload': False},
                                              destination=[workername],
                                              reply=True)
-        if 'ok' in response[0][workername]:
+        if response and 'ok' in response[0][workername]:
             self.write(dict(
                 message="Restarting '%s' worker's pool" % workername))
         else:
@@ -60,7 +60,7 @@ class WorkerPoolGrow(ControlHandler):
                                              arguments={'n': n},
                                              destination=[workername],
                                              reply=True)
-        if 'ok' in response[0][workername]:
+        if response and 'ok' in response[0][workername]:
             self.write(dict(message="Growing '%s' worker's pool" % workername))
         else:
             logging.error(response)
@@ -82,7 +82,7 @@ class WorkerPoolShrink(ControlHandler):
                                              arguments={'n': n},
                                              destination=[workername],
                                              reply=True)
-        if 'ok' in response[0][workername]:
+        if response and 'ok' in response[0][workername]:
             self.write(dict(
                 message="Shrinking '%s' worker's pool" % workername))
         else:
@@ -107,11 +107,11 @@ class WorkerPoolAutoscale(ControlHandler):
                         arguments={'min': min, 'max': max},
                         destination=[workername],
                         reply=True)
-        if 'ok' in response[0][workername]:
+        if response and 'ok' in response[0][workername]:
             self.write(dict(message="Autoscaling '%s' worker" % workername))
         else:
             logging.error(response)
-            error = response[0][workername]['error']
+            error = response[0][workername]['error'] if response else 'No response'
             self.set_status(403)
             self.write("Failed to autoscale '%s' worker: %s" %
                        (workername, error))
@@ -132,11 +132,11 @@ class WorkerQueueAddConsumer(ControlHandler):
                         arguments={'queue': queue},
                         destination=[workername],
                         reply=True)
-        if 'ok' in response[0][workername]:
+        if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
             logging.error(response)
-            error = response[0][workername]['error']
+            error = response[0][workername]['error'] if response else 'No response'
             self.set_status(403)
             self.write("Failed to add '%s' consumer to '%s' worker: %s" %
                        (queue, workername, error))
@@ -157,11 +157,11 @@ class WorkerQueueCancelConsumer(ControlHandler):
                         arguments={'queue': queue},
                         destination=[workername],
                         reply=True)
-        if 'ok' in response[0][workername]:
+        if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
             logging.error(response)
-            error = response[0][workername]['error']
+            error = response[0][workername]['error'] if response else 'No response'
             self.set_status(403)
             self.write("Failed to cancel '%s' consumer from '%s' worker: %s" %
                        (queue, workername, error))
@@ -194,13 +194,13 @@ class TaskTimout(ControlHandler):
         response = celery.control.time_limit(taskname, hard, soft,
                                              reply=True,
                                              destination=[workername])
-        if 'ok' in response[0][workername]:
+        if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
             logging.error(response)
+            error = response[0][workername]['error'] if response else 'No response'
             self.set_status(403)
-            self.write("Failed to set timeouts: '%s'" %
-                       response[0][workername]['error'])
+            self.write("Failed to set timeouts: '%s'" % error)
 
 
 class TaskRateLimit(ControlHandler):
@@ -219,10 +219,10 @@ class TaskRateLimit(ControlHandler):
                                               ratelimit,
                                               reply=True,
                                               destination=[workername])
-        if 'ok' in response[0][workername]:
+        if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
             logging.error(response)
+            error = response[0][workername]['error'] if response else 'No response'
             self.set_status(403)
-            self.write("Failed to set rate limit: '%s'" %
-                       response[0][workername]['error'])
+            self.write("Failed to set rate limit: '%s'" % error)
