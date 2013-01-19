@@ -34,9 +34,9 @@ class WorkerPoolRestart(ControlHandler):
 
         logging.info("Restarting '%s' worker's pool" % workername)
         response = celery.control.broadcast('pool_restart',
-                                             arguments={'reload': False},
-                                             destination=[workername],
-                                             reply=True)
+                                            arguments={'reload': False},
+                                            destination=[workername],
+                                            reply=True)
         if response and 'ok' in response[0][workername]:
             self.write(dict(
                 message="Restarting '%s' worker's pool" % workername))
@@ -57,9 +57,9 @@ class WorkerPoolGrow(ControlHandler):
 
         logging.info("Growing '%s' worker's pool by '%s'" % (workername, n))
         response = celery.control.broadcast('pool_grow',
-                                             arguments={'n': n},
-                                             destination=[workername],
-                                             reply=True)
+                                            arguments={'n': n},
+                                            destination=[workername],
+                                            reply=True)
         if response and 'ok' in response[0][workername]:
             self.write(dict(message="Growing '%s' worker's pool" % workername))
         else:
@@ -79,9 +79,9 @@ class WorkerPoolShrink(ControlHandler):
 
         logging.info("Shrinking '%s' worker's pool by '%s'" % (workername, n))
         response = celery.control.broadcast('pool_shrink',
-                                             arguments={'n': n},
-                                             destination=[workername],
-                                             reply=True)
+                                            arguments={'n': n},
+                                            destination=[workername],
+                                            reply=True)
         if response and 'ok' in response[0][workername]:
             self.write(dict(
                 message="Shrinking '%s' worker's pool" % workername))
@@ -104,14 +104,17 @@ class WorkerPoolAutoscale(ControlHandler):
         logging.info("Autoscaling '%s' worker by '%s'" %
                      (workername, (min, max)))
         response = celery.control.broadcast('autoscale',
-                        arguments={'min': min, 'max': max},
-                        destination=[workername],
-                        reply=True)
+                                            arguments={'min': min, 'max': max},
+                                            destination=[workername],
+                                            reply=True)
         if response and 'ok' in response[0][workername]:
             self.write(dict(message="Autoscaling '%s' worker" % workername))
         else:
             logging.error(response)
-            error = response[0][workername]['error'] if response else 'No response'
+            if response:
+                error = response[0][workername]['error']
+            else:
+                error = 'No response'
             self.set_status(403)
             self.write("Failed to autoscale '%s' worker: %s" %
                        (workername, error))
@@ -129,14 +132,17 @@ class WorkerQueueAddConsumer(ControlHandler):
         logging.info("Adding consumer '%s' to worker '%s'" %
                      (queue, workername))
         response = celery.control.broadcast('add_consumer',
-                        arguments={'queue': queue},
-                        destination=[workername],
-                        reply=True)
+                                            arguments={'queue': queue},
+                                            destination=[workername],
+                                            reply=True)
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
             logging.error(response)
-            error = response[0][workername]['error'] if response else 'No response'
+            if response:
+                error = response[0][workername]['error']
+            else:
+                error = 'No response'
             self.set_status(403)
             self.write("Failed to add '%s' consumer to '%s' worker: %s" %
                        (queue, workername, error))
@@ -154,14 +160,17 @@ class WorkerQueueCancelConsumer(ControlHandler):
         logging.info("Canceling consumer '%s' from worker '%s'" %
                      (queue, workername))
         response = celery.control.broadcast('cancel_consumer',
-                        arguments={'queue': queue},
-                        destination=[workername],
-                        reply=True)
+                                            arguments={'queue': queue},
+                                            destination=[workername],
+                                            reply=True)
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
             logging.error(response)
-            error = response[0][workername]['error'] if response else 'No response'
+            if response:
+                error = response[0][workername]['error']
+            else:
+                error = 'No response'
             self.set_status(403)
             self.write("Failed to cancel '%s' consumer from '%s' worker: %s" %
                        (queue, workername, error))
@@ -198,7 +207,10 @@ class TaskTimout(ControlHandler):
             self.write(dict(message=response[0][workername]['ok']))
         else:
             logging.error(response)
-            error = response[0][workername]['error'] if response else 'No response'
+            if response:
+                error = response[0][workername]['error']
+            else:
+                error = 'No response'
             self.set_status(403)
             self.write("Failed to set timeouts: '%s'" % error)
 
@@ -216,13 +228,16 @@ class TaskRateLimit(ControlHandler):
         logging.info("Setting '%s' rate limit for '%s' task" %
                      (ratelimit, taskname))
         response = celery.control.rate_limit(taskname,
-                                              ratelimit,
-                                              reply=True,
-                                              destination=[workername])
+                                             ratelimit,
+                                             reply=True,
+                                             destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
             logging.error(response)
-            error = response[0][workername]['error'] if response else 'No response'
+            if response:
+                error = response[0][workername]['error']
+            else:
+                error = 'No response'
             self.set_status(403)
             self.write("Failed to set rate limit: '%s'" % error)

@@ -25,8 +25,8 @@ class UpdateWorkers(websocket.WebSocketHandler):
         if not listeners:
             logging.debug('Starting a timer for dashboard updates')
             periodic_callback = periodic_callback or PeriodicCallback(
-                    partial(UpdateWorkers.on_update_time, app),
-                    PAGE_UPDATE_INTERVAL)
+                partial(UpdateWorkers.on_update_time, app),
+                PAGE_UPDATE_INTERVAL)
             periodic_callback.start()
         listeners.append(self)
 

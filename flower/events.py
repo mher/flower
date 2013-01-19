@@ -54,8 +54,8 @@ class Events(threading.Thread):
 
                 with self._celery_app.connection() as conn:
                     recv = EventReceiver(conn,
-                                handlers={"*": self.on_event},
-                                app=self._celery_app)
+                                         handlers={"*": self.on_event},
+                                         app=self._celery_app)
                     recv.capture(limit=None, timeout=None)
 
                 try_interval = 1

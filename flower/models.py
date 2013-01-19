@@ -24,13 +24,14 @@ class WorkersModel(BaseModel):
         for workername, stat in sorted(state.stats.iteritems()):
             pool = stat.get('pool') or {}
             self.workers[workername] = dict(
-                    status=(workername in state.ping),
-                    concurrency=pool.get('max-concurrency'),
-                    completed_tasks=sum(stat['total'].itervalues()),
-                    running_tasks=len(state.active_tasks.get(workername, [])),
-                    queues=map(lambda x: x['name'],
-                               state.active_queues.get(workername, [])),
-                    )
+                status=(workername in state.ping),
+                concurrency=pool.get('max-concurrency'),
+                completed_tasks=sum(stat['total'].itervalues()),
+                running_tasks=len(state.active_tasks.get(workername, [])),
+                queues=map(lambda x: x['name'],
+                           state.active_queues.get(
+                           workername, [])),
+            )
 
     @classmethod
     def get_latest(cls, app):
@@ -72,13 +73,13 @@ class WorkerModel(BaseModel):
 
     def __eq__(self, other):
         return self.name == other.name and self.stats == other.stats and\
-               self.active_tasks == other.active_tasks and\
-               self.active_queues == other.active_queues and\
-               self.revoked_tasks == other.revoked_tasks and\
-               self.registered_tasks == other.registered_tasks and\
-               self.scheduled_tasks == other.scheduled_tasks and\
-               self.reserved_tasks == other.reserved_tasks and\
-               self.conf == other.conf
+            self.active_tasks == other.active_tasks and\
+            self.active_queues == other.active_queues and\
+            self.revoked_tasks == other.revoked_tasks and\
+            self.registered_tasks == other.registered_tasks and\
+            self.scheduled_tasks == other.scheduled_tasks and\
+            self.reserved_tasks == other.reserved_tasks and\
+            self.conf == other.conf
 
 
 class TaskModel(BaseModel):

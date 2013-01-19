@@ -12,7 +12,7 @@ from flower.urls import handlers
 
 class Flower(tornado.web.Application):
     def __init__(self, celery_app=None, events=None, state=None,
-                       auth=None, io_loop=None, **kwargs):
+                 auth=None, io_loop=None, **kwargs):
         kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
         self.io_loop = io_loop or ioloop.IOLoop.instance()

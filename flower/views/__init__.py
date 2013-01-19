@@ -28,7 +28,7 @@ class BaseHandler(tornado.web.RequestHandler):
         if status_code == 404:
             message = None
             if 'exc_info' in kwargs and\
-                kwargs['exc_info'][0] == tornado.web.HTTPError:
+                    kwargs['exc_info'][0] == tornado.web.HTTPError:
                     message = kwargs['exc_info'][1].log_message
             self.render('404.html', message=message)
         elif status_code == 500:
@@ -42,7 +42,7 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             message = None
             if 'exc_info' in kwargs and\
-                kwargs['exc_info'][0] == tornado.web.HTTPError:
+                    kwargs['exc_info'][0] == tornado.web.HTTPError:
                     message = kwargs['exc_info'][1].log_message
                     self.set_header('Content-Type', 'text/plain')
                     self.write(message)

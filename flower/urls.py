@@ -3,14 +3,14 @@ from __future__ import absolute_import
 from tornado.web import StaticFileHandler
 
 from .views.workers import (
-        WorkersView,
-        WorkerView,
-        )
+    WorkersView,
+    WorkerView,
+)
 
 from .views.tasks import (
-        TaskView,
-        TasksView,
-        )
+    TaskView,
+    TasksView,
+)
 
 from .views import auth
 
@@ -20,14 +20,14 @@ from .api import tasks
 from .api import workers
 
 from .views.update import (
-        UpdateWorkers,
-        )
+    UpdateWorkers,
+)
 
 from .views.monitor import (
-        Monitor,
-        SucceededTaskMonitor,
-        FailedTaskMonitor,
-        )
+    Monitor,
+    SucceededTaskMonitor,
+    FailedTaskMonitor,
+)
 
 
 from .views.error import NotFoundErrorHandler
@@ -74,7 +74,7 @@ handlers = [
     (r"/monitor/failed-tasks", FailedTaskMonitor),
     # Static
     (r"/static/(.*)", StaticFileHandler,
-                        {"path": APP_SETTINGS['static_path']}),
+     {"path": APP_SETTINGS['static_path']}),
     # Auth
     (r"/login", auth.LoginHandler),
     (r"/logout", auth.LogoutHandler),

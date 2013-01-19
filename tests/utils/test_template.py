@@ -43,7 +43,7 @@ class TestHumanize(unittest.TestCase):
         self.assertEqual('2, 3', humanize([2, 3]))
         self.assertEqual('2, foo, 1.2', humanize([2, 'foo', 1.2]))
         self.assertEqual([None, None], humanize([None, None]))
-        self.assertEqual([4, {1:1}], humanize([4, {1:1}]))
+        self.assertEqual([4, {1: 1}], humanize([4, {1: 1}]))
 
     def test_time(self):
         self.assertEqual(1343911558.305793, humanize(1343911558.305793))

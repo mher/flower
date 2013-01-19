@@ -13,7 +13,8 @@ def humanize(obj, type=None, length=None):
     if obj is None:
         obj = ''
     elif type == 'time':
-        obj = datetime.fromtimestamp(float(obj)).strftime("%Y-%m-%d %H:%M:%S") if obj else '-'
+        obj = datetime.fromtimestamp(
+            float(obj)).strftime("%Y-%m-%d %H:%M:%S") if obj else '-'
     elif isinstance(obj, basestring) and not re.match(UUID_REGEX, obj):
         obj = obj.replace('-', ' ').replace('_', ' ')
         obj = re.sub('|'.join(KEYWORDS_UP),

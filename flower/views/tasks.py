@@ -38,10 +38,10 @@ class TasksView(BaseHandler):
         seen_task_types = TaskModel.seen_task_types(app)
 
         self.render("tasks.html", tasks=tasks,
-                                  task_types=seen_task_types,
-                                  all_states=celery.states.ALL_STATES,
-                                  workers=workers,
-                                  limit=limit,
-                                  worker=worker,
-                                  type=type,
-                                  state=state)
+                    task_types=seen_task_types,
+                    all_states=celery.states.ALL_STATES,
+                    workers=workers,
+                    limit=limit,
+                    worker=worker,
+                    type=type,
+                    state=state)

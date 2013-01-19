@@ -39,12 +39,12 @@ class State(threading.Thread):
         transport = self._celery_app.connection().transport.driver_type
         if transport not in ('amqp', 'redis', 'mongodb'):
             logging.error("Dashboard and worker management commands are "
-                    "not available for '%s' transport" % transport)
+                          "not available for '%s' transport" % transport)
             return
 
         if celery.__version__.rsplit('.', 1)[0] < '3.1':
             logging.warning("Configuration viewer is not available for "
-                "Celery versions prior to 3.1")
+                            "Celery versions prior to 3.1")
 
         timeout = settings.CELERY_INSPECT_TIMEOUT / 1000.0
         i = self._celery_app.control.inspect(timeout=timeout)

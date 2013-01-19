@@ -6,7 +6,7 @@ from paver.setuputils import setup
 PYCOMPILE_CACHES = ['*.pyc', '*$py.class']
 
 options(
-        sphinx=Bunch(builddir='.build'),
+    sphinx=Bunch(builddir='.build'),
 )
 
 

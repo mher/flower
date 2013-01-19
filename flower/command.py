@@ -16,9 +16,9 @@ define("address", default='', help="run on the given address", type=str)
 define("debug", default=False, help="run in debug mode", type=bool)
 define("inspect", default=True, help="inspect workers", type=bool)
 define("inspect_timeout", default=1000, type=float,
-        help="inspect timeout (in milliseconds)")
+       help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
-        help="comma separated list of emails to grant access")
+       help="comma separated list of emails to grant access")
 define("url_prefix", type=str, help="base url prefix")
 
 
@@ -40,7 +40,7 @@ class FlowerCommand(Command):
         flower = Flower(celery_app=self.app, auth=auth, **app_settings)
 
         logging.info('Visit me at http://%s:%s' %
-                (options.address or 'localhost', options.port))
+                    (options.address or 'localhost', options.port))
         logging.info('Broker: %s', self.app.connection().as_uri())
         logging.debug('Settings: %s' % pformat(app_settings))
 
