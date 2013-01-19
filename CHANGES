@@ -3,6 +3,12 @@ Celery Flower
 
 Here you can see the full list of changes between each release.
 
+Version 0.5
+-----------
+
+- --url_prefix option allows to deploy flower on non-root URLs
+- flower detects inactivity and stops inspecting workers
+
 Version 0.4
 -----------
 
