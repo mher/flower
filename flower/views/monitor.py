@@ -31,6 +31,27 @@ class SucceededTaskMonitor(BaseHandler):
         self.write(data)
 
 
+class TimeToCompletionMonitor(BaseHandler):
+    @web.authenticated
+    def get(self):
+        timestamp = float(self.get_argument('lastquery'))
+        state = self.application.events.state
+
+        total_time = 0
+        num_tasks = 0
+        for _, task in state.itertasks():
+            if timestamp < task.timestamp and task.state == states.SUCCESS:
+                if task.eta is None:
+                    diff = task.succeeded - task.received
+                    total_time += diff
+                    num_tasks += 1
+
+        result = {
+            "average_time": (total_time / num_tasks) if num_tasks > 0 else 0
+        }
+        self.write(result)
+
+
 class FailedTaskMonitor(BaseHandler):
     @web.authenticated
     def get(self):

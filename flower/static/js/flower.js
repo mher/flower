@@ -479,9 +479,11 @@ var flower = (function () {
         if ($(location).attr('pathname') === url_prefix() + '/monitor') {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
+                tts = current_unix_time(),
                 updateinterval = 3000,
                 succeeded_graph = null,
-                failed_graph = null;
+                failed_graph = null,
+                time_graph = null;
 
             $.ajax({
                 type: 'GET',
@@ -497,6 +499,25 @@ var flower = (function () {
                                      url_prefix() + '/monitor/succeeded-tasks',
                                      sts);
                         sts = current_unix_time();
+                    }, updateinterval);
+
+                },
+            });
+
+            $.ajax({
+                type: 'GET',
+                url: url_prefix() + '/monitor/task-completion-time',
+                data: {lastquery: current_unix_time()},
+                success: function (data) {
+                    time_graph = create_graph(data, '-time');
+                    time_graph.update();
+
+                    time_graph.series.setTimeInterval(updateinterval);
+                    setInterval(function () {
+                        update_graph(time_graph,
+                                     url_prefix() + '/monitor/task-completion-time',
+                                     tts);
+                        tts = current_unix_time();
                     }, updateinterval);
 
                 },
