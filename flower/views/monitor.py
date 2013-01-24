@@ -37,17 +37,19 @@ class TimeToCompletionMonitor(BaseHandler):
         timestamp = float(self.get_argument('lastquery'))
         state = self.application.events.state
 
-        total_time = 0
+        execute_time = 0
+        queue_time = 0
         num_tasks = 0
         for _, task in state.itertasks():
             if timestamp < task.timestamp and task.state == states.SUCCESS:
                 if task.eta is None:
-                    diff = task.succeeded - task.received
-                    total_time += diff
+                    queue_time += task.started - task.received
+                    execute_time += task.succeeded - task.started
                     num_tasks += 1
 
         result = {
-            "average_time": (total_time / num_tasks) if num_tasks > 0 else 0
+            "Time in queue": (queue_time / num_tasks) if num_tasks > 0 else 0,
+            "Execution time": (execute_time / num_tasks) if num_tasks > 0 else 0,
         }
         self.write(result)
 
