@@ -506,7 +506,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: url_prefix() + '/monitor/task-completion-time',
+                url: url_prefix() + '/monitor/completion-time',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     time_graph = create_graph(data, '-time');
@@ -515,7 +515,7 @@ var flower = (function () {
                     time_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(time_graph,
-                                     url_prefix() + '/monitor/task-completion-time',
+                                     url_prefix() + '/monitor/completion-time',
                                      tts);
                         tts = current_unix_time();
                     }, updateinterval);

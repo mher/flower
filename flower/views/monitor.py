@@ -42,14 +42,18 @@ class TimeToCompletionMonitor(BaseHandler):
         num_tasks = 0
         for _, task in state.itertasks():
             if timestamp < task.timestamp and task.state == states.SUCCESS:
+                # eta can make "time in queue" look really scary.
                 if task.eta is None:
                     queue_time += task.started - task.received
                     execute_time += task.succeeded - task.started
                     num_tasks += 1
 
+        avg_queue_time = (queue_time / num_tasks) if num_tasks > 0 else 0
+        avg_execution_time = (execute_time / num_tasks) if num_tasks > 0 else 0
+
         result = {
-            "Time in queue": (queue_time / num_tasks) if num_tasks > 0 else 0,
-            "Execution time": (execute_time / num_tasks) if num_tasks > 0 else 0,
+            "Time in queue": avg_queue_time,
+            "Execution time": avg_execution_time,
         }
         self.write(result)
 
