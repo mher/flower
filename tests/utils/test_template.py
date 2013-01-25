@@ -1,6 +1,6 @@
 import unittest
 
-from flower.utils.template import humanize
+from flower.utils.template import humanize, format_time
 
 
 class TestHumanize(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestHumanize(unittest.TestCase):
 
     def test_time(self):
         self.assertEqual(1343911558.305793, humanize(1343911558.305793))
-        self.assertEqual('2012-08-02 16:45:58',
+        self.assertEqual(format_time(1343911558.305793),
                          humanize(1343911558.305793, type='time'))
 
     def test_strings(self):
