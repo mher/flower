@@ -14,6 +14,10 @@ class MonitorTest(AsyncHTTPTestCase):
         r = self.get('/monitor/succeeded-tasks?lastquery=%s' % time.time())
         self.assertEqual(200, r.code)
 
+    def test_monitor_completion_time(self):
+        r = self.get('/monitor/completion-time?lastquery=%s' % time.time())
+        self.assertEqual(200, r.code)
+
     def test_monitor_failed_tasks(self):
         r = self.get('/monitor/failed-tasks?lastquery=%s' % time.time())
         self.assertEqual(200, r.code)
