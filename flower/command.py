@@ -11,6 +11,7 @@ from celery.bin.base import Command
 from . import settings
 from .app import Flower
 
+
 define("port", default=5555, help="run on the given port", type=int)
 define("address", default='', help="run on the given address", type=str)
 define("debug", default=False, help="run in debug mode", type=bool)
@@ -20,6 +21,8 @@ define("inspect_timeout", default=1000, type=float,
 define("auth", default='', type=str,
        help="comma separated list of emails to grant access")
 define("url_prefix", type=str, help="base url prefix")
+define("max_tasks", type=int, default=10000,
+       help="maximum number of tasks to keep in memory (default 10000)")
 
 
 class FlowerCommand(Command):
@@ -30,6 +33,7 @@ class FlowerCommand(Command):
         parse_command_line([prog_name] + argv)
         auth = map(str.strip, options.auth.split(',')) if options.auth else []
         app_settings['debug'] = options.debug
+
         if options.url_prefix:
             prefix = options.url_prefix.strip('/')
             app_settings['static_url_prefix'] = '/{0}/static/'.format(prefix)
@@ -37,7 +41,8 @@ class FlowerCommand(Command):
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
 
-        flower = Flower(celery_app=self.app, auth=auth, **app_settings)
+        flower = Flower(celery_app=self.app, auth=auth, options=options,
+                        **app_settings)
 
         logging.info('Visit me at http://%s:%s' %
                     (options.address or 'localhost', options.port))
@@ -45,8 +50,7 @@ class FlowerCommand(Command):
         logging.debug('Settings: %s' % pformat(app_settings))
 
         try:
-            flower.start(options.port, address=options.address,
-                         inspect=options.inspect)
+            flower.start()
         except (KeyboardInterrupt, SystemExit):
             pass
 

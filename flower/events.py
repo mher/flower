@@ -19,6 +19,10 @@ from .settings import CELERY_EVENTS_ENABLE_INTERVAL
 
 class EventsState(State):
     # EventsState object is created and accessed only from ioloop thread
+
+    def __init__(self, *args, **kwargs):
+        super(EventsState, self).__init__(*args, **kwargs)
+
     def event(self, event):
         # Send event to api subscribers (via websockets)
         classname = api.events.getClassName(event['type'])
@@ -32,13 +36,13 @@ class EventsState(State):
 
 class Events(threading.Thread):
 
-    def __init__(self, celery_app, io_loop=None):
+    def __init__(self, celery_app, io_loop=None, **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
         self._io_loop = io_loop or IOLoop.instance()
         self._celery_app = celery_app
-        self.state = EventsState()
+        self.state = EventsState(**kwargs)
         self._timer = PeriodicCallback(self.on_enable_events,
                                        CELERY_EVENTS_ENABLE_INTERVAL)
 
