@@ -21,6 +21,7 @@ class Flower(tornado.web.Application):
 
         self.celery_app = celery_app or celery.Celery()
         self.events = events or Events(celery_app, io_loop=self.io_loop,
+                                       events_store=options.events_store,
                                        max_tasks_in_memory=options.max_tasks)
         self.state = State(celery_app)
 
@@ -30,3 +31,6 @@ class Flower(tornado.web.Application):
             self.state.start()
         self.listen(self.options.port, address=self.options.address)
         self.io_loop.start()
+
+    def stop(self):
+        self.events.stop()

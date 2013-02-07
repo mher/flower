@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import atexit
 import logging
 
 from pprint import pformat
@@ -23,6 +24,8 @@ define("auth", default='', type=str,
 define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
+define("events_store", type=str, default=None,
+       help="save/load events to/from the given file")
 
 
 class FlowerCommand(Command):
@@ -43,6 +46,7 @@ class FlowerCommand(Command):
 
         flower = Flower(celery_app=self.app, auth=auth, options=options,
                         **app_settings)
+        atexit.register(flower.stop)
 
         logging.info('Visit me at http://%s:%s' %
                     (options.address or 'localhost', options.port))

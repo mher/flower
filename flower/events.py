@@ -1,7 +1,9 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
+import os
 import time
+import pickle
 import logging
 import threading
 
@@ -36,19 +38,31 @@ class EventsState(State):
 
 class Events(threading.Thread):
 
-    def __init__(self, celery_app, io_loop=None, **kwargs):
+    def __init__(self, celery_app, events_store=None, io_loop=None, **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
         self._io_loop = io_loop or IOLoop.instance()
         self._celery_app = celery_app
-        self.state = EventsState(**kwargs)
+        self._events_store = events_store
+        if events_store and os.path.exists(events_store):
+            logging.debug("Loading state from '%s'..." % events_store)
+            with open(events_store, 'rb') as f:
+                self.state = pickle.load(f)
+        else:
+            self.state = EventsState(**kwargs)
         self._timer = PeriodicCallback(self.on_enable_events,
                                        CELERY_EVENTS_ENABLE_INTERVAL)
 
     def start(self):
         threading.Thread.start(self)
         self._timer.start()
+
+    def stop(self):
+        if self._events_store:
+            logging.debug("Saving state to '%s'..." % self._events_store)
+            with open(self._events_store, 'wb') as f:
+                pickle.dump(self.state, f)
 
     def run(self):
         try_interval = 1
