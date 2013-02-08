@@ -4,6 +4,7 @@ from __future__ import with_statement
 import os
 import time
 import pickle
+import shelve
 import logging
 import threading
 
@@ -49,8 +50,9 @@ class Events(threading.Thread):
         self._persistent = persistent
         if persistent and os.path.exists(db):
             logging.debug("Loading state from '%s'..." % db)
-            with open(db, 'rb') as f:
-                self.state = pickle.load(f)
+            state = shelve.open(self._db)
+            self.state = state['events']
+            state.close()
         else:
             self.state = EventsState(**kwargs)
         self._timer = PeriodicCallback(self.on_enable_events,
@@ -63,8 +65,9 @@ class Events(threading.Thread):
     def stop(self):
         if self._persistent:
             logging.debug("Saving state to '%s'..." % self._db)
-            with open(self._db, 'wb') as f:
-                pickle.dump(self.state, f)
+            state = shelve.open(self._db)
+            state['events'] = self.state
+            state.close()
 
     def run(self):
         try_interval = 1
