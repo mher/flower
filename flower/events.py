@@ -38,16 +38,18 @@ class EventsState(State):
 
 class Events(threading.Thread):
 
-    def __init__(self, celery_app, events_store=None, io_loop=None, **kwargs):
+    def __init__(self, celery_app, db=None, persistent=False,
+                 io_loop=None, **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
         self._io_loop = io_loop or IOLoop.instance()
         self._celery_app = celery_app
-        self._events_store = events_store
-        if events_store and os.path.exists(events_store):
-            logging.debug("Loading state from '%s'..." % events_store)
-            with open(events_store, 'rb') as f:
+        self._db = db
+        self._persistent = persistent
+        if persistent and os.path.exists(db):
+            logging.debug("Loading state from '%s'..." % db)
+            with open(db, 'rb') as f:
                 self.state = pickle.load(f)
         else:
             self.state = EventsState(**kwargs)
@@ -59,9 +61,9 @@ class Events(threading.Thread):
         self._timer.start()
 
     def stop(self):
-        if self._events_store:
-            logging.debug("Saving state to '%s'..." % self._events_store)
-            with open(self._events_store, 'wb') as f:
+        if self._persistent:
+            logging.debug("Saving state to '%s'..." % self._db)
+            with open(self._db, 'wb') as f:
                 pickle.dump(self.state, f)
 
     def run(self):

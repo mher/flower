@@ -24,8 +24,8 @@ define("auth", default='', type=str,
 define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
-define("events_store", type=str, default=None,
-       help="save/load events to/from the given file")
+define("db", type=str, default='flower.db', help="flower database file")
+define("persistent", type=bool, default=False, help="enable persistent mode")
 
 
 class FlowerCommand(Command):
