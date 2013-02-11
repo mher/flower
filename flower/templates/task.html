@@ -74,8 +74,10 @@
                     {% elif name == 'worker' %}
                     <a
                         href="{{ absolute_url('/worker/' + task.worker.hostname) }}">{{ task.worker.hostname }}</a>
+                    {% elif name == 'traceback' %}
+                    <pre>{{ getattr(task, name, None) }}</pre>
                     {% else %}
-                    {{ getattr(task, name, None) }}
+                      {{ getattr(task, name, None) }}
                     {% end %}
                   </td>
                 </tr>
