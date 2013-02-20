@@ -99,7 +99,7 @@
     <tbody>
     {% for uuid, task in tasks %}
     <tr>
-      <td>{{ task.name }}</td>
+      <td>{{ getattr(task, 'name', None) }}</td>
       <td><a href="{{ absolute_url('/task/' + task.uuid) }}">{{ task.uuid }}</a></td>
       <td>
         {% if task.state == "SUCCESS" %}
