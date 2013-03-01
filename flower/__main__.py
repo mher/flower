@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 from flower.command import FlowerCommand
+from flower.utils import bugreport
 
 
 def main():
@@ -10,8 +11,7 @@ def main():
         flower.execute_from_commandline()
     except:
         import sys
-        import celery
-        print(celery.bugreport(), file=sys.stderr)
+        print(bugreport(), file=sys.stderr)
         raise
 
 

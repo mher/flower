@@ -5,11 +5,10 @@ import traceback
 
 from urlparse import urljoin
 
-import celery
 import tornado
 
 from .. import settings
-from ..utils import template
+from ..utils import template, bugreport
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -40,7 +39,7 @@ class BaseHandler(tornado.web.RequestHandler):
             self.render('error.html',
                         status_code=status_code,
                         error_trace=error_trace,
-                        bugreport=celery.bugreport())
+                        bugreport=bugreport())
         else:
             message = None
             if 'exc_info' in kwargs and\

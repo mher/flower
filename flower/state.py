@@ -36,8 +36,12 @@ class State(threading.Thread):
         self._confs = {}
 
     def run(self):
-        transport = self._celery_app.connection().transport.driver_type
-        if transport not in ('amqp', 'redis', 'mongodb'):
+        try:
+            transport = self._celery_app.connection().transport.driver_type
+        except AttributeError:
+            # Celery versions prior to 3 don't have driver_type
+            transport = None
+        if transport and transport not in ('amqp', 'redis', 'mongodb'):
             logging.error("Dashboard and worker management commands are "
                           "not available for '%s' transport" % transport)
             return

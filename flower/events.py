@@ -10,6 +10,8 @@ import threading
 
 from functools import partial
 
+import celery
+
 from tornado.ioloop import PeriodicCallback
 from tornado.ioloop import IOLoop
 
@@ -60,7 +62,9 @@ class Events(threading.Thread):
 
     def start(self):
         threading.Thread.start(self)
-        self._timer.start()
+        # Celery versions prior to 3 don't support enable_events
+        if celery.VERSION[0] > 2:
+            self._timer.start()
 
     def stop(self):
         if self._persistent:
