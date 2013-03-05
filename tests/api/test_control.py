@@ -97,10 +97,10 @@ class WorkerControlTests(AsyncHTTPTestCase):
             return_value=[{'test': {'ok': ''}}])
 
         r = self.post('/api/task/timeout/test',
-                      body={'hard-timeout': 3.1, 'soft-timeout': 1.2})
+                      body={'hard': 3.1, 'soft': 1.2})
         self.assertEqual(200, r.code)
         celery.control.time_limit.assert_called_once_with(
-            None, 3.1, 1.2, destination=['test'],
+            None, hard=3.1, soft=1.2, destination=['test'],
             reply=True)
 
     def test_task_ratelimit(self):

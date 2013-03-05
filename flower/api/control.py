@@ -194,14 +194,15 @@ class TaskTimout(ControlHandler):
         celery = self.application.celery_app
 
         taskname = self.get_argument('taskname', None)
-        hard = self.get_argument('hard-timeout', None)
-        soft = self.get_argument('soft-timeout', None)
+        hard = self.get_argument('hard', None)
+        soft = self.get_argument('soft', None)
         hard = hard and float(hard)
         soft = soft and float(soft)
 
-        logging.info("Setting timeouts for '%s' task" % taskname)
-        response = celery.control.time_limit(taskname, hard, soft,
-                                             reply=True,
+        logging.info("Setting timeouts for '%s' task (%s, %s)" %
+                (taskname, soft, hard))
+        response = celery.control.time_limit(taskname, reply=True,
+                                             hard=hard, soft=soft,
                                              destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))

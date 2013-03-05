@@ -221,18 +221,21 @@ var flower = (function () {
         var workername = $('#workername').text(),
             taskname = $(event.target).closest("tr").children("td:eq(0)").text(),
             type = $(event.target).html().toLowerCase(),
-            timeout = $(event.target).siblings().closest("input").val();
+            timeout = $(event.target).siblings().closest("input").val(),
+            data = {};
 
         taskname = taskname.split(' ')[0]; // removes [rate_limit=xxx]
+
+        console.log(type);
+
+        data.taskname = taskname;
+        data[type] = timeout;
 
         $.ajax({
             type: 'POST',
             url: url_prefix() + '/api/task/timeout/' + workername,
             dataType: 'json',
-            data: {
-                'taskname': taskname,
-                type: timeout,
-            },
+            data: data,
             success: function (data) {
                 show_success_alert(data.message);
             },
