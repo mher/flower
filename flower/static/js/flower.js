@@ -353,7 +353,6 @@ var flower = (function () {
         event.stopPropagation();
 
         $('#task-filter-form').each(function () {
-            $(this).find('INPUT:text').val('');
             $(this).find('SELECT').val('');
         });
 
