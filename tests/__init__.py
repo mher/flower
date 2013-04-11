@@ -16,9 +16,8 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
         celery_app = celery_app or celery.Celery()
         events = events or Events(celery_app)
         state = state or State(celery_app)
-        auth = ''
-        self.app = Flower(celery_app, events, state, auth,
-                          handlers, **APP_SETTINGS)
+        self.app = Flower(celery_app=celery_app, events=events,
+                          state=state, handlers=handlers, **APP_SETTINGS)
         return self.app
 
     def get(self, url, **kwargs):

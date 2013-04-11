@@ -21,6 +21,8 @@ define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
        help="comma separated list of emails to grant access")
+define("basic_auth", type=str, default=None,
+       help="colon separated user-password to enable basic auth")
 define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
@@ -46,9 +48,8 @@ class FlowerCommand(Command):
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
-
         flower = Flower(celery_app=self.app, auth=auth, options=options,
-                        **app_settings)
+                        basic_auth=options.basic_auth, **app_settings)
         atexit.register(flower.stop)
 
         logging.info('Visit me at http://%s:%s' %

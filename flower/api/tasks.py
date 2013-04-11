@@ -4,16 +4,17 @@ import logging
 
 from tornado import web
 from tornado.escape import json_decode
-from tornado.web import RequestHandler, HTTPError
+from tornado.web import HTTPError
 
 from celery import states
 from celery.result import AsyncResult
 from celery.backends.base import DisabledBackend
 
 from ..models import TaskModel
+from ..views import BaseHandler
 
 
-class BaseTaskHandler(RequestHandler):
+class BaseTaskHandler(BaseHandler):
     def get_task_args(self):
         options = json_decode(self.request.body)
         args = options.pop('args', [])
@@ -24,14 +25,8 @@ class BaseTaskHandler(RequestHandler):
     def backend_configured(result):
         return not isinstance(result.backend, DisabledBackend)
 
-    def get_current_user(self):
-        if not self.application.auth:
-            return True
-        user = self.get_secure_cookie('user')
-        if user and user in self.application.auth:
-            return user
-        else:
-            return None
+    def write_error(self, status_code, **kwargs):
+        self.set_status(status_code)
 
 
 class TaskAsyncApply(BaseTaskHandler):
