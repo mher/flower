@@ -121,3 +121,23 @@ class TaskModel(BaseModel):
 
     def __dir__(self):
         return self._fields
+
+
+class BrokerModel(BaseModel):
+    def __init__(self, app):
+        super(BrokerModel, self).__init__(app)
+
+    @property
+    def url(self):
+        return self.app.celery_app.connection().as_uri()
+
+    @property
+    def queues(self):
+        return self.app.state.broker_queues
+
+    @property
+    def info_available(self):
+        if self.app.celery_app.connection().transport == 'amqp' and\
+                not self.app.options.broker_api:
+            return False
+        return True

@@ -28,6 +28,8 @@ define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
 define("db", type=str, default='flower.db', help="flower database file")
 define("persistent", type=bool, default=False, help="enable persistent mode")
+define("broker_api", type=str, default=None,
+        help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
 
 
 class FlowerCommand(Command):

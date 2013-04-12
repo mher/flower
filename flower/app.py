@@ -26,7 +26,7 @@ class Flower(tornado.web.Application):
                                        persistent=options.persistent,
                                        io_loop=self.io_loop,
                                        max_tasks_in_memory=options.max_tasks)
-        self.state = State(celery_app)
+        self.state = State(celery_app, options.broker_api)
 
     def start(self):
         self.events.start()

@@ -12,6 +12,10 @@ from .views.tasks import (
     TasksView,
 )
 
+from .views.broker import (
+    BrokerView,
+)
+
 from .views import auth
 
 from .api import events
@@ -42,6 +46,7 @@ handlers = [
     (r"/worker/(.+)", WorkerView),
     (r"/task/(.+)", TaskView),
     (r"/tasks", TasksView),
+    (r"/broker", BrokerView),
     # Worker API
     (r"/api/workers", workers.ListWorkers),
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),

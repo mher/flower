@@ -11,14 +11,16 @@ from pprint import pformat
 import celery
 
 from . import settings
+from .utils.broker import Broker
 
 
 class State(threading.Thread):
 
-    def __init__(self, celery_app):
+    def __init__(self, celery_app, broker_api=None):
         threading.Thread.__init__(self)
         self.daemon = True
         self._celery_app = celery_app
+        self._broker_api = broker_api
 
         self._update_lock = threading.Lock()
         self._inspect = threading.Event()
@@ -34,6 +36,7 @@ class State(threading.Thread):
         self._ping = {}
         self._active_queues = {}
         self._confs = {}
+        self._broker_queues = []
 
     def run(self):
         try:
@@ -52,6 +55,15 @@ class State(threading.Thread):
 
         timeout = settings.CELERY_INSPECT_TIMEOUT / 1000.0
         i = self._celery_app.control.inspect(timeout=timeout)
+
+        broker = Broker(self._celery_app.connection().as_uri(),
+                        self._broker_api) if self._broker_api else None
+        if transport == 'amqp' and not self._broker_api:
+            logging.warning("Broker info is not available if --broker_api "
+                            "option is not configured. Also make sure "
+                            "RabbitMQ Management Plugin is enabled ("
+                            "rabbitmq-plugins enable rabbitmq_management)")
+
         try_interval = 1
         while True:
             try:
@@ -77,6 +89,13 @@ class State(threading.Thread):
                 conf = hasattr(i, 'conf') and i.conf()
                 logging.debug('Conf: %s' % pformat(conf))
 
+                try:
+                    broker_queues = broker.queues(self.active_queue_names) if self._broker_api else None
+                    logging.debug('Broker queues: %s' % pformat(broker_queues))
+                except Exception as e:
+                    broker_queues = []
+                    logging.error("Failed to inspect the broker: %s" % e)
+
                 with self._update_lock:
                     self._stats.update(stats or {})
                     self._registered_tasks = registered or {}
@@ -87,6 +106,7 @@ class State(threading.Thread):
                     self._ping = ping or {}
                     self._active_queues = active_queues or {}
                     self._conf = conf or {}
+                    self._broker_queues = broker_queues or []
 
                 try_interval = 1
 
@@ -117,8 +137,12 @@ class State(threading.Thread):
     def __getattr__(self, name):
         if name in ['stats', 'registered_tasks', 'scheduled_tasks',
                     'active_tasks', 'reserved_tasks', 'revoked_tasks',
-                    'ping', 'active_queues', 'conf']:
+                    'ping', 'active_queues', 'conf', 'broker_queues']:
             with self._update_lock:
                 self._last_access = time.time()
                 return copy.deepcopy(getattr(self, '_' + name))
         super(State, self).__getattr__(name)
+
+    @property
+    def active_queue_names(self):
+        return set(map(lambda x: x[0]['name'], self._active_queues.values()))
