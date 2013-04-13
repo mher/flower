@@ -6,6 +6,12 @@ Here you can see the full list of changes between each release.
 Version 0.5
 -----------
 
+- broker monitor for RabbitMQ and Redis
+- HTTP Basic Auth
+- flower state can be saved with --persistent option
+- database name can be changed with --db option
+- number of in-memory tasks can be limited with --max_tasks option
+- task runtime graph
 - --url_prefix option allows to deploy flower on non-root URLs
 - flower detects inactivity and stops inspecting workers
 
