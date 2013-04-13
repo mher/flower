@@ -26,7 +26,7 @@ Features
     - Revoke or terminate tasks
 
 - HTTP API
-- OpenID authentication
+- Basic Auth and Google OpenID authentication
 
 API
 ---
