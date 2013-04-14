@@ -20,7 +20,7 @@ define("inspect", default=True, help="inspect workers", type=bool)
 define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
-       help="comma separated list of emails to grant access")
+       help="regexp  of emails to grant access")
 define("basic_auth", type=str, default=None,
        help="colon separated user-password to enable basic auth")
 define("url_prefix", type=str, help="base url prefix")
@@ -38,7 +38,6 @@ class FlowerCommand(Command):
         app_settings = settings.APP_SETTINGS
         argv = filter(self.flower_option, argv)
         parse_command_line([prog_name] + argv)
-        auth = map(str.strip, options.auth.split(',')) if options.auth else []
         app_settings['debug'] = options.debug
 
         if options.url_prefix:

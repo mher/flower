@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import re
 import inspect
 import traceback
 
@@ -71,7 +72,7 @@ class BaseHandler(tornado.web.RequestHandler):
         if not self.application.auth:
             return True
         user = self.get_secure_cookie('user')
-        if user and user in self.application.auth:
+        if user and re.search(self.application.auth, user):
             return user
         else:
             return
