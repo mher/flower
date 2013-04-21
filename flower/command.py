@@ -49,8 +49,9 @@ class FlowerCommand(Command):
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
-        flower = Flower(celery_app=self.app, auth=options.auth, options=options,
-                        basic_auth=options.basic_auth, **app_settings)
+        flower = Flower(celery_app=self.app, auth=options.auth,
+                        options=options, basic_auth=options.basic_auth,
+                        **app_settings)
         atexit.register(flower.stop)
 
         logging.info('Visit me at http://%s:%s' %

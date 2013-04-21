@@ -3,7 +3,6 @@ from __future__ import with_statement
 
 import os
 import time
-import pickle
 import shelve
 import logging
 import threading

@@ -44,11 +44,11 @@ class Redis(BrokerBase):
 
         import redis
         self._redis = redis.Redis(host=host, port=port,
-                db=db, password=self.password)
+                                  db=db, password=self.password)
 
         def queues(self, names):
             return map(lambda x: dict(name=x, messages=self._redis.llen(x)),
-                    names)
+                       names)
 
 
 class Broker(object):
@@ -66,5 +66,7 @@ if __name__ == "__main__":
     import sys
     broker_url = sys.argv[1] if len(sys.argv) > 1 else 'amqp://'
     queue_name = sys.argv[2] if len(sys.argv) > 2 else 'celery'
-    broker = Broker(broker_url, broker_api_url='http://guest:guest@localhost:55672/api/')
+    broker_api_url = 'http://guest:guest@localhost:55672/api/'
+
+    broker = Broker(broker_url, broker_api_url=broker_api_url)
     print(broker.queues([queue_name]))
