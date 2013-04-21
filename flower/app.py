@@ -12,21 +12,22 @@ from flower.urls import handlers
 
 class Flower(tornado.web.Application):
     def __init__(self, celery_app=None, events=None, state=None,
-                 auth=None, basic_auth=None, io_loop=None, options={},
+                 auth=None, basic_auth=None, io_loop=None, options=None,
                  **kwargs):
         kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
         self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.auth = auth or []
         self.basic_auth = basic_auth
-        self.options = options
+        self.options = options or object()
+        self.broker_api = getattr(self.options, 'broker_api', None)
 
         self.celery_app = celery_app or celery.Celery()
         self.events = events or Events(celery_app, db=options.db,
                                        persistent=options.persistent,
                                        io_loop=self.io_loop,
                                        max_tasks_in_memory=options.max_tasks)
-        self.state = State(celery_app, options.broker_api)
+        self.state = State(celery_app, self.broker_api)
 
     def start(self):
         self.events.start()
