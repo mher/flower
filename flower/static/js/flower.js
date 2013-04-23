@@ -467,6 +467,11 @@ var flower = (function () {
             };
         }
 
+        //https://github.com/twitter/bootstrap/issues/1768
+        var shiftWindow = function() { scrollBy(0, -50) };
+        if (location.hash) shiftWindow();
+        window.addEventListener("hashchange", shiftWindow);
+
         // Make bootstrap tabs persistent
         $(document).ready(function () {
             if (location.hash !== '') {

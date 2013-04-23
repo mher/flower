@@ -52,7 +52,7 @@ class TimeToCompletionMonitor(BaseHandler):
         avg_execution_time = (execute_time / num_tasks) if num_tasks > 0 else 0
 
         result = {
-            "Time in queue": avg_queue_time,
+            "Time in a queue": avg_queue_time,
             "Execution time": avg_execution_time,
         }
         self.write(result)

@@ -7,12 +7,15 @@
 {% block container %}
 
 <div class="container-fluid">
-    <div class="row-fluid">
+    <a name="succeeded"></a>
+    <div class="row-fluid spacer">
         <div class="graph content">
-            <form class="side-panel">
-                <h3>Succeeded tasks</h3>
-                <section><div id="legend-succeeded" class="legend"></div></section>
-            </form>
+            <div class="span2">
+                <form class="side-panel">
+                    <a href="#succeeded"><h3>Succeeded tasks</h3></a>
+                    <section><div id="legend-succeeded" class="legend"></div></section>
+                </form>
+            </div>
             <div class="chart-container">
                 <div id="chart-succeeded" class="chart"></div>
                 <div id="timeline-succeeded" class="timeline"></div>
@@ -20,15 +23,31 @@
             </div>
         </div>
     </div>
-    <br/>
-    <br/>
-    <br/>
-    <div class="row-fluid">
+    <a name="failed"></a>
+    <div class="row-fluid spacer">
         <div class="graph content">
-            <form class="side-panel">
-                <h3>Task completion time</h3>
-                <section><div id="legend-time" class="legend"></div></section>
-            </form>
+            <div class="span2">
+                <form class="side-panel">
+                    <a href="#failed"><h3>Failed tasks</h3></a>
+                    <section><div id="legend-failed" class="legend"></div></section>
+                </form>
+            </div>
+            <div class="chart-container">
+                <div id="chart-failed" class="chart"></div>
+                <div id="timeline-failed" class="timeline"></div>
+                <div id="slider-failed" class="slider"></div>
+            </div>
+        </div>
+    </div>
+    <a name="times"></a>
+    <div class="row-fluid spacer">
+        <div class="graph content">
+            <div class="span2">
+                <form class="side-panel">
+                    <a href="#times"><h3>Task times</h3></a>
+                    <section><div id="legend-time" class="legend"></div></section>
+                </form>
+            </div>
             <div class="chart-container">
                 <div id="chart-time" class="chart"></div>
                 <div id="timeline-time" class="timeline"></div>

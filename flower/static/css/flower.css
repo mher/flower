@@ -120,3 +120,7 @@
 	margin: 0 7px;
 	cursor: pointer;
 }
+.spacer {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
