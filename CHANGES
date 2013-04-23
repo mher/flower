@@ -6,6 +6,8 @@ Here you can see the full list of changes between each release.
 Version 0.5
 -----------
 
+Released on Apr 23 2013
+
 - broker monitor for RabbitMQ and Redis
 - HTTP Basic Auth
 - --auth option accepts an email regexp
