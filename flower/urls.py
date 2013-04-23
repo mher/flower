@@ -32,6 +32,7 @@ from .views.monitor import (
     SucceededTaskMonitor,
     FailedTaskMonitor,
     TimeToCompletionMonitor,
+    BrokerMonitor,
 )
 
 
@@ -79,6 +80,7 @@ handlers = [
     (r"/monitor/succeeded-tasks", SucceededTaskMonitor),
     (r"/monitor/failed-tasks", FailedTaskMonitor),
     (r"/monitor/completion-time", TimeToCompletionMonitor),
+    (r"/monitor/broker", BrokerMonitor),
     # Static
     (r"/static/(.*)", StaticFileHandler,
      {"path": APP_SETTINGS['static_path']}),

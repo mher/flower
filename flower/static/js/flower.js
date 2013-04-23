@@ -485,7 +485,8 @@ var flower = (function () {
                 updateinterval = 3000,
                 succeeded_graph = null,
                 failed_graph = null,
-                time_graph = null;
+                time_graph = null,
+                broker_graph = null;
 
             $.ajax({
                 type: 'GET',
@@ -544,6 +545,21 @@ var flower = (function () {
                 },
             });
 
+            $.ajax({
+                type: 'GET',
+                url: url_prefix() + '/monitor/broker',
+                success: function (data) {
+                    broker_graph = create_graph(data, '-broker');
+                    broker_graph.update();
+
+                    broker_graph.series.setTimeInterval(updateinterval);
+                    setInterval(function () {
+                        update_graph(broker_graph,
+                                     url_prefix() + '/monitor/broker');
+                    }, updateinterval);
+
+                },
+            });
 
         }
 

@@ -73,3 +73,15 @@ class FailedTaskMonitor(BaseHandler):
                 data[worker] = 0
 
         self.write(data)
+
+
+class BrokerMonitor(BaseHandler):
+    @web.authenticated
+    def get(self):
+        state = self.application.state
+
+        data = defaultdict(int)
+        for queue in state.broker_queues:
+            data[queue['name']] = queue['messages']
+
+        self.write(data)
