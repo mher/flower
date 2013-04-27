@@ -15,6 +15,7 @@ class BrokerBase(object):
         self.host = purl.hostname
         self.port = purl.port
         self.vhost = purl.path[1:]
+        self.username = purl.username
         self.password = purl.password
 
     def queues(self, names):
@@ -27,7 +28,11 @@ class RabbitMQ(BrokerBase):
         self._broker_api_url = broker_api_url
 
     def queues(self, names):
-        r = requests.get(urljoin(self._broker_api_url, 'queues', self.vhost))
+        
+        broker_url = urljoin(self._broker_api_url, 'queues', self.vhost)
+        basic_auth = requests.auth.HTTPBasicAuth(self.username, self.password)
+        r = requests.get(broker_url, auth=basic_auth)
+
         if r.status_code == 200:
             info = r.json()
             return filter(lambda x: x['name'] in names, info)
