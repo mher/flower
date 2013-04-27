@@ -33,7 +33,6 @@ class RabbitMQ(BrokerBase):
         basic_auth = requests.auth.HTTPBasicAuth(self.username, self.password)
         r = requests.get(broker_url, auth=basic_auth)
 
-        print urljoin(self._broker_api_url, 'queues', self.vhost)
         if r.status_code == 200:
             info = r.json()
             return filter(lambda x: x['name'] in names, info)
