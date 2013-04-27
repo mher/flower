@@ -28,10 +28,12 @@ class RabbitMQ(BrokerBase):
         self._broker_api_url = broker_api_url
 
     def queues(self, names):
-        
-        broker_url = urljoin(self._broker_api_url, 'queues', self.vhost)
-        basic_auth = requests.auth.HTTPBasicAuth(self.username, self.password)
-        r = requests.get(broker_url, auth=basic_auth)
+        url = urljoin(self._broker_api_url, 'queues/' + self.vhost)
+        api_url = urlparse(self._broker_api_url)
+        username = api_url.username or self.username
+        password = api_url.password or self.password
+        auth = requests.auth.HTTPBasicAuth(username, password)
+        r = requests.get(url, auth=auth)
 
         if r.status_code == 200:
             info = r.json()
