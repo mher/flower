@@ -53,9 +53,9 @@ class Redis(BrokerBase):
         self._redis = redis.Redis(host=host, port=port,
                                   db=db, password=self.password)
 
-        def queues(self, names):
-            return map(lambda x: dict(name=x, messages=self._redis.llen(x)),
-                       names)
+    def queues(self, names):
+        return map(lambda x: dict(name=x, messages=self._redis.llen(x)),
+                   names)
 
 
 class Broker(object):
