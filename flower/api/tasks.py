@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import json
 import logging
 
 from tornado import web
@@ -53,15 +54,21 @@ class TaskResult(BaseTaskHandler):
         response = {'task-id': taskid, 'state': result.state}
         if result.ready():
             if result.state == states.FAILURE:
-                response.update({'result': repr(result.result),
+                response.update({'result': self.safe_result(result.result),
                                  'traceback': result.traceback})
             else:
-                response.update({'result': result.result})
+                response.update({'result': self.safe_result(result.result)})
+        self.write(response)
 
+    def safe_result(self, result):
+        "returns json encodable result"
         try:
-            self.write(response)
+            json.dumps(result)
         except TypeError:
-            self.write('Unable to json encode the task result: %s' % response)
+            return repr(result)
+        else:
+            return result
+
 
 
 class ListTasks(BaseTaskHandler):
