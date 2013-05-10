@@ -61,7 +61,7 @@ class TaskResult(BaseTaskHandler):
         try:
             self.write(response)
         except TypeError:
-            self.write('Unable to json encode the task result')
+            self.write('Unable to json encode the task result: %s' % response)
 
 
 class ListTasks(BaseTaskHandler):
