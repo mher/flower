@@ -25,6 +25,10 @@ Features
     - Configuration viewer
     - Revoke or terminate tasks
 
+- Broker monitoring
+    - View statistics for all Celery queues
+    - Queue length graphs
+
 - HTTP API
 - Basic Auth and Google OpenID authentication
 
