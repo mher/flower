@@ -677,6 +677,8 @@ table {
   text-align: left;
   vertical-align: top;
   border-top: 1px solid #c7ecb8;
+  word-break:break-word;
+  overflow:hidden;
 }
 .table th {
   font-weight: bold;
@@ -692,6 +694,11 @@ table {
 .table thead:first-child tr:first-child td {
   border-top: 0;
 }
+
+.table caption + thead tr td:first-child {
+    width: 20%;
+}
+
 .table tbody + tbody {
   border-top: 2px solid #c7ecb8;
 }

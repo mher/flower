@@ -90,6 +90,7 @@
     <tr>
       <th>Name</th>
       <th>UUID</th>
+      <th>Started</th>
       <th>State</th>
       <th>args</th>
       <th>kwargs</th>
@@ -101,6 +102,7 @@
     <tr>
       <td>{{ getattr(task, 'name', None) }}</td>
       <td><a href="{{ absolute_url('/task/' + task.uuid) }}">{{ task.uuid }}</a></td>
+      <td>{{ humanize(getattr(task, 'started', None), type='time') }}</td>
       <td>
         {% if task.state == "SUCCESS" %}
           <span class="label label-success">{{ task.state }}</span>
