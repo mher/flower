@@ -124,3 +124,10 @@
     margin-top: 20px;
     margin-bottom: 20px;
 }
+.span6 table {
+    table-layout:fixed;
+    word-wrap: break-word;
+}
+.span6 table caption + tbody tr td:first-child {
+    width: 25%;
+}
