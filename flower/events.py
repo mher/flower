@@ -92,6 +92,7 @@ class Events(threading.Thread):
                 logging.error("Failed to capture events: '%s', "
                               "trying again in %s seconds."
                               % (e, try_interval))
+                logging.debug(e, exc_info=True)
                 time.sleep(try_interval)
 
     def on_enable_events(self):

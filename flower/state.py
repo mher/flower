@@ -99,6 +99,7 @@ class State(threading.Thread):
                 except Exception as e:
                     broker_queues = []
                     logging.error("Failed to inspect the broker: %s" % e)
+                    logging.debug(e, exc_info=True)
 
                 with self._update_lock:
                     self._stats.update(stats or {})
@@ -125,6 +126,7 @@ class State(threading.Thread):
             except Exception as e:
                 logging.error("Failed to inspect workers: '%s', trying "
                               "again in %s seconds" % (e, try_interval))
+                logging.debug(e, exc_info=True)
                 time.sleep(try_interval)
 
     def pause(self):
