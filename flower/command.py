@@ -47,6 +47,9 @@ class FlowerCommand(Command):
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
 
+        if options.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
+
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
         flower = Flower(celery_app=self.app, options=options,
