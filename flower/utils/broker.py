@@ -1,12 +1,19 @@
 from __future__ import absolute_import
 
 import logging
-import requests
 
 from urlparse import urlparse, urljoin
 
+try:
+    import requests
+    logging.getLogger("requests").setLevel(logging.WARNING)
+except ImportError:
+    requests = None
 
-logging.getLogger("requests").setLevel(logging.WARNING)
+try:
+    import redis
+except ImportError:
+    redis = None
 
 
 class BrokerBase(object):
@@ -26,6 +33,9 @@ class RabbitMQ(BrokerBase):
     def __init__(self, broker_url, broker_api_url):
         super(RabbitMQ, self).__init__(broker_url)
         self._broker_api_url = broker_api_url
+
+        if not requests:
+            raise ImportError('requests library is required')
 
     def queues(self, names):
         url = urljoin(self._broker_api_url, 'queues/' + self.vhost)
@@ -49,7 +59,9 @@ class Redis(BrokerBase):
         port = self.port or 6379
         db = self.vhost or 0
 
-        import redis
+        if not redis:
+            raise ImportError('redis library is required')
+
         self._redis = redis.Redis(host=host, port=port,
                                   db=db, password=self.password)
 
