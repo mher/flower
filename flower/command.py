@@ -30,6 +30,8 @@ define("db", type=str, default='flower.db', help="flower database file")
 define("persistent", type=bool, default=False, help="enable persistent mode")
 define("broker_api", type=str, default=None,
         help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
+define("certfile", type=str, default=None, help="path to SSL certificate file")
+define("keyfile", type=str, default=None, help="path to SSL key file")
 
 
 class FlowerCommand(Command):
@@ -56,8 +58,9 @@ class FlowerCommand(Command):
                         **app_settings)
         atexit.register(flower.stop)
 
-        logging.info('Visit me at http://%s:%s' %
-                    (options.address or 'localhost', options.port))
+        logging.info('Visit me at http%s://%s:%s' %
+                    ('s' if flower.ssl else '', options.address or 'localhost',
+                     options.port))
         logging.info('Broker: %s', self.app.connection().as_uri())
         logging.debug('Settings: %s' % pformat(app_settings))
 

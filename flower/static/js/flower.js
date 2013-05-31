@@ -460,7 +460,8 @@ var flower = (function () {
     $(document).ready(function () {
         if ($.inArray($(location).attr('pathname'), [url_prefix(), url_prefix() + '/workers'])) {
             var host = $(location).attr('host'),
-                ws = new WebSocket("ws://" + host + url_prefix() + "/update-workers");
+                protocol = $(location).attr('protocol') == 'http:' ? 'ws://' : 'wss://',
+                ws = new WebSocket(protocol + host + url_prefix() + "/update-workers");
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
                 on_workers_table_update(update);

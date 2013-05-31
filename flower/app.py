@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import os
+
 import tornado.web
 from tornado import ioloop
 
@@ -20,6 +22,13 @@ class Flower(tornado.web.Application):
         self.auth = getattr(self.options, 'auth', [])
         self.basic_auth = getattr(self.options, 'basic_auth', None)
         self.broker_api = getattr(self.options, 'broker_api', None)
+        self.ssl = None
+        if self.options.certfile and self.options.keyfile:
+            cwd = os.environ.get('PWD') or os.getcwd()
+            self.ssl = {
+                'certfile': os.path.join(cwd, self.options.certfile),
+                'keyfile': os.path.join(cwd, self.options.keyfile),
+            }
 
         self.celery_app = celery_app or celery.Celery()
         self.events = events or Events(celery_app, db=options.db,
@@ -32,7 +41,8 @@ class Flower(tornado.web.Application):
         self.events.start()
         if self.options.inspect:
             self.state.start()
-        self.listen(self.options.port, address=self.options.address)
+        self.listen(self.options.port, address=self.options.address,
+                    ssl_options=self.ssl)
         self.io_loop.start()
 
     def stop(self):
