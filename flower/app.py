@@ -42,7 +42,7 @@ class Flower(tornado.web.Application):
         if self.options.inspect:
             self.state.start()
         self.listen(self.options.port, address=self.options.address,
-                    ssl_options=self.ssl)
+                    ssl_options=self.ssl, xheaders=self.options.xheaders)
         self.io_loop.start()
 
     def stop(self):
