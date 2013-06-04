@@ -32,7 +32,8 @@ define("broker_api", type=str, default=None,
         help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
 define("certfile", type=str, default=None, help="path to SSL certificate file")
 define("keyfile", type=str, default=None, help="path to SSL key file")
-define("xheaders", type=bool, default=False, help="enable  support the X-Real-Ip and X-Scheme headers.")
+define("xheaders", type=bool, default=False,
+       help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
 
 
 class FlowerCommand(Command):
