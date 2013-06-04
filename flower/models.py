@@ -89,8 +89,9 @@ class TaskModel(BaseModel):
         task = app.events.state.tasks[task_id]
 
         self._fields = task._defaults.keys()
-        for name, value in task.info(fields=self._fields).iteritems():
-            setattr(self, name, value)
+        for name in self._fields:
+            if hasattr(task, name):
+                setattr(self, name, getattr(task, name))
 
     @classmethod
     def get_task_by_id(cls, app, task_id):
