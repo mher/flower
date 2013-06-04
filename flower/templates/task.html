@@ -14,7 +14,7 @@
             <small>{{ task.uuid }}</small>
             {% if task.state == "STARTED" %}
                 <button style="float: right" class="btn btn-danger" onclick="flower.on_task_terminate(event)">Terminate</button>
-            {% elif task.state == "RECEIVED" %}
+            {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
                 <button  style="float: right" class="btn btn-danger" onclick="flower.on_task_revoke(event)">Revoke</button>
             {% end %}
           </h2>
