@@ -49,9 +49,9 @@ class State(threading.Thread):
                           "not available for '%s' transport" % transport)
             return
 
-        if celery.__version__.rsplit('.', 1)[0] < '3.1':
+        if celery.__version__.rsplit('.', 1)[0] < '3.0':
             logging.warning("Configuration viewer is not available for "
-                            "Celery versions prior to 3.1")
+                            "Celery versions prior to 3.0")
 
         timeout = settings.CELERY_INSPECT_TIMEOUT / 1000.0
         i = self._celery_app.control.inspect(timeout=timeout)
