@@ -3,6 +3,9 @@ Celery Flower
 
 Here you can see the full list of changes between each release.
 
+Version 0.6
+-----------
+
 - --debug option sets logging level to DEBUG
 - tasks in RETRY state can be revoked
 - UI improvements
