@@ -5,4 +5,4 @@ python:
 install:
   - pip install -r requirements.txt --use-mirrors
 script:
-  - python -m tests
+  - python -m tests.__main__
