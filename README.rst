@@ -1,6 +1,9 @@
 Celery Flower
 =============
 
+.. image:: https://travis-ci.org/mher/flower.png?branch=master
+        :target: https://travis-ci.org/mher/flower
+
 Flower is a web based tool for monitoring and administrating Celery clusters.
 
 Features
