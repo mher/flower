@@ -1,5 +1,3 @@
-import tornado.testing
-
 from mock import MagicMock
 
 from flower.api.control import ControlHandler
