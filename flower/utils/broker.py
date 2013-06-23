@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import sys
 import logging
 
 from urlparse import urlparse, urljoin
@@ -82,10 +83,12 @@ class Broker(object):
 
 
 if __name__ == "__main__":
-    import sys
     broker_url = sys.argv[1] if len(sys.argv) > 1 else 'amqp://'
     queue_name = sys.argv[2] if len(sys.argv) > 2 else 'celery'
-    broker_api_url = 'http://guest:guest@localhost:55672/api/'
+    if len(sys.argv) > 3:
+        broker_api_url = sys.argv[3]
+    else:
+        broker_api_url = 'http://guest:guest@localhost:55672/api/'
 
     broker = Broker(broker_url, broker_api_url=broker_api_url)
     print(broker.queues([queue_name]))
