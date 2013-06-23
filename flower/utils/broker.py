@@ -39,6 +39,8 @@ class RabbitMQ(BrokerBase):
             raise ImportError('requests library is required')
 
     def queues(self, names):
+        if not self._broker_api_url.endswith('/'):
+            self._broker_api_url += '/'
         url = urljoin(self._broker_api_url, 'queues/' + self.vhost)
         api_url = urlparse(self._broker_api_url)
         username = api_url.username or self.username
