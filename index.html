@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Flower by mher</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Flower</h1>
+        <p>Real-time monitor and web admin for Celery</p>
+
+        <p class="view"><a href="https://github.com/mher/flower">View the Project on GitHub <small>mher/flower</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/mher/flower/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mher/flower/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mher/flower">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>Flower is a web based tool for monitoring and administrating Celery clusters</p>
+
+<h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>
+<p>Real-time monitoring using Celery Events</p>
+
+<ul>
+<li>Task progress and history</li>
+<li>Ability to show task details (arguments, start time, runtime, and more)</li>
+<li>Graphs and statistics</li>
+</ul>
+</li>
+<li>
+<p>Remote Control</p>
+
+<ul>
+<li>View worker status and statistics</li>
+<li>Shutdown and restart worker instances</li>
+<li>Control worker pool size and autoscale settings</li>
+<li>View and modify the queues a worker instance consumes from</li>
+<li>View currently running tasks</li>
+<li>View scheduled tasks (ETA/countdown)</li>
+<li>View reserved and revoked tasks</li>
+<li>Apply time and rate limits</li>
+<li>Configuration viewer</li>
+<li>Revoke or terminate tasks</li>
+</ul>
+</li>
+<li>
+<p>Broker monitoring</p>
+
+<ul>
+<li>View statistics for all Celery queues</li>
+<li>Queue length graphs</li>
+</ul>
+</li>
+<li><p>HTTP API</p></li>
+<li><p>Basic Auth and Google OpenID authentication</p></li>
+</ul><h2>
+<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h2>
+
+<p>Flower API enables to manage the cluster via REST api, call tasks and receive task
+events in real-time via WebSockets.</p>
+
+<p>For example you can restart worker's pool by:</p>
+
+<pre><code>$ curl -X POST http://localhost:5555/api/worker/pool/restart/myworker
+</code></pre>
+
+<p>Or call a task by:</p>
+
+<pre><code>$ curl -X POST -d '{"args":[1,2]}' http://localhost:5555/api/task/async-apply/tasks.add
+</code></pre>
+
+<p>Or terminate executing task by:</p>
+
+<pre><code>$ curl -X POST -d 'terminate=True' http://localhost:5555/api/task/revoke/8a4da87b-e12b-4547-b89a-e92e4d1f8efd
+</code></pre>
+
+<p>Or receive task completion events in real-time:</p>
+
+<pre><code>var ws = new WebSocket('ws://localhost:5555/api/task/events/task-succeeded/');
+ws.onmessage = function (event) {
+    console.log(event.data);
+}
+</code></pre>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>To install, simply:</p>
+
+<pre><code>$ pip install flower
+</code></pre>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Launch the server and open http://localhost:5555:</p>
+
+<pre><code>$ celery flower --address=127.0.0.1 --port=5555
+</code></pre>
+
+<p>Broker URL and other configuration options can be passed through the standard Celery options:</p>
+
+<pre><code>$ celery flower --broker=amqp://guest:guest@localhost:5672//
+</code></pre>
+
+<h2>
+<a name="screenshots" class="anchor" href="#screenshots"><span class="octicon octicon-link"></span></a>Screenshots</h2>
+
+<p><img src="https://raw.github.com/mher/flower/master/docs/screenshots/dashboard.png" alt="Dashboard"></p>
+
+<p><img src="https://raw.github.com/mher/flower/master/docs/screenshots/pool.png" alt="Worker Pool"></p>
+
+<p><img src="https://raw.github.com/mher/flower/master/docs/screenshots/tasks.png" alt="Tasks"></p>
+
+<p><img src="https://raw.github.com/mher/flower/master/docs/screenshots/task.png" alt="Task"></p>
+
+<p><img src="https://raw.github.com/mher/flower/master/docs/screenshots/monitor.png" alt="Monitor"></p>
+
+<p><a href="https://github.com/mher/flower/tree/master/docs/screenshots">More screenshots</a></p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/mher">mher</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-42103143-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
