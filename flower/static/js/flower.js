@@ -457,6 +457,11 @@ var flower = (function () {
         return '';
     }
 
+    $.urlParam = function(name){
+        var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        return results[1] || 0;
+    }
+
     $(document).ready(function () {
         if ($.inArray($(location).attr('pathname'), [url_prefix(), url_prefix() + '/workers'])) {
             var host = $(location).attr('host'),
@@ -488,7 +493,7 @@ var flower = (function () {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
                 tts = current_unix_time(),
-                updateinterval = 3000,
+                updateinterval = parseInt($.urlParam('updateInterval')) || 3000,
                 succeeded_graph = null,
                 failed_graph = null,
                 time_graph = null,
