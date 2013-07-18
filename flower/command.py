@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import print_function
 
 import atexit
 import logging
@@ -10,6 +11,7 @@ from tornado.options import define, options, parse_command_line
 from celery.bin.base import Command
 
 from . import settings
+from . import __version__
 from .app import Flower
 
 
@@ -73,6 +75,11 @@ class FlowerCommand(Command):
 
     def handle_argv(self, prog_name, argv=None):
         return self.run_from_argv(prog_name, argv)
+
+    def early_version(self, argv):
+        if '--version' in argv:
+            print(__version__, file=self.stdout)
+            super(FlowerCommand, self).early_version(argv)
 
     @staticmethod
     def flower_option(arg):
