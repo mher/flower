@@ -38,7 +38,13 @@ class TaskAsyncApply(BaseTaskHandler):
         args, kwargs, options = self.get_task_args()
         logging.debug("Invoking task '%s' with '%s' and '%s'" %
                      (taskname, args, kwargs))
-        result = celery.send_task(taskname, args=args, kwargs=kwargs)
+
+        try:
+            task = celery.tasks[taskname]
+        except KeyError:
+            raise web.HTTPError(404, "Unknown task '%s'" % taskname)
+
+        result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if self.backend_configured(result):
             response.update(state=result.state)
@@ -68,7 +74,6 @@ class TaskResult(BaseTaskHandler):
             return repr(result)
         else:
             return result
-
 
 
 class ListTasks(BaseTaskHandler):
