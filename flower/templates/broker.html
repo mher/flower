@@ -26,7 +26,7 @@
       {% for queue in broker.queues %}
         <tr id="{{ url_escape(queue['name']) }}">
             <td>{{ queue['name'] }}</td>
-            <td>{{ queue['messages'] }}</td>
+            <td>{{ queue.get('messages', 'N/A') }}</td>
             <td>{{ queue.get('messages_unacknowledged', 'N/A') }}</td>
             <td>{{ queue.get('messages_ready', 'N/A') }}</td>
             <td>{{ queue.get('consumers', 'N/A') }}</td>
