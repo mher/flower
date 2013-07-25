@@ -17,7 +17,10 @@ from ..views import BaseHandler
 
 class BaseTaskHandler(BaseHandler):
     def get_task_args(self):
-        options = json_decode(self.request.body)
+        try:
+            options = json_decode(self.request.body)
+        except ValueError as e:
+            raise HTTPError(400, e)
         args = options.pop('args', [])
         kwargs = options.pop('kwargs', {})
         return args, kwargs, options
