@@ -20,9 +20,13 @@ class BaseTaskHandler(BaseHandler):
         try:
             options = json_decode(self.request.body)
         except ValueError as e:
-            raise HTTPError(400, e)
+            raise HTTPError(400, str(e))
         args = options.pop('args', [])
         kwargs = options.pop('kwargs', {})
+
+        if not isinstance(args, (list, tuple)):
+            raise HTTPError(400, 'args must be an array')
+
         return args, kwargs, options
 
     @staticmethod
