@@ -49,7 +49,7 @@ class State(threading.Thread):
                           "not available for '%s' transport" % transport)
             return
 
-        if celery.__version__.rsplit('.', 1)[0] < '3.0':
+        if celery.__version__ < '3.0.0':
             logging.warning("Configuration viewer is not available for "
                             "Celery versions prior to 3.0")
 
