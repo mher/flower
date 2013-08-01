@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import sys
+import urllib
 import logging
 
 from urlparse import urlparse, urljoin
@@ -22,7 +23,7 @@ class BrokerBase(object):
         purl = urlparse(broker_url)
         self.host = purl.hostname
         self.port = purl.port
-        self.vhost = purl.path[1:]
+        self.vhost = urllib.quote(purl.path[1:], '')
         self.username = purl.username
         self.password = purl.password
 
