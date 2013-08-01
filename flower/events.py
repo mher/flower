@@ -49,7 +49,13 @@ class Events(threading.Thread):
         self._celery_app = celery_app
         self._db = db
         self._persistent = persistent
-        if persistent and os.path.exists(db):
+
+        if self._persistent and celery.__version__ < '3.0.15':
+            logging.warning('Persistent mode is supported with '
+                            'Celery 3.0.15 and later')
+            self._persistent = False
+
+        if self._persistent and os.path.exists(db):
             logging.debug("Loading state from '%s'..." % db)
             state = shelve.open(self._db)
             self.state = state['events']
