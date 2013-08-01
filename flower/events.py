@@ -51,7 +51,7 @@ class Events(threading.Thread):
         self._persistent = persistent
 
         if self._persistent and celery.__version__ < '3.0.15':
-            logging.warning('Persistent mode is supported with '
+            logging.warning('Persistent mode is available with '
                             'Celery 3.0.15 and later')
             self._persistent = False
 
