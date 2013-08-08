@@ -1,6 +1,8 @@
 Celery Flower
 =============
 
+.. image:: https://badge.fury.io/py/flower.png
+        :target: http://badge.fury.io/py/flower
 .. image:: https://travis-ci.org/mher/flower.png?branch=master
         :target: https://travis-ci.org/mher/flower
 
