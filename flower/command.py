@@ -62,11 +62,12 @@ class FlowerCommand(Command):
                         **app_settings)
         atexit.register(flower.stop)
 
-        logging.info('Visit me at http%s://%s:%s' %
-                    ('s' if flower.ssl else '', options.address or 'localhost',
-                     options.port))
+        logging.info('Visit me at http%s://%s:%s',
+                     's' if flower.ssl else '',
+                     options.address or 'localhost',
+                     options.port)
         logging.info('Broker: %s', self.app.connection().as_uri())
-        logging.debug('Settings: %s' % pformat(app_settings))
+        logging.debug('Settings: %s', pformat(app_settings))
 
         try:
             flower.start()

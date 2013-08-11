@@ -43,8 +43,8 @@ class TaskAsyncApply(BaseTaskHandler):
         celery = self.application.celery_app
 
         args, kwargs, options = self.get_task_args()
-        logging.debug("Invoking task '%s' with '%s' and '%s'" %
-                     (taskname, args, kwargs))
+        logging.debug("Invoking task '%s' with '%s' and '%s'",
+                      taskname, args, kwargs)
 
         try:
             task = celery.tasks[taskname]
