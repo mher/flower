@@ -48,7 +48,7 @@ class UpdateWorkers(websocket.WebSocketHandler):
         changes = workers.workers
 
         if workers != cls.workers and changes:
-            logging.debug('Sending dashboard updates: %s' % pformat(changes))
+            logging.debug('Sending dashboard updates: %s', pformat(changes))
             for l in cls.listeners:
                 l.write_message(changes)
             cls.workers = workers
