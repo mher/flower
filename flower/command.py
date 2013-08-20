@@ -66,7 +66,7 @@ class FlowerCommand(Command):
 
         logging.info('Visit me at http%s://%s:%s',
                      's' if flower.ssl else '',
-                     options.address or 'localhost',
+                     options.address or 'localhost' if options.HOST == 'localhost' else options.HOST,
                      options.port)
         logging.info('Broker: %s', self.app.connection().as_uri())
         logging.debug('Settings: %s', pformat(app_settings))
