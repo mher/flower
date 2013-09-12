@@ -5,7 +5,7 @@ from mock import MagicMock
 from flower.utils import broker
 from flower.utils.broker import RabbitMQ, Redis, Broker
 
-broker.request = MagicMock()
+broker.requests = MagicMock()
 broker.redis = MagicMock()
 
 
