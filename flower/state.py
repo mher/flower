@@ -56,9 +56,13 @@ class State(threading.Thread):
         timeout = settings.CELERY_INSPECT_TIMEOUT / 1000.0
         i = self._celery_app.control.inspect(timeout=timeout)
 
-        broker = Broker(self._celery_app.connection().as_uri(
-                                                include_password=True),
-                        self._broker_api) if self._broker_api else None
+        burl = self._celery_app.connection().as_uri(include_password=True)
+        broker = None
+        if transport == 'amqp' and self._broker_api:
+            broker = Broker(burl, self._broker_api)
+        elif transport == 'redis':
+            broker = Broker(burl)
+
         if transport == 'amqp' and not self._broker_api:
             logging.warning("Broker info is not available if --broker_api "
                             "option is not configured. Also make sure "
@@ -91,7 +95,7 @@ class State(threading.Thread):
                 logging.debug('Conf: %s', pformat(conf))
 
                 try:
-                    if self._broker_api:
+                    if broker:
                         broker_queues = broker.queues(self.active_queue_names)
                     else:
                         broker_queues = None
