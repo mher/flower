@@ -1,6 +1,12 @@
 import unittest
 
+from mock import MagicMock
+
+from flower.utils import broker
 from flower.utils.broker import RabbitMQ, Redis, Broker
+
+broker.request = MagicMock()
+broker.redis = MagicMock()
 
 
 class TestRabbitMQ(unittest.TestCase):
