@@ -34,6 +34,13 @@ class BrokerBase(object):
 class RabbitMQ(BrokerBase):
     def __init__(self, broker_url, broker_api_url):
         super(RabbitMQ, self).__init__(broker_url)
+
+        self.host = self.host or 'localhost'
+        self.port = int(self.port or 5672)
+        self.vhost = self.vhost or '/'
+        self.username = self.username or 'guest'
+        self.password = self.password or 'guest'
+
         self._broker_api_url = broker_api_url
 
         if not requests:
@@ -59,15 +66,15 @@ class RabbitMQ(BrokerBase):
 class Redis(BrokerBase):
     def __init__(self, broker_url, *args, **kwargs):
         super(Redis, self).__init__(broker_url)
-        host = self.host or '127.0.0.1'
-        port = self.port or 6379
-        db = self.vhost or 0
+        self.host = self.host or 'localhost'
+        self.port = self.port or 6379
+        self.vhost = int(self.vhost or 0)
 
         if not redis:
             raise ImportError('redis library is required')
 
-        self._redis = redis.Redis(host=host, port=port,
-                                  db=db, password=self.password)
+        self._redis = redis.Redis(host=self.host, port=self.port,
+                                  db=self.vhost, password=self.password)
 
     def queues(self, names):
         return map(lambda x: dict(name=x, messages=self._redis.llen(x)),
