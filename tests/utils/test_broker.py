@@ -5,6 +5,12 @@ from mock import MagicMock
 from flower.utils import broker
 from flower.utils.broker import RabbitMQ, Redis, Broker
 
+
+# python 2.6 support
+if not hasattr(unittest.TestCase, 'assertIn'):
+    import unittest2 as unittest
+
+
 broker.requests = MagicMock()
 broker.redis = MagicMock()
 
