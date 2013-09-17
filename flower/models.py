@@ -29,7 +29,7 @@ class WorkersModel(BaseModel):
                 completed_tasks=sum(stat.get('total', {}).itervalues()),
                 running_tasks=len(state.active_tasks.get(workername, [])),
                 queues=map(lambda x: x['name'],
-                           filter(None, state.active_queues.get(workername, None))),
+                           filter(None, state.active_queues.get(workername, []))),
             )
 
     @classmethod
