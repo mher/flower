@@ -92,7 +92,10 @@ class Events(threading.Thread):
 
                 try_interval = 1
             except (KeyboardInterrupt, SystemExit):
-                import thread
+                try:
+                    import _thread as thread
+                except ImportError:
+                    import thread
                 thread.interrupt_main()
             except Exception as e:
                 logging.error("Failed to capture events: '%s', "

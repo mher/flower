@@ -42,7 +42,7 @@ class FlowerCommand(Command):
 
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
         app_settings = settings.APP_SETTINGS
-        argv = filter(self.flower_option, argv)
+        argv = list(filter(self.flower_option, argv))
         parse_command_line([prog_name] + argv)
         app_settings['debug'] = options.debug
 
