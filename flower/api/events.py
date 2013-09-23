@@ -33,5 +33,5 @@ for event in EVENTS:
             type(classname, (EventsApiHandler, ), {'listeners': []}))
 
 
-__all__ = map(getClassName, EVENTS)
+__all__ = list(map(getClassName, EVENTS))
 __all__.append(getClassName)

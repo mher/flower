@@ -29,7 +29,7 @@
                   <table class="table table-bordered table-striped">
                     <caption>Worker pool options</caption>
                     <tbody>
-                      {% for name,value in worker.stats['pool'].iteritems() %}
+                      {% for name,value in worker.stats['pool'].items() %}
                         <tr>
                           <td>{{ humanize(name) }}</td>
                           <td>{{ humanize(value) }}</td>
@@ -85,7 +85,7 @@
                         <table class="table table-bordered table-striped">
                             <caption>Autoscaler options</caption>
                             <tbody>
-                            {% for name,value in worker.stats['autoscaler'].iteritems() %}
+                            {% for name,value in worker.stats['autoscaler'].items() %}
                                 <tr>
                                 <td>{{ humanize(name) }}</td>
                                 <td>{{ humanize(value) }}</td>
@@ -104,7 +104,7 @@
                 <table class="table table-bordered table-striped">
                   <caption>Broker options</caption>
                   <tbody>
-                    {% for name,value in (worker.stats.get('consumer', None) or worker.stats)['broker'].iteritems() %}
+                    {% for name,value in (worker.stats.get('consumer', None) or worker.stats)['broker'].items() %}
                       <tr>
                         <td>{{ humanize(name) }}</td>
                         <td>{{ value }}</td>
@@ -167,7 +167,7 @@
               <h2>Processed <small>number of completed tasks</small></h2>
               <table class="table table-bordered table-striped">
                 <tbody>
-                  {% for name,value in worker.stats['total'].iteritems() %}
+                  {% for name,value in worker.stats['total'].items() %}
                     <tr>
                       <td>{{ name }}</td>
                       <td>{{ value }}</td>
@@ -317,7 +317,7 @@
               <table class="table table-bordered table-striped">
                 <caption>Configuration options</caption>
                 <tbody>
-                  {% for name,value in sorted(worker.conf.iteritems()) %}
+                  {% for name,value in sorted(worker.conf.items()) %}
                     {% if value is not None %}
                       <tr>
                         <td><a href="http://docs.celeryproject.org/en/latest/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>

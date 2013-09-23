@@ -4,7 +4,10 @@ import re
 import inspect
 import traceback
 
-from urlparse import urljoin
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 from base64 import b64decode
 
 import tornado
@@ -20,7 +23,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def render(self, *args, **kwargs):
         functions = inspect.getmembers(template, inspect.isfunction)
-        assert not set(map(lambda x: x[0], functions)) & set(kwargs.iterkeys())
+        assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
         kwargs.update(absolute_url=self.absolute_url)
         kwargs.update(url_prefix=settings.URL_PREFIX)

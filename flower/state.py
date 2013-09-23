@@ -125,7 +125,10 @@ class State(threading.Thread):
                 self._inspect.wait()
 
             except (KeyboardInterrupt, SystemExit):
-                import thread
+                try:
+                    import _thread as thread
+                except ImportError:
+                    import thread
                 thread.interrupt_main()
             except Exception as e:
                 logging.error("Failed to inspect workers: '%s', trying "

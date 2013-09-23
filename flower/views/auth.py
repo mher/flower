@@ -1,7 +1,10 @@
 from __future__ import absolute_import
-import urllib
 
-from urlparse import urlparse, parse_qsl
+try:
+    from urllib.parse import urlparse, parse_qsl, urlencode
+except ImportError:
+    from urlparse import urlparse, parse_qsl
+    from urllib import urlencode
 
 import re
 import tornado.web
@@ -23,7 +26,7 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
             qs = dict(parse_qsl(urlparse(self.request.uri).query))
             next = qs.get('next', '/')
             callback_uri = self.absolute_url('/login')
-            callback_uri += '?' + urllib.urlencode(dict(next=next))
+            callback_uri += '?' + urlencode(dict(next=next))
 
         self.authenticate_redirect(callback_uri=callback_uri)
 

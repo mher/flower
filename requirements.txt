@@ -1,4 +1,4 @@
+anyjson
 celery
 tornado
 mock
-unittest2
