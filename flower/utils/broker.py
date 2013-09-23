@@ -4,7 +4,11 @@ import sys
 import urllib
 import logging
 
-from urlparse import urlparse, urljoin
+try:
+    from urllib.parse import urlparse, urljoin, quote
+except ImportError:
+    from urlparse import urlparse, urljoin
+    from urllib import quote
 
 try:
     import requests
@@ -23,7 +27,7 @@ class BrokerBase(object):
         purl = urlparse(broker_url)
         self.host = purl.hostname
         self.port = purl.port
-        self.vhost = urllib.quote(purl.path[1:], '')
+        self.vhost = quote(purl.path[1:], '')
         self.username = purl.username
         self.password = purl.password
 
@@ -58,7 +62,7 @@ class RabbitMQ(BrokerBase):
 
         if r.status_code == 200:
             info = r.json()
-            return filter(lambda x: x['name'] in names, info)
+            return [x for x in info if x['name'] in names]
         else:
             r.raise_for_status()
 
@@ -77,8 +81,7 @@ class Redis(BrokerBase):
                                   db=self.vhost, password=self.password)
 
     def queues(self, names):
-        return map(lambda x: dict(name=x, messages=self._redis.llen(x)),
-                   names)
+        return [dict(name=x, messages=self._redis.llen(x)) for x in names]
 
 
 class Broker(object):

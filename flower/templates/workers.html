@@ -45,7 +45,7 @@
       </tr>
       </thead>
       <tbody>
-      {% for name,info in workers.iteritems() %}
+      {% for name,info in workers.items() %}
       <tr id="{{ url_escape(name) }}">
         <td class="is_selected"><input type="checkbox"></td>
         <td><a href="{{ absolute_url('worker/' + name) }}">{{ name }}</a></td>

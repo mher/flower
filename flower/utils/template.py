@@ -1,6 +1,15 @@
 from __future__ import absolute_import
 
 import re
+import sys
+
+PY2 = sys.version_info[0] == 2
+if not PY2:
+    text_type = str
+    string_types = (str,)
+else:
+    text_type = unicode
+    string_types = (str, unicode)
 
 from datetime import datetime
 
@@ -18,14 +27,14 @@ def humanize(obj, type=None, length=None):
         obj = ''
     elif type == 'time':
         obj = format_time(float(obj)) if obj else '-'
-    elif isinstance(obj, basestring) and not re.match(UUID_REGEX, obj):
+    elif isinstance(obj, string_types) and not re.match(UUID_REGEX, obj):
         obj = obj.replace('-', ' ').replace('_', ' ')
         obj = re.sub('|'.join(KEYWORDS_UP),
                      lambda m: m.group(0).upper(), obj)
         if obj and obj not in KEYWORDS_DOWN:
             obj = obj[0].upper() + obj[1:]
     elif isinstance(obj, list):
-        if all(map(lambda x: isinstance(x, (int, float, basestring)), obj)):
+        if all(isinstance(x, (int, float) + string_types) for x in obj):
             obj = ', '.join(map(str, obj))
     if length is not None and len(obj) > length:
         obj = obj[:length - 4] + ' ...'
