@@ -28,8 +28,8 @@ class BrokerBase(object):
         self.host = purl.hostname
         self.port = purl.port
         self.vhost = quote(purl.path[1:], '')
-        self.username = unquote(purl.username)
-        self.password = unquote(purl.password)
+        self.username = unquote(purl.username) if purl.username else purl.username
+        self.password = unquote(purl.password) if purl.password else purl.password
 
     def queues(self, names):
         raise NotImplementedError
@@ -55,8 +55,8 @@ class RabbitMQ(BrokerBase):
             self._broker_api_url += '/'
         url = urljoin(self._broker_api_url, 'queues/' + self.vhost)
         api_url = urlparse(self._broker_api_url)
-        username = unquote(api_url.username or self.username)
-        password = unquote(api_url.password or self.password)
+        username = unquote(api_url.username or '') or self.username
+        password = unquote(api_url.password or '') or self.password
         auth = requests.auth.HTTPBasicAuth(username, password)
         r = requests.get(url, auth=auth)
 
