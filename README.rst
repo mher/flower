@@ -65,6 +65,11 @@ Or receive task completion events in real-time: ::
         console.log(event.data);
     }
 
+
+See detailed API documentation here_.
+
+.. _here: http://nbviewer.ipython.org/urls/raw.github.com/tebeka/flower/master/docs/api.ipynb
+
 Installation
 ------------
 
