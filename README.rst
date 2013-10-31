@@ -68,7 +68,7 @@ Or receive task completion events in real-time: ::
 
 See detailed API documentation here_.
 
-.. _here: http://nbviewer.ipython.org/urls/raw.github.com/tebeka/flower/master/docs/api.ipynb
+.. _here: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
 Installation
 ------------
