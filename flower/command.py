@@ -3,6 +3,8 @@ from __future__ import print_function
 
 import atexit
 import logging
+import signal
+import sys
 
 from pprint import pformat
 
@@ -61,6 +63,12 @@ class FlowerCommand(Command):
         flower = Flower(celery_app=self.app, options=options,
                         **app_settings)
         atexit.register(flower.stop)
+
+        # graceful shutdown on SIGTERM
+        def signal_handler(signal, frame):
+            logging.info('SIGTERM detected, shutting down')
+            sys.exit(0)
+        signal.signal(signal.SIGTERM, signal_handler)
 
         logging.info('Visit me at http%s://%s:%s',
                      's' if flower.ssl else '',
