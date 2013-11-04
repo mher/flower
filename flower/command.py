@@ -3,6 +3,8 @@ from __future__ import print_function
 
 import atexit
 import logging
+import signal
+import sys
 
 from pprint import pformat
 
@@ -31,7 +33,7 @@ define("max_tasks", type=int, default=10000,
 define("db", type=str, default='flower.db', help="flower database file")
 define("persistent", type=bool, default=False, help="enable persistent mode")
 define("broker_api", type=str, default=None,
-        help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
+       help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
 define("certfile", type=str, default=None, help="path to SSL certificate file")
 define("keyfile", type=str, default=None, help="path to SSL key file")
 define("xheaders", type=bool, default=False,
@@ -61,6 +63,12 @@ class FlowerCommand(Command):
         flower = Flower(celery_app=self.app, options=options,
                         **app_settings)
         atexit.register(flower.stop)
+
+        # graceful shutdown on SIGTERM
+        def signal_handler(signal, frame):
+            logging.info('SIGTERM detected, shutting down')
+            sys.exit(0)
+        signal.signal(signal.SIGTERM, signal_handler)
 
         logging.info('Visit me at http%s://%s:%s',
                      's' if flower.ssl else '',
