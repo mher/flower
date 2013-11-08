@@ -121,3 +121,9 @@ Please head over to #celery IRC channel on irc.freenode.net or
 `open an issue`_.
 
 .. _open an issue: https://github.com/mher/flower/issues
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/mher/flower/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
