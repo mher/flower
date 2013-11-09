@@ -30,7 +30,7 @@ class TasksView(BaseHandler):
         try:
             limit = limit and int(limit)
         except ValueError:
-            limit = None
+            raise web.HTTPError(400, "Bad limit '%s'" % limit)
 
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
