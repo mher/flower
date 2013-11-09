@@ -27,7 +27,11 @@ class TasksView(BaseHandler):
         type = self.get_argument('type', None)
         state = self.get_argument('state', None)
 
-        limit = limit and int(limit)
+        try:
+            limit = limit and int(limit)
+        except ValueError:
+            raise web.HTTPError(400, "Bad limit '%s'" % limit)
+
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
