@@ -62,7 +62,7 @@ class WorkerPoolGrow(ControlHandler):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
         celery = self.application.celery_app
 
-        n = int(self.get_argument('n', 1))
+        n = self.get_argument('n', default=1, type=int)
 
         logging.info("Growing '%s' worker's pool by '%s'", workername, n)
         response = celery.control.broadcast('pool_grow',
@@ -85,7 +85,7 @@ class WorkerPoolShrink(ControlHandler):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
         celery = self.application.celery_app
 
-        n = int(self.get_argument('n', 1))
+        n = self.get_argument('n', default=1, type=int)
 
         logging.info("Shrinking '%s' worker's pool by '%s'", workername, n)
         response = celery.control.broadcast('pool_shrink',
@@ -109,8 +109,8 @@ class WorkerPoolAutoscale(ControlHandler):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
         celery = self.application.celery_app
 
-        min = int(self.get_argument('min'))
-        max = int(self.get_argument('max'))
+        min = self.get_argument('min', type=int)
+        max = self.get_argument('max', type=int)
 
         logging.info("Autoscaling '%s' worker by '%s'",
                      workername, (min, max))
@@ -180,7 +180,7 @@ class TaskRevoke(BaseHandler):
     def post(self, taskid):
         logging.info("Revoking task '%s'", taskid)
         celery = self.application.celery_app
-        terminate = bool(self.get_argument('terminate', False))
+        terminate = self.get_argument('terminate', default=False, type=bool)
         celery.control.revoke(taskid, terminate=terminate)
         self.write(dict(message="Revoked '%s'" % taskid))
 
@@ -192,11 +192,9 @@ class TaskTimout(ControlHandler):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
         celery = self.application.celery_app
 
-        taskname = self.get_argument('taskname', None)
-        hard = self.get_argument('hard', None)
-        soft = self.get_argument('soft', None)
-        hard = hard and float(hard)
-        soft = soft and float(soft)
+        taskname = self.get_argument('taskname', default=None)
+        hard = self.get_argument('hard', default=None, type=float)
+        soft = self.get_argument('soft', default=None, type=float)
 
         logging.info("Setting timeouts for '%s' task (%s, %s)",
                      taskname, soft, hard)
@@ -220,7 +218,7 @@ class TaskRateLimit(ControlHandler):
         celery = self.application.celery_app
 
         taskname = self.get_argument('taskname', None)
-        ratelimit = int(self.get_argument('ratelimit'))
+        ratelimit = self.get_argument('ratelimit', type=int)
 
         logging.info("Setting '%s' rate limit for '%s' task",
                      ratelimit, taskname)

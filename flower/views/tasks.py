@@ -22,15 +22,10 @@ class TasksView(BaseHandler):
     @web.authenticated
     def get(self):
         app = self.application
-        limit = self.get_argument('limit', None)
+        limit = self.get_argument('limit', default=None, type=int)
         worker = self.get_argument('worker', None)
         type = self.get_argument('type', None)
         state = self.get_argument('state', None)
-
-        try:
-            limit = limit and int(limit)
-        except ValueError:
-            raise web.HTTPError(400, "Bad limit '%s'" % limit)
 
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None

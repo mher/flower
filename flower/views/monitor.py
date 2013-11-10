@@ -17,7 +17,7 @@ class Monitor(BaseHandler):
 class SucceededTaskMonitor(BaseHandler):
     @web.authenticated
     def get(self):
-        timestamp = float(self.get_argument('lastquery'))
+        timestamp = self.get_argument('lastquery', type=float)
         state = self.application.events.state
 
         data = defaultdict(int)
@@ -34,7 +34,7 @@ class SucceededTaskMonitor(BaseHandler):
 class TimeToCompletionMonitor(BaseHandler):
     @web.authenticated
     def get(self):
-        timestamp = float(self.get_argument('lastquery'))
+        timestamp = self.get_argument('lastquery', type=float)
         state = self.application.events.state
 
         execute_time = 0
@@ -61,7 +61,7 @@ class TimeToCompletionMonitor(BaseHandler):
 class FailedTaskMonitor(BaseHandler):
     @web.authenticated
     def get(self):
-        timestamp = float(self.get_argument('lastquery'))
+        timestamp = self.get_argument('lastquery', type=float)
         state = self.application.events.state
 
         data = defaultdict(int)
