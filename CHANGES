@@ -6,6 +6,8 @@ Here you can see the full list of changes between each release.
 Version 0.6
 -----------
 
+Released on Nov 10 2013
+
 - Python 3 support
 - SSL support
 - new api docs
