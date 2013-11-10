@@ -48,7 +48,7 @@ class RabbitMQ(BrokerBase):
         self._broker_api_url = broker_api_url
 
         if not requests:
-            raise ImportError('requests library is required')
+            raise ImportError("'python-requests' library is required")
 
     def queues(self, names):
         if not self._broker_api_url.endswith('/'):

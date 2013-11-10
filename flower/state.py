@@ -58,10 +58,13 @@ class State(threading.Thread):
 
         burl = self._celery_app.connection().as_uri(include_password=True)
         broker = None
-        if transport == 'amqp' and self._broker_api:
-            broker = Broker(burl, self._broker_api)
-        elif transport == 'redis':
-            broker = Broker(burl)
+        try:
+            if transport == 'amqp' and self._broker_api:
+                broker = Broker(burl, self._broker_api)
+            elif transport == 'redis':
+                broker = Broker(burl)
+        except Exception as e:
+            logging.error("Unable to get broker info: %s" % e)
 
         if transport == 'amqp' and not self._broker_api:
             logging.warning("Broker info is not available if --broker_api "
