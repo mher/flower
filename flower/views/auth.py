@@ -34,9 +34,11 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleMixin):
         if not user:
             raise tornado.web.HTTPError(500, 'Google auth failed')
         if not re.match(self.application.auth, user['email']):
-            raise tornado.web.HTTPError(404, "Access denied to '{email}'. "
-                    "Please use another account or ask your admin to "
-                    "add your email to flower --auth".format(**user))
+            raise tornado.web.HTTPError(
+                404,
+                "Access denied to '{email}'. "
+                "Please use another account or ask your admin to "
+                "add your email to flower --auth".format(**user))
 
         self.set_secure_cookie("user", str(user['email']))
 

@@ -42,8 +42,8 @@ class WorkerControlTests(AsyncHTTPTestCase):
         r = self.post('/api/worker/pool/grow/test', body={'n': 3})
         self.assertEqual(200, r.code)
         celery.control.broadcast.assert_called_once_with(
-                'pool_grow',
-                reply=True, destination=['test'], arguments={'n': 3})
+            'pool_grow',
+            reply=True, destination=['test'], arguments={'n': 3})
 
     def test_pool_shrink(self):
         celery = self.app.celery_app
@@ -51,8 +51,8 @@ class WorkerControlTests(AsyncHTTPTestCase):
         r = self.post('/api/worker/pool/shrink/test', body={})
         self.assertEqual(200, r.code)
         celery.control.broadcast.assert_called_once_with(
-                'pool_shrink',
-                reply=True, destination=['test'], arguments={'n': 1})
+            'pool_shrink',
+            reply=True, destination=['test'], arguments={'n': 1})
 
     def test_pool_autoscale(self):
         celery = self.app.celery_app
@@ -61,9 +61,9 @@ class WorkerControlTests(AsyncHTTPTestCase):
                       body={'min': 2, 'max': 5})
         self.assertEqual(200, r.code)
         celery.control.broadcast.assert_called_once_with(
-                'autoscale',
-                reply=True, destination=['test'],
-                arguments={'min': 2, 'max': 5})
+            'autoscale',
+            reply=True, destination=['test'],
+            arguments={'min': 2, 'max': 5})
 
     def test_add_consumer(self):
         celery = self.app.celery_app
@@ -73,9 +73,9 @@ class WorkerControlTests(AsyncHTTPTestCase):
                       body={'queue': 'foo'})
         self.assertEqual(200, r.code)
         celery.control.broadcast.assert_called_once_with(
-                'add_consumer',
-                reply=True, destination=['test'],
-                arguments={'queue': 'foo'})
+            'add_consumer',
+            reply=True, destination=['test'],
+            arguments={'queue': 'foo'})
 
     def test_cancel_consumer(self):
         celery = self.app.celery_app
@@ -85,9 +85,9 @@ class WorkerControlTests(AsyncHTTPTestCase):
                       body={'queue': 'foo'})
         self.assertEqual(200, r.code)
         celery.control.broadcast.assert_called_once_with(
-                'cancel_consumer',
-                reply=True, destination=['test'],
-                arguments={'queue': 'foo'})
+            'cancel_consumer',
+            reply=True, destination=['test'],
+            arguments={'queue': 'foo'})
 
     def test_task_timeout(self):
         celery = self.app.celery_app

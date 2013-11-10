@@ -96,7 +96,8 @@ class BaseHandler(tornado.web.RequestHandler):
             except (ValueError, TypeError):
                 if arg is None and default is None:
                     return arg
-                raise tornado.web.HTTPError(400,
-                        "Invalid argument '%s' of type '%s'" %
-                        (arg, type.__name__))
+                raise tornado.web.HTTPError(
+                    400,
+                    "Invalid argument '%s' of type '%s'" % (
+                        arg, type.__name__))
         return arg

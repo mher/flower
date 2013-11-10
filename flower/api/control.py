@@ -51,8 +51,9 @@ class WorkerPoolRestart(ControlHandler):
         else:
             logging.error(response)
             self.set_status(403)
-            self.write("Failed to restart the '%s' pool: %s" %
-                    (workername, self.error_reason(workername, response)))
+            self.write("Failed to restart the '%s' pool: %s" % (
+                workername, self.error_reason(workername, response)
+            ))
 
 
 class WorkerPoolGrow(ControlHandler):
@@ -74,8 +75,9 @@ class WorkerPoolGrow(ControlHandler):
         else:
             logging.error(response)
             self.set_status(403)
-            self.write("Failed to grow '%s' worker's pool" %
-                    (workername, self.error_reason(workername, response)))
+            self.write("Failed to grow '%s' worker's pool" % (
+                workername, self.error_reason(workername, response)
+            ))
 
 
 class WorkerPoolShrink(ControlHandler):
@@ -98,8 +100,9 @@ class WorkerPoolShrink(ControlHandler):
         else:
             logging.error(response)
             self.set_status(403)
-            self.write("Failed to shrink '%s' worker's pool: %s" %
-                    (workername, self.error_reason(workername, response)))
+            self.write("Failed to shrink '%s' worker's pool: %s" % (
+                workername, self.error_reason(workername, response)
+            ))
 
 
 class WorkerPoolAutoscale(ControlHandler):
@@ -123,8 +126,9 @@ class WorkerPoolAutoscale(ControlHandler):
         else:
             logging.error(response)
             self.set_status(403)
-            self.write("Failed to autoscale '%s' worker: %s" %
-                    (workername, self.error_reason(workername, response)))
+            self.write("Failed to autoscale '%s' worker: %s" % (
+                workername, self.error_reason(workername, response)
+            ))
 
 
 class WorkerQueueAddConsumer(ControlHandler):
@@ -147,8 +151,9 @@ class WorkerQueueAddConsumer(ControlHandler):
         else:
             logging.error(response)
             self.set_status(403)
-            self.write("Failed to add '%s' consumer to '%s' worker: %s" %
-                    (workername, self.error_reason(workername, response)))
+            self.write("Failed to add '%s' consumer to '%s' worker: %s" % (
+                workername, self.error_reason(workername, response)
+            ))
 
 
 class WorkerQueueCancelConsumer(ControlHandler):
@@ -171,8 +176,10 @@ class WorkerQueueCancelConsumer(ControlHandler):
         else:
             logging.error(response)
             self.set_status(403)
-            self.write("Failed to cancel '%s' consumer from '%s' worker: %s" %
-                    (workername, self.error_reason(workername, response)))
+            self.write(
+                "Failed to cancel '%s' consumer from '%s' worker: %s" % (
+                    workername, self.error_reason(workername, response)
+                ))
 
 
 class TaskRevoke(BaseHandler):
@@ -207,7 +214,7 @@ class TaskTimout(ControlHandler):
             logging.error(response)
             self.set_status(403)
             self.write("Failed to set timeouts: '%s'" %
-                    self.error_reason(workername, response))
+                       self.error_reason(workername, response))
 
 
 class TaskRateLimit(ControlHandler):
@@ -232,4 +239,4 @@ class TaskRateLimit(ControlHandler):
             logging.error(response)
             self.set_status(403)
             self.write("Failed to set rate limit: '%s'" %
-                    self.error_reason(workername, response))
+                       self.error_reason(workername, response))

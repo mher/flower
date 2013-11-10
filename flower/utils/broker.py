@@ -27,8 +27,12 @@ class BrokerBase(object):
         self.host = purl.hostname
         self.port = purl.port
         self.vhost = quote(purl.path[1:], '')
-        self.username = unquote(purl.username) if purl.username else purl.username
-        self.password = unquote(purl.password) if purl.password else purl.password
+
+        username = purl.username
+        password = purl.password
+
+        self.username = unquote(username) if username else username
+        self.password = unquote(password) if password else password
 
     def queues(self, names):
         raise NotImplementedError
