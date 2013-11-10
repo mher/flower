@@ -87,3 +87,16 @@ class BaseHandler(tornado.web.RequestHandler):
         aurl = urljoin(base, url[1:] if url.startswith('/') else url)
         aurl = aurl[:-1] if aurl.endswith('/') else aurl
         return aurl
+
+    def get_argument(self, name, default=[], strip=True, type=None):
+        arg = super(BaseHandler, self).get_argument(name, default, strip)
+        if type is not None:
+            try:
+                arg = type(arg)
+            except (ValueError, TypeError):
+                if arg is None and default is None:
+                    return arg
+                raise tornado.web.HTTPError(400,
+                        "Invalid argument '%s' of type '%s'" %
+                        (arg, type.__name__))
+        return arg
