@@ -94,6 +94,8 @@
       <th>args</th>
       <th>kwargs</th>
       <th>Result</th>
+      <th>Received</th>
+      <th>Started</th>
     </tr>
     </thead>
     <tbody>
@@ -113,6 +115,8 @@
       <td>{{ humanize(task.args, length=20) }}</td>
       <td>{{ humanize(task.kwargs, length=20) }}</td>
       <td>{{ task.result }}</td>
+      <td>{{ humanize(task.received, type='time') }}</td>
+      <td>{{ humanize(task.started, type='time') }}</td>
     </tr>
     {% end %}
   </table>
