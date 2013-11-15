@@ -71,6 +71,8 @@ class TaskResult(BaseTaskHandler):
                                  'traceback': result.traceback})
             else:
                 response.update({'result': self.safe_result(result.result)})
+        else:
+            response.update({'meta': result.result})
         self.write(response)
 
     def safe_result(self, result):
