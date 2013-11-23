@@ -27,7 +27,8 @@ class UpdateWorkers(websocket.WebSocketHandler):
             periodic_callback = periodic_callback or PeriodicCallback(
                 partial(UpdateWorkers.on_update_time, app),
                 PAGE_UPDATE_INTERVAL)
-            periodic_callback.start()
+            if not periodic_callback._running:
+                periodic_callback.start()
         listeners.append(self)
 
     def on_message(self, message):
