@@ -61,7 +61,7 @@ handlers = [
     # Task API
     (r"/api/tasks", tasks.ListTasks),
     (r"/api/task/async-apply/(.+)", tasks.TaskAsyncApply),
-    (r"/api/task/send/(.+)", tasks.TaskSend),
+    (r"/api/task/send-task/(.+)", tasks.TaskSend),
     (r"/api/task/result/(.+)", tasks.TaskResult),
     (r"/api/task/timeout/(.+)", control.TaskTimout),
     (r"/api/task/rate-limit/(.+)", control.TaskRateLimit),
