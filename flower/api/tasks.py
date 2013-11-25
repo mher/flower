@@ -58,6 +58,21 @@ class TaskAsyncApply(BaseTaskHandler):
         self.write(response)
 
 
+class TaskSend(BaseTaskHandler):
+    @web.authenticated
+    def post(self, taskname):
+        celery = self.application.celery_app
+
+        args, kwargs, options = self.get_task_args()
+        logging.debug("Invoking task '%s' with '%s' and '%s'",
+                      taskname, args, kwargs)
+        result = celery.send_task(taskname, args=args, kwargs=kwargs)
+        response = {'task-id': result.task_id}
+        if self.backend_configured(result):
+            response.update(state=result.state)
+        self.write(response)
+
+
 class TaskResult(BaseTaskHandler):
     @web.authenticated
     def get(self, taskid):
