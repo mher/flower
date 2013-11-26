@@ -38,6 +38,7 @@ define("certfile", type=str, default=None, help="path to SSL certificate file")
 define("keyfile", type=str, default=None, help="path to SSL key file")
 define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
+define("host", type=str, default='localhost', help='set the host name that should be used for constructing URLs')
 
 
 class FlowerCommand(Command):
@@ -54,6 +55,7 @@ class FlowerCommand(Command):
             app_settings['login_url'] = '/{0}/login'.format(prefix)
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
+        settings.HOST = options.host
 
         if options.debug:
             logging.getLogger().setLevel(logging.DEBUG)
@@ -72,7 +74,7 @@ class FlowerCommand(Command):
 
         logging.info('Visit me at http%s://%s:%s',
                      's' if flower.ssl else '',
-                     options.address or 'localhost',
+                     options.address or 'localhost' if options.HOST == 'localhost' else options.HOST,
                      options.port)
         logging.info('Broker: %s', self.app.connection().as_uri())
         logging.debug('Settings: %s', pformat(app_settings))
