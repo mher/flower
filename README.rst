@@ -92,6 +92,14 @@ Broker URL and other configuration options can be passed through the standard Ce
 
     $ celery flower --broker=amqp://guest:guest@localhost:5672//
 
+Documentation
+-------------
+
+Documentation is available at `Github Wiki`_ and `IPython Notebook Viewer`_
+
+.. _Github Wiki: https://github.com/mher/flower/wiki
+.. _IPython Notebook Viewer: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
+
 Screenshots
 -----------
 
