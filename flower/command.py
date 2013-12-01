@@ -38,6 +38,7 @@ define("certfile", type=str, default=None, help="path to SSL certificate file")
 define("keyfile", type=str, default=None, help="path to SSL key file")
 define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
+define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 
 
 class FlowerCommand(Command):
@@ -54,6 +55,7 @@ class FlowerCommand(Command):
             app_settings['login_url'] = '/{0}/login'.format(prefix)
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
+        settings.AUTO_REFRESH = options.auto_refresh
 
         if options.debug:
             logging.getLogger().setLevel(logging.DEBUG)

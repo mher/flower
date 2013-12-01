@@ -8,8 +8,8 @@ from pprint import pformat
 from tornado import websocket
 from tornado.ioloop import PeriodicCallback
 
+from . import settings
 from ..models import WorkersModel
-from ..settings import PAGE_UPDATE_INTERVAL
 
 
 class UpdateWorkers(websocket.WebSocketHandler):
@@ -18,13 +18,17 @@ class UpdateWorkers(websocket.WebSocketHandler):
     workers = None
 
     def open(self):
+        if not settings.AUTO_REFRESH:
+            self.write_message({})
+            return
+
         app = self.application
 
         if not self.listeners:
             logging.debug('Starting a timer for dashboard updates')
             periodic_callback = self.periodic_callback or PeriodicCallback(
                 partial(UpdateWorkers.on_update_time, app),
-                PAGE_UPDATE_INTERVAL)
+                settings.PAGE_UPDATE_INTERVAL)
             if not periodic_callback._running:
                 periodic_callback.start()
         self.listeners.append(self)
@@ -33,7 +37,8 @@ class UpdateWorkers(websocket.WebSocketHandler):
         pass
 
     def on_close(self):
-        self.listeners.remove(self)
+        if self in self.listeners:
+            self.listeners.remove(self)
         if not self.listeners and self.periodic_callback:
             logging.debug('Stopping dashboard updates timer')
             self.periodic_callback.stop()
