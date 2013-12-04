@@ -325,6 +325,30 @@ var flower = (function () {
         });
     }
 
+    function on_task_requeue(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var taskname = $('#taskname').text();
+        var taskargs = $('#taskargs').text();
+        var taskkwargs = $('#taskkwargs').text();
+
+        $.ajax({
+            type: 'POST',
+            url: url_prefix() + '/api/task/async-apply/' + taskname,
+            dataType: 'json',
+            data: '{"args":' + taskargs + ', "kwargs":' + taskkwargs + '}',
+            success: function (data) {
+                var message = 'Requeued UUID: ' + data['task-id']
+                show_success_alert(message);
+            },
+            error: function (data) {
+                show_error_alert('Cannot enqueue task. In addition to broker, is Flower configured with correct ' +
+                    'Celery app/task config (e.g. --app or CELERY_APP)?');
+            }
+        });
+    }
+
     function on_task_terminate(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -859,6 +883,7 @@ var flower = (function () {
         on_task_timeout: on_task_timeout,
         on_task_rate_limit: on_task_rate_limit,
         on_cancel_task_filter: on_cancel_task_filter,
+        on_task_requeue: on_task_requeue,
         on_task_revoke: on_task_revoke,
         on_task_terminate: on_task_terminate,
     };

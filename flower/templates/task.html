@@ -16,6 +16,8 @@
                 <button style="float: right" class="btn btn-danger" onclick="flower.on_task_terminate(event)">Terminate</button>
             {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
                 <button  style="float: right" class="btn btn-danger" onclick="flower.on_task_revoke(event)">Revoke</button>
+            {% elif task.state == "FAILURE" %}
+                <button  style="float: right" class="btn btn-success" onclick="flower.on_task_requeue(event)">Requeue</button>
             {% end %}
           </h2>
         </div>
@@ -26,7 +28,7 @@
               <tbody>
               <tr>
                 <td>Name</td>
-                <td>{{ getattr(task, 'name', None) }}</td>
+                <td id="taskname">{{ getattr(task, 'name', None) }}</td>
               </tr>
               <tr>
                 <td>UUID</td>
@@ -46,11 +48,11 @@
               </tr>
               <tr>
                 <td>args</td>
-                <td>{{ task.args }}</td>
+                <td id="taskargs">{{ task.args }}</td>
               </tr>
               <tr>
                 <td>kwargs</td>
-                <td>{{ task.kwargs }}</td>
+                <td id="taskkwargs">{{ task.kwargs }}</td>
               </tr>
               <tr>
                 <td>Result</td>
