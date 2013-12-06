@@ -112,9 +112,6 @@ class ListTasks(BaseTaskHandler):
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
-        tasks = {}
-        for (id, task) in TaskModel.iter_tasks(app, limit=limit, type=type,
-                                               worker=worker, state=state):
-            tasks[id] = task
-
-        self.write(tasks)
+        self.write(dict(
+            TaskModel.iter_tasks(app, limit=limit, type=type,
+                                 worker=worker, state=state)))
