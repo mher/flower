@@ -19,7 +19,10 @@ UUID_REGEX = re.compile(r'^[\w]{8}(-[\w]{4}){3}-[\w]{12}$')
 
 
 def format_time(time):
-    return datetime.fromtimestamp(time).strftime("%Y-%m-%d %H:%M:%S")
+    dt = datetime.fromtimestamp(time)
+    return '%s.%s' % (
+        dt.strftime("%Y-%m-%d %H:%M:%S"), dt.microsecond)
+
 
 
 def humanize(obj, type=None, length=None):
