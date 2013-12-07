@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
+from celery.events.state import Task as _Task
 from celery.utils.compat import OrderedDict
 
 
@@ -83,21 +84,21 @@ class WorkerModel(BaseModel):
 
 class TaskModel(BaseModel):
     def __init__(self, app, task_id):
-        super(TaskModel, self).__init__(app)
+        self.uuid = task_id
 
-        task = app.events.state.tasks[task_id]
+    if hasattr(_Task, '_fields'):  # Old version
+        @classmethod
+        def get_task_by_id(cls, app, task_id):
+            return app.events.state.tasks.get(task_id)
+    else:
+        _fields = _Task._defaults.keys()
 
-        self._fields = task._defaults.keys()
-        for name in self._fields:
-            if hasattr(task, name):
-                setattr(self, name, getattr(task, name))
-
-    @classmethod
-    def get_task_by_id(cls, app, task_id):
-        try:
-            return TaskModel(app, task_id)
-        except KeyError:
-            return None
+        @classmethod
+        def get_task_by_id(cls, app, task_id):
+            task = app.events.state.tasks.get(task_id)
+            if task is not None:
+                task._fields = self._fields
+            return task
 
     @classmethod
     def iter_tasks(cls, app, limit=None, type=None, worker=None, state=None):

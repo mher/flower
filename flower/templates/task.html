@@ -64,7 +64,7 @@
             <table class="table table-bordered table-striped">
               <caption>Advanced task options</caption>
               <tbody>
-              {% for name in dir(task) %}
+              {% for name in task._fields %}
                 {% if name not in ['name', 'uuid', 'state', 'args', 'kwargs', 'result'] and getattr(task, name, None) is not None %}
                 <tr>
                   <td>{{ humanize(name) }}</td>
