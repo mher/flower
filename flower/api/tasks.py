@@ -66,7 +66,7 @@ class TaskSend(BaseTaskHandler):
         args, kwargs, options = self.get_task_args()
         logging.debug("Invoking task '%s' with '%s' and '%s'",
                       taskname, args, kwargs)
-        result = celery.send_task(taskname, args=args, kwargs=kwargs)
+        result = celery.send_task(taskname, args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if self.backend_configured(result):
             response.update(state=result.state)
