@@ -49,7 +49,7 @@ setup(
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=['celery', 'tornado'],
-    package_data={'flower': ['templates/*', 'static/**/*']},
+    package_data={'flower': ['templates/*', 'static/**/*', 'static/*.*']},
     entry_points={
         'console_scripts': [
             'flower = flower.__main__:main',
