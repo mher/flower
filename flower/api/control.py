@@ -225,7 +225,7 @@ class TaskRateLimit(ControlHandler):
         celery = self.application.celery_app
 
         taskname = self.get_argument('taskname', None)
-        ratelimit = self.get_argument('ratelimit', type=int)
+        ratelimit = self.get_argument('ratelimit')
 
         logging.info("Setting '%s' rate limit for '%s' task",
                      ratelimit, taskname)
