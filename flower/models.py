@@ -97,7 +97,7 @@ class TaskModel(BaseModel):
         def get_task_by_id(cls, app, task_id):
             task = app.events.state.tasks.get(task_id)
             if task is not None:
-                task._fields = self._fields
+                task._fields = cls._fields
             return task
 
     @classmethod
