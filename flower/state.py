@@ -161,4 +161,7 @@ class State(threading.Thread):
 
     @property
     def active_queue_names(self):
-        return set(map(lambda x: x[0]['name'], self._active_queues.values()))
+        queues = set([])
+        for q in self._active_queues.values():
+            queues.update(map(lambda x: x['name'], q))
+        return queues
