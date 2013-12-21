@@ -110,7 +110,18 @@ class WorkerControlTests(AsyncHTTPTestCase):
                       body={'taskname': 'foo', 'ratelimit': 20})
         self.assertEqual(200, r.code)
         celery.control.rate_limit.assert_called_once_with(
-            'foo', 20, destination=['test'], reply=True)
+            'foo', '20', destination=['test'], reply=True)
+
+    def test_task_ratelimit_non_integer(self):
+        celery = self.app.celery_app
+        celery.control.rate_limit = MagicMock(
+            return_value=[{'test': {'ok': ''}}])
+
+        r = self.post('/api/task/rate-limit/test',
+                      body={'taskname': 'foo', 'ratelimit': '11/m'})
+        self.assertEqual(200, r.code)
+        celery.control.rate_limit.assert_called_once_with(
+            'foo', '11/m', destination=['test'], reply=True)
 
 
 class TaskControlTests(AsyncHTTPTestCase):
