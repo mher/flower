@@ -36,6 +36,15 @@ class BaseTaskHandler(BaseHandler):
     def write_error(self, status_code, **kwargs):
         self.set_status(status_code)
 
+    def safe_result(self, result):
+        "returns json encodable result"
+        try:
+            json.dumps(result)
+        except TypeError:
+            return repr(result)
+        else:
+            return result
+
 
 class TaskAsyncApply(BaseTaskHandler):
     @web.authenticated
@@ -88,14 +97,24 @@ class TaskResult(BaseTaskHandler):
                 response.update({'result': self.safe_result(result.result)})
         self.write(response)
 
-    def safe_result(self, result):
-        "returns json encodable result"
+
+class TaskState(BaseTaskHandler):
+    @web.authenticated
+    def get(self, taskid):
+        app = self.application
         try:
-            json.dumps(result)
-        except TypeError:
-            return repr(result)
-        else:
-            return result
+            result = app.events.state.tasks[taskid]
+        except KeyError:
+            raise HTTPError(503)
+
+        response = {
+            'task-id': taskid,
+            'state': result.state,
+            'worker': self.safe_result(result.worker.hostname),
+            'name': self.safe_result(result.name),
+        }
+
+        self.write(response)
 
 
 class ListTasks(BaseTaskHandler):
