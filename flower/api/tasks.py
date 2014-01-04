@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import httplib
 import json
 import logging
 
@@ -115,3 +116,20 @@ class ListTasks(BaseTaskHandler):
         self.write(dict(
             TaskModel.iter_tasks(app, limit=limit, type=type,
                                  worker=worker, state=state)))
+
+
+class TaskInfo(BaseTaskHandler):
+    def get(self, task_id):
+        task = TaskModel.get_task_by_id(self.application, task_id)
+        if not task:
+            self.send_error(httplib.NOT_FOUND)
+            return
+
+        self.write({
+            'id': task.uuid,
+            'name': getattr(task, 'name', None),
+            'state': task.state,
+            'args': task.args,
+            'kw': task.kwargs,
+            'result': getattr(task, 'result', None),
+        })
