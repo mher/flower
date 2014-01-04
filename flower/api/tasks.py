@@ -105,7 +105,7 @@ class TaskState(BaseTaskHandler):
         try:
             task = app.events.state.tasks[taskid]
         except KeyError:
-            raise HTTPError(503)
+            raise HTTPError(404, "Unknown task '%s'" % taskid)
 
         response = {
             'task-id': taskid,
