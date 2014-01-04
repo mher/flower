@@ -103,15 +103,15 @@ class TaskState(BaseTaskHandler):
     def get(self, taskid):
         app = self.application
         try:
-            result = app.events.state.tasks[taskid]
+            task = app.events.state.tasks[taskid]
         except KeyError:
             raise HTTPError(503)
 
         response = {
             'task-id': taskid,
-            'state': result.state,
-            'worker': self.safe_result(result.worker.hostname),
-            'name': self.safe_result(result.name),
+            'state': task.state,
+            'worker': self.safe_result(task.worker.hostname),
+            'name': self.safe_result(task.name),
         }
 
         self.write(response)
