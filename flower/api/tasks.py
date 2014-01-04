@@ -58,7 +58,7 @@ class TaskAsyncApply(BaseTaskHandler):
         try:
             task = celery.tasks[taskname]
         except KeyError:
-            raise web.HTTPError(404, "Unknown task '%s'" % taskname)
+            raise HTTPError(404, "Unknown task '%s'" % taskname)
 
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
