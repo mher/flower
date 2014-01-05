@@ -98,25 +98,6 @@ class TaskResult(BaseTaskHandler):
         self.write(response)
 
 
-class TaskState(BaseTaskHandler):
-    @web.authenticated
-    def get(self, taskid):
-        app = self.application
-        try:
-            task = app.events.state.tasks[taskid]
-        except KeyError:
-            raise HTTPError(404, "Unknown task '%s'" % taskid)
-
-        response = {
-            'task-id': taskid,
-            'state': task.state,
-            'worker': self.safe_result(task.worker.hostname),
-            'name': self.safe_result(task.name),
-        }
-
-        self.write(response)
-
-
 class ListTasks(BaseTaskHandler):
     @web.authenticated
     def get(self):
