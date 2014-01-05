@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import httplib
 import json
 import logging
 
@@ -138,11 +137,10 @@ class ListTasks(BaseTaskHandler):
 
 
 class TaskInfo(BaseTaskHandler):
-    def get(self, task_id):
-        task = TaskModel.get_task_by_id(self.application, task_id)
+    def get(self, taskid):
+        task = TaskModel.get_task_by_id(self.application, taskid)
         if not task:
-            self.send_error(httplib.NOT_FOUND)
-            return
+            raise HTTPError(404, "Unknown task '%s'" % taskid)
 
         self.write({
             'task-id': task.uuid,
