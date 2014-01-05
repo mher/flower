@@ -149,4 +149,5 @@ class TaskInfo(BaseTaskHandler):
             'args': task.args,
             'kwargs': task.kwargs,
             'result': getattr(task, 'result', None),
+            'worker': task.worker.hostname,
         })
