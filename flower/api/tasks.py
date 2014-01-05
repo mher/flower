@@ -145,10 +145,10 @@ class TaskInfo(BaseTaskHandler):
             return
 
         self.write({
-            'id': task.uuid,
+            'task-id': task.uuid,
             'name': getattr(task, 'name', None),
             'state': task.state,
             'args': task.args,
-            'kw': task.kwargs,
+            'kwargs': task.kwargs,
             'result': getattr(task, 'result', None),
         })
