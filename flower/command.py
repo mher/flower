@@ -39,7 +39,7 @@ define("keyfile", type=str, default=None, help="path to SSL key file")
 define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
 define("auto_refresh", default=True, help="refresh dashboards", type=bool)
-
+define("cookie_secret", type=str, default=None, help="Cookie secret for secure secrets. Necessary for multi-server deployments of flower")
 
 class FlowerCommand(Command):
 
@@ -49,13 +49,16 @@ class FlowerCommand(Command):
         parse_command_line([prog_name] + argv)
         app_settings['debug'] = options.debug
 
+        if options.cookie_secret:
+            app_settings['cookie_secret'] = options.cookie_secret
+
         if options.url_prefix:
             prefix = options.url_prefix.strip('/')
             app_settings['static_url_prefix'] = '/{0}/static/'.format(prefix)
             app_settings['login_url'] = '/{0}/login'.format(prefix)
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
-        settings.AUTO_REFRESH = options.auto_refresh
+        settings.AUTO_REFRESH = options.auto_refresha
 
         if options.debug:
             logging.getLogger().setLevel(logging.DEBUG)
