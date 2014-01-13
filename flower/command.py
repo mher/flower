@@ -58,7 +58,7 @@ class FlowerCommand(Command):
             app_settings['login_url'] = '/{0}/login'.format(prefix)
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
-        settings.AUTO_REFRESH = options.auto_refresha
+        settings.AUTO_REFRESH = options.auto_refresh
 
         if options.debug:
             logging.getLogger().setLevel(logging.DEBUG)
