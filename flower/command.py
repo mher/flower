@@ -40,6 +40,7 @@ define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
 define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 define("cookie_secret", type=str, default=None, help="Cookie secret for secure secrets. Necessary for multi-server deployments of flower")
+define("force_https", type=bool, default=None, help="All internal links should always use https. Useful if running behind a reverse-proxy with https.")
 
 class FlowerCommand(Command):
 
@@ -59,6 +60,7 @@ class FlowerCommand(Command):
             settings.URL_PREFIX = prefix
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
         settings.AUTO_REFRESH = options.auto_refresh
+        settings.FORCE_HTTPS = options.force_https
 
         if options.debug:
             logging.getLogger().setLevel(logging.DEBUG)
