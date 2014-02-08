@@ -8,7 +8,8 @@ import sys
 
 from pprint import pformat
 
-from tornado.options import define, options, parse_command_line
+from tornado.options import define, options
+from tornado.options import parse_command_line, parse_config_file
 
 from celery.bin.base import Command
 
@@ -41,14 +42,19 @@ define("xheaders", type=bool, default=False,
 define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 define("cookie_secret", type=str, default=None, help="Cookie secret for secure secrets. Necessary for multi-server deployments of flower")
 
+
 class FlowerCommand(Command):
 
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
         app_settings = settings.APP_SETTINGS
         argv = list(filter(self.flower_option, argv))
+        try:
+            parse_config_file('flowerconfig.py', final=False)
+        except IOError:
+            pass
         parse_command_line([prog_name] + argv)
-        app_settings['debug'] = options.debug
 
+        app_settings['debug'] = options.debug
         if options.cookie_secret:
             app_settings['cookie_secret'] = options.cookie_secret
 
