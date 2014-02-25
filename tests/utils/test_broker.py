@@ -29,13 +29,23 @@ class TestRabbitMQ(unittest.TestCase):
         self.assertEqual('user', b.username)
         self.assertEqual('pass', b.password)
 
-    def test_url_defaults(self):
-        b = RabbitMQ('amqp://', '')
-        self.assertEqual('localhost', b.host)
-        self.assertEqual(5672, b.port)
-        self.assertEqual('/', b.vhost)
-        self.assertEqual('guest', b.username)
-        self.assertEqual('guest', b.password)
+    def test_url_defaults_rabbitmq(self):
+        for url in ['amqp://', 'amqp://localhost']:
+            b = RabbitMQ(url, '')
+            self.assertEqual('localhost', b.host)
+            self.assertEqual(5672, b.port)
+            self.assertEqual('/', b.vhost)
+            self.assertEqual('guest', b.username)
+            self.assertEqual('guest', b.password)
+
+    def test_url_defaults_redis(self):
+        for url in ['redis://', 'redis://localhost', 'redis://localhost/0']:
+            b = Redis(url, '')
+            self.assertEqual('localhost', b.host)
+            self.assertEqual(6379, b.port)
+            self.assertEqual(0, b.vhost)
+            self.assertEqual(None, b.username)
+            self.assertEqual(None, b.password)
 
 
 class TestRedis(unittest.TestCase):
