@@ -45,7 +45,7 @@ class RabbitMQ(BrokerBase):
 
         self.host = self.host or 'localhost'
         self.port = int(self.port or 5672)
-        self.vhost = quote(self.vhost or '/', '')
+        self.vhost = quote(self.vhost, '') or '/'
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
