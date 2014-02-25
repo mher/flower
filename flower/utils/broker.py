@@ -64,7 +64,10 @@ class RabbitMQ(BrokerBase):
         r = requests.get(url, auth=auth)
 
         if r.status_code == 200:
-            info = r.json()
+            try:
+                info = r.json()
+            except TypeError:
+                info = r.json
             return [x for x in info if x['name'] in names]
         else:
             r.raise_for_status()
