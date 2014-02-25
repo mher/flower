@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import sys
 import logging
+import numbers
 
 try:
     from urllib.parse import urlparse, urljoin, quote, unquote
@@ -26,7 +27,7 @@ class BrokerBase(object):
         purl = urlparse(broker_url)
         self.host = purl.hostname
         self.port = purl.port
-        self.vhost = quote(purl.path[1:], '')
+        self.vhost = purl.path[1:]
 
         username = purl.username
         password = purl.password
@@ -44,7 +45,7 @@ class RabbitMQ(BrokerBase):
 
         self.host = self.host or 'localhost'
         self.port = int(self.port or 5672)
-        self.vhost = self.vhost or '/'
+        self.vhost = quote(self.vhost or '/', '')
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
@@ -78,7 +79,7 @@ class Redis(BrokerBase):
         super(Redis, self).__init__(broker_url)
         self.host = self.host or 'localhost'
         self.port = self.port or 6379
-        self.vhost = int(self.vhost or 0)
+        self.vhost = self._prepare_virtual_host(self.vhost)
 
         if not redis:
             raise ImportError('redis library is required')
@@ -88,6 +89,21 @@ class Redis(BrokerBase):
 
     def queues(self, names):
         return [dict(name=x, messages=self._redis.llen(x)) for x in names]
+
+    def _prepare_virtual_host(self, vhost):
+        if not isinstance(vhost, numbers.Integral):
+            if not vhost or vhost == '/':
+                vhost = 0
+            elif vhost.startswith('/'):
+                vhost = vhost[1:]
+            try:
+                vhost = int(vhost)
+            except ValueError:
+                raise ValueError(
+                    'Database is int between 0 and limit - 1, not {0}'.format(
+                        vhost,
+                    ))
+        return vhost
 
 
 class Broker(object):
