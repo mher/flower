@@ -50,6 +50,7 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=['celery', 'tornado'],
     test_suite="tests",
+    tests_require=['mock'],
     package_data={'flower': ['templates/*', 'static/**/*', 'static/*.*']},
     entry_points={
         'console_scripts': [
