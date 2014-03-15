@@ -1,4 +1,9 @@
+include AUTHORS
+include CHANGES
+include LICENSE
 include MANIFEST.in
 include README.rst
+recursive-include docs *
 recursive-include flower/static *
 recursive-include flower/templates *
+recursive-include tests *
