@@ -133,3 +133,12 @@ Please head over to #celery IRC channel on irc.freenode.net or
 
 .. _open an issue: https://github.com/mher/flower/issues
 
+Contributing
+------------
+
+If you'd like to contribute, simply fork `the repository`_, commit your
+changes, run the tests (`python -m tests`) and send a pull request.
+Make sure you add yourself to AUTHORS_.
+
+.. _`the repository`: https://github.com/mher/flower
+.. _AUTHORS: https://github.com/mher/flower/blob/master/AUTHORS
