@@ -81,9 +81,12 @@ class BaseHandler(tornado.web.RequestHandler):
             return
 
     def absolute_url(self, url):
-        base = "{0}://{1}/".format(self.request.protocol, self.request.host)
         if settings.URL_PREFIX:
-            base += settings.URL_PREFIX + '/'
+            base = "{0}://{1}/{2}/".format(self.request.protocol,
+                                           self.request.host,
+                                           settings.URL_PREFIX)
+        else:
+            base = '/'
         aurl = urljoin(base, url[1:] if url.startswith('/') else url)
         aurl = aurl[:-1] if aurl.endswith('/') else aurl
         return aurl
