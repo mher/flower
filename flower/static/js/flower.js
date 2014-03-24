@@ -447,7 +447,7 @@ var flower = (function () {
 
     function current_unix_time() {
         var now = new Date()
-        return (new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()))/ 1000;
+        return (Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()))/ 1000;
     }
 
     function url_prefix() {
