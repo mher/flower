@@ -107,7 +107,7 @@ class TaskModel(BaseModel):
         for uuid, task in events_state.tasks_by_timestamp():
             if type and task.name != type:
                 continue
-            if worker and task.worker.hostname != worker:
+            if worker and task.worker and task.worker.hostname != worker:
                 continue
             if state and task.state != state:
                 continue
