@@ -75,10 +75,12 @@ class BaseHandler(tornado.web.RequestHandler):
         if not self.application.auth:
             return True
         user = self.get_secure_cookie('user')
-        if user and re.search(self.application.auth, user):
-            return user
-        else:
-            return
+        if user:
+            if not isinstance(user, str):
+                user = user.decode()
+            if re.search(self.application.auth, user):
+                return user
+        return None
 
     def absolute_url(self, url):
         if settings.URL_PREFIX:
