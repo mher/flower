@@ -21,6 +21,7 @@ class Flower(tornado.web.Application):
         self.options = options or object()
         self.auth = getattr(self.options, 'auth', [])
         self.basic_auth = getattr(self.options, 'basic_auth', None)
+        self.basic_auth_file = getattr(self.options, 'basic_auth_file', None)
         self.broker_api = getattr(self.options, 'broker_api', None)
         self.ssl = None
         if options and self.options.certfile and self.options.keyfile:

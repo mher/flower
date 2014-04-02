@@ -61,12 +61,19 @@ class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         # Basic Auth
         basic_auth = self.application.basic_auth
-        if basic_auth:
+        basic_auth_file = self.application.basic_auth_file
+        if basic_auth or basic_auth_file:
             auth_header = self.request.headers.get("Authorization", "")
             try:
                 basic, credentials = auth_header.split()
                 credentials = b64decode(credentials.encode()).decode()
-                if basic != 'Basic' or credentials != basic_auth:
+                basic_auth_list = []
+                if basic_auth_file:
+                    with open(basic_auth_file) as f:
+                        basic_auth_list = [x.strip("\r\n") for x in f.readlines()]
+                if basic_auth:
+                    basic_auth_list.append(basic_auth)
+                if basic != 'Basic' or credentials not in basic_auth_list:
                     raise tornado.web.HTTPError(401)
             except ValueError:
                 raise tornado.web.HTTPError(401)
