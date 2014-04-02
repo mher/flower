@@ -28,6 +28,8 @@ define("auth", default='', type=str,
        help="regexp  of emails to grant access")
 define("basic_auth", type=str, default=None,
        help="colon separated user-password to enable basic auth")
+define("basic_auth_file", type=str, default=None,
+       help="file containing colon separated user-password (one per line) to enable basic auth")
 define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
