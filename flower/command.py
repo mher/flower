@@ -26,7 +26,7 @@ define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
        help="regexp  of emails to grant access")
-define("basic_auth", type=str, default=None,
+define("basic_auth", type=str, default=None, multiple=True,
        help="colon separated user-password to enable basic auth")
 define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,

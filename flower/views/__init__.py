@@ -66,7 +66,7 @@ class BaseHandler(tornado.web.RequestHandler):
             try:
                 basic, credentials = auth_header.split()
                 credentials = b64decode(credentials.encode()).decode()
-                if basic != 'Basic' or credentials != basic_auth:
+                if basic != 'Basic' or credentials not in basic_auth:
                     raise tornado.web.HTTPError(401)
             except ValueError:
                 raise tornado.web.HTTPError(401)
