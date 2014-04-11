@@ -10,7 +10,7 @@ Or, with `easy_install <http://pypi.python.org/pypi/setuptools>`_ ::
     $ pip install flower
 
 Usage
-=====
+-----
 
 Launch the server and open http://localhost:5555: ::
 
