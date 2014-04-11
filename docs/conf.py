@@ -33,6 +33,7 @@ import flower
 # ones.
 extensions = [
     'sphinx.ext.intersphinx',
+    'sphinxcontrib.fulltoc',
 ]
 
 templates_path = ['_templates']
