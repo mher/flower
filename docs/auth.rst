@@ -17,6 +17,8 @@ this argument: ::
 
     $ celery flower --basic_auth=user1:password1,user2:password2
 
+See also :ref:`reverse-proxy`
+
 Google OpenID
 -------------
 

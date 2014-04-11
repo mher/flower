@@ -1,3 +1,5 @@
+.. _reverse-proxy:
+
 Running behind reverse proxy
 ============================
 
