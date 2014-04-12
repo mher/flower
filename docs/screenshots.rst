@@ -35,7 +35,7 @@ Worker info:
 .. image:: screenshots/queues.png
    :width: 100%
 
-Task info
+Task info:
 
 .. image:: screenshots/task.png
    :width: 100%
