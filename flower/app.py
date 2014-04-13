@@ -18,7 +18,7 @@ class Flower(tornado.web.Application):
         kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
         self.io_loop = io_loop or ioloop.IOLoop.instance()
-        self.options = options or object()
+        self.options = options or {}
         self.auth = getattr(self.options, 'auth', [])
         self.basic_auth = getattr(self.options, 'basic_auth', None)
         self.broker_api = getattr(self.options, 'broker_api', None)
@@ -31,10 +31,13 @@ class Flower(tornado.web.Application):
             }
 
         self.celery_app = celery_app or celery.Celery()
-        self.events = events or Events(celery_app, db=options.db,
-                                       persistent=options.persistent,
+        db = options.db if options else None
+        persistent = options.persistent if options else None
+        max_tasks= options.max_tasks if options else None
+        self.events = events or Events(celery_app, db=db,
+                                       persistent=persistent,
                                        io_loop=self.io_loop,
-                                       max_tasks_in_memory=options.max_tasks)
+                                       max_tasks_in_memory=max_tasks)
         self.state = State(celery_app, self.broker_api)
 
     def start(self):
