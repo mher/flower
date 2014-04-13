@@ -92,36 +92,37 @@ class WorkerControlTests(AsyncHTTPTestCase):
     def test_task_timeout(self):
         celery = self.app.celery_app
         celery.control.time_limit = MagicMock(
-            return_value=[{'test': {'ok': ''}}])
+            return_value=[{'foo': {'ok': ''}}])
 
-        r = self.post('/api/task/timeout/test',
-                      body={'hard': 3.1, 'soft': 1.2})
+        r = self.post('/api/task/timeout/celery.map',
+                body={'workername': 'foo', 'hard': 3.1, 'soft': 1.2})
         self.assertEqual(200, r.code)
         celery.control.time_limit.assert_called_once_with(
-            None, hard=3.1, soft=1.2, destination=['test'],
+            'celery.map', hard=3.1, soft=1.2, destination=['foo'],
             reply=True)
 
     def test_task_ratelimit(self):
         celery = self.app.celery_app
+        print celery.tasks
         celery.control.rate_limit = MagicMock(
-            return_value=[{'test': {'ok': ''}}])
+            return_value=[{'foo': {'ok': ''}}])
 
-        r = self.post('/api/task/rate-limit/test',
-                      body={'taskname': 'foo', 'ratelimit': 20})
+        r = self.post('/api/task/rate-limit/celery.map',
+                      body={'workername': 'foo', 'ratelimit': 20})
         self.assertEqual(200, r.code)
         celery.control.rate_limit.assert_called_once_with(
-            'foo', '20', destination=['test'], reply=True)
+            'celery.map', '20', destination=['foo'], reply=True)
 
     def test_task_ratelimit_non_integer(self):
         celery = self.app.celery_app
         celery.control.rate_limit = MagicMock(
-            return_value=[{'test': {'ok': ''}}])
+            return_value=[{'foo': {'ok': ''}}])
 
-        r = self.post('/api/task/rate-limit/test',
-                      body={'taskname': 'foo', 'ratelimit': '11/m'})
+        r = self.post('/api/task/rate-limit/celery.map',
+                      body={'workername': 'foo', 'ratelimit': '11/m'})
         self.assertEqual(200, r.code)
         celery.control.rate_limit.assert_called_once_with(
-            'foo', '11/m', destination=['test'], reply=True)
+            'celery.map', '11/m', destination=['foo'], reply=True)
 
 
 class TaskControlTests(AsyncHTTPTestCase):
