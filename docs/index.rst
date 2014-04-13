@@ -17,6 +17,7 @@ Contents
    features
    screenshots
    install
+   config
    auth
    reverse-proxy
    docker
