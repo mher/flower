@@ -18,6 +18,7 @@ Contents
    screenshots
    install
    config
+   api
    auth
    reverse-proxy
    docker

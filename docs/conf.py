@@ -34,6 +34,8 @@ import flower
 extensions = [
     'sphinx.ext.intersphinx',
     'sphinxcontrib.fulltoc',
+    'sphinxcontrib.httpdomain',
+    'sphinxcontrib.autohttp.tornado',
 ]
 
 templates_path = ['_templates']

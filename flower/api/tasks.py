@@ -18,7 +18,7 @@ from ..views import BaseHandler
 class BaseTaskHandler(BaseHandler):
     def get_task_args(self):
         try:
-            options = json_decode(self.request.body)
+            options = json_decode(self.request.body) if self.request.body else {}
         except ValueError as e:
             raise HTTPError(400, str(e))
         args = options.pop('args', [])
@@ -49,10 +49,49 @@ class BaseTaskHandler(BaseHandler):
 class TaskAsyncApply(BaseTaskHandler):
     @web.authenticated
     def post(self, taskname):
+        """
+Execute a task
+
+**Example request**:
+
+.. sourcecode:: http
+
+  POST /api/task/async-apply/tasks.add HTTP/1.1
+  Accept: application/json
+  Accept-Encoding: gzip, deflate, compress
+  Content-Length: 16
+  Content-Type: application/json; charset=utf-8
+  Host: localhost:5555
+
+  {
+      "args": [1, 2]
+  }
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 71
+  Content-Type: application/json; charset=UTF-8
+  Date: Sun, 13 Apr 2014 15:55:00 GMT
+
+  {
+      "state": "PENDING",
+      "task-id": "abc300c7-2922-4069-97b6-a635cc2ac47c"
+  }
+
+:query args: a list of arguments
+:query kwargs: a dictionary of arguments
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+:statuscode 404: unknown task
+        """
         celery = self.application.celery_app
 
         args, kwargs, options = self.get_task_args()
-        logging.debug("Invoking task '%s' with '%s' and '%s'",
+        logging.info("Invoking a task '%s' with '%s' and '%s'",
                       taskname, args, kwargs)
 
         try:
@@ -70,6 +109,44 @@ class TaskAsyncApply(BaseTaskHandler):
 class TaskSend(BaseTaskHandler):
     @web.authenticated
     def post(self, taskname):
+        """
+Execute a task by name (doesn't require task sources)
+
+**Example request**:
+
+.. sourcecode:: http
+
+  POST /api/task/send-task/tasks.add HTTP/1.1
+  Accept: application/json
+  Accept-Encoding: gzip, deflate, compress
+  Content-Length: 16
+  Content-Type: application/json; charset=utf-8
+  Host: localhost:5555
+
+  {
+      "args": [1, 2]
+  }
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 71
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "state": "SUCCESS",
+      "task-id": "c60be250-fe52-48df-befb-ac66174076e6"
+  }
+
+:query args: a list of arguments
+:query kwargs: a dictionary of arguments
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+:statuscode 404: unknown task
+        """
         celery = self.application.celery_app
 
         args, kwargs, options = self.get_task_args()
@@ -85,6 +162,35 @@ class TaskSend(BaseTaskHandler):
 class TaskResult(BaseTaskHandler):
     @web.authenticated
     def get(self, taskid):
+        """
+Get a task result
+
+**Example request**:
+
+.. sourcecode:: http
+
+  GET /api/task/result/c60be250-fe52-48df-befb-ac66174076e6 HTTP/1.1
+  Host: localhost:5555
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 84
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "result": 3,
+      "state": "SUCCESS",
+      "task-id": "c60be250-fe52-48df-befb-ac66174076e6"
+  }
+
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+:statuscode 503: result backend is not configured
+        """
         result = AsyncResult(taskid)
         if not self.backend_configured(result):
             raise HTTPError(503)
@@ -119,6 +225,43 @@ class ListTasks(BaseTaskHandler):
 
 class TaskInfo(BaseTaskHandler):
     def get(self, taskid):
+        """
+Get a task info
+
+**Example request**:
+
+.. sourcecode:: http
+
+  GET /api/task/info/c60be250-fe52-48df-befb-ac66174076e6 HTTP/1.1
+  Accept: */*
+  Accept-Encoding: gzip, deflate, compress
+  Host: localhost:5555
+
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 171
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "args": "[1, 2]",
+      "kwargs": "{}",
+      "name": "tasks.add",
+      "result": "'3'",
+      "state": "SUCCESS",
+      "task-id": "c60be250-fe52-48df-befb-ac66174076e6",
+      "worker": "celery@worker1"
+  }
+
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+:statuscode 404: unknown task
+        """
+
         task = TaskModel.get_task_by_id(self.application, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
