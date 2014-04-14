@@ -103,7 +103,6 @@ class WorkerControlTests(AsyncHTTPTestCase):
 
     def test_task_ratelimit(self):
         celery = self.app.celery_app
-        print celery.tasks
         celery.control.rate_limit = MagicMock(
             return_value=[{'foo': {'ok': ''}}])
 
