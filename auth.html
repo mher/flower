@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Authentication &mdash; Flower 0.7.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.7.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Flower 0.7.0 documentation" href="index.html" />
+    <link rel="next" title="Running behind reverse proxy" href="reverse-proxy.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="reverse-proxy.html" title="Running behind reverse proxy"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="api.html" title="API Reference"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+<div class="deck">
+
+</div>
+    <div class="section" id="authentication">
+<h1>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h1>
+<p>Protecting your Flower instance from unwarranted access is important
+if it runs in an untrusted environment. Below, we outline the various
+forms of authentication supported by Flower.</p>
+<div class="section" id="http-basic-authentication">
+<h2>HTTP Basic Authentication<a class="headerlink" href="#http-basic-authentication" title="Permalink to this headline">¶</a></h2>
+<p>Securing Flower with Basic Authentication is easy.</p>
+<p>The <cite>&#8211;basic_auth</cite> option accepts <cite>user:password</cite> pairs separated by
+semicolons. If configured, any client trying to access this
+Flower instance will be prompted to provide the credentials specified in
+this argument:</p>
+<div class="highlight-python"><pre>$ celery flower --basic_auth=user1:password1,user2:password2</pre>
+</div>
+<p>See also <a class="reference internal" href="reverse-proxy.html#reverse-proxy"><em>Running behind reverse proxy</em></a></p>
+</div>
+<div class="section" id="google-openid">
+<h2>Google OpenID<a class="headerlink" href="#google-openid" title="Permalink to this headline">¶</a></h2>
+<p>Flower also supports Google OpenID. This way you can authenticate any user
+with a Google account. Google OpenID authentication is enabled using the
+&#8211;auth option, which accepts a group of emails in the form of a regular
+expression.</p>
+<p>Grant access to Google accounts with email <cite>me&#64;gmail.com</cite> and
+<cite>you&#64;gmail.com</cite>:</p>
+<div class="highlight-python"><pre>$ celery flower --auth="me@gmail.com|you@gmail.com"</pre>
+</div>
+<p>Grant access to all Google accounts having a domain of <cite>example.com</cite>:</p>
+<div class="highlight-python"><pre>$ celery flower --auth=.*@example\.com</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p>
+  <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
+    allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Authentication</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#http-basic-authentication">HTTP Basic Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#google-openid">Google OpenID</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter">API Reference</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reverse-proxy.html"
+                        title="next chapter">Running behind reverse proxy</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="reverse-proxy.html" title="Running behind reverse proxy"
+             >next</a></li>
+        <li class="right" >
+          <a href="api.html" title="API Reference"
+             >previous</a> |</li>
+        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Mher Movsisyan.
+    </div>
+  </body>
+</html>

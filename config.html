@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Configuration &mdash; Flower 0.7.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.7.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Flower 0.7.0 documentation" href="index.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="api.html" title="API Reference"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+<div class="deck">
+
+</div>
+    <div class="section" id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<p>Flower can be configured from the command line:</p>
+<div class="highlight-python"><pre>$ flower --auto_refresh=False</pre>
+</div>
+<p>Or, using <tt class="file docutils literal"><span class="pre">flowerconfig.py</span></tt> configuration file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Broker settings</span>
+<span class="n">BROKER_URL</span> <span class="o">=</span> <span class="s">&#39;amqp://guest:guest@localhost:5672//&#39;</span>
+
+<span class="c"># RabbitMQ management api url</span>
+<span class="n">broker_api</span> <span class="o">=</span> <span class="s">&#39;http://guest:guest@localhost:15672/api/&#39;</span>
+
+<span class="c"># Enable debug logging</span>
+<span class="n">logging</span> <span class="o">=</span> <span class="s">&#39;DEBUG&#39;</span>
+</pre></div>
+</div>
+<p>Options passed via the command line have precedence over the options
+defined in the configuration file.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><tt class="file docutils literal"><span class="pre">flowerconfig.py</span></tt> file should be available on the Python path.</p>
+</div>
+<div class="section" id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<p>Flower accepts all standard Celery configuration options:</p>
+<div class="highlight-python"><pre>$ flower --broker_url=amqp://guest:guest@localhost:5672//</pre>
+</div>
+<p>See <a class="reference external" href="http://docs.celeryproject.org/en/latest/configuration.html#configuration">Celery Configuration reference</a> for a complete listing of all
+the available settings, and their default values.</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#auto-refresh" id="id1">auto_refresh</a></li>
+<li><a class="reference internal" href="#port" id="id2">port</a></li>
+<li><a class="reference internal" href="#address" id="id3">address</a></li>
+<li><a class="reference internal" href="#debug" id="id4">debug</a></li>
+<li><a class="reference internal" href="#max-tasks" id="id5">max_tasks</a></li>
+<li><a class="reference internal" href="#certfile" id="id6">certfile</a></li>
+<li><a class="reference internal" href="#keyfile" id="id7">keyfile</a></li>
+</ul>
+</div>
+<div class="section" id="auto-refresh">
+<h3><a class="toc-backref" href="#id1">auto_refresh</a><a class="headerlink" href="#auto-refresh" title="Permalink to this headline">¶</a></h3>
+<p>Refresh dashboards automatically (by default, <cite>auto_refresh=True</cite>)</p>
+</div>
+<div class="section" id="port">
+<h3><a class="toc-backref" href="#id2">port</a><a class="headerlink" href="#port" title="Permalink to this headline">¶</a></h3>
+<p>Run the http server on a given port (by default, <cite>port=5555</cite>)</p>
+</div>
+<div class="section" id="address">
+<h3><a class="toc-backref" href="#id3">address</a><a class="headerlink" href="#address" title="Permalink to this headline">¶</a></h3>
+<p>Run the http server on a given address</p>
+</div>
+<div class="section" id="debug">
+<h3><a class="toc-backref" href="#id4">debug</a><a class="headerlink" href="#debug" title="Permalink to this headline">¶</a></h3>
+<p>Enable the debug mode (by default, <cite>debug=False</cite>)</p>
+</div>
+<div class="section" id="max-tasks">
+<h3><a class="toc-backref" href="#id5">max_tasks</a><a class="headerlink" href="#max-tasks" title="Permalink to this headline">¶</a></h3>
+<p>Maximum number of tasks to keep in memory (by default, <cite>max_tasks=10000</cite>)</p>
+</div>
+<div class="section" id="certfile">
+<h3><a class="toc-backref" href="#id6">certfile</a><a class="headerlink" href="#certfile" title="Permalink to this headline">¶</a></h3>
+<p>A path to SSL certificate file</p>
+</div>
+<div class="section" id="keyfile">
+<h3><a class="toc-backref" href="#id7">keyfile</a><a class="headerlink" href="#keyfile" title="Permalink to this headline">¶</a></h3>
+<p>A path to SSL key file</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p>
+  <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
+    allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">API Reference</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="api.html" title="API Reference"
+             >next</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             >previous</a> |</li>
+        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Mher Movsisyan.
+    </div>
+  </body>
+</html>
