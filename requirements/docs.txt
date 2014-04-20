@@ -1,0 +1,4 @@
+Sphinx
+sphinxcontrib.fulltoc
+sphinxcontrib.httpdomain
+sphinxcontrib.autohttp.tornado
