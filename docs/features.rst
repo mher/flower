@@ -1,5 +1,5 @@
 Features
-========
+--------
 
 - Real-time monitoring using Celery Events
 
