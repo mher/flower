@@ -49,19 +49,23 @@ class Events(threading.Thread):
         self._celery_app = celery_app
         self._db = db
         self._persistent = persistent
+        self.state = None
 
         if self._persistent and celery.__version__ < '3.0.15':
             logging.warning('Persistent mode is available with '
                             'Celery 3.0.15 and later')
             self._persistent = False
 
-        if self._persistent and os.path.exists(db):
+        if self._persistent:
             logging.debug("Loading state from '%s'...", db)
             state = shelve.open(self._db)
-            self.state = state['events']
+            if state:
+                self.state = state['events']
             state.close()
-        else:
+
+        if not self.state:
             self.state = EventsState(**kwargs)
+
         self._timer = PeriodicCallback(self.on_enable_events,
                                        CELERY_EVENTS_ENABLE_INTERVAL)
 
