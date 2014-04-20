@@ -98,9 +98,9 @@ Broker URL and other configuration options can be passed through the standard Ce
 Documentation
 -------------
 
-Documentation is available at `Github Wiki`_ and `IPython Notebook Viewer`_
+Documentation is available at `Read the Docs`_ and `IPython Notebook Viewer`_
 
-.. _Github Wiki: https://github.com/mher/flower/wiki
+.. _Read the Docs: http://flower.readthedocs.org
 .. _IPython Notebook Viewer: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
 Screenshots
