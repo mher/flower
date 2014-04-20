@@ -5,7 +5,7 @@ python:
   - "3.2"
   - "3.3"
 install:
-  - pip install -r requirements.txt --use-mirrors
+  - pip install -r requirements/default.txt --use-mirrors
   - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi
 script:
   - python -m tests.__main__
