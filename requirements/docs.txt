@@ -1,6 +1,5 @@
 Sphinx
-sphinxcontrib.fulltoc
-sphinxcontrib.httpdomain
-sphinxcontrib.autohttp.tornado
+sphinxcontrib-fulltoc
+sphinxcontrib-httpdomain
 tornado
 celery
