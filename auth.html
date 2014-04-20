@@ -55,7 +55,7 @@
 if it runs in an untrusted environment. Below, we outline the various
 forms of authentication supported by Flower.</p>
 <div class="section" id="http-basic-authentication">
-<h2>HTTP Basic Authentication<a class="headerlink" href="#http-basic-authentication" title="Permalink to this headline">¶</a></h2>
+<span id="basic-auth"></span><h2>HTTP Basic Authentication<a class="headerlink" href="#http-basic-authentication" title="Permalink to this headline">¶</a></h2>
 <p>Securing Flower with Basic Authentication is easy.</p>
 <p>The <cite>&#8211;basic_auth</cite> option accepts <cite>user:password</cite> pairs separated by
 semicolons. If configured, any client trying to access this
@@ -66,7 +66,7 @@ this argument:</p>
 <p>See also <a class="reference internal" href="reverse-proxy.html#reverse-proxy"><em>Running behind reverse proxy</em></a></p>
 </div>
 <div class="section" id="google-openid">
-<h2>Google OpenID<a class="headerlink" href="#google-openid" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Google OpenID<a class="headerlink" href="#google-openid" title="Permalink to this headline">¶</a></h2>
 <p>Flower also supports Google OpenID. This way you can authenticate any user
 with a Google account. Google OpenID authentication is enabled using the
 &#8211;auth option, which accepts a group of emails in the form of a regular
@@ -94,9 +94,17 @@ expression.</p>
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Authentication</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#http-basic-authentication">HTTP Basic Authentication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#google-openid">Google OpenID</a></li>

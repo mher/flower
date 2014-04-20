@@ -58,14 +58,14 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># Broker settings</span>
 <span class="n">BROKER_URL</span> <span class="o">=</span> <span class="s">&#39;amqp://guest:guest@localhost:5672//&#39;</span>
 
-<span class="c"># RabbitMQ management api url</span>
+<span class="c"># RabbitMQ management api</span>
 <span class="n">broker_api</span> <span class="o">=</span> <span class="s">&#39;http://guest:guest@localhost:15672/api/&#39;</span>
 
 <span class="c"># Enable debug logging</span>
 <span class="n">logging</span> <span class="o">=</span> <span class="s">&#39;DEBUG&#39;</span>
 </pre></div>
 </div>
-<p>Options passed via the command line have precedence over the options
+<p>Options passed through the command line have precedence over the options
 defined in the configuration file.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -73,49 +73,131 @@ defined in the configuration file.</p>
 </div>
 <div class="section" id="options">
 <h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
-<p>Flower accepts all standard Celery configuration options:</p>
-<div class="highlight-python"><pre>$ flower --broker_url=amqp://guest:guest@localhost:5672//</pre>
-</div>
-<p>See <a class="reference external" href="http://docs.celeryproject.org/en/latest/configuration.html#configuration">Celery Configuration reference</a> for a complete listing of all
+<p>Standard Celery configuration settings can be overridden in the configuration
+file. See <a class="reference external" href="http://docs.celeryproject.org/en/latest/configuration.html#configuration">Celery Configuration reference</a> for a complete listing of all
 the available settings, and their default values.</p>
+<p>Celery command line options also can be passed to Flower. For example
+the <cite>&#8211;broker</cite> sets the default broker url:</p>
+<div class="highlight-python"><pre>$ flower --broker=amqp://guest:guest@localhost:5672//</pre>
+</div>
+<p>For a full list of options see:</p>
+<div class="highlight-python"><pre>$ celery --help</pre>
+</div>
 <div class="contents local topic" id="contents">
 <ul class="simple">
-<li><a class="reference internal" href="#auto-refresh" id="id1">auto_refresh</a></li>
-<li><a class="reference internal" href="#port" id="id2">port</a></li>
-<li><a class="reference internal" href="#address" id="id3">address</a></li>
-<li><a class="reference internal" href="#debug" id="id4">debug</a></li>
-<li><a class="reference internal" href="#max-tasks" id="id5">max_tasks</a></li>
+<li><a class="reference internal" href="#address" id="id1">address</a></li>
+<li><a class="reference internal" href="#auth" id="id2">auth</a></li>
+<li><a class="reference internal" href="#auto-refresh" id="id3">auto_refresh</a></li>
+<li><a class="reference internal" href="#basic-auth" id="id4">basic_auth</a></li>
+<li><a class="reference internal" href="#broker-api" id="id5">broker_api</a></li>
 <li><a class="reference internal" href="#certfile" id="id6">certfile</a></li>
-<li><a class="reference internal" href="#keyfile" id="id7">keyfile</a></li>
+<li><a class="reference internal" href="#db" id="id7">db</a></li>
+<li><a class="reference internal" href="#debug" id="id8">debug</a></li>
+<li><a class="reference internal" href="#inspect" id="id9">inspect</a></li>
+<li><a class="reference internal" href="#inspect-timeout" id="id10">inspect_timeout</a></li>
+<li><a class="reference internal" href="#keyfile" id="id11">keyfile</a></li>
+<li><a class="reference internal" href="#max-tasks" id="id12">max_tasks</a></li>
+<li><a class="reference internal" href="#persistent" id="id13">persistent</a></li>
+<li><a class="reference internal" href="#port" id="id14">port</a></li>
+<li><a class="reference internal" href="#url-prefix" id="id15">url_prefix</a></li>
+<li><a class="reference internal" href="#xheaders" id="id16">xheaders</a></li>
 </ul>
 </div>
-<div class="section" id="auto-refresh">
-<h3><a class="toc-backref" href="#id1">auto_refresh</a><a class="headerlink" href="#auto-refresh" title="Permalink to this headline">¶</a></h3>
-<p>Refresh dashboards automatically (by default, <cite>auto_refresh=True</cite>)</p>
-</div>
-<div class="section" id="port">
-<h3><a class="toc-backref" href="#id2">port</a><a class="headerlink" href="#port" title="Permalink to this headline">¶</a></h3>
-<p>Run the http server on a given port (by default, <cite>port=5555</cite>)</p>
-</div>
 <div class="section" id="address">
-<h3><a class="toc-backref" href="#id3">address</a><a class="headerlink" href="#address" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id1">address</a><a class="headerlink" href="#address" title="Permalink to this headline">¶</a></h3>
 <p>Run the http server on a given address</p>
 </div>
-<div class="section" id="debug">
-<h3><a class="toc-backref" href="#id4">debug</a><a class="headerlink" href="#debug" title="Permalink to this headline">¶</a></h3>
-<p>Enable the debug mode (by default, <cite>debug=False</cite>)</p>
+<div class="section" id="auth">
+<h3><a class="toc-backref" href="#id2">auth</a><a class="headerlink" href="#auth" title="Permalink to this headline">¶</a></h3>
+<p>Enables Google OpenID authentication. <cite>auth</cite> is a regexp of emails
+to grant access. For more info see <a class="reference internal" href="auth.html#google-openid"><em>Google OpenID</em></a></p>
 </div>
-<div class="section" id="max-tasks">
-<h3><a class="toc-backref" href="#id5">max_tasks</a><a class="headerlink" href="#max-tasks" title="Permalink to this headline">¶</a></h3>
-<p>Maximum number of tasks to keep in memory (by default, <cite>max_tasks=10000</cite>)</p>
+<div class="section" id="auto-refresh">
+<h3><a class="toc-backref" href="#id3">auto_refresh</a><a class="headerlink" href="#auto-refresh" title="Permalink to this headline">¶</a></h3>
+<p>Refresh dashboards automatically (by default, <cite>auto_refresh=True</cite>)</p>
+</div>
+<div class="section" id="basic-auth">
+<h3><a class="toc-backref" href="#id4">basic_auth</a><a class="headerlink" href="#basic-auth" title="Permalink to this headline">¶</a></h3>
+<p>Enables HTTP Basic authentication. <cite>basic_auth</cite> is a comma separated list
+of <cite>username:passworrd</cite>. See <a class="reference internal" href="auth.html#basic-auth"><em>HTTP Basic Authentication</em></a> for more info.</p>
+</div>
+<div class="section" id="broker-api">
+<h3><a class="toc-backref" href="#id5">broker_api</a><a class="headerlink" href="#broker-api" title="Permalink to this headline">¶</a></h3>
+<p>Flower uses <a class="reference external" href="https://www.rabbitmq.com/management.html">RabbitMQ Managment Plugin</a> to get info about queues.
+<cite>broker_api</cite> is a URL of RabbitMQ HTTP API including user credentials.</p>
+<div class="highlight-python"><pre>$ flower --broker_api=http://username:password@rabbitmq-server-name:15672/api/</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>By default the managment plugin is not enabled. To enable it run:</p>
+<div class="last highlight-python"><pre>$ rabbitmq-plugins enable rabbitmq_management</pre>
+</div>
+</div>
 </div>
 <div class="section" id="certfile">
 <h3><a class="toc-backref" href="#id6">certfile</a><a class="headerlink" href="#certfile" title="Permalink to this headline">¶</a></h3>
 <p>A path to SSL certificate file</p>
 </div>
+<div class="section" id="db">
+<h3><a class="toc-backref" href="#id7">db</a><a class="headerlink" href="#db" title="Permalink to this headline">¶</a></h3>
+<p>A database file to use if persistent mode is enabled
+(by default, <cite>db=flower.db</cite>)</p>
+</div>
+<div class="section" id="debug">
+<h3><a class="toc-backref" href="#id8">debug</a><a class="headerlink" href="#debug" title="Permalink to this headline">¶</a></h3>
+<p>Enable the debug mode (by default, <cite>debug=False</cite>)</p>
+</div>
+<div class="section" id="inspect">
+<h3><a class="toc-backref" href="#id9">inspect</a><a class="headerlink" href="#inspect" title="Permalink to this headline">¶</a></h3>
+<p>Enable inspecting running workers (by default, <cite>inspect=True</cite>).</p>
+</div>
+<div class="section" id="inspect-timeout">
+<h3><a class="toc-backref" href="#id10">inspect_timeout</a><a class="headerlink" href="#inspect-timeout" title="Permalink to this headline">¶</a></h3>
+<p>Sets worker inspect timeout (by default, <cite>inspect_timeout=10000</cite>
+in milliseconds)</p>
+</div>
 <div class="section" id="keyfile">
-<h3><a class="toc-backref" href="#id7">keyfile</a><a class="headerlink" href="#keyfile" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id11">keyfile</a><a class="headerlink" href="#keyfile" title="Permalink to this headline">¶</a></h3>
 <p>A path to SSL key file</p>
+</div>
+<div class="section" id="max-tasks">
+<h3><a class="toc-backref" href="#id12">max_tasks</a><a class="headerlink" href="#max-tasks" title="Permalink to this headline">¶</a></h3>
+<p>Maximum number of tasks to keep in memory (by default, <cite>max_tasks=10000</cite>)</p>
+</div>
+<div class="section" id="persistent">
+<h3><a class="toc-backref" href="#id13">persistent</a><a class="headerlink" href="#persistent" title="Permalink to this headline">¶</a></h3>
+<p>Enable persistent mode. If the persistent mode is enabled Flower saves
+the current state and reloads on restart (by default, <cite>persistent=False</cite>)</p>
+</div>
+<div class="section" id="port">
+<h3><a class="toc-backref" href="#id14">port</a><a class="headerlink" href="#port" title="Permalink to this headline">¶</a></h3>
+<p>Run the http server on a given port (by default, <cite>port=5555</cite>)</p>
+</div>
+<div class="section" id="url-prefix">
+<h3><a class="toc-backref" href="#id15">url_prefix</a><a class="headerlink" href="#url-prefix" title="Permalink to this headline">¶</a></h3>
+<p>Enables deploying Flower on non-root URL.</p>
+<p>For example to access Flower on <a class="reference external" href="http://example.com/flower">http://example.com/flower</a> run it with:</p>
+<div class="highlight-python"><pre>$ flower --url_prefix=flower</pre>
+</div>
+<p>And use the following <cite>nginx</cite> configuration:</p>
+<div class="highlight-nginx"><div class="highlight"><pre><span class="k">server</span> <span class="p">{</span>
+    <span class="kn">listen</span> <span class="mi">80</span><span class="p">;</span>
+    <span class="kn">server_name</span> <span class="s">example.com</span><span class="p">;</span>
+
+    <span class="kn">location</span> <span class="s">/flower/</span> <span class="p">{</span>
+        <span class="kn">rewrite</span> <span class="s">^/flower/(.*)</span>$ <span class="s">/</span><span class="nv">$1</span> <span class="s">break</span><span class="p">;</span>
+        <span class="kn">proxy_pass</span> <span class="s">http://example.com:5555</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+    <span class="p">}</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="xheaders">
+<h3><a class="toc-backref" href="#id16">xheaders</a><a class="headerlink" href="#xheaders" title="Permalink to this headline">¶</a></h3>
+<p>Enable support of <cite>X-Real-Ip</cite> and <cite>X-Scheme</cite> headers
+(by default, <cite>xheaders=False</cite>)</p>
 </div>
 </div>
 </div>
@@ -133,13 +215,22 @@ the available settings, and their default values.</p>
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#google-openid">Google OpenID</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
 </ul>
