@@ -86,6 +86,8 @@ class FlowerCommand(Command):
                      options.address or 'localhost',
                      options.port)
         logging.info('Broker: %s', self.app.connection().as_uri())
+        logging.debug('Registered tasks: \n%s',
+                      pformat(sorted(self.app.tasks.keys())))
         logging.debug('Settings: %s', pformat(app_settings))
 
         try:
