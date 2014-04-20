@@ -5,6 +5,8 @@ Protecting your Flower instance from unwarranted access is important
 if it runs in an untrusted environment. Below, we outline the various
 forms of authentication supported by Flower.
 
+.. _basic-auth:
+
 HTTP Basic Authentication
 -------------------------
 
@@ -18,6 +20,8 @@ this argument: ::
     $ celery flower --basic_auth=user1:password1,user2:password2
 
 See also :ref:`reverse-proxy`
+
+.. _google-openid:
 
 Google OpenID
 -------------
