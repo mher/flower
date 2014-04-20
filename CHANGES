@@ -3,6 +3,17 @@ Celery Flower
 
 Here you can see the full list of changes between each release.
 
+Version 0.7
+-----------
+
+- documentation
+- --basic_auth option accepts multiple basic http auth users
+- configuration options can be passed through `flowerconfig.py` file
+- --cookie_secret option for setting secure cookie secret
+- new task info api
+- --auto_refresh option allows to disable dashboard auto-refreshes
+- `received` and `started` time columns for tasks dashboard
+
 Version 0.6
 -----------
 
