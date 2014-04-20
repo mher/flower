@@ -25,9 +25,9 @@ define("inspect", default=True, help="inspect workers", type=bool)
 define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
-       help="regexp  of emails to grant access")
+       help="regexp of emails to grant access")
 define("basic_auth", type=str, default=None, multiple=True,
-       help="colon separated user-password to enable basic auth")
+        help="enable http basic authentication")
 define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
