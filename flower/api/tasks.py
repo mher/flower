@@ -209,8 +209,8 @@ class ListTasks(BaseTaskHandler):
     def get(self):
         app = self.application
         limit = self.get_argument('limit', None)
-        worker = self.get_argument('worker', None)
-        type = self.get_argument('type', None)
+        worker = self.get_argument('workername', None)
+        type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
 
         limit = limit and int(limit)
