@@ -207,6 +207,90 @@ Get a task result
 class ListTasks(BaseTaskHandler):
     @web.authenticated
     def get(self):
+        """
+List tasks
+
+**Example request**:
+
+.. sourcecode:: http
+
+  GET /api/tasks HTTP/1.1
+  Host: localhost:5555
+  User-Agent: HTTPie/0.8.0
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 1109
+  Content-Type: application/json; charset=UTF-8
+  Etag: "b2478118015c8b825f7b88ce6b660e5449746c37"
+  Server: TornadoServer/3.1.1
+
+  {
+      "e42ceb2d-8730-47b5-8b4d-8e0d2a1ef7c9": {
+          "args": "[3, 4]",
+          "client": null,
+          "clock": 1079,
+          "eta": null,
+          "exception": null,
+          "exchange": null,
+          "expires": null,
+          "failed": null,
+          "kwargs": "{}",
+          "name": "tasks.add",
+          "received": 1398505411.107885,
+          "result": "'7'",
+          "retried": null,
+          "retries": 0,
+          "revoked": null,
+          "routing_key": null,
+          "runtime": 0.01610181899741292,
+          "sent": null,
+          "started": 1398505411.108985,
+          "state": "SUCCESS",
+          "succeeded": 1398505411.124802,
+          "timestamp": 1398505411.124802,
+          "traceback": null,
+          "uuid": "e42ceb2d-8730-47b5-8b4d-8e0d2a1ef7c9"
+      },
+      "f67ea225-ae9e-42a8-90b0-5de0b24507e0": {
+          "args": "[1, 2]",
+          "client": null,
+          "clock": 1042,
+          "eta": null,
+          "exception": null,
+          "exchange": null,
+          "expires": null,
+          "failed": null,
+          "kwargs": "{}",
+          "name": "tasks.add",
+          "received": 1398505395.327208,
+          "result": "'3'",
+          "retried": null,
+          "retries": 0,
+          "revoked": null,
+          "routing_key": null,
+          "runtime": 0.012884548006695695,
+          "sent": null,
+          "started": 1398505395.3289,
+          "state": "SUCCESS",
+          "succeeded": 1398505395.341089,
+          "timestamp": 1398505395.341089,
+          "traceback": null,
+          "uuid": "f67ea225-ae9e-42a8-90b0-5de0b24507e0"
+      }
+  }
+
+:query limit: maximum number of tasks
+:query workername: filter task by workername
+:query taskname: filter tasks by taskname
+:query state: filter tasks by state
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+        """
         app = self.application
         limit = self.get_argument('limit', None)
         worker = self.get_argument('workername', None)
