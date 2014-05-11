@@ -95,7 +95,7 @@ db
 ~~
 
 A database file to use if persistent mode is enabled
-(by default, `db=flower.db`)
+(by default, `db=flower`)
 
 debug
 ~~~~~
