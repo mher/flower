@@ -61,6 +61,7 @@ class State(threading.Thread):
         try:
             if transport == 'amqp' and self._broker_api:
                 broker = Broker(burl, self._broker_api)
+                broker.queues([])
             elif transport == 'redis':
                 broker = Broker(burl)
         except Exception as e:
