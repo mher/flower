@@ -40,7 +40,7 @@ the available settings, and their default values.
 Celery command line options also can be passed to Flower. For example
 the `--broker` sets the default broker url: ::
 
-    $ flower --broker=amqp://guest:guest@localhost:5672//
+    $ flower -A tasks --broker=amqp://guest:guest@localhost:5672//
 
 For a full list of options see: ::
 
@@ -78,7 +78,7 @@ broker_api
 Flower uses `RabbitMQ Managment Plugin`_ to get info about queues.
 `broker_api` is a URL of RabbitMQ HTTP API including user credentials. ::
 
-    $ flower --broker_api=http://username:password@rabbitmq-server-name:15672/api/
+    $ flower -A tasks --broker_api=http://username:password@rabbitmq-server-name:15672/api/
 
 .. Note:: By default the managment plugin is not enabled. To enable it run::
 
@@ -141,7 +141,7 @@ Enables deploying Flower on non-root URL.
 
 For example to access Flower on http://example.com/flower run it with: ::
 
-    $ flower --url_prefix=flower
+    $ flower -A tasks --url_prefix=flower
 
 And use the following `nginx` configuration:
 
