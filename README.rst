@@ -68,7 +68,7 @@ Or receive task completion events in real-time: ::
         console.log(event.data);
     }
 
-For more info checkout _`API Reference` and _`examples`.
+For more info checkout `API Reference`_ and `examples`_.
 
 .. _API Reference: http://flower.readthedocs.org/en/latest/api.html
 .. _examples: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
