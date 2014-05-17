@@ -46,8 +46,8 @@ Features
 API
 ---
 
-Flower API enables to manage the cluster via REST api, call tasks and receive task
-events in real-time via WebSockets.
+Flower API enables to manage the cluster via REST API, call tasks and
+receive task events in real-time via WebSockets.
 
 For example you can restart worker's pool by: ::
 
@@ -68,10 +68,10 @@ Or receive task completion events in real-time: ::
         console.log(event.data);
     }
 
+For more info checkout _`API Reference` and _`examples`.
 
-See detailed API documentation here_.
-
-.. _here: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
+.. _API Reference: http://flower.readthedocs.org/en/latest/api.html
+.. _examples: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
 Installation
 ------------
@@ -85,7 +85,7 @@ Usage
 
 Launch the server and open http://localhost:5555: ::
 
-    $ flower -A proj --port=5555
+    $ flower --port=5555
 
 Or launch from celery: ::
 
