@@ -107,19 +107,19 @@ Screenshots
 -----------
 
 .. image:: https://raw.github.com/mher/flower/master/docs/screenshots/dashboard.png
-   :width: 800px
+   :width: 100%
 
 .. image:: https://raw.github.com/mher/flower/master/docs/screenshots/pool.png
-   :width: 800px
+   :width: 100%
 
 .. image:: https://raw.github.com/mher/flower/master/docs/screenshots/tasks.png
-   :width: 800px
+   :width: 100%
 
 .. image:: https://raw.github.com/mher/flower/master/docs/screenshots/task.png
-   :width: 800px
+   :width: 100%
 
 .. image:: https://raw.github.com/mher/flower/master/docs/screenshots/monitor.png
-   :width: 800px
+   :width: 100%
 
 More screenshots_
 
