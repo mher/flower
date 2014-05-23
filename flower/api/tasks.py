@@ -321,7 +321,7 @@ Get a task info
 
 .. sourcecode:: http
 
-  GET /api/task/info/c60be250-fe52-48df-befb-ac66174076e6 HTTP/1.1
+  GET /api/task/info/91396550-c228-4111-9da4-9d88cfd5ddc6 HTTP/1.1
   Accept: */*
   Accept-Encoding: gzip, deflate, compress
   Host: localhost:5555
@@ -332,16 +332,34 @@ Get a task info
 .. sourcecode:: http
 
   HTTP/1.1 200 OK
-  Content-Length: 171
+  Content-Length: 575
   Content-Type: application/json; charset=UTF-8
 
   {
-      "args": "[1, 2]",
+      "args": "[2, 2]",
+      "client": null,
+      "clock": 25,
+      "eta": null,
+      "exception": null,
+      "exchange": null,
+      "expires": null,
+      "failed": null,
       "kwargs": "{}",
       "name": "tasks.add",
-      "result": "'3'",
+      "received": 1400806241.970742,
+      "result": "'{\"result\": 4}'",
+      "retried": null,
+      "retries": null,
+      "revoked": null,
+      "routing_key": null,
+      "runtime": 2.0037889280356467,
+      "sent": null,
+      "started": 1400806241.972624,
       "state": "SUCCESS",
-      "task-id": "c60be250-fe52-48df-befb-ac66174076e6",
+      "succeeded": 1400806243.975336,
+      "task-id": "91396550-c228-4111-9da4-9d88cfd5ddc6",
+      "timestamp": 1400806243.975336,
+      "traceback": null,
       "worker": "celery@worker1"
   }
 
@@ -354,13 +372,10 @@ Get a task info
         task = TaskModel.get_task_by_id(self.application, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
-
-        self.write({
-            'task-id': task.uuid,
-            'name': getattr(task, 'name', None),
-            'state': task.state,
-            'args': task.args,
-            'kwargs': task.kwargs,
-            'result': getattr(task, 'result', None),
-            'worker': task.worker.hostname,
-        })
+        response = {}
+        for name in task._fields:
+            if name not in ['uuid', 'worker']:
+                response[name] = getattr(task, name, None)
+        response['task-id'] = task.uuid
+        response['worker'] = task.worker.hostname
+        self.write(response)
