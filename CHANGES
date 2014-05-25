@@ -6,6 +6,8 @@ Here you can see the full list of changes between each release.
 Version 0.7
 -----------
 
+Released on May 25 2014
+
 - documentation
 - --basic_auth option accepts multiple basic http auth users
 - configuration options can be passed through `flowerconfig.py` file
@@ -13,6 +15,7 @@ Version 0.7
 - new task info api
 - --auto_refresh option allows to disable dashboard auto-refreshes
 - `received` and `started` time columns for tasks dashboard
+- man page
 
 Version 0.6
 -----------
