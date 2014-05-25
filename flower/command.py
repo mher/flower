@@ -27,7 +27,7 @@ define("inspect_timeout", default=1000, type=float,
 define("auth", default='', type=str,
        help="regexp of emails to grant access")
 define("basic_auth", type=str, default=None, multiple=True,
-        help="enable http basic authentication")
+       help="enable http basic authentication")
 define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
@@ -40,7 +40,7 @@ define("keyfile", type=str, default=None, help="path to SSL key file")
 define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
 define("auto_refresh", default=True, help="refresh dashboards", type=bool)
-define("cookie_secret", type=str, default=None, help="Cookie secret for secure secrets. Necessary for multi-server deployments of flower")
+define("cookie_secret", type=str, default=None, help="secure cookie secret")
 
 
 class FlowerCommand(Command):
