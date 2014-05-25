@@ -33,7 +33,7 @@ class Flower(tornado.web.Application):
         self.celery_app = celery_app or celery.Celery()
         db = options.db if options else None
         persistent = options.persistent if options else None
-        max_tasks= options.max_tasks if options else None
+        max_tasks = options.max_tasks if options else None
         self.events = events or Events(celery_app, db=db,
                                        persistent=persistent,
                                        io_loop=self.io_loop,

@@ -18,7 +18,8 @@ from ..views import BaseHandler
 class BaseTaskHandler(BaseHandler):
     def get_task_args(self):
         try:
-            options = json_decode(self.request.body) if self.request.body else {}
+            body = self.request.body
+            options = json_decode(body) if body else {}
         except ValueError as e:
             raise HTTPError(400, str(e))
         args = options.pop('args', [])
@@ -92,7 +93,7 @@ Execute a task
 
         args, kwargs, options = self.get_task_args()
         logging.info("Invoking a task '%s' with '%s' and '%s'",
-                      taskname, args, kwargs)
+                     taskname, args, kwargs)
 
         try:
             task = celery.tasks[taskname]
@@ -152,7 +153,8 @@ Execute a task by name (doesn't require task sources)
         args, kwargs, options = self.get_task_args()
         logging.debug("Invoking task '%s' with '%s' and '%s'",
                       taskname, args, kwargs)
-        result = celery.send_task(taskname, args=args, kwargs=kwargs, **options)
+        result = celery.send_task(taskname, args=args,
+                                  kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if self.backend_configured(result):
             response.update(state=result.state)

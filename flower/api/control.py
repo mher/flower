@@ -159,13 +159,13 @@ Grow worker's pool
                                             destination=[workername],
                                             reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message="Growing '%s' worker's pool by %s" % (workername, n)))
+            self.write(dict(
+                message="Growing '%s' worker's pool by %s" % (workername, n)))
         else:
             logging.error(response)
             self.set_status(403)
             self.write("Failed to grow '%s' worker's pool" % (
-                workername, self.error_reason(workername, response)
-            ))
+                workername, self.error_reason(workername, response)))
 
 
 class WorkerPoolShrink(ControlHandler):
@@ -214,8 +214,8 @@ Shrink worker's pool
                                             destination=[workername],
                                             reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(
-                message="Shrinking '%s' worker's pool by %s" % (workername, n)))
+            self.write(dict(message="Shrinking '%s' worker's pool by %s" % (
+                            workername, n)))
         else:
             logging.error(response)
             self.set_status(403)
@@ -275,7 +275,8 @@ Autoscale worker pool
                                             reply=True)
         if response and 'ok' in response[0][workername]:
             self.write(dict(message="Autoscaling '%s' worker "
-                              "(min=%s, max=%s)" % (workername, min, max)))
+                                    "(min=%s, max=%s)" % (
+                                        workername, min, max)))
         else:
             logging.error(response)
             self.set_status(403)
@@ -294,7 +295,7 @@ Start consuming from a queue
 
 .. sourcecode:: http
 
-  POST /api/worker/queue/add-consumer/celery@worker2?queue=sample-queue HTTP/1.1
+  POST /api/worker/queue/add-consumer/celery@worker2?queue=sample-queue
   Content-Length: 0
   Content-Type: application/x-www-form-urlencoded; charset=utf-8
   Host: localhost:5555
@@ -350,7 +351,7 @@ Stop consuming from a queue
 
 .. sourcecode:: http
 
-  POST /api/worker/queue/cancel-consumer/celery@worker2?queue=sample-queue HTTP/1.1
+  POST /api/worker/queue/cancel-consumer/celery@worker2?queue=sample-queue
   Content-Length: 0
   Content-Type: application/x-www-form-urlencoded; charset=utf-8
   Host: localhost:5555
@@ -407,7 +408,7 @@ Revoke a task
 
 .. sourcecode:: http
 
-  POST /api/task/revoke/1480b55c-b8b2-462c-985e-24af3e9158f9?terminate=true HTTP/1.1
+  POST /api/task/revoke/1480b55c-b8b2-462c-985e-24af3e9158f9?terminate=true
   Content-Length: 0
   Content-Type: application/x-www-form-urlencoded; charset=utf-8
   Host: localhost:5555

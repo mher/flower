@@ -24,7 +24,6 @@ def format_time(time):
         dt.strftime("%Y-%m-%d %H:%M:%S"), dt.microsecond)
 
 
-
 def humanize(obj, type=None, length=None):
     if obj is None:
         obj = ''
