@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import with_statement
 
 import time
-import copy
 import logging
 import threading
 
@@ -15,6 +14,10 @@ from .utils.broker import Broker
 
 
 class State(threading.Thread):
+
+    fields = ('stats', 'registered_tasks', 'scheduled_tasks',
+              'active_tasks', 'reserved_tasks', 'revoked_tasks',
+              'ping', 'active_queues', 'conf', 'broker_queues')
 
     def __init__(self, celery_app, broker_api=None):
         threading.Thread.__init__(self)
@@ -152,12 +155,10 @@ class State(threading.Thread):
         self._last_access = time.time()
 
     def __getattr__(self, name):
-        if name in ['stats', 'registered_tasks', 'scheduled_tasks',
-                    'active_tasks', 'reserved_tasks', 'revoked_tasks',
-                    'ping', 'active_queues', 'conf', 'broker_queues']:
+        if name in self.fields:
             with self._update_lock:
                 self._last_access = time.time()
-                return copy.deepcopy(getattr(self, '_' + name))
+                return getattr(self, '_' + name)
         super(State, self).__getattr__(name)
 
     @property
