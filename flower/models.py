@@ -2,7 +2,12 @@ from __future__ import absolute_import
 from __future__ import with_statement
 
 from celery.events.state import Task as _Task
-from celery.utils.compat import OrderedDict
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    # celery <3.2 provides this
+    from celery.utils.compat import OrderedDict
 
 
 class BaseModel(object):
