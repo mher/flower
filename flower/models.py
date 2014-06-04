@@ -116,6 +116,7 @@ class TaskModel(BaseModel):
                 continue
             if state and task.state != state:
                 continue
+            task.error_message = [ line for line in task.traceback.split('\n') if line.strip() ][-1]
             yield uuid, task
             i += 1
             if i == limit:
