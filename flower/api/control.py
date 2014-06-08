@@ -154,10 +154,8 @@ Grow worker's pool
         n = self.get_argument('n', default=1, type=int)
 
         logging.info("Growing '%s' worker's pool by '%s'", workername, n)
-        response = celery.control.broadcast('pool_grow',
-                                            arguments={'n': n},
-                                            destination=[workername],
-                                            reply=True)
+        response = celery.control.pool_grow(n=n, reply=True,
+                                            destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(
                 message="Growing '%s' worker's pool by %s" % (workername, n)))
@@ -209,10 +207,8 @@ Shrink worker's pool
         n = self.get_argument('n', default=1, type=int)
 
         logging.info("Shrinking '%s' worker's pool by '%s'", workername, n)
-        response = celery.control.broadcast('pool_shrink',
-                                            arguments={'n': n},
-                                            destination=[workername],
-                                            reply=True)
+        response = celery.control.pool_shrink(n=n, reply=True,
+                                              destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(message="Shrinking '%s' worker's pool by %s" % (
                             workername, n)))
