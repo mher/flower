@@ -38,21 +38,19 @@ class WorkerControlTests(AsyncHTTPTestCase):
 
     def test_pool_grow(self):
         celery = self.app.celery_app
-        celery.control.broadcast = MagicMock(return_value=[{'test': 'ok'}])
+        celery.control.pool_grow = MagicMock(return_value=[{'test': 'ok'}])
         r = self.post('/api/worker/pool/grow/test', body={'n': 3})
         self.assertEqual(200, r.code)
-        celery.control.broadcast.assert_called_once_with(
-            'pool_grow',
-            reply=True, destination=['test'], arguments={'n': 3})
+        celery.control.pool_grow.assert_called_once_with(
+            n=3, reply=True, destination=['test'])
 
     def test_pool_shrink(self):
         celery = self.app.celery_app
-        celery.control.broadcast = MagicMock(return_value=[{'test': 'ok'}])
+        celery.control.pool_shrink = MagicMock(return_value=[{'test': 'ok'}])
         r = self.post('/api/worker/pool/shrink/test', body={})
         self.assertEqual(200, r.code)
-        celery.control.broadcast.assert_called_once_with(
-            'pool_shrink',
-            reply=True, destination=['test'], arguments={'n': 1})
+        celery.control.pool_shrink.assert_called_once_with(
+            n=1, reply=True, destination=['test'])
 
     def test_pool_autoscale(self):
         celery = self.app.celery_app
