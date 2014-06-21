@@ -7,7 +7,7 @@ Installing `flower` with `pip <http://www.pip-installer.org/>`_ is simple ::
 
 Or, with `easy_install <http://pypi.python.org/pypi/setuptools>`_ ::
 
-    $ pip install flower
+    $ easy_install flower
 
 Usage
 -----
