@@ -104,7 +104,7 @@ A path to SSL certificate file
 conf
 ~~~~
 
-A path to the configuration file (by default, `flowerconfig.py`)
+A path to the configuration file (by default, :file:`flowerconfig.py`)
 
 .. _db:
 
