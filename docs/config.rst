@@ -21,12 +21,8 @@ Or, using :file:`flowerconfig.py` configuration file:
     logging = 'DEBUG'
 
 Options passed through the command line have precedence over the options
-defined in the configuration file.
-
-.. note::
-
-    :file:`flowerconfig.py` file should be available on the Python path.
-
+defined in the configuration file. The configuration file name and path
+can be changed with `conf`_ option.
 
 Options
 -------
@@ -90,6 +86,13 @@ certfile
 ~~~~~~~~
 
 A path to SSL certificate file
+
+.. _conf:
+
+conf
+~~~~
+
+A path to the configuration file (by default, `flowerconfig.py`)
 
 db
 ~~
