@@ -7,9 +7,6 @@ Celery Flower
         :target: https://travis-ci.org/mher/flower
 .. image:: https://pypip.in/d/flower/badge.png
         :target: https://crate.io/packages/flower/
-.. image:: https://d2weczhvl823v0.cloudfront.net/mher/flower/trend.png
-   :alt: Bitdeli badge
-   :target: https://bitdeli.com/free
 
 Flower is a web based tool for monitoring and administrating Celery clusters.
 
