@@ -46,10 +46,14 @@ For a full list of options see: ::
     :local:
     :depth: 1
 
+.. _address:
+
 address
 ~~~~~~~
 
 Run the http server on a given address
+
+.. _auth:
 
 auth
 ~~~~
@@ -57,16 +61,22 @@ auth
 Enables Google OpenID authentication. `auth` is a regexp of emails
 to grant access. For more info see :ref:`google-openid`
 
+.. _auto_refresh:
+
 auto_refresh
 ~~~~~~~~~~~~
 
 Refresh dashboards automatically (by default, `auto_refresh=True`)
+
+.. _basic_auth:
 
 basic_auth
 ~~~~~~~~~~
 
 Enables HTTP Basic authentication. `basic_auth` is a comma separated list
 of `username:passworrd`. See :ref:`basic-auth` for more info.
+
+.. _broker_api:
 
 broker_api
 ~~~~~~~~~~
@@ -82,6 +92,8 @@ Flower uses `RabbitMQ Managment Plugin`_ to get info about queues.
 
 .. _`RabbitMQ Managment Plugin`: https://www.rabbitmq.com/management.html
 
+.. _certfile:
+
 certfile
 ~~~~~~~~
 
@@ -94,21 +106,29 @@ conf
 
 A path to the configuration file (by default, `flowerconfig.py`)
 
+.. _db:
+
 db
 ~~
 
 A database file to use if persistent mode is enabled
 (by default, `db=flower`)
 
+.. _debug:
+
 debug
 ~~~~~
 
 Enable the debug mode (by default, `debug=False`)
 
+.. _inspect:
+
 inspect
 ~~~~~~~
 
 Enable inspecting running workers (by default, `inspect=True`).
+
+.. _inspect_timeout:
 
 inspect_timeout
 ~~~~~~~~~~~~~~~
@@ -116,15 +136,21 @@ inspect_timeout
 Sets worker inspect timeout (by default, `inspect_timeout=10000`
 in milliseconds)
 
+.. _keyfile:
+
 keyfile
 ~~~~~~~
 
 A path to SSL key file
 
+.. _max_tasks:
+
 max_tasks
 ~~~~~~~~~
 
 Maximum number of tasks to keep in memory (by default, `max_tasks=10000`)
+
+.. _persistent:
 
 persistent
 ~~~~~~~~~~
@@ -132,10 +158,14 @@ persistent
 Enable persistent mode. If the persistent mode is enabled Flower saves
 the current state and reloads on restart (by default, `persistent=False`)
 
+.. _port:
+
 port
 ~~~~
 
 Run the http server on a given port (by default, `port=5555`)
+
+.. _url_prefix:
 
 url_prefix
 ~~~~~~~~~~
@@ -161,6 +191,8 @@ And use the following `nginx` configuration:
         }
 
     }
+
+.. _xheaders:
 
 xheaders
 ~~~~~~~~
