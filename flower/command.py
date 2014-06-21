@@ -41,6 +41,7 @@ define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
 define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 define("cookie_secret", type=str, default=None, help="secure cookie secret")
+define("conf", default=settings.CONFIG_FILE, help="configuration file")
 
 
 class FlowerCommand(Command):
@@ -48,11 +49,14 @@ class FlowerCommand(Command):
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
         app_settings = settings.APP_SETTINGS
         argv = list(filter(self.flower_option, argv))
-        try:
-            parse_config_file('flowerconfig.py', final=False)
-        except IOError:
-            pass
+        # parse the command line to get --conf option
         parse_command_line([prog_name] + argv)
+        try:
+            parse_config_file(options.conf, final=False)
+            parse_command_line([prog_name] + argv)
+        except IOError:
+            if options.conf != settings.CONFIG_FILE:
+                raise
 
         app_settings['debug'] = options.debug
         if options.cookie_secret:

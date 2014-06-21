@@ -6,6 +6,7 @@ from .utils import gen_cookie_secret
 
 
 PROJECT_ROOT = abspath(dirname(__file__))
+CONFIG_FILE = 'flowerconfig.py'
 
 APP_SETTINGS = dict(
     template_path=join(PROJECT_ROOT, "templates"),
