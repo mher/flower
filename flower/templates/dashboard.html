@@ -37,6 +37,7 @@
         <th>Concurrency</th>
         <th>Processed Tasks</th>
         <th>Active Tasks</th>
+        <th>Average Load</th>
         <th>Queues</th>
       </tr>
       </thead>
@@ -55,6 +56,7 @@
         <td>{{ humanize(info['concurrency']) }}</td>
         <td>{{ info['processed'] }}</td>
         <td>{{ info['active'] }}</td>
+        <td>{{ humanize(info['loadavg']) }}</td>
         <td>{{ humanize(info['queues']) }}</td>
       </tr>
       {% end %}

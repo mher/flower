@@ -33,6 +33,7 @@ class WorkersModel(BaseModel):
                     concurrency='N/A',
                     processed=worker.processed,
                     active=worker.active,
+                    loadavg=worker.loadavg,
                     queues='N/A')
 
     @classmethod

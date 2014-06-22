@@ -333,17 +333,19 @@ var flower = (function () {
 
             var stat = tr.children('td:eq(2)').children(),
                 concurrency = tr.children('td:eq(3)'),
-                completed_tasks = tr.children('td:eq(4)'),
-                running_tasks = tr.children('td:eq(5)'),
-                queues = tr.children('td:eq(6)');
+                processed = tr.children('td:eq(4)'),
+                active = tr.children('td:eq(5)'),
+                loadavg = tr.children('td:eq(6)');
+                //queues = tr.children('td:eq(7)');
 
             stat.text($(this).attr('status') ? "Online" : "Offline");
             stat.removeClass("label-success label-important");
             stat.addClass($(this).attr('status') ? "label-success" : "label-important");
             concurrency.text($(this).attr('concurrency'));
-            completed_tasks.text($(this).attr('completed_tasks'));
-            running_tasks.text($(this).attr('running_tasks'));
-            queues.text($(this).attr('queues').toString().replace(/,/g, ', '));
+            processed.text($(this).attr('processed'));
+            active.text($(this).attr('active'));
+            loadavg.text($(this).attr('loadavg').toString().replace(/,/g, ', '));
+            //queues.text($(this).attr('queues').toString().replace(/,/g, ', '));
         });
     }
 
