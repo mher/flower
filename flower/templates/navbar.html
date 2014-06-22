@@ -9,7 +9,7 @@
       <a class="brand" href="{{ absolute_url('/') }}">Celery Flower</a>
       <div class="nav-collapse">
         <ul class="nav">
-            <li {% if active_tab == "workers" %}class="active"{% end %}><a href="{{ absolute_url('/workers') }}">Workers</a></li>
+            <li {% if active_tab == "dashboard" %}class="active"{% end %}><a href="{{ absolute_url('/dashboard') }}">Dashboard</a></li>
             <li {% if active_tab == "tasks" %}class="active"{% end %}><a href="{{ absolute_url('/tasks?limit=100') }}">Tasks</a></li>
             <li {% if active_tab == "broker" %}class="active"{% end %}><a href="{{ absolute_url('/broker') }}">Broker</a></li>
             <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="{{ absolute_url('/monitor') }}">Monitor</a></li>

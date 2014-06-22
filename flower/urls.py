@@ -2,8 +2,11 @@ from __future__ import absolute_import
 
 from tornado.web import StaticFileHandler
 
+from .views.dashboard import (
+    DashboardView,
+)
+
 from .views.workers import (
-    WorkersView,
     WorkerView,
 )
 
@@ -42,8 +45,8 @@ from .settings import APP_SETTINGS
 
 handlers = [
     # App
-    (r"/", WorkersView),
-    (r"/workers", WorkersView),
+    (r"/", DashboardView),
+    (r"/dashboard", DashboardView),
     (r"/worker/(.+)", WorkerView),
     (r"/task/(.+)", TaskView),
     (r"/tasks", TasksView),

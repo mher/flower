@@ -1,15 +1,11 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="workers", absolute_url=absolute_url) %}
+  {% module Template("navbar.html", active_tab="dashboard", absolute_url=absolute_url) %}
 {% end %}
 
 {% block container %}
   <div class="container-fluid">
-    <div class="page-header">
-      <h1>Workers</h1>
-    </div>
-
     <div class="btn-toolbar">
       <div class="btn-group">
         <button class="btn" onclick="flower.toggle_selected_workers(event);"><input id="select-workers-toggler" type="checkbox" style="margin: 0;"></button>
@@ -36,7 +32,7 @@
       <thead>
       <tr>
         <th style="width: 15px; min-width: 15px;"></th>
-        <th>Name</th>
+        <th>Worker Name</th>
         <th>Status</th>
         <th>Concurrency</th>
         <th>Completed Tasks</th>

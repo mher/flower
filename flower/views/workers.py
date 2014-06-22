@@ -3,17 +3,7 @@ from __future__ import absolute_import
 from tornado import web
 
 from ..views import BaseHandler
-from ..models import WorkersModel, WorkerModel
-
-
-class WorkersView(BaseHandler):
-    @web.authenticated
-    def get(self):
-        app = self.application
-        workers = WorkersModel.get_latest(app).workers
-        broker = app.celery_app.connection().as_uri()
-
-        self.render("workers.html", workers=workers, broker=broker)
+from ..models import WorkerModel
 
 
 class WorkerView(BaseHandler):
