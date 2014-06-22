@@ -49,7 +49,7 @@ setup(
     license='BSD',
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
-    install_requires=['celery', 'tornado'],
+    install_requires=open('requirements/default.txt').read().splitlines(),
     test_suite="tests",
     tests_require=['mock'],
     package_data={'flower': ['templates/*', 'static/**/*', 'static/*.*']},

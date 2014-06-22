@@ -1,5 +1,4 @@
+-r default.txt
 Sphinx
 sphinxcontrib-fulltoc
 sphinxcontrib-httpdomain
-tornado
-celery

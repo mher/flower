@@ -6,7 +6,7 @@ python:
   - "3.3"
   - "3.4"
 install:
-  - pip install -r requirements/default.txt --use-mirrors
+  - pip install -r requirements/dev.txt --use-mirrors
   - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2 importlib ordereddict; fi
 script:
   - python -m tests.__main__
