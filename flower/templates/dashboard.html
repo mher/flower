@@ -41,7 +41,7 @@
       </tr>
       </thead>
       <tbody>
-      {% for name,info in workers.items() %}
+      {% for name, info in workers.items() %}
       <tr id="{{ url_escape(name) }}">
         <td class="is_selected"><input type="checkbox"></td>
         <td><a href="{{ absolute_url('worker/' + name) }}">{{ name }}</a></td>
@@ -53,8 +53,8 @@
           {% end %}
         </td>
         <td>{{ humanize(info['concurrency']) }}</td>
-        <td>{{ info['completed_tasks'] }}</td>
-        <td>{{ info['running_tasks'] }}</td>
+        <td>{{ info['processed'] }}</td>
+        <td>{{ info['active'] }}</td>
         <td>{{ humanize(info['queues']) }}</td>
       </tr>
       {% end %}

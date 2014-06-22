@@ -26,17 +26,14 @@ class WorkersModel(BaseModel):
         super(WorkersModel, self).__init__(app)
         self.workers = OrderedDict()
 
-        state = self.app.state
-        for workername, stat in sorted(state.stats.items()):
-            pool = stat.get('pool') or {}
-            self.workers[workername] = dict(
-                status=(workername in state.ping),
-                concurrency=pool.get('max-concurrency'),
-                completed_tasks=sum(stat.get('total', {}).values()),
-                running_tasks=len(state.active_tasks.get(workername, [])),
-                queues=[x['name'] for x in
-                        state.active_queues.get(workername, []) if x]
-            )
+        state = self.app.events.state
+        for name, worker in sorted(state.workers.items()):
+            self.workers[name] = dict(
+                    status=worker.alive,
+                    concurrency='N/A',
+                    processed=worker.processed,
+                    active=worker.active,
+                    queues='N/A')
 
     @classmethod
     def get_latest(cls, app):
@@ -44,7 +41,7 @@ class WorkersModel(BaseModel):
 
     @classmethod
     def get_workers(cls, app):
-        return list(app.state.stats.keys())
+        return list(app.events.state.workers.keys())
 
     @classmethod
     def is_worker(cls, app, workername):
@@ -60,6 +57,7 @@ class WorkerModel(BaseModel):
 
         state = self.app.state
         self.name = name
+
         self.stats = state.stats[name]
         self.active_tasks = state.active_tasks.get(name, {})
         self.scheduled_tasks = state.scheduled_tasks.get(name, {})
