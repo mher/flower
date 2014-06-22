@@ -1,2 +1,2 @@
 -r default.txt
-mock
+-r test.txt

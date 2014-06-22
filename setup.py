@@ -19,6 +19,10 @@ def get_package_version():
             return ".".join(m.groups()[0].split(", "))
 
 
+def get_requirements(filename):
+    return open('requirements/' + filename).read().splitlines()
+
+
 classes = """
     Development Status :: 4 - Beta
     Intended Audience :: Developers
@@ -49,9 +53,9 @@ setup(
     license='BSD',
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
-    install_requires=open('requirements/default.txt').read().splitlines(),
+    install_requires=get_requirements('default.txt'),
     test_suite="tests",
-    tests_require=['mock'],
+    tests_require=get_requirements('test.txt'),
     package_data={'flower': ['templates/*', 'static/**/*', 'static/*.*']},
     entry_points={
         'console_scripts': [
