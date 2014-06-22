@@ -20,7 +20,9 @@
             <li><a href="#tab-tasks" data-toggle="tab">Tasks</a></li>
             <li><a href="#tab-limits" data-toggle="tab">Limits</a></li>
             <li><a href="#tab-config" data-toggle="tab">Config</a></li>
+            <li><a href="#tab-system" data-toggle="tab">System</a></li>
           </ul>
+
           <div class="tab-content">
             <div class="tab-pane active" id="tab-pool">
 
@@ -98,7 +100,7 @@
               {% end %}
 
             </div> <!-- end pool tab -->
-	    
+
             <div class="tab-pane" id="tab-broker">
               <div class="span6">
                 <table class="table table-bordered table-striped">
@@ -114,7 +116,7 @@
                 </table>
               </div>
             </div> <!-- end broker tab -->
-	    
+
             <div class="tab-pane" id="tab-queues">
               <h3>Active  <small>queues being consumed from</small></h3>
 
@@ -162,7 +164,7 @@
               </tbody>
               </table>
             </div> <!-- end queues tab -->
-	    
+
             <div class="tab-pane" id="tab-tasks">
               <h2>Processed <small>number of completed tasks</small></h2>
               <table class="table table-bordered table-striped">
@@ -272,7 +274,7 @@
                 </tbody>
               </table>
             </div> <!-- end tasks tab -->
-	    
+
             <div class="tab-pane" id="tab-limits">
               <h3>Task limits</h3>
               <table class="table table-bordered table-striped">
@@ -329,6 +331,22 @@
               </table>
             </div>
           </div> <!-- end config tab -->
+
+          <div class="tab-pane" id="tab-system">
+            <div class="span8">
+              <table class="table table-bordered table-striped">
+                <caption>System usage statistics</caption>
+                <tbody>
+                  {% for name, value in worker.stats['rusage'].items() %}
+                      <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ value }}</td>
+                      </tr>
+                  {% end %}
+                </tbody>
+              </table>
+            </div>
+          </div> <!-- end system tab -->
 
 	      </div>
 	    </div>
