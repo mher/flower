@@ -39,7 +39,11 @@
                       {% end %}
                         <tr>
                             <td>Worker PID</td>
-                            <td>{{ worker.stats.get('pid', '')}}</td>
+                            <td>{{ worker.stats.get('pid', 'N/A')}}</td>
+                        </tr>
+                        <tr>
+                            <td>Prefetch Count</td>
+                            <td>{{ worker.stats.get('prefetch_count', 'N/A')}}</td>
                         </tr>
                     </tbody>
                   </table>
