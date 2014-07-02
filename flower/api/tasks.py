@@ -314,7 +314,49 @@ List tasks
         self.write(dict(tasks))
 
 
+class ListTaskTypes(BaseTaskHandler):
+    @web.authenticated
+    def get(self):
+        """
+List (seen) task types
+
+**Example request**:
+
+.. sourcecode:: http
+
+  GET /api/task/types HTTP/1.1
+  Host: localhost:5555
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 44
+  Content-Type: application/json; charset=UTF-8
+
+{
+    "tasks-types": [
+        "tasks.add",
+        "tasks.sleep"
+    ]
+}
+
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+        """
+        app = self.application
+
+        seen_task_types = TaskModel.seen_task_types(app)
+
+        response = {}
+        response['task-types'] = seen_task_types
+        self.write(response)
+
+
 class TaskInfo(BaseTaskHandler):
+    @web.authenticated
     def get(self, taskid):
         """
 Get a task info
@@ -349,7 +391,7 @@ Get a task info
       "kwargs": "{}",
       "name": "tasks.add",
       "received": 1400806241.970742,
-      "result": "'{\"result\": 4}'",
+      "result": "'4'",
       "retried": null,
       "retries": null,
       "revoked": null,

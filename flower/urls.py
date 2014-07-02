@@ -60,6 +60,7 @@ handlers = [
         control.WorkerQueueCancelConsumer),
     # Task API
     (r"/api/tasks", tasks.ListTasks),
+    (r"/api/task/types", tasks.ListTaskTypes),
     (r"/api/task/info/(.*)", tasks.TaskInfo),
     (r"/api/task/async-apply/(.+)", tasks.TaskAsyncApply),
     (r"/api/task/send-task/(.+)", tasks.TaskSend),
