@@ -335,12 +335,12 @@ List (seen) task types
   Content-Length: 44
   Content-Type: application/json; charset=UTF-8
 
-{
-    "task-types": [
-        "tasks.add",
-        "tasks.sleep"
-    ]
-}
+  {
+      "task-types": [
+          "tasks.add",
+          "tasks.sleep"
+      ]
+  }
 
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
