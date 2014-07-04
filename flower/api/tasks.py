@@ -336,7 +336,7 @@ List (seen) task types
   Content-Type: application/json; charset=UTF-8
 
 {
-    "tasks-types": [
+    "task-types": [
         "tasks.add",
         "tasks.sleep"
     ]
