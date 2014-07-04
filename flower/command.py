@@ -75,6 +75,8 @@ class FlowerCommand(Command):
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
+
+        self.app.loader.import_default_modules()
         flower = Flower(celery_app=self.app, options=options,
                         **app_settings)
         atexit.register(flower.stop)
