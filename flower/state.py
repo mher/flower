@@ -80,33 +80,22 @@ class State(threading.Thread):
         while True:
             try:
                 try_interval *= 2
-                logging.debug('Inspecting workers...')
                 stats = i.stats()
-                logging.debug('Stats: %s', pformat(stats))
                 registered = i.registered()
-                logging.debug('Registered: %s', pformat(registered))
                 scheduled = i.scheduled()
-                logging.debug('Scheduled: %s', pformat(scheduled))
                 active = i.active()
-                logging.debug('Active: %s', pformat(active))
                 reserved = i.reserved()
-                logging.debug('Reserved: %s', pformat(reserved))
                 revoked = i.revoked()
-                logging.debug('Revoked: %s', pformat(revoked))
                 ping = i.ping()
-                logging.debug('Ping: %s', pformat(ping))
                 active_queues = i.active_queues()
-                logging.debug('Active queues: %s', pformat(active_queues))
                 # Inspect.conf was introduced in Celery 3.1
                 conf = hasattr(i, 'conf') and i.conf()
-                logging.debug('Conf: %s', pformat(conf))
 
                 try:
                     if broker:
                         broker_queues = broker.queues(self.active_queue_names)
                     else:
                         broker_queues = None
-                    logging.debug('Broker queues: %s', pformat(broker_queues))
                 except Exception as e:
                     broker_queues = []
                     logging.error("Failed to inspect the broker: %s", e)
