@@ -336,7 +336,7 @@ var flower = (function () {
                 processed = tr.children('td:eq(4)'),
                 active = tr.children('td:eq(5)'),
                 loadavg = tr.children('td:eq(6)');
-                //queues = tr.children('td:eq(7)');
+                queues = tr.children('td:eq(7)');
 
             stat.text($(this).attr('status') ? "Online" : "Offline");
             stat.removeClass("label-success label-important");
@@ -345,7 +345,7 @@ var flower = (function () {
             processed.text($(this).attr('processed'));
             active.text($(this).attr('active'));
             loadavg.text($(this).attr('loadavg').toString().replace(/,/g, ', '));
-            //queues.text($(this).attr('queues').toString().replace(/,/g, ', '));
+            queues.text($(this).attr('queues').toString().replace(/,/g, ', '));
         });
     }
 
