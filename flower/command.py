@@ -18,6 +18,9 @@ from . import __version__
 from .app import Flower
 
 
+logger = logging.getLogger(__name__)
+
+
 define("port", default=5555, help="run on the given port", type=int)
 define("address", default='', help="run on the given address", type=str)
 define("debug", default=False, help="run in debug mode", type=bool)
@@ -67,7 +70,7 @@ class FlowerCommand(Command):
         settings.AUTO_REFRESH = options.auto_refresh
 
         if options.debug:
-            logging.getLogger().setLevel(logging.DEBUG)
+            logger.setLevel(logging.DEBUG)
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
@@ -79,18 +82,18 @@ class FlowerCommand(Command):
 
         # graceful shutdown on SIGTERM
         def signal_handler(signal, frame):
-            logging.info('SIGTERM detected, shutting down')
+            logger.info('SIGTERM detected, shutting down')
             sys.exit(0)
         signal.signal(signal.SIGTERM, signal_handler)
 
-        logging.info('Visit me at http%s://%s:%s',
-                     's' if flower.ssl else '',
-                     options.address or 'localhost',
-                     options.port)
-        logging.info('Broker: %s', self.app.connection().as_uri())
-        logging.debug('Registered tasks: \n%s',
-                      pformat(sorted(self.app.tasks.keys())))
-        logging.debug('Settings: %s', pformat(app_settings))
+        logger.info('Visit me at http%s://%s:%s',
+                    's' if flower.ssl else '',
+                    options.address or 'localhost',
+                    options.port)
+        logger.info('Broker: %s', self.app.connection().as_uri())
+        logger.debug('Registered tasks: \n%s',
+                     pformat(sorted(self.app.tasks.keys())))
+        logger.debug('Settings: %s', pformat(app_settings))
 
         try:
             flower.start()
