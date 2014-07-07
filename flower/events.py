@@ -20,6 +20,9 @@ from . import api
 from .settings import CELERY_EVENTS_ENABLE_INTERVAL
 
 
+logger = logging.getLogger(__name__)
+
+
 class EventsState(State):
     # EventsState object is created and accessed only from ioloop thread
 
@@ -51,12 +54,12 @@ class Events(threading.Thread):
         self.state = None
 
         if self._persistent and celery.__version__ < '3.0.15':
-            logging.warning('Persistent mode is available with '
-                            'Celery 3.0.15 and later')
+            logger.warning('Persistent mode is available with '
+                           'Celery 3.0.15 and later')
             self._persistent = False
 
         if self._persistent:
-            logging.debug("Loading state from '%s'...", db)
+            logger.debug("Loading state from '%s'...", db)
             state = shelve.open(self._db)
             if state:
                 self.state = state['events']
@@ -76,7 +79,7 @@ class Events(threading.Thread):
 
     def stop(self):
         if self._persistent:
-            logging.debug("Saving state to '%s'...", self._db)
+            logger.debug("Saving state to '%s'...", self._db)
             state = shelve.open(self._db)
             state['events'] = self.state
             state.close()
@@ -101,20 +104,20 @@ class Events(threading.Thread):
                     import thread
                 thread.interrupt_main()
             except Exception as e:
-                logging.error("Failed to capture events: '%s', "
-                              "trying again in %s seconds.",
-                              e, try_interval)
-                logging.debug(e, exc_info=True)
+                logger.error("Failed to capture events: '%s', "
+                             "trying again in %s seconds.",
+                             e, try_interval)
+                logger.debug(e, exc_info=True)
                 time.sleep(try_interval)
 
     def on_enable_events(self):
         # Periodically enable events for workers
         # launched after flower
-        logging.debug('Enabling events')
+        logger.debug('Enabling events')
         try:
             self._celery_app.control.enable_events()
         except Exception as e:
-            logging.debug("Failed to enable events: '%s'", e)
+            logger.debug("Failed to enable events: '%s'", e)
 
     def on_event(self, event):
         # Call EventsState.event in ioloop thread to avoid synchronization
