@@ -15,6 +15,9 @@ from ..models import TaskModel
 from ..views import BaseHandler
 
 
+logger = logging.getLogger(__name__)
+
+
 class BaseTaskHandler(BaseHandler):
     def get_task_args(self):
         try:
@@ -92,8 +95,8 @@ Execute a task
         celery = self.application.celery_app
 
         args, kwargs, options = self.get_task_args()
-        logging.info("Invoking a task '%s' with '%s' and '%s'",
-                     taskname, args, kwargs)
+        logger.info("Invoking a task '%s' with '%s' and '%s'",
+                    taskname, args, kwargs)
 
         try:
             task = celery.tasks[taskname]
@@ -151,8 +154,8 @@ Execute a task by name (doesn't require task sources)
         celery = self.application.celery_app
 
         args, kwargs, options = self.get_task_args()
-        logging.debug("Invoking task '%s' with '%s' and '%s'",
-                      taskname, args, kwargs)
+        logger.debug("Invoking task '%s' with '%s' and '%s'",
+                     taskname, args, kwargs)
         result = celery.send_task(taskname, args=args,
                                   kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
