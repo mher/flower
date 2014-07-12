@@ -8,6 +8,9 @@ from ..views import BaseHandler
 from ..models import WorkersModel
 
 
+logger = logging.getLogger(__name__)
+
+
 class ControlHandler(BaseHandler):
     def is_worker(self, name):
         return WorkersModel.is_worker(self.application, name)
@@ -56,7 +59,7 @@ Shut down a worker
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
         celery = self.application.celery_app
 
-        logging.info("Shutting down '%s' worker", workername)
+        logger.info("Shutting down '%s' worker", workername)
         celery.control.broadcast('shutdown', destination=[workername])
         self.write(dict(message="Shutting down!"))
 
@@ -97,7 +100,7 @@ Restart worker's pool
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
         celery = self.application.celery_app
 
-        logging.info("Restarting '%s' worker's pool", workername)
+        logger.info("Restarting '%s' worker's pool", workername)
         response = celery.control.broadcast('pool_restart',
                                             arguments={'reload': False},
                                             destination=[workername],
@@ -106,7 +109,7 @@ Restart worker's pool
             self.write(dict(
                 message="Restarting '%s' worker's pool" % workername))
         else:
-            logging.error(response)
+            logger.error(response)
             self.set_status(403)
             self.write("Failed to restart the '%s' pool: %s" % (
                 workername, self.error_reason(workername, response)
@@ -153,14 +156,14 @@ Grow worker's pool
 
         n = self.get_argument('n', default=1, type=int)
 
-        logging.info("Growing '%s' worker's pool by '%s'", workername, n)
+        logger.info("Growing '%s' worker's pool by '%s'", workername, n)
         response = celery.control.pool_grow(n=n, reply=True,
                                             destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(
                 message="Growing '%s' worker's pool by %s" % (workername, n)))
         else:
-            logging.error(response)
+            logger.error(response)
             self.set_status(403)
             self.write("Failed to grow '%s' worker's pool" % (
                 workername, self.error_reason(workername, response)))
@@ -206,14 +209,14 @@ Shrink worker's pool
 
         n = self.get_argument('n', default=1, type=int)
 
-        logging.info("Shrinking '%s' worker's pool by '%s'", workername, n)
+        logger.info("Shrinking '%s' worker's pool by '%s'", workername, n)
         response = celery.control.pool_shrink(n=n, reply=True,
                                               destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(message="Shrinking '%s' worker's pool by %s" % (
                             workername, n)))
         else:
-            logging.error(response)
+            logger.error(response)
             self.set_status(403)
             self.write("Failed to shrink '%s' worker's pool: %s" % (
                 workername, self.error_reason(workername, response)
@@ -263,8 +266,8 @@ Autoscale worker pool
         min = self.get_argument('min', type=int)
         max = self.get_argument('max', type=int)
 
-        logging.info("Autoscaling '%s' worker by '%s'",
-                     workername, (min, max))
+        logger.info("Autoscaling '%s' worker by '%s'",
+                    workername, (min, max))
         response = celery.control.broadcast('autoscale',
                                             arguments={'min': min, 'max': max},
                                             destination=[workername],
@@ -274,7 +277,7 @@ Autoscale worker pool
                                     "(min=%s, max=%s)" % (
                                         workername, min, max)))
         else:
-            logging.error(response)
+            logger.error(response)
             self.set_status(403)
             self.write("Failed to autoscale '%s' worker: %s" % (
                 workername, self.error_reason(workername, response)
@@ -321,8 +324,8 @@ Start consuming from a queue
 
         queue = self.get_argument('queue')
 
-        logging.info("Adding consumer '%s' to worker '%s'",
-                     queue, workername)
+        logger.info("Adding consumer '%s' to worker '%s'",
+                    queue, workername)
         response = celery.control.broadcast('add_consumer',
                                             arguments={'queue': queue},
                                             destination=[workername],
@@ -330,7 +333,7 @@ Start consuming from a queue
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
-            logging.error(response)
+            logger.error(response)
             self.set_status(403)
             self.write("Failed to add '%s' consumer to '%s' worker: %s" % (
                 workername, self.error_reason(workername, response)
@@ -377,8 +380,8 @@ Stop consuming from a queue
 
         queue = self.get_argument('queue')
 
-        logging.info("Canceling consumer '%s' from worker '%s'",
-                     queue, workername)
+        logger.info("Canceling consumer '%s' from worker '%s'",
+                    queue, workername)
         response = celery.control.broadcast('cancel_consumer',
                                             arguments={'queue': queue},
                                             destination=[workername],
@@ -386,7 +389,7 @@ Stop consuming from a queue
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
-            logging.error(response)
+            logger.error(response)
             self.set_status(403)
             self.write(
                 "Failed to cancel '%s' consumer from '%s' worker: %s" % (
@@ -426,7 +429,7 @@ Revoke a task
 :statuscode 200: no error
 :statuscode 401: unauthorized request
         """
-        logging.info("Revoking task '%s'", taskid)
+        logger.info("Revoking task '%s'", taskid)
         celery = self.application.celery_app
         terminate = self.get_argument('terminate', default=False, type=bool)
         celery.control.revoke(taskid, terminate=terminate)
@@ -479,8 +482,8 @@ Change soft and hard time limits for a task
         if workername is not None and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
-        logging.info("Setting timeouts for '%s' task (%s, %s)",
-                     taskname, soft, hard)
+        logger.info("Setting timeouts for '%s' task (%s, %s)",
+                    taskname, soft, hard)
         destination = [workername] if workername is not None else None
         response = celery.control.time_limit(taskname, reply=True,
                                              hard=hard, soft=soft,
@@ -489,7 +492,7 @@ Change soft and hard time limits for a task
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
-            logging.error(response)
+            logger.error(response)
             self.set_status(403)
             self.write("Failed to set timeouts: '%s'" %
                        self.error_reason(taskname, response))
@@ -540,8 +543,8 @@ Change rate limit for a task
         if workername is not None and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
-        logging.info("Setting '%s' rate limit for '%s' task",
-                     ratelimit, taskname)
+        logger.info("Setting '%s' rate limit for '%s' task",
+                    ratelimit, taskname)
         destination = [workername] if workername is not None else None
         response = celery.control.rate_limit(taskname,
                                              ratelimit,
@@ -550,7 +553,7 @@ Change rate limit for a task
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))
         else:
-            logging.error(response)
+            logger.error(response)
             self.set_status(403)
             self.write("Failed to set rate limit: '%s'" %
                        self.error_reason(taskname, response))

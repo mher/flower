@@ -12,6 +12,9 @@ from . import settings
 from ..models import WorkersModel
 
 
+logger = logging.getLogger(__name__)
+
+
 class UpdateWorkers(websocket.WebSocketHandler):
     listeners = []
     periodic_callback = None
@@ -25,7 +28,7 @@ class UpdateWorkers(websocket.WebSocketHandler):
         app = self.application
 
         if not self.listeners:
-            logging.debug('Starting a timer for dashboard updates')
+            logger.debug('Starting a timer for dashboard updates')
             periodic_callback = self.periodic_callback or PeriodicCallback(
                 partial(UpdateWorkers.on_update_time, app),
                 settings.PAGE_UPDATE_INTERVAL)
@@ -40,7 +43,7 @@ class UpdateWorkers(websocket.WebSocketHandler):
         if self in self.listeners:
             self.listeners.remove(self)
         if not self.listeners and self.periodic_callback:
-            logging.debug('Stopping dashboard updates timer')
+            logger.debug('Stopping dashboard updates timer')
             self.periodic_callback.stop()
 
     @classmethod
@@ -49,7 +52,7 @@ class UpdateWorkers(websocket.WebSocketHandler):
         changes = workers.workers
 
         if workers != cls.workers and changes:
-            logging.debug('Sending dashboard updates: %s', pformat(changes))
+            logger.debug('Sending dashboard updates: %s', pformat(changes))
             for l in cls.listeners:
                 l.write_message(changes)
             cls.workers = workers
