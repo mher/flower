@@ -9,6 +9,7 @@ import sys
 from pprint import pformat
 
 from tornado.options import define, options
+from tornado.log import enable_pretty_logging
 from tornado.options import parse_command_line, parse_config_file
 
 from celery.bin.base import Command
@@ -16,9 +17,6 @@ from celery.bin.base import Command
 from . import settings
 from . import __version__
 from .app import Flower
-
-
-logger = logging.getLogger(__name__)
 
 
 define("port", default=5555, help="run on the given port", type=int)
@@ -47,6 +45,9 @@ define("cookie_secret", type=str, default=None, help="secure cookie secret")
 define("conf", default=settings.CONFIG_FILE, help="configuration file")
 
 
+logger = logging.getLogger(__name__)
+
+
 class FlowerCommand(Command):
 
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
@@ -73,8 +74,9 @@ class FlowerCommand(Command):
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
         settings.AUTO_REFRESH = options.auto_refresh
 
-        if options.debug:
-            logger.setLevel(logging.DEBUG)
+        if options.debug and options.logging == 'info':
+            options.logging = 'debug'
+            enable_pretty_logging()
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
