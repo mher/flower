@@ -13,6 +13,9 @@ from . import settings
 from .utils.broker import Broker
 
 
+logger = logging.getLogger(__name__)
+
+
 class State(threading.Thread):
 
     fields = ('stats', 'registered_tasks', 'scheduled_tasks',
@@ -48,13 +51,13 @@ class State(threading.Thread):
             # Celery versions prior to 3 don't have driver_type
             transport = None
         if transport and transport not in ('amqp', 'redis', 'mongodb'):
-            logging.error("Dashboard and worker management commands are "
-                          "not available for '%s' transport", transport)
+            logger.error("Dashboard and worker management commands are "
+                         "not available for '%s' transport", transport)
             return
 
         if celery.__version__ < '3.0.0':
-            logging.warning("Configuration viewer is not available for "
-                            "Celery versions prior to 3.0")
+            logger.warning("Configuration viewer is not available for "
+                           "Celery versions prior to 3.0")
 
         timeout = settings.CELERY_INSPECT_TIMEOUT / 1000.0
         i = self._celery_app.control.inspect(timeout=timeout)
@@ -68,18 +71,19 @@ class State(threading.Thread):
             elif transport == 'redis':
                 broker = Broker(burl)
         except Exception as e:
-            logging.error("Unable to get broker info: %s" % e)
+            logger.error("Unable to get broker info: %s" % e)
 
         if transport == 'amqp' and not self._broker_api:
-            logging.warning("Broker info is not available if --broker_api "
-                            "option is not configured. Also make sure "
-                            "RabbitMQ Management Plugin is enabled ("
-                            "rabbitmq-plugins enable rabbitmq_management)")
+            logger.warning("Broker info is not available if --broker_api "
+                           "option is not configured. Also make sure "
+                           "RabbitMQ Management Plugin is enabled ("
+                           "rabbitmq-plugins enable rabbitmq_management)")
 
         try_interval = 1
         while True:
             try:
                 try_interval *= 2
+<<<<<<< HEAD
                 stats = i.stats()
                 registered = i.registered()
                 scheduled = i.scheduled()
@@ -90,16 +94,38 @@ class State(threading.Thread):
                 active_queues = i.active_queues()
                 # Inspect.conf was introduced in Celery 3.1
                 conf = hasattr(i, 'conf') and i.conf()
+=======
+                logger.debug('Inspecting workers...')
+                stats = i.stats()
+                logger.debug('Stats: %s', pformat(stats))
+                registered = i.registered()
+                logger.debug('Registered: %s', pformat(registered))
+                scheduled = i.scheduled()
+                logger.debug('Scheduled: %s', pformat(scheduled))
+                active = i.active()
+                logger.debug('Active: %s', pformat(active))
+                reserved = i.reserved()
+                logger.debug('Reserved: %s', pformat(reserved))
+                revoked = i.revoked()
+                logger.debug('Revoked: %s', pformat(revoked))
+                ping = i.ping()
+                logger.debug('Ping: %s', pformat(ping))
+                active_queues = i.active_queues()
+                logger.debug('Active queues: %s', pformat(active_queues))
+                # Inspect.conf was introduced in Celery 3.1
+                conf = hasattr(i, 'conf') and i.conf()
+                logger.debug('Conf: %s', pformat(conf))
 
                 try:
                     if broker:
                         broker_queues = broker.queues(self.active_queue_names)
                     else:
                         broker_queues = None
+                    logger.debug('Broker queues: %s', pformat(broker_queues))
                 except Exception as e:
                     broker_queues = []
-                    logging.error("Failed to inspect the broker: %s", e)
-                    logging.debug(e, exc_info=True)
+                    logger.error("Failed to inspect the broker: %s", e)
+                    logger.debug(e, exc_info=True)
 
                 with self._update_lock:
                     self._stats.update(stats or {})
@@ -127,19 +153,19 @@ class State(threading.Thread):
                     import thread
                 thread.interrupt_main()
             except Exception as e:
-                logging.error("Failed to inspect workers: '%s', trying "
-                              "again in %s seconds", e, try_interval)
-                logging.debug(e, exc_info=True)
+                logger.error("Failed to inspect workers: '%s', trying "
+                             "again in %s seconds", e, try_interval)
+                logger.debug(e, exc_info=True)
                 time.sleep(try_interval)
 
     def pause(self):
         "stop inspecting workers until resume is called"
-        logging.debug('Stopping inspecting workers...')
+        logger.debug('Stopping inspecting workers...')
         self._inspect.clear()
 
     def resume(self):
         "resume inspecting workers"
-        logging.debug('Resuming inspecting workers...')
+        logger.debug('Resuming inspecting workers...')
         self._inspect.set()
         self._last_access = time.time()
 

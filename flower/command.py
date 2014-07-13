@@ -9,6 +9,7 @@ import sys
 from pprint import pformat
 
 from tornado.options import define, options
+from tornado.log import enable_pretty_logging
 from tornado.options import parse_command_line, parse_config_file
 
 from celery.bin.base import Command
@@ -44,6 +45,9 @@ define("cookie_secret", type=str, default=None, help="secure cookie secret")
 define("conf", default=settings.CONFIG_FILE, help="configuration file")
 
 
+logger = logging.getLogger(__name__)
+
+
 class FlowerCommand(Command):
 
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
@@ -70,8 +74,9 @@ class FlowerCommand(Command):
         settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
         settings.AUTO_REFRESH = options.auto_refresh
 
-        if options.debug:
-            logging.getLogger().setLevel(logging.DEBUG)
+        if options.debug and options.logging == 'info':
+            options.logging = 'debug'
+            enable_pretty_logging()
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
@@ -83,18 +88,18 @@ class FlowerCommand(Command):
 
         # graceful shutdown on SIGTERM
         def signal_handler(signal, frame):
-            logging.info('SIGTERM detected, shutting down')
+            logger.info('SIGTERM detected, shutting down')
             sys.exit(0)
         signal.signal(signal.SIGTERM, signal_handler)
 
-        logging.info('Visit me at http%s://%s:%s',
-                     's' if flower.ssl else '',
-                     options.address or 'localhost',
-                     options.port)
-        logging.info('Broker: %s', self.app.connection().as_uri())
-        logging.debug('Registered tasks: \n%s',
-                      pformat(sorted(self.app.tasks.keys())))
-        logging.debug('Settings: %s', pformat(app_settings))
+        logger.info('Visit me at http%s://%s:%s',
+                    's' if flower.ssl else '',
+                    options.address or 'localhost',
+                    options.port)
+        logger.info('Broker: %s', self.app.connection().as_uri())
+        logger.debug('Registered tasks: \n%s',
+                     pformat(sorted(self.app.tasks.keys())))
+        logger.debug('Settings: %s', pformat(app_settings))
 
         try:
             flower.start()
