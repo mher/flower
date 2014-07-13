@@ -83,7 +83,6 @@ class State(threading.Thread):
         while True:
             try:
                 try_interval *= 2
-<<<<<<< HEAD
                 stats = i.stats()
                 registered = i.registered()
                 scheduled = i.scheduled()
@@ -94,27 +93,6 @@ class State(threading.Thread):
                 active_queues = i.active_queues()
                 # Inspect.conf was introduced in Celery 3.1
                 conf = hasattr(i, 'conf') and i.conf()
-=======
-                logger.debug('Inspecting workers...')
-                stats = i.stats()
-                logger.debug('Stats: %s', pformat(stats))
-                registered = i.registered()
-                logger.debug('Registered: %s', pformat(registered))
-                scheduled = i.scheduled()
-                logger.debug('Scheduled: %s', pformat(scheduled))
-                active = i.active()
-                logger.debug('Active: %s', pformat(active))
-                reserved = i.reserved()
-                logger.debug('Reserved: %s', pformat(reserved))
-                revoked = i.revoked()
-                logger.debug('Revoked: %s', pformat(revoked))
-                ping = i.ping()
-                logger.debug('Ping: %s', pformat(ping))
-                active_queues = i.active_queues()
-                logger.debug('Active queues: %s', pformat(active_queues))
-                # Inspect.conf was introduced in Celery 3.1
-                conf = hasattr(i, 'conf') and i.conf()
-                logger.debug('Conf: %s', pformat(conf))
 
                 try:
                     if broker:
