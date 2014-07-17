@@ -319,7 +319,7 @@ var flower = (function () {
         });
     }
 
-    function on_workers_table_update(update) {
+    function on_dashboard_update(update) {
         $.each(update, function (name) {
             var id = encodeURIComponent(name),
                 sel = id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/%@])/g,'\\$1'),
@@ -332,20 +332,22 @@ var flower = (function () {
             }
 
             var stat = tr.children('td:eq(2)').children(),
-                concurrency = tr.children('td:eq(3)'),
+                active = tr.children('td:eq(3)'),
                 processed = tr.children('td:eq(4)'),
-                active = tr.children('td:eq(5)'),
-                loadavg = tr.children('td:eq(6)');
-                queues = tr.children('td:eq(7)');
+                failed = tr.children('td:eq(5)'),
+                revoked = tr.children('td:eq(6)');
+                retried = tr.children('td:eq(7)');
+                loadavg = tr.children('td:eq(8)');
 
             stat.text($(this).attr('status') ? "Online" : "Offline");
             stat.removeClass("label-success label-important");
             stat.addClass($(this).attr('status') ? "label-success" : "label-important");
-            concurrency.text($(this).attr('concurrency'));
-            processed.text($(this).attr('processed'));
             active.text($(this).attr('active'));
+            processed.text($(this).attr('processed'));
+            failed.text($(this).attr('failed'));
+            revoked.text($(this).attr('revoked'));
+            retried.text($(this).attr('retried'));
             loadavg.text($(this).attr('loadavg').toString().replace(/,/g, ', '));
-            queues.text($(this).attr('queues').toString().replace(/,/g, ', '));
         });
     }
 
@@ -471,10 +473,10 @@ var flower = (function () {
         if ($.inArray($(location).attr('pathname'), [url_prefix(), url_prefix() + '/workers'])) {
             var host = $(location).attr('host'),
                 protocol = $(location).attr('protocol') == 'http:' ? 'ws://' : 'wss://',
-                ws = new WebSocket(protocol + host + url_prefix() + "/update-workers");
+                ws = new WebSocket(protocol + host + url_prefix() + "/update-dashboard");
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
-                on_workers_table_update(update);
+                on_dashboard_update(update);
             };
         }
 

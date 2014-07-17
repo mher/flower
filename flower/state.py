@@ -5,8 +5,6 @@ import time
 import logging
 import threading
 
-from pprint import pformat
-
 import celery
 
 from . import settings
@@ -99,7 +97,6 @@ class State(threading.Thread):
                         broker_queues = broker.queues(self.active_queue_names)
                     else:
                         broker_queues = None
-                    logger.debug('Broker queues: %s', pformat(broker_queues))
                 except Exception as e:
                     broker_queues = []
                     logger.error("Failed to inspect the broker: %s", e)

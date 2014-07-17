@@ -34,11 +34,12 @@
         <th style="width: 15px; min-width: 15px;"></th>
         <th>Worker Name</th>
         <th>Status</th>
-        <th>Concurrency</th>
-        <th>Processed Tasks</th>
-        <th>Active Tasks</th>
-        <th>Average Load</th>
-        <th>Queues</th>
+        <th>Active</th>
+        <th>Processed</th>
+        <th>Failed</th>
+        <th>Revoked</th>
+        <th>Retried</th>
+        <th>Load Avg</th>
       </tr>
       </thead>
       <tbody>
@@ -53,11 +54,12 @@
           <span class="label label-important">Offline</span>
           {% end %}
         </td>
-        <td>{{ humanize(info['concurrency']) }}</td>
-        <td>{{ info['processed'] }}</td>
         <td>{{ info['active'] }}</td>
+        <td>{{ info.get('task-received', 0) }}</td>
+        <td>{{ info.get('task-failed', 0) }}</td>
+        <td>{{ info.get('task-revoked', 0) }}</td>
+        <td>{{ info.get('task-retried', 0) }}</td>
         <td>{{ humanize(info['loadavg']) }}</td>
-        <td>{{ humanize(info['queues']) }}</td>
       </tr>
       {% end %}
       </tbody>
@@ -75,7 +77,12 @@
               <td class="is_selected"><input type="checkbox"></td>
               <td><a href=""></a></td>
               <td><span class="label label-success">Online</span></td>
-              <td></td><td></td><td></td><td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
           </tr>
       </table>
   </div>

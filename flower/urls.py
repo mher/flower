@@ -4,6 +4,7 @@ from tornado.web import StaticFileHandler
 
 from .views.dashboard import (
     DashboardView,
+    DashboardUpdateHandler,
 )
 
 from .views.workers import (
@@ -26,9 +27,6 @@ from .api import control
 from .api import tasks
 from .api import workers
 
-from .views.update import (
-    UpdateWorkers,
-)
 
 from .views.monitor import (
     Monitor,
@@ -80,7 +78,7 @@ handlers = [
     (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
     (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
     # WebSocket Updates
-    (r"/update-workers", UpdateWorkers),
+    (r"/update-dashboard", DashboardUpdateHandler),
     # Monitors
     (r"/monitor", Monitor),
     (r"/monitor/succeeded-tasks", SucceededTaskMonitor),
