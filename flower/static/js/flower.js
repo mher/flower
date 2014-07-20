@@ -86,6 +86,23 @@ var flower = (function () {
         });
     }
 
+    function on_worker_refresh(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        $.ajax({
+            type: 'GET',
+            url: window.location.pathname,
+            data: 'refresh=1',
+            success: function (data) {
+                show_success_alert('Refreshed');
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
     function on_pool_grow(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -590,6 +607,7 @@ var flower = (function () {
         shutdown_selected: shutdown_selected,
         restart_selected: restart_selected,
         on_alert_close: on_alert_close,
+        on_worker_refresh: on_worker_refresh,
         on_pool_grow: on_pool_grow,
         on_pool_shrink: on_pool_shrink,
         on_pool_autoscale: on_pool_autoscale,
