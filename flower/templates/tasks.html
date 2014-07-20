@@ -101,7 +101,10 @@
     <tbody>
     {% for uuid, task in tasks %}
     <tr>
-      <td>{{ getattr(task, 'name', None) }}</td>
+       {% if getattr(task, 'name', None) is None %}
+           {% continue %}
+       {% end %}
+      <td>{{ task.name }}</td>
       <td><a href="{{ absolute_url('/task/' + task.uuid) }}">{{ task.uuid }}</a></td>
       <td>
         {% if task.state == "SUCCESS" %}
@@ -114,7 +117,13 @@
       </td>
       <td>{{ humanize(task.args, length=20) }}</td>
       <td>{{ humanize(task.kwargs, length=20) }}</td>
-      <td>{{ task.result }}</td>
+      <td>
+          {% if task.state == "SUCCESS" %}
+            {{ task.result }}
+          {% elif task.state == "FAILURE" %}
+            {{ task.exception }}
+          {% end %}
+      </td>
       <td>{{ humanize(task.received, type='time') }}</td>
       <td>{{ humanize(task.started, type='time') }}</td>
     </tr>
