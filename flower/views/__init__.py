@@ -4,6 +4,8 @@ import re
 import inspect
 import traceback
 
+from distutils.util import strtobool
+
 try:
     from urllib.parse import urljoin
 except ImportError:
@@ -97,7 +99,10 @@ class BaseHandler(tornado.web.RequestHandler):
         arg = super(BaseHandler, self).get_argument(name, default, strip)
         if type is not None:
             try:
-                arg = type(arg)
+                if type is bool:
+                    arg = strtobool(str(arg))
+                else:
+                    arg = type(arg)
             except (ValueError, TypeError):
                 if arg is None and default is None:
                     return arg
