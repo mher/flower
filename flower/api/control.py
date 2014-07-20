@@ -1,19 +1,41 @@
 from __future__ import absolute_import
 
 import logging
+import collections
 
 from tornado import web
+from tornado import gen
 
 from ..views import BaseHandler
-from ..models import WorkersModel
 
 
 logger = logging.getLogger(__name__)
 
 
 class ControlHandler(BaseHandler):
-    def is_worker(self, name):
-        return WorkersModel.is_worker(self.application, name)
+    INSPECT_METHODS = ('stats', 'registered', 'scheduled', 'active',
+                       'reserved', 'revoked', 'active_queues', 'conf')
+    worker_cache = collections.defaultdict(dict)
+
+    @gen.coroutine
+    def update_cache(self, workername=None):
+        logger.debug('Updating worker cache...')
+        app = self.application
+
+        futures = []
+        inspect = app.celery_app.control.inspect(destination=[workername])
+        for method in self.INSPECT_METHODS:
+            futures.append(app.delay(getattr(inspect, method)))
+
+        results = yield futures
+
+        for i, response in enumerate(results):
+            for worker in response or {}:
+                info = self.worker_cache[worker]
+                info[self.INSPECT_METHODS[i]] = response[worker]
+
+    def is_worker(self, workername):
+        return workername in self.worker_cache
 
     def error_reason(self, workername, response):
         "extracts error message from response"
