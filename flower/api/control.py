@@ -7,6 +7,7 @@ from tornado import web
 from tornado import gen
 
 from ..views import BaseHandler
+from ..settings import CELERY_INSPECT_TIMEOUT
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,8 @@ class ControlHandler(BaseHandler):
         app = self.application
 
         futures = []
-        inspect = app.celery_app.control.inspect(destination=[workername])
+        timeout = CELERY_INSPECT_TIMEOUT / 1000.0
+        inspect = app.celery_app.control.inspect(timeout=timeout, destination=[workername])
         for method in self.INSPECT_METHODS:
             futures.append(app.delay(getattr(inspect, method)))
 
