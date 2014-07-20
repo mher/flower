@@ -6,7 +6,6 @@ except ImportError:
     from urlparse import urlparse, parse_qsl
     from urllib import urlencode
 
-import os
 import re
 import tornado.web
 import tornado.auth
@@ -27,20 +26,15 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
             callback_uri = self.absolute_url('/login')
             callback_uri += '?' + urlencode(dict(next=next))
 
-        self.settings[self._OAUTH_SETTINGS_KEY] = {
-          'key': os.environ.get('GOOGLE_OAUTH2_KEY'),
-          'secret': os.environ.get('GOOGLE_OAUTH2_SECRET'),
-        }
-
         if self.get_argument('code', False):
             self.get_authenticated_user(
-                redirect_uri=os.environ.get('GOOGLE_REDIRECT_URI'),
+                redirect_uri=self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri'],
                 code=self.get_argument('code'),
                 callback=self.async_callback(self._on_auth),
             )
         else:
             self.authorize_redirect(
-                redirect_uri=os.environ.get('GOOGLE_REDIRECT_URI'),
+                redirect_uri=self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri'],
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['profile', 'email'],
                 response_type='code',
