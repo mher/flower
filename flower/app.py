@@ -2,6 +2,9 @@ from __future__ import absolute_import
 
 import os
 
+from functools import partial
+from concurrent.futures import ThreadPoolExecutor
+
 import tornado.web
 from tornado import ioloop
 
@@ -13,6 +16,9 @@ from flower.urls import handlers
 
 
 class Flower(tornado.web.Application):
+    pool_executor_cls = ThreadPoolExecutor
+    max_workers = 4
+
     def __init__(self, celery_app=None, events=None, state=None,
                  io_loop=None, options=None, **kwargs):
         kwargs.update(handlers=handlers)
@@ -41,6 +47,7 @@ class Flower(tornado.web.Application):
         self.state = State(celery_app, self.broker_api)
 
     def start(self):
+        self._pool = self.pool_executor_cls(max_workers=self.max_workers)
         self.events.start()
         if self.options.inspect:
             self.state.start()
@@ -50,3 +57,7 @@ class Flower(tornado.web.Application):
 
     def stop(self):
         self.events.stop()
+        self._pool.shutdown(wait=False)
+
+    def delay(self, method, *args, **kwargs):
+        return self._pool.submit(partial(method, *args, **kwargs))
