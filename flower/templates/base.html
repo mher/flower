@@ -34,12 +34,8 @@
   </head>
 
   <body>
-      <script type="text/javascript">
-          var prefix = "{{ url_prefix }}"
-      </script>
-
     {% block navbar %}
-    {% module Template("navbar.html", active_tab="", absolute_url=absolute_url) %}
+    {% module Template("navbar.html", active_tab="") %}
     {% end %}
 
     <div class="container-fluid">

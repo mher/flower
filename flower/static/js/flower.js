@@ -50,7 +50,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'POST',
-                url: url_prefix() + '/api/worker/shutdown/' + worker_name,
+                url: '/api/worker/shutdown/' + worker_name,
                 dataType: 'json',
                 data: { workername: worker_name },
                 success: function (data) {
@@ -73,7 +73,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'POST',
-                url: url_prefix() + '/api/worker/pool/restart/' + worker_name,
+                url: '/api/worker/pool/restart/' + worker_name,
                 dataType: 'json',
                 data: { workername: worker_name },
                 success: function (data) {
@@ -113,7 +113,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/worker/pool/grow/' + workername,
+            url: '/api/worker/pool/grow/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -137,7 +137,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/worker/pool/shrink/' + workername,
+            url: '/api/worker/pool/shrink/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -162,7 +162,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/worker/pool/autoscale/' + workername,
+            url: '/api/worker/pool/autoscale/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -187,7 +187,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/worker/queue/add-consumer/' + workername,
+            url: '/api/worker/queue/add-consumer/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -196,7 +196,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-queues').load(url_prefix() + '/worker/' + workername + ' #tab-queues').fadeIn('show');
+                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -214,7 +214,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/worker/queue/cancel-consumer/' + workername,
+            url: '/api/worker/queue/cancel-consumer/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -223,7 +223,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-queues').load(url_prefix() + '/worker/' + workername + ' #tab-queues').fadeIn('show');
+                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -251,7 +251,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/task/timeout/' + workername,
+            url: '/api/task/timeout/' + workername,
             dataType: 'json',
             data: data,
             success: function (data) {
@@ -275,7 +275,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/task/rate-limit/' + workername,
+            url: '/api/task/rate-limit/' + workername,
             dataType: 'json',
             data: {
                 'taskname': taskname,
@@ -284,7 +284,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-limits').load(url_prefix() + '/worker/' + workername + ' #tab-limits').fadeIn('show');
+                    $('#tab-limits').load('/worker/' + workername + ' #tab-limits').fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -301,7 +301,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/task/revoke/' + taskid,
+            url: '/api/task/revoke/' + taskid,
             dataType: 'json',
             data: {
                 'terminate': false,
@@ -323,7 +323,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/task/revoke/' + taskid,
+            url: '/api/task/revoke/' + taskid,
             dataType: 'json',
             data: {
                 'terminate': true,
@@ -346,7 +346,7 @@ var flower = (function () {
             if (tr.length === 0) {
                 $('#workers-table-row').clone().removeClass('hidden').attr('id', id).appendTo('tbody');
                 tr = $('#' + sel);
-                tr.children('td').children('a').attr('href', url_prefix() + '/worker/' + name).text(name);
+                tr.children('td').children('a').attr('href', '/worker/' + name).text(name);
             }
 
             var stat = tr.children('td:eq(2)').children(),
@@ -474,24 +474,16 @@ var flower = (function () {
                         now.getUTCMinutes(), now.getUTCSeconds())/1000;
     }
 
-    function url_prefix() {
-        // prefix is initialized in base.html
-        if (prefix) {
-            return '/' + prefix;
-        }
-        return '';
-    }
-
     $.urlParam = function(name){
         var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
         return results && results[1] || 0;
     }
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), [url_prefix(), url_prefix() + '/workers'])) {
+        if ($.inArray($(location).attr('pathname'), ['/', '/workers'])) {
             var host = $(location).attr('host'),
                 protocol = $(location).attr('protocol') == 'http:' ? 'ws://' : 'wss://',
-                ws = new WebSocket(protocol + host + url_prefix() + "/update-dashboard");
+                ws = new WebSocket(protocol + host + "/update-dashboard");
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
                 on_dashboard_update(update);
@@ -514,7 +506,7 @@ var flower = (function () {
             });
         });
 
-        if ($(location).attr('pathname') === url_prefix() + '/monitor') {
+        if ($(location).attr('pathname') === '/monitor') {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
                 tts = current_unix_time(),
@@ -526,7 +518,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: url_prefix() + '/monitor/succeeded-tasks',
+                url: '/monitor/succeeded-tasks',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     succeeded_graph = create_graph(data, '-succeeded');
@@ -535,7 +527,7 @@ var flower = (function () {
                     succeeded_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(succeeded_graph,
-                                     url_prefix() + '/monitor/succeeded-tasks',
+                                     '/monitor/succeeded-tasks',
                                      sts);
                         sts = current_unix_time();
                     }, updateinterval);
@@ -545,7 +537,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: url_prefix() + '/monitor/completion-time',
+                url: '/monitor/completion-time',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     time_graph = create_graph(data, '-time');
@@ -554,7 +546,7 @@ var flower = (function () {
                     time_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(time_graph,
-                                     url_prefix() + '/monitor/completion-time',
+                                     '/monitor/completion-time',
                                      tts);
                         tts = current_unix_time();
                     }, updateinterval);
@@ -564,7 +556,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: url_prefix() + '/monitor/failed-tasks',
+                url: '/monitor/failed-tasks',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     failed_graph = create_graph(data, '-failed');
@@ -573,7 +565,7 @@ var flower = (function () {
                     failed_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(failed_graph,
-                                     url_prefix() + '/monitor/failed-tasks',
+                                     '/monitor/failed-tasks',
                                      fts);
                         fts = current_unix_time();
                     }, updateinterval);
@@ -583,7 +575,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: url_prefix() + '/monitor/broker',
+                url: '/monitor/broker',
                 success: function (data) {
                     broker_graph = create_graph(data, '-broker');
                     broker_graph.update();
@@ -591,7 +583,7 @@ var flower = (function () {
                     broker_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(broker_graph,
-                                     url_prefix() + '/monitor/broker');
+                                     '/monitor/broker');
                     }, updateinterval);
 
                 },

@@ -34,7 +34,6 @@ define("basic_auth", type=str, default=None, multiple=True,
 define("oauth2_key", type=str, default=None, help="Google oauth2 key (requires --auth)")
 define("oauth2_secret", type=str, default=None, help="Google oauth2 secret (requires --auth)")
 define("oauth2_redirect_uri", type=str, default=None, help="Google oauth2 redirect uri (requires --auth)")
-define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
 define("db", type=str, default='flower', help="flower database file")
@@ -48,6 +47,9 @@ define("xheaders", type=bool, default=False,
 define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 define("cookie_secret", type=str, default=None, help="secure cookie secret")
 define("conf", default=settings.CONFIG_FILE, help="configuration file")
+
+# deprecated options
+define("url_prefix", type=str, help="base url prefix")
 
 
 logger = logging.getLogger(__name__)
@@ -72,11 +74,8 @@ class FlowerCommand(Command):
             app_settings['cookie_secret'] = options.cookie_secret
 
         if options.url_prefix:
-            prefix = options.url_prefix.strip('/')
-            app_settings['static_url_prefix'] = '/{0}/static/'.format(prefix)
-            app_settings['login_url'] = '/{0}/login'.format(prefix)
-            settings.URL_PREFIX = prefix
-        settings.CELERY_INSPECT_TIMEOUT = options.inspect_timeout
+            logger.error('url_prefix option is not supported anymore')
+
         settings.AUTO_REFRESH = options.auto_refresh
 
         if options.debug and options.logging == 'info':

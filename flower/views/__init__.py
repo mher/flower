@@ -27,8 +27,6 @@ class BaseHandler(tornado.web.RequestHandler):
         functions = inspect.getmembers(template, inspect.isfunction)
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
-        kwargs.update(absolute_url=self.absolute_url)
-        kwargs.update(url_prefix=settings.URL_PREFIX)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
@@ -83,17 +81,6 @@ class BaseHandler(tornado.web.RequestHandler):
             if re.search(self.application.auth, user):
                 return user
         return None
-
-    def absolute_url(self, url):
-        if settings.URL_PREFIX:
-            base = "{0}://{1}/{2}/".format(self.request.protocol,
-                                           self.request.host,
-                                           settings.URL_PREFIX)
-        else:
-            base = '/'
-        aurl = urljoin(base, url[1:] if url.startswith('/') else url)
-        aurl = aurl[:-1] if aurl.endswith('/') else aurl
-        return aurl
 
     def get_argument(self, name, default=[], strip=True, type=None):
         arg = super(BaseHandler, self).get_argument(name, default, strip)
