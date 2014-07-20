@@ -41,9 +41,11 @@ class ControlHandler(BaseHandler):
         "extracts error message from response"
         for r in response:
             try:
-                return r[workername].get('error', 'Unknown error')
+                return r[workername].get('error', 'Unknown reason')
             except KeyError:
                 pass
+        logger.error("Failed to extract error reason from '%s'", response)
+        return 'Unknown reason'
 
 
 class WorkerShutDown(ControlHandler):
