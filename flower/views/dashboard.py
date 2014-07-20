@@ -48,12 +48,14 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
         app = self.application
 
         if not self.listeners:
-            logger.debug('Starting a timer for dashboard updates')
-            periodic_callback = self.periodic_callback or PeriodicCallback(
-                partial(DashboardUpdateHandler.on_update_time, app),
-                settings.PAGE_UPDATE_INTERVAL)
-            if not periodic_callback._running:
-                periodic_callback.start()
+            if self.periodic_callback is None:
+                cls = DashboardUpdateHandler
+                cls.periodic_callback = PeriodicCallback(
+                    partial(cls.on_update_time, app),
+                    settings.PAGE_UPDATE_INTERVAL)
+            if not self.periodic_callback._running:
+                logger.debug('Starting a timer for dashboard updates')
+                self.periodic_callback.start()
         self.listeners.append(self)
 
     def on_message(self, message):

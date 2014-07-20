@@ -480,7 +480,7 @@ var flower = (function () {
     }
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), ['/', '/workers'])) {
+        if ($.inArray($(location).attr('pathname'), ['/', '/dashboard']) != -1) {
             var host = $(location).attr('host'),
                 protocol = $(location).attr('protocol') == 'http:' ? 'ws://' : 'wss://',
                 ws = new WebSocket(protocol + host + "/update-dashboard");
