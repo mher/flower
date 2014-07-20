@@ -96,6 +96,7 @@ var flower = (function () {
             data: 'refresh=1',
             success: function (data) {
                 show_success_alert('Refreshed');
+                window.location.reload();
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -352,8 +353,8 @@ var flower = (function () {
                 active = tr.children('td:eq(3)'),
                 processed = tr.children('td:eq(4)'),
                 failed = tr.children('td:eq(5)'),
-                revoked = tr.children('td:eq(6)');
-                retried = tr.children('td:eq(7)');
+                revoked = tr.children('td:eq(6)'),
+                retried = tr.children('td:eq(7)'),
                 loadavg = tr.children('td:eq(8)');
 
             stat.text($(this).attr('status') ? "Online" : "Offline");
