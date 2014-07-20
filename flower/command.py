@@ -5,12 +5,14 @@ import atexit
 import logging
 import signal
 import sys
+import os
 
 from pprint import pformat
 
 from tornado.options import define, options
 from tornado.log import enable_pretty_logging
 from tornado.options import parse_command_line, parse_config_file
+from tornado.auth import GoogleOAuth2Mixin
 
 from celery.bin.base import Command
 
@@ -29,6 +31,9 @@ define("auth", default='', type=str,
        help="regexp of emails to grant access")
 define("basic_auth", type=str, default=None, multiple=True,
        help="enable http basic authentication")
+define("oauth2_key", type=str, default=None, help="Google oauth2 key (requires --auth)")
+define("oauth2_secret", type=str, default=None, help="Google oauth2 secret (requires --auth)")
+define("oauth2_redirect_uri", type=str, default=None, help="Google oauth2 redirect uri (requires --auth)")
 define("url_prefix", type=str, help="base url prefix")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
@@ -77,6 +82,13 @@ class FlowerCommand(Command):
         if options.debug and options.logging == 'info':
             options.logging = 'debug'
             enable_pretty_logging()
+
+        if options.auth:
+            app_settings[GoogleOAuth2Mixin._OAUTH_SETTINGS_KEY] = {
+              'key': options.oauth2_key or os.environ.get('GOOGLE_OAUTH2_KEY'),
+              'secret': options.oauth2_secret or os.environ.get('GOOGLE_OAUTH2_SECRET'),
+              'redirect_uri': options.oauth2_redirect_uri or os.environ.get('GOOGLE_OAUTH2_REDIRECT_URI'),
+            }
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
