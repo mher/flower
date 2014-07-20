@@ -121,7 +121,7 @@
           {% if task.state == "SUCCESS" %}
             {{ task.result }}
           {% elif task.state == "FAILURE" %}
-            {{ task.error_message }}
+            {{ task.exception }}
           {% end %}
       </td>
       <td>{{ humanize(task.received, type='time') }}</td>
