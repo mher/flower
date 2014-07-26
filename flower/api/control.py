@@ -52,6 +52,14 @@ class ControlHandler(BaseHandler):
         logger.error("Failed to extract error reason from '%s'", response)
         return 'Unknown reason'
 
+    @classmethod
+    def get_active_queue_names(cls):
+        queues = set([])
+        for worker, info in cls.worker_cache.items():
+            for q in info.get('active_queues', []):
+                queues.update(map(lambda x: x['name'], q))
+        return queues
+
 
 class WorkerShutDown(ControlHandler):
     @web.authenticated

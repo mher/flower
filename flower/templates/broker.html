@@ -7,7 +7,7 @@
 {% block container %}
   <div class="container-fluid">
     <div class="page-header">
-        <h3><small>Broker:</small> {{ broker.url }}</h3>
+        <h3><small>Broker:</small> {{ broker_url }}</h3>
     </div>
 
     <table id="queue-table" class="table table-bordered table-striped">
@@ -23,7 +23,7 @@
         </tr>
       </thead>
       <tbody>
-      {% for queue in broker.queues %}
+      {% for queue in queues %}
         <tr id="{{ url_escape(queue['name']) }}">
             <td>{{ queue['name'] }}</td>
             <td>{{ queue.get('messages', 'N/A') }}</td>

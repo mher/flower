@@ -61,3 +61,11 @@ class Flower(tornado.web.Application):
 
     def delay(self, method, *args, **kwargs):
         return self._pool.submit(partial(method, *args, **kwargs))
+
+    @property
+    def transport(self):
+        try:
+            return self.celery_app.connection().transport.driver_type
+        except AttributeError:
+            # Celery versions prior to 3 don't have driver_type
+            return None
