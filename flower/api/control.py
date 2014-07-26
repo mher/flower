@@ -57,7 +57,7 @@ class ControlHandler(BaseHandler):
         queues = set([])
         for worker, info in cls.worker_cache.items():
             for q in info.get('active_queues', []):
-                queues.update(map(lambda x: x['name'], q))
+                queues.add(q['name'])
         return queues
 
 
