@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ControlHandler(BaseHandler):
     INSPECT_METHODS = ('stats', 'registered', 'scheduled', 'active',
-                       'reserved', 'revoked', 'active_queues', 'conf')
+                       'reserved', 'revoked', 'conf', 'active_queues')
     worker_cache = collections.defaultdict(dict)
 
     @gen.coroutine
@@ -31,10 +31,13 @@ class ControlHandler(BaseHandler):
 
         results = yield futures
 
-        for i, response in enumerate(results):
-            for worker in response or {}:
-                info = self.worker_cache[worker]
-                info[self.INSPECT_METHODS[i]] = response[worker]
+        for i, result in enumerate(results):
+            if result is None:
+                continue
+            for worker, response in result.items():
+                if response:
+                    info = self.worker_cache[worker]
+                    info[self.INSPECT_METHODS[i]] = response
 
     def is_worker(self, workername):
         return workername in self.worker_cache
