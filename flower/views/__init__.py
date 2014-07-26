@@ -20,9 +20,6 @@ from ..utils import template, bugreport
 
 class BaseHandler(tornado.web.RequestHandler):
 
-    def prepare(self):
-        self.application.state.resume()
-
     def render(self, *args, **kwargs):
         functions = inspect.getmembers(template, inspect.isfunction)
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())

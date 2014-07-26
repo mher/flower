@@ -44,7 +44,6 @@ class Flower(tornado.web.Application):
                                        persistent=persistent,
                                        io_loop=self.io_loop,
                                        max_tasks_in_memory=max_tasks)
-        self.state = State(celery_app, self.broker_api)
 
     def start(self):
         self._pool = self.pool_executor_cls(max_workers=self.max_workers)
