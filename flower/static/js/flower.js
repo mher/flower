@@ -275,9 +275,10 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/rate-limit/' + workername,
+            url: '/api/task/rate-limit/' + taskname,
             dataType: 'json',
             data: {
+                'workername': workername,
                 'taskname': taskname,
                 'ratelimit': ratelimit,
             },

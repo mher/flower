@@ -40,7 +40,7 @@ class ControlHandler(BaseHandler):
                     info[self.INSPECT_METHODS[i]] = response
 
     def is_worker(self, workername):
-        return workername in self.worker_cache
+        return workername and workername in self.worker_cache
 
     def error_reason(self, workername, response):
         "extracts error message from response"
