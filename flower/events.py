@@ -90,7 +90,6 @@ class Events(threading.Thread):
             state = shelve.open(self._db)
             state['events'] = self.state
             state.close()
-        print dict(self.state.counter)
 
     def run(self):
         try_interval = 1
