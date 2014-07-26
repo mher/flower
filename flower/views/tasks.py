@@ -5,13 +5,13 @@ import celery
 from tornado import web
 
 from ..views import BaseHandler
-from ..models import TaskModel, WorkersModel
+from ..utils.tasks import iter_tasks, get_task_by_id
 
 
 class TaskView(BaseHandler):
     @web.authenticated
     def get(self, task_id):
-        task = TaskModel.get_task_by_id(self.application, task_id)
+        task = get_task_by_id(self.application, task_id)
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
 
@@ -31,10 +31,10 @@ class TasksView(BaseHandler):
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
-        tasks = TaskModel.iter_tasks(app, limit=limit, type=type,
-                                     worker=worker, state=state)
-        workers = WorkersModel.get_workers(app)
-        seen_task_types = TaskModel.seen_task_types(app)
+        tasks = iter_tasks(app, limit=limit, type=type,
+                           worker=worker, state=state)
+        workers = app.events.state.workers
+        seen_task_types = app.events.state.task_types()
 
         self.render("tasks.html", tasks=tasks,
                     task_types=seen_task_types,
