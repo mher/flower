@@ -4,7 +4,7 @@ import json
 
 from tornado import web
 from tornado import gen
-from tornado.httpclient import AsyncHTTPClient
+from tornado import httpclient
 
 from ..views import BaseHandler
 
@@ -20,11 +20,11 @@ class WorkerView(BaseHandler):
         if refresh:
             url += '&refresh=%s' % refresh
 
-        http_client = AsyncHTTPClient()
+        http_client = httpclient.AsyncHTTPClient()
         try:
             response = yield http_client.fetch(url)
             worker = json.loads(response.body)[name]
-        except AttributeError:
+        except (AttributeError, httpclient.HTTPError):
             raise web.HTTPError(404, "Unknown worker '%s'" % name)
         finally:
             http_client.close()
