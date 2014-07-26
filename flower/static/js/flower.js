@@ -244,14 +244,13 @@ var flower = (function () {
 
         taskname = taskname.split(' ')[0]; // removes [rate_limit=xxx]
 
-        console.log(type);
-
         data.taskname = taskname;
+        data.workername = workername;
         data[type] = timeout;
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/timeout/' + workername,
+            url: '/api/task/timeout/' + taskname,
             dataType: 'json',
             data: data,
             success: function (data) {
