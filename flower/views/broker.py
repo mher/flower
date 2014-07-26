@@ -12,13 +12,14 @@ class BrokerView(BaseHandler):
     @web.authenticated
     @gen.coroutine
     def get(self):
-        app = self.application
-        broker_url = app.celery_app.connection().as_uri()
+        app = self.application.celery_app
         if app.transport == 'amqp' and app.broker_api:
             mgmnt_api = self.broker_api
         else:
             mgmnt_api = None
-        broker = Broker(broker_url, mgmnt_api=mgmnt_api)
+        broker = Broker(app.connection().as_uri(include_password=True),
+                        mgmnt_api=mgmnt_api)
         queue_names = ControlHandler.get_active_queue_names()
         queues = yield broker.queues(queue_names)
-        self.render("broker.html", broker_url=broker_url, queues=queues)
+        self.render("broker.html", broker_url=app.connection().as_uri(),
+                                   queues=queues)
