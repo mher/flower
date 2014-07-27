@@ -25,7 +25,8 @@ class ControlHandler(BaseHandler):
 
         futures = []
         timeout = CELERY_INSPECT_TIMEOUT / 1000.0
-        inspect = app.celery_app.control.inspect(timeout=timeout, destination=[workername])
+        destination = [workername] if workername else None
+        inspect = app.celery_app.control.inspect(timeout=timeout, destination=destination)
         for method in self.INSPECT_METHODS:
             futures.append(app.delay(getattr(inspect, method)))
 

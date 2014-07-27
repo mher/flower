@@ -53,7 +53,7 @@ List workers
         """
         refresh = self.get_argument('refresh', default=False, type=bool)
         workername = self.get_argument('workername', default=None)
-        if not refresh and workername in self.worker_cache:
+        if self.worker_cache and not refresh and workername in self.worker_cache:
             self.write({workername:self.worker_cache[workername]})
             return
 
