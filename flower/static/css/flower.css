@@ -131,3 +131,13 @@
 .span6 table caption + tbody tr td:first-child {
     width: 25%;
 }
+.btn-group-justified{
+    display: inline-block;
+    width: 100%;
+    float: left;
+}
+.btn-group-justified .btn{
+    display: table-cell !important;
+    float: none;
+    width: 1%;
+}
