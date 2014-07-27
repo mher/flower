@@ -47,8 +47,6 @@ class Flower(tornado.web.Application):
     def start(self):
         self._pool = self.pool_executor_cls(max_workers=self.max_workers)
         self.events.start()
-        if self.options.inspect:
-            self.state.start()
         self.listen(self.options.port, address=self.options.address,
                     ssl_options=self.ssl, xheaders=self.options.xheaders)
         self.io_loop.start()
