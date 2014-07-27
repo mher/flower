@@ -11,7 +11,6 @@ from tornado import ioloop
 import celery
 
 from flower.events import Events
-from flower.state import State
 from flower.urls import handlers
 
 
