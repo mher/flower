@@ -14,6 +14,9 @@
         <a id="btn-retried" class="btn btn-default btn-large" href="/tasks?limit=100&state=RETRY">Retried: {{ sum(map(lambda x:x.get('task-retried', 0), workers.values() )) }}</a>
     </div>
 
+    <div class="panel panel-default">
+        <div class="panel-body">
+
     <div class="btn-toolbar">
       <div class="btn-group">
         <button class="btn" onclick="flower.toggle_selected_workers(event);"><input id="select-workers-toggler" type="checkbox" style="margin: 0;"></button>
@@ -72,6 +75,9 @@
       {% end %}
       </tbody>
     </table>
+
+        </div>
+    </div>
 
     <p>
     <strong>Broker:</strong> {{ broker }}
