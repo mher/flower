@@ -87,6 +87,7 @@ Execute a task
 
 :query args: a list of arguments
 :query kwargs: a dictionary of arguments
+:query options: a dictionary of `apply_async` keyword arguments
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
