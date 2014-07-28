@@ -18,7 +18,7 @@ class Flower(tornado.web.Application):
     pool_executor_cls = ThreadPoolExecutor
     max_workers = 4
 
-    def __init__(self, celery_app=None, events=None, state=None,
+    def __init__(self, celery_app=None, events=None,
                  io_loop=None, options=None, **kwargs):
         kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
