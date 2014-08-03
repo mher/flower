@@ -30,7 +30,7 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
             self.get_authenticated_user(
                 redirect_uri=self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri'],
                 code=self.get_argument('code'),
-                callback=self.async_callback(self._on_auth),
+                callback=self._on_auth,
             )
         else:
             self.authorize_redirect(
