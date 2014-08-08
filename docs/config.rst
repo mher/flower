@@ -90,6 +90,8 @@ Flower uses `RabbitMQ Managment Plugin`_ to get info about queues.
 
     $ rabbitmq-plugins enable rabbitmq_management
 
+.. Note:: The port number for RabbitMQ versions prior to 3.0 is 55672.
+
 .. _`RabbitMQ Managment Plugin`: https://www.rabbitmq.com/management.html
 
 .. _certfile:
