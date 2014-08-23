@@ -1,3 +1,2 @@
 celery
 tornado>=3.2.0
-mock
