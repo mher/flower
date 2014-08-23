@@ -7,6 +7,7 @@ python:
   - "3.4"
 install:
   - pip install -r requirements/dev.txt --use-mirrors
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2 importlib ordereddict; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2 importlib ordereddict futures; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install futures; fi
 script:
   - python -m tests.__main__
