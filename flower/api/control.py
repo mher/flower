@@ -165,7 +165,7 @@ Grow worker's pool
         else:
             logger.error(response)
             self.set_status(403)
-            self.write("Failed to grow '%s' worker's pool" % (
+            self.write("Failed to grow '%s' worker's pool: %s" % (
                 workername, self.error_reason(workername, response)))
 
 
