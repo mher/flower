@@ -95,7 +95,7 @@ var flower = (function () {
             url: window.location.pathname,
             data: 'refresh=1',
             success: function (data) {
-                show_success_alert('Refreshed');
+                //show_success_alert('Refreshed');
                 window.location.reload();
             },
             error: function (data) {
