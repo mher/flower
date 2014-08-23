@@ -3,8 +3,8 @@ from tests import AsyncHTTPTestCase
 
 
 class AuthTests(AsyncHTTPTestCase):
-    def get_app(self, celery_app=None, events=None, state=None):
-        super(AuthTests, self).get_app(celery_app, events, state)
+    def get_app(self, celery_app=None, events=None):
+        super(AuthTests, self).get_app(celery_app, events)
         self.app.basic_auth = "hello:world"
         return self.app
 
