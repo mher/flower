@@ -20,18 +20,15 @@ class BrokerView(BaseHandler):
         app = self.application
         capp = app.celery_app
 
+        mgmnt_api = None
+
         if app.transport == 'amqp' and app.broker_api:
             mgmnt_api = app.broker_api
-        elif app.transport == 'amqp' and not app.broker_api:
-            logger.warning("Broker info is not available if --broker_api "
-                           "option is not configured. Make sure "
-                           "RabbitMQ Management Plugin is enabled ("
-                           "rabbitmq-plugins enable rabbitmq_management)")
-        else:
-            mgmnt_api = None
+
         broker = Broker(capp.connection().as_uri(include_password=True),
                         mgmnt_api=mgmnt_api)
         queue_names = ControlHandler.get_active_queue_names()
         queues = yield broker.queues(queue_names)
+
         self.render("broker.html", broker_url=capp.connection().as_uri(),
                                    queues=queues)
