@@ -32,7 +32,7 @@ class DashboardView(BaseHandler):
 
     @classmethod
     def _as_dict(cls, worker):
-        return {k: worker.__getattribute__(k) for k in worker._fields}
+        return dict((k, worker.__getattribute__(k)) for k in worker._fields)
 
 
 class DashboardUpdateHandler(websocket.WebSocketHandler):
