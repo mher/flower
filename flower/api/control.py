@@ -7,38 +7,43 @@ from tornado import web
 from tornado import gen
 
 from ..views import BaseHandler
-from ..settings import CELERY_INSPECT_TIMEOUT
 
 
 logger = logging.getLogger(__name__)
 
 
 class ControlHandler(BaseHandler):
-    INSPECT_METHODS = ('stats', 'registered', 'scheduled', 'active',
-                       'reserved', 'revoked', 'conf', 'active_queues')
+    INSPECT_METHODS = ('stats', 'active_queues', 'registered', 'scheduled',
+                       'active', 'reserved', 'revoked', 'conf')
     worker_cache = collections.defaultdict(dict)
 
     @gen.coroutine
     def update_cache(self, workername=None):
-        logger.debug('Updating worker cache...')
-        app = self.application
+        yield self.update_workers(workername=workername,
+                                  app=self.application)
+
+    @classmethod
+    @gen.coroutine
+    def update_workers(cls, app, workername=None):
+        logger.debug("Updating %s worker's cache...", workername or 'all')
 
         futures = []
-        timeout = CELERY_INSPECT_TIMEOUT / 1000.0
         destination = [workername] if workername else None
+        timeout = app.options.inspect_timeout /1000.0
         inspect = app.celery_app.control.inspect(timeout=timeout, destination=destination)
-        for method in self.INSPECT_METHODS:
+        for method in cls.INSPECT_METHODS:
             futures.append(app.delay(getattr(inspect, method)))
 
         results = yield futures
 
         for i, result in enumerate(results):
             if result is None:
+                logger.warning("'%s' inspect method failed", cls.INSPECT_METHODS[i])
                 continue
             for worker, response in result.items():
                 if response:
-                    info = self.worker_cache[worker]
-                    info[self.INSPECT_METHODS[i]] = response
+                    info = cls.worker_cache[worker]
+                    info[cls.INSPECT_METHODS[i]] = response
 
     def is_worker(self, workername):
         return workername and workername in self.worker_cache

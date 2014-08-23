@@ -57,7 +57,8 @@ List workers
             self.write({workername:self.worker_cache[workername]})
             return
 
-        yield self.update_cache(workername=workername)
+        if refresh:
+            yield self.update_cache(workername=workername)
 
         if workername and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
