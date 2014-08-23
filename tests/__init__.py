@@ -21,6 +21,7 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
         state = state or State(celery_app)
         self.app = Flower(celery_app=celery_app, events=events,
                           state=state, handlers=handlers, **APP_SETTINGS)
+        self.app.delay = lambda method, *args, **kwargs: method(*args, **kwargs)
         return self.app
 
     def get(self, url, **kwargs):
