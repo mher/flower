@@ -50,17 +50,19 @@ class RabbitMQ(BrokerBase):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
-        self.port = int(self.port or 5672)
+        self.port = 15672
         self.vhost = quote(self.vhost, '') or '/'
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
+
+        if not mgmnt_api:
+            mgmnt_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
+                    self.username, self.password, self.host, self.vhost)
 
         self._mgmnt_api = mgmnt_api
 
     @gen.coroutine
     def queues(self, names):
-        if not self._mgmnt_api.endswith('/'):
-            self._mgmnt_api += '/'
         url = urljoin(self._mgmnt_api, 'queues/' + self.vhost)
         api_url = urlparse(self._mgmnt_api)
         username = unquote(api_url.username or '') or self.username
@@ -71,8 +73,10 @@ class RabbitMQ(BrokerBase):
             response = yield http_client.fetch(
                     url, auth_username=username, auth_password=password)
         except (socket.error, httpclient.HTTPError) as e:
-            logger.error("RabbitMQ managment API call failed: %s", e)
-            return
+            logger.error("RabbitMQ management API call failed: %s", e)
+            logger.error("Make sure RabbitMQ Management Plugin is enabled "
+                         "(rabbitmq-plugins enable rabbitmq_management)")
+            raise gen.Return([])
         finally:
             http_client.close()
 
