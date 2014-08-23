@@ -24,7 +24,7 @@ class TestRabbitMQ(unittest.TestCase):
     def test_url(self):
         b = RabbitMQ('amqp://user:pass@host:10000/vhost', '')
         self.assertEqual('host', b.host)
-        self.assertEqual(10000, b.port)
+        self.assertEqual(15672, b.port)
         self.assertEqual('vhost', b.vhost)
         self.assertEqual('user', b.username)
         self.assertEqual('pass', b.password)
@@ -33,7 +33,7 @@ class TestRabbitMQ(unittest.TestCase):
         for url in ['amqp://', 'amqp://localhost']:
             b = RabbitMQ(url, '')
             self.assertEqual('localhost', b.host)
-            self.assertEqual(5672, b.port)
+            self.assertEqual(15672, b.port)
             self.assertEqual('/', b.vhost)
             self.assertEqual('guest', b.username)
             self.assertEqual('guest', b.password)
