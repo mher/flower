@@ -221,21 +221,18 @@ var flower = (function () {
         var workername = $('#workername').text(),
             taskname = $(event.target).closest("tr").children("td:eq(0)").text(),
             type = $(event.target).html().toLowerCase(),
-            timeout = $(event.target).siblings().closest("input").val(),
-            data = {};
+            timeout = $(event.target).siblings().closest("input").val();
 
         taskname = taskname.split(' ')[0]; // removes [rate_limit=xxx]
 
-        console.log(type);
-
-        data.taskname = taskname;
-        data[type] = timeout;
-
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/task/timeout/' + workername,
+            url: url_prefix() + '/api/task/timeout/' + taskname,
             dataType: 'json',
-            data: data,
+            data: {
+                'workername': workername,
+                'type': timeout,
+            },
             success: function (data) {
                 show_success_alert(data.message);
             },
@@ -257,10 +254,10 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/task/rate-limit/' + workername,
+            url: url_prefix() + '/api/task/rate-limit/' + taskname,
             dataType: 'json',
             data: {
-                'taskname': taskname,
+                'workername': workername,
                 'ratelimit': ratelimit,
             },
             success: function (data) {
