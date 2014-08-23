@@ -570,7 +570,7 @@ Change rate limit for a task
       "message": "Revoked '1480b55c-b8b2-462c-985e-24af3e9158f9'"
   }
 
-:query terminate: terminate the task if it is running
+:query workername: worker name
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request

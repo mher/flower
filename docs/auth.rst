@@ -23,19 +23,26 @@ See also :ref:`reverse-proxy`
 
 .. _google-openid:
 
-Google OpenID
--------------
+Google OAuth 2.0
+----------------
 
-Flower also supports Google OpenID. This way you can authenticate any user
-with a Google account. Google OpenID authentication is enabled using the
---auth option, which accepts a group of emails in the form of a regular
-expression.
+Flower also supports Google OAuth 2.0. This way you can authenticate any user
+with a Google account. Google OAuth 2.0 authentication is enabled using the
+--auth, --oauth2_key, --oauth2_secret and --oauth2_redirect_uri options.
 
-Grant access to Google accounts with email `me@gmail.com` and
-`you@gmail.com`: ::
+--auth is a regular expression, for granting access only to the specified email pattern.
+--oauth2_key and --oauth2_secret are your credentials from your `Google Developer Console`_.
+--oauth2_redirect_uri is there to specify what is the redirect_uri associated to you key and secret
 
-    $ celery flower --auth="me@gmail.com|you@gmail.com"
+For instance, if you want to grant access to `me@gmail.com` and `you@gmail.com`: ::
 
-Grant access to all Google accounts having a domain of `example.com`: ::
+    $ celery flower --auth="me@gmail.com|you@gmail.com" --oauth2_key=... --oauth2_secret=... --auth2_redirect_uri=http://flower.example.com/login
+
+Alternatively you can set environment variables instead of command line arguments: ::
  
+    $ export GOOGLE_OAUTH2_KEY=...
+    $ export GOOGLE_OAUTH2_SECRET=...
+    $ export GOOGLE_OAUTH2_REDIRECT_URI=http://flower.example.com/login
     $ celery flower --auth=.*@example\.com
+    
+.. _Google Developer Console: https://console.developers.google.com

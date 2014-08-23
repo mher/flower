@@ -239,20 +239,18 @@ var flower = (function () {
         var workername = $('#workername').text(),
             taskname = $(event.target).closest("tr").children("td:eq(0)").text(),
             type = $(event.target).html().toLowerCase(),
-            timeout = $(event.target).siblings().closest("input").val(),
-            data = {};
+            timeout = $(event.target).siblings().closest("input").val();
 
         taskname = taskname.split(' ')[0]; // removes [rate_limit=xxx]
 
-        data.taskname = taskname;
-        data.workername = workername;
-        data[type] = timeout;
-
         $.ajax({
             type: 'POST',
-            url: '/api/task/timeout/' + taskname,
+            url: url_prefix() + '/api/task/timeout/' + taskname,
             dataType: 'json',
-            data: data,
+            data: {
+                'workername': workername,
+                'type': timeout,
+            },
             success: function (data) {
                 show_success_alert(data.message);
             },
@@ -278,7 +276,6 @@ var flower = (function () {
             dataType: 'json',
             data: {
                 'workername': workername,
-                'taskname': taskname,
                 'ratelimit': ratelimit,
             },
             success: function (data) {
