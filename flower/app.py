@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import os
+import logging
 
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
@@ -12,6 +13,10 @@ import celery
 
 from flower.events import Events
 from flower.urls import handlers
+from flower.api import control
+
+
+logger = logging.getLogger(__name__)
 
 
 class Flower(tornado.web.Application):
@@ -49,6 +54,9 @@ class Flower(tornado.web.Application):
         self.events.start()
         self.listen(self.options.port, address=self.options.address,
                     ssl_options=self.ssl, xheaders=self.options.xheaders)
+        self.io_loop.add_future(
+                control.ControlHandler.update_workers(app=self),
+                callback=lambda x: logger.debug('Updated workers cache'))
         self.io_loop.start()
 
     def stop(self):
