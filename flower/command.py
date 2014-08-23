@@ -24,7 +24,7 @@ from .app import Flower
 define("port", default=5555, help="run on the given port", type=int)
 define("address", default='', help="run on the given address", type=str)
 define("debug", default=False, help="run in debug mode", type=bool)
-define("inspect_timeout", default=1000, type=float,
+define("inspect_timeout", default=settings.CELERY_INSPECT_TIMEOUT, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
        help="regexp of emails to grant access")
