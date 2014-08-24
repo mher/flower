@@ -25,9 +25,7 @@ class SucceededTaskMonitor(BaseHandler):
 
         data = defaultdict(int)
         for _, task in state.itertasks():
-            utcoffset = getattr(task, 'utcoffset', 0)
-            if (timestamp < (task.timestamp + (utcoffset * 3600))
-                    and task.state == states.SUCCESS):
+            if (timestamp < task.timestamp and task.state == states.SUCCESS):
                 data[task.worker.hostname] += 1
         for worker in state.workers:
             if worker not in data:
@@ -46,9 +44,7 @@ class TimeToCompletionMonitor(BaseHandler):
         queue_time = 0
         num_tasks = 0
         for _, task in state.itertasks():
-            utcoffset = getattr(task, 'utcoffset', 0)
-            if (timestamp < (task.timestamp + (utcoffset * 3600))
-                    and task.state == states.SUCCESS):
+            if (timestamp < task.timestamp and task.state == states.SUCCESS):
                 # eta can make "time in queue" look really scary.
                 if task.eta is not None:
                     continue
@@ -79,9 +75,7 @@ class FailedTaskMonitor(BaseHandler):
 
         data = defaultdict(int)
         for _, task in state.itertasks():
-            utcoffset = getattr(task, 'utcoffset', 0)
-            if (timestamp < (task.timestamp + (utcoffset * 3600))
-                    and task.state == states.FAILURE):
+            if (timestamp < task.timestamp and task.state == states.FAILURE):
                 data[task.worker.hostname] += 1
         for worker in state.workers:
             if worker not in data:
