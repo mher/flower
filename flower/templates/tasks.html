@@ -105,7 +105,7 @@
            {% continue %}
        {% end %}
       <td>{{ task.name }}</td>
-      <td><a href="{{ absolute_url('/task/' + task.uuid) }}">{{ task.uuid }}</a></td>
+      <td><a href="{{ absolute_url('/task/' + str(task.uuid)) }}">{{ task.uuid }}</a></td>
       <td>
         {% if task.state == "SUCCESS" %}
           <span class="label label-success">{{ task.state }}</span>
