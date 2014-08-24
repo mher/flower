@@ -358,8 +358,8 @@ var flower = (function () {
 
     function create_graph(data, id, width, height) {
         id = id || '';
-        width = width || 700;
-        height = height || 400;
+        width = width || 500;
+        height = height || 300;
 
         var name, seriesData = [];
         for (name in data) {
@@ -375,13 +375,20 @@ var flower = (function () {
             renderer: 'stack',
             series: new Rickshaw.Series(seriesData, palette),
             maxDataPoints: 10000,
+            padding: {top: 0.1, left: 0.01, right: 0.01, bottom: 0.01},
         });
 
         var ticksTreatment = 'glow';
 
+        var timeUnit = new Rickshaw.Fixtures.Time.Local();
+        timeUnit.formatTime = function(d) { return moment(d).format("yyyy.mm.dd HH:mm:ss"); }
+        timeUnit.unit("minute");
+
         var xAxis = new Rickshaw.Graph.Axis.Time({
             graph: graph,
+            timeFixture: new Rickshaw.Fixtures.Time.Local(),
             ticksTreatment: ticksTreatment,
+            timeUnit: timeUnit
         });
 
         xAxis.render();
@@ -389,18 +396,14 @@ var flower = (function () {
         var yAxis = new Rickshaw.Graph.Axis.Y({
             graph: graph,
             tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-            ticksTreatment: ticksTreatment
+            ticksTreatment: ticksTreatment,
         });
 
         yAxis.render();
 
-        var slider = new Rickshaw.Graph.RangeSlider({
-            graph: graph,
-            element: $('#slider' + id)
-        });
-
         var hoverDetail = new Rickshaw.Graph.HoverDetail({
-            graph: graph
+            graph: graph,
+            yFormatter: function(y) { return Math.round(y) }
         });
 
         var legend = new Rickshaw.Graph.Legend({
