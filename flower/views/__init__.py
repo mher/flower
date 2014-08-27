@@ -25,7 +25,7 @@ class BaseHandler(tornado.web.RequestHandler):
         functions = inspect.getmembers(template, inspect.isfunction)
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
-        kwargs.update(absolute_url=self.absolute_url)
+        kwargs.update(build_url=self.build_url)
         kwargs.update(url_prefix=settings.URL_PREFIX)
         super(BaseHandler, self).render(*args, **kwargs)
 
@@ -82,11 +82,9 @@ class BaseHandler(tornado.web.RequestHandler):
                 return user
         return None
 
-    def absolute_url(self, url):
+    def build_url(self, url):
         if settings.URL_PREFIX:
-            base = "{0}://{1}/{2}/".format(self.request.protocol,
-                                           self.request.host,
-                                           settings.URL_PREFIX)
+            base = "/{0}/".format(settings.URL_PREFIX)
         else:
             base = '/'
         aurl = urljoin(base, url[1:] if url.startswith('/') else url)

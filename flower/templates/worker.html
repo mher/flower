@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="workers", absolute_url=absolute_url) %}
+  {% module Template("navbar.html", active_tab="workers", build_url=build_url) %}
 {% end %}
 
 {% block container %}
@@ -195,7 +195,7 @@
                   {% for task in worker.active_tasks %}
                     <tr>
                       <td>{{ task['name'] }}</td>
-                      <td><a href="{{ absolute_url('/task/' + task['id']) }}">{{ task['id'] }}</a></td>
+                      <td><a href="{{ build_url('/task/' + task['id']) }}">{{ task['id'] }}</a></td>
                       <td>{{ humanize(task['time_start'], type='time') }}</td>
                       <td>{{ task['acknowledged'] }}</td>
                       <td>{{ task['worker_pid'] }}</td>
@@ -220,7 +220,7 @@
                   {% for task in worker.scheduled_tasks %}
                     <tr>
                       <td>{{ task['request']['name'] }}</td>
-                      <td><a href="{{ absolute_url('/task/' + task['request']['id']) }}">{{ task['request']['id'] }}</a></td>
+                      <td><a href="{{ build_url('/task/' + task['request']['id']) }}">{{ task['request']['id'] }}</a></td>
                       <td>{{ task['request']['args'] }}</td>
                       <td>{{ task['request']['kwargs'] }}</td>
                     </tr>
@@ -242,7 +242,7 @@
                   {% for task in worker.reserved_tasks %}
                     <tr>
                       <td>{{ task['name'] }}</td>
-                      <td><a href="{{ absolute_url('/task/' + task['id']) }}">{{ task['id'] }}</a></td>
+                      <td><a href="{{ build_url('/task/' + task['id']) }}">{{ task['id'] }}</a></td>
                       <td>{{ task['args'] }}</td>
                       <td>{{ task['kwargs'] }}</td>
                     </tr>
@@ -264,7 +264,7 @@
                   {% for task in worker.revoked_tasks %}
                     <tr>
                       <td></td>
-                      <td><a href="{{ absolute_url('/task/' + task) }}">{{ task }}</a></td>
+                      <td><a href="{{ build_url('/task/' + task) }}">{{ task }}</a></td>
                       <td></td>
                       <td></td>
                     </tr>

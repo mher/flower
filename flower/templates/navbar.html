@@ -6,13 +6,13 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a class="brand" href="{{ absolute_url('/') }}">Celery Flower</a>
+      <a class="brand" href="{{ build_url('/') }}">Celery Flower</a>
       <div class="nav-collapse">
         <ul class="nav">
-            <li {% if active_tab == "workers" %}class="active"{% end %}><a href="{{ absolute_url('/workers') }}">Workers</a></li>
-            <li {% if active_tab == "tasks" %}class="active"{% end %}><a href="{{ absolute_url('/tasks?limit=100') }}">Tasks</a></li>
-            <li {% if active_tab == "broker" %}class="active"{% end %}><a href="{{ absolute_url('/broker') }}">Broker</a></li>
-            <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="{{ absolute_url('/monitor') }}">Monitor</a></li>
+            <li {% if active_tab == "workers" %}class="active"{% end %}><a href="{{ build_url('/workers') }}">Workers</a></li>
+            <li {% if active_tab == "tasks" %}class="active"{% end %}><a href="{{ build_url('/tasks?limit=100') }}">Tasks</a></li>
+            <li {% if active_tab == "broker" %}class="active"{% end %}><a href="{{ build_url('/broker') }}">Broker</a></li>
+            <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="{{ build_url('/monitor') }}">Monitor</a></li>
           <li><a href="http://flower.readthedocs.org" target="_blank">Docs</a></li>
           <li><a href="https://github.com/mher/flower" target="_blank">About</a></li>
         </ul>
