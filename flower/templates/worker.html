@@ -196,7 +196,7 @@
                     <tr>
                       <td>{{ task['name'] }}</td>
                       <td><a href="{{ absolute_url('/task/' + task['id']) }}">{{ task['id'] }}</a></td>
-                      <td>{{ humanize(task['time_start'], type='time') }}</td>
+                      <td>{{ humanize_monotonic_time(task['time_start']) }}</td>
                       <td>{{ task['acknowledged'] }}</td>
                       <td>{{ task['worker_pid'] }}</td>
                       <td>{{ task['args'] }}</td>

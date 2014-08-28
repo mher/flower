@@ -1,6 +1,8 @@
 import unittest
 
-from flower.utils.template import humanize, format_time
+from flower.utils.template import humanize, format_time, humanize_monotonic_time
+from celery.five import monotonic
+from time import time
 
 
 class TestHumanize(unittest.TestCase):
@@ -49,6 +51,9 @@ class TestHumanize(unittest.TestCase):
         self.assertEqual(1343911558.305793, humanize(1343911558.305793))
         self.assertEqual(format_time(1343911558.305793),
                          humanize(1343911558.305793, type='time'))
+
+    def test_monotonic_time(self):
+        self.assertEqual(humanize(time(), "time"), humanize_monotonic_time(monotonic()))
 
     def test_strings(self):
         self.assertEqual('Max tasks per child',

@@ -41,3 +41,9 @@ def humanize(obj, type=None, length=None):
     if length is not None and len(obj) > length:
         obj = obj[:length - 4] + ' ...'
     return obj
+
+from celery.five import monotonic
+from time import time
+def humanize_monotonic_time(obj):
+    dt = monotonic() - float(obj)
+    return humanize(time() - dt, 'time')
