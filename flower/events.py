@@ -80,7 +80,7 @@ class Events(threading.Thread):
 
     def start(self):
         threading.Thread.start(self)
-        # Celery versions prior to 3 don't support enable_events
+        # Celery versions prior to 2 don't support enable_events
         if celery.VERSION[0] > 2:
             self._timer.start()
 
