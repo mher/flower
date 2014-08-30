@@ -115,8 +115,8 @@
           <span class="label label-default">{{ task.state }}</span>
         {% end %}
       </td>
-      <td>{{ humanize(task.args, length=20) }}</td>
-      <td>{{ humanize(task.kwargs, length=20) }}</td>
+      <td>{{ task.args }}</td>
+      <td>{{ task.kwargs }}</td>
       <td>
           {% if task.state == "SUCCESS" %}
             {{ task.result }}
