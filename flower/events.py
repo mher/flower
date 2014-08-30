@@ -50,7 +50,7 @@ class EventsState(State):
 class Events(threading.Thread):
 
     def __init__(self, celery_app, db=None, persistent=False,
-                 io_loop=None, **kwargs):
+                 enable_events=True, io_loop=None, **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
@@ -59,6 +59,7 @@ class Events(threading.Thread):
         self._db = db
         self._persistent = persistent
         self.state = None
+        self.enable_events = enable_events
 
         if self._persistent and celery.__version__ < '3.0.15':
             logger.warning('Persistent mode is available with '
@@ -81,7 +82,7 @@ class Events(threading.Thread):
     def start(self):
         threading.Thread.start(self)
         # Celery versions prior to 2 don't support enable_events
-        if celery.VERSION[0] > 2:
+        if self.enable_events and celery.VERSION[0] > 2:
             self._timer.start()
 
     def stop(self):

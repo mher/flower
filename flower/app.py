@@ -46,6 +46,7 @@ class Flower(tornado.web.Application):
         max_tasks = options.max_tasks if options else None
         self.events = events or Events(celery_app, db=db,
                                        persistent=persistent,
+                                       enable_events=options.enable_events,
                                        io_loop=self.io_loop,
                                        max_tasks_in_memory=max_tasks)
 
