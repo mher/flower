@@ -1,5 +1,8 @@
 from __future__ import absolute_import
 
+import copy
+from itertools import imap
+
 import celery
 
 from tornado import web
@@ -33,6 +36,7 @@ class TasksView(BaseHandler):
 
         tasks = iter_tasks(app, limit=limit, type=type,
                            worker=worker, state=state)
+        tasks = imap(self.format_task, tasks)
         workers = app.events.state.workers
         seen_task_types = app.events.state.task_types()
 
@@ -44,3 +48,11 @@ class TasksView(BaseHandler):
                     worker=worker,
                     type=type,
                     state=state)
+
+    def format_task(self, args):
+        uuid, task = args
+        custom_format_task = self.application.format_task
+
+        if custom_format_task:
+            task = custom_format_task(copy.copy(task))
+        return uuid, task
