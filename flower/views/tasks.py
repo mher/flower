@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 
 import copy
-from itertools import imap
+try:
+    from itertools import imap
+except ImportError:
+    imap = map
 
 import celery
 
