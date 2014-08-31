@@ -124,8 +124,8 @@
             {{ task.exception }}
           {% end %}
       </td>
-      <td>{{ humanize(task.received, type='time') }}</td>
-      <td>{{ humanize(task.started, type='time') }}</td>
+      <td>{{ humanize(task.received, type=time) }}</td>
+      <td>{{ humanize(task.started, type=time) }}</td>
     </tr>
     {% end %}
   </table>

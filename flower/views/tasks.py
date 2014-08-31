@@ -39,6 +39,7 @@ class TasksView(BaseHandler):
         tasks = imap(self.format_task, tasks)
         workers = app.events.state.workers
         seen_task_types = app.events.state.task_types()
+        time = 'natural-time' if app.natural_time else 'time'
 
         self.render("tasks.html", tasks=tasks,
                     task_types=seen_task_types,
@@ -47,7 +48,8 @@ class TasksView(BaseHandler):
                     limit=limit,
                     worker=worker,
                     type=type,
-                    state=state)
+                    state=state,
+                    time=time)
 
     def format_task(self, args):
         uuid, task = args
