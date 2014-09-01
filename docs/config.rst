@@ -123,12 +123,36 @@ debug
 
 Enable the debug mode (by default, `debug=False`)
 
-.. _inspect:
+.. _enable_events:
 
-inspect
-~~~~~~~
+enable_events
+~~~~~~~~~~~~~
 
-Enable inspecting running workers (by default, `inspect=True`).
+Periodically enable Celery events by using `enable_events` command
+(by default, `enable_event=True`)
+
+.. _format_task:
+
+format_task
+~~~~~~~~~~~
+
+Modifies the default task formatting. `format_task` function should be
+defined in the `flowerconfig.py` configuration file. It accepts a task
+object and returns the modified version.
+
+`format_task` is useful for filtering out sensitive information.
+
+The example below shows how to filter arguments and limit display lengths.::
+
+.. code-block:: python
+
+    from flower.utils.template import humanize
+
+    def format_task2(task):
+        task.args = humanize(task.args, length=10)
+        task.kwargs.pop('credit_card_number')
+        task.result = humanize(task.result, length=20)
+        return task
 
 .. _inspect_timeout:
 
@@ -152,6 +176,13 @@ max_tasks
 
 Maximum number of tasks to keep in memory (by default, `max_tasks=10000`)
 
+.. _natural_time:
+
+natural_time
+~~~~~~~~~~~~
+
+Show time relative to the refresh time (by default, `natural_time=True`)
+
 .. _persistent:
 
 persistent
@@ -166,33 +197,6 @@ port
 ~~~~
 
 Run the http server on a given port (by default, `port=5555`)
-
-.. _url_prefix:
-
-url_prefix
-~~~~~~~~~~
-
-Enables deploying Flower on non-root URL.
-
-For example to access Flower on http://example.com/flower run it with: ::
-
-    $ flower -A proj --url_prefix=flower
-
-And use the following `nginx` configuration:
-
-.. code-block:: nginx
-
-    server {
-        listen 80;
-        server_name example.com;
-
-        location /flower/ {
-            rewrite ^/flower/(.*)$ /$1 break;
-            proxy_pass http://example.com:5555;
-            proxy_set_header Host $host;
-        }
-
-    }
 
 .. _xheaders:
 
