@@ -441,7 +441,12 @@ var flower = (function () {
 
         var hoverDetail = new Rickshaw.Graph.HoverDetail({
             graph: graph,
-            yFormatter: function(y) { return Math.round(y) }
+            yFormatter: function(y) {
+                if (y % 1 === 0)
+                    return y;
+                else
+                    return y.toFixed(2);
+            }
         });
 
         var legend = new Rickshaw.Graph.Legend({
