@@ -1,13 +1,14 @@
 from __future__ import absolute_import
 
 from tornado import web
+from tornado import gen
 
-from ..models import WorkersModel
-from ..views import BaseHandler
+from .control import ControlHandler
 
 
-class ListWorkers(BaseHandler):
+class ListWorkers(ControlHandler):
     @web.authenticated
+    @gen.coroutine
     def get(self):
         """
 List workers
@@ -50,5 +51,19 @@ List workers
 :statuscode 200: no error
 :statuscode 401: unauthorized request
         """
-        app = self.application
-        self.write(WorkersModel.get_latest(app).workers)
+        refresh = self.get_argument('refresh', default=False, type=bool)
+        workername = self.get_argument('workername', default=None)
+        if self.worker_cache and not refresh and workername in self.worker_cache:
+            self.write({workername:self.worker_cache[workername]})
+            return
+
+        if refresh:
+            yield self.update_cache(workername=workername)
+
+        if workername and not self.is_worker(workername):
+            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+
+        if workername:
+            self.write({workername:self.worker_cache[workername]})
+        else:
+            self.write(self.worker_cache)

@@ -19,6 +19,10 @@ def get_package_version():
             return ".".join(m.groups()[0].split(", "))
 
 
+def get_requirements(filename):
+    return open('requirements/' + filename).read().splitlines()
+
+
 classes = """
     Development Status :: 4 - Beta
     Intended Audience :: Developers
@@ -26,10 +30,8 @@ classes = """
     Topic :: System :: Distributed Computing
     Programming Language :: Python
     Programming Language :: Python :: 2
-    Programming Language :: Python :: 2.6
     Programming Language :: Python :: 2.7
     Programming Language :: Python :: 3
-    Programming Language :: Python :: 3.2
     Programming Language :: Python :: 3.3
     Programming Language :: Python :: 3.4
     Programming Language :: Python :: Implementation :: CPython
@@ -49,9 +51,9 @@ setup(
     license='BSD',
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
-    install_requires=['celery', 'tornado'],
+    install_requires=get_requirements('default.txt'),
     test_suite="tests",
-    tests_require=['mock'],
+    tests_require=get_requirements('test.txt'),
     package_data={'flower': ['templates/*', 'static/**/*', 'static/*.*']},
     entry_points={
         'console_scripts': [

@@ -4,6 +4,8 @@ import re
 import inspect
 import traceback
 
+from distutils.util import strtobool
+
 try:
     from urllib.parse import urljoin
 except ImportError:
@@ -18,15 +20,10 @@ from ..utils import template, bugreport
 
 class BaseHandler(tornado.web.RequestHandler):
 
-    def prepare(self):
-        self.application.state.resume()
-
     def render(self, *args, **kwargs):
         functions = inspect.getmembers(template, inspect.isfunction)
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
-        kwargs.update(absolute_url=self.absolute_url)
-        kwargs.update(url_prefix=settings.URL_PREFIX)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
@@ -82,22 +79,14 @@ class BaseHandler(tornado.web.RequestHandler):
                 return user
         return None
 
-    def absolute_url(self, url):
-        if settings.URL_PREFIX:
-            base = "{0}://{1}/{2}/".format(self.request.protocol,
-                                           self.request.host,
-                                           settings.URL_PREFIX)
-        else:
-            base = '/'
-        aurl = urljoin(base, url[1:] if url.startswith('/') else url)
-        aurl = aurl[:-1] if aurl.endswith('/') else aurl
-        return aurl
-
     def get_argument(self, name, default=[], strip=True, type=None):
         arg = super(BaseHandler, self).get_argument(name, default, strip)
         if type is not None:
             try:
-                arg = type(arg)
+                if type is bool:
+                    arg = strtobool(str(arg))
+                else:
+                    arg = type(arg)
             except (ValueError, TypeError):
                 if arg is None and default is None:
                     return arg

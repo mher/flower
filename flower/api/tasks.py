@@ -11,7 +11,7 @@ from celery import states
 from celery.result import AsyncResult
 from celery.backends.base import DisabledBackend
 
-from ..models import TaskModel
+from ..utils import tasks
 from ..views import BaseHandler
 
 
@@ -87,6 +87,7 @@ Execute a task
 
 :query args: a list of arguments
 :query kwargs: a dictionary of arguments
+:query options: a dictionary of `apply_async` keyword arguments
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
@@ -307,14 +308,14 @@ List tasks
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
-        tasks = []
-        for task_id, task in TaskModel.iter_tasks(
+        result = []
+        for task_id, task in tasks.iter_tasks(
                 app, limit=limit, type=type,
                 worker=worker, state=state):
             task = task.as_dict()
             task.pop('worker')
-            tasks.append((task_id, task))
-        self.write(dict(tasks))
+            result.append((task_id, task))
+        self.write(dict(result))
 
 
 class ListTaskTypes(BaseTaskHandler):
@@ -351,7 +352,7 @@ List (seen) task types
         """
         app = self.application
 
-        seen_task_types = TaskModel.seen_task_types(app)
+        seen_task_types = app.events.state.task_types()
 
         response = {}
         response['task-types'] = seen_task_types
@@ -416,7 +417,7 @@ Get a task info
 :statuscode 404: unknown task
         """
 
-        task = TaskModel.get_task_by_id(self.application, taskid)
+        task = tasks.get_task_by_id(self.application, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
         response = {}

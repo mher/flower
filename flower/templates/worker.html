@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="workers", absolute_url=absolute_url) %}
+  {% module Template("navbar.html", active_tab="workers") %}
 {% end %}
 
 {% block container %}
@@ -9,9 +9,10 @@
     <div class="row-fluid">
       <div class="span12">
         <div class="page-header">
-          <h1 id="workername">{{ worker.name }}</h1>
+                <small>Worker: </small><h1 id="workername">{{ worker['name'] }}</h1>
         </div>
 
+        <button class="btn pull-right" type="button" onclick="flower.on_worker_refresh(event)">Refresh</button>
         <div class="tabbable">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#tab-pool" data-toggle="tab">Pool</a></li>
@@ -20,7 +21,9 @@
             <li><a href="#tab-tasks" data-toggle="tab">Tasks</a></li>
             <li><a href="#tab-limits" data-toggle="tab">Limits</a></li>
             <li><a href="#tab-config" data-toggle="tab">Config</a></li>
+            <li><a href="#tab-system" data-toggle="tab">System</a></li>
           </ul>
+
           <div class="tab-content">
             <div class="tab-pane active" id="tab-pool">
 
@@ -29,7 +32,7 @@
                   <table class="table table-bordered table-striped">
                     <caption>Worker pool options</caption>
                     <tbody>
-                      {% for name,value in worker.stats['pool'].items() %}
+                      {% for name,value in worker['stats']['pool'].items() %}
                         <tr>
                           <td>{{ humanize(name) }}</td>
                           <td>{{ humanize(value) }}</td>
@@ -37,7 +40,11 @@
                       {% end %}
                         <tr>
                             <td>Worker PID</td>
-                            <td>{{ worker.stats.get('pid', '')}}</td>
+                            <td>{{ worker['stats'].get('pid', 'N/A')}}</td>
+                        </tr>
+                        <tr>
+                            <td>Prefetch Count</td>
+                            <td>{{ worker['stats'].get('prefetch_count', 'N/A')}}</td>
                         </tr>
                     </tbody>
                   </table>
@@ -79,13 +86,13 @@
                 </div>
               </div>
 
-              {% if worker.stats.get('autoscaler', None) %}
+              {% if worker['stats'].get('autoscaler', None) %}
                 <div class="row-fluid">
                     <div class="span6">
                         <table class="table table-bordered table-striped">
                             <caption>Autoscaler options</caption>
                             <tbody>
-                            {% for name,value in worker.stats['autoscaler'].items() %}
+                            {% for name,value in worker['stats']['autoscaler'].items() %}
                                 <tr>
                                 <td>{{ humanize(name) }}</td>
                                 <td>{{ humanize(value) }}</td>
@@ -98,13 +105,13 @@
               {% end %}
 
             </div> <!-- end pool tab -->
-	    
+
             <div class="tab-pane" id="tab-broker">
               <div class="span6">
                 <table class="table table-bordered table-striped">
                   <caption>Broker options</caption>
                   <tbody>
-                    {% for name,value in (worker.stats.get('consumer', None) or worker.stats)['broker'].items() %}
+                    {% for name,value in (worker['stats'].get('consumer', None) or worker['stats'])['broker'].items() %}
                       <tr>
                         <td>{{ humanize(name) }}</td>
                         <td>{{ value }}</td>
@@ -114,7 +121,7 @@
                 </table>
               </div>
             </div> <!-- end broker tab -->
-	    
+
             <div class="tab-pane" id="tab-queues">
               <h3>Active  <small>queues being consumed from</small></h3>
 
@@ -144,7 +151,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for queue in worker.active_queues %}
+                  {% for queue in worker.get('active_queues', []) %}
                     <tr>
                       <td>{{ queue['name'] }}</td>
                       <td>{{ queue['exclusive'] }}</td>
@@ -162,12 +169,12 @@
               </tbody>
               </table>
             </div> <!-- end queues tab -->
-	    
+
             <div class="tab-pane" id="tab-tasks">
               <h2>Processed <small>number of completed tasks</small></h2>
               <table class="table table-bordered table-striped">
                 <tbody>
-                  {% for name,value in worker.stats['total'].items() %}
+                  {% for name,value in worker['stats']['total'].items() %}
                     <tr>
                       <td>{{ name }}</td>
                       <td>{{ value }}</td>
@@ -188,14 +195,12 @@
                     <th>args</th>
                     <th>kwargs</th>
                   </tr>
-                  </tr>
-                  </tr>
                 </thead>
                 <tbody>
-                  {% for task in worker.active_tasks %}
+                {% for task in worker.get('active', {}) %}
                     <tr>
                       <td>{{ task['name'] }}</td>
-                      <td><a href="{{ absolute_url('/task/' + task['id']) }}">{{ task['id'] }}</a></td>
+                      <td><a href="{{ '/task/' + task['id'] }}">{{ task['id'] }}</a></td>
                       <td>{{ humanize(task['time_start'], type='time') }}</td>
                       <td>{{ task['acknowledged'] }}</td>
                       <td>{{ task['worker_pid'] }}</td>
@@ -217,10 +222,10 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for task in worker.scheduled_tasks %}
+                {% for task in worker.get('scheduled', {}) %}
                     <tr>
                       <td>{{ task['request']['name'] }}</td>
-                      <td><a href="{{ absolute_url('/task/' + task['request']['id']) }}">{{ task['request']['id'] }}</a></td>
+                      <td><a href="{{ '/task/' + task['request']['id'] }}">{{ task['request']['id'] }}</a></td>
                       <td>{{ task['request']['args'] }}</td>
                       <td>{{ task['request']['kwargs'] }}</td>
                     </tr>
@@ -239,10 +244,10 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for task in worker.reserved_tasks %}
+                {% for task in worker.get('reserved', {}) %}
                     <tr>
                       <td>{{ task['name'] }}</td>
-                      <td><a href="{{ absolute_url('/task/' + task['id']) }}">{{ task['id'] }}</a></td>
+                      <td><a href="{{ '/task/' + task['id'] }}">{{ task['id'] }}</a></td>
                       <td>{{ task['args'] }}</td>
                       <td>{{ task['kwargs'] }}</td>
                     </tr>
@@ -254,25 +259,19 @@
               <table class="table table-bordered table-striped">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>ID</th>
-                    <th>args</th>
-                    <th>kwargs</th>
+                    <th>UUID</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for task in worker.revoked_tasks %}
+                  {% for task in worker.get('revoked', []) %}
                     <tr>
-                      <td></td>
-                      <td><a href="{{ absolute_url('/task/' + task) }}">{{ task }}</a></td>
-                      <td></td>
-                      <td></td>
+                      <td><a href="{{ '/task/' + task }}">{{ task }}</a></td>
                     </tr>
                   {% end %}
                 </tbody>
               </table>
             </div> <!-- end tasks tab -->
-	    
+
             <div class="tab-pane" id="tab-limits">
               <h3>Task limits</h3>
               <table class="table table-bordered table-striped">
@@ -283,7 +282,7 @@
                     <th>Timeouts</th>
                   </tr>
                 </thead>
-                {% for taskname in worker.registered_tasks %}
+                {% for taskname in worker.get('registered', []) %}
                   <tr>
                     <td>{{ taskname }}</td>
                     <td>
@@ -317,7 +316,7 @@
               <table class="table table-bordered table-striped">
                 <caption>Configuration options</caption>
                 <tbody>
-                  {% for name,value in sorted(worker.conf.items()) %}
+                {% for name,value in sorted(worker.get('conf', {}).items()) %}
                     {% if value is not None %}
                       <tr>
                         <td><a href="http://docs.celeryproject.org/en/latest/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
@@ -329,6 +328,22 @@
               </table>
             </div>
           </div> <!-- end config tab -->
+
+          <div class="tab-pane" id="tab-system">
+            <div class="span8">
+              <table class="table table-bordered table-striped">
+                <caption>System usage statistics</caption>
+                <tbody>
+                  {% for name, value in worker['stats']['rusage'].items() %}
+                      <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ value }}</td>
+                      </tr>
+                  {% end %}
+                </tbody>
+              </table>
+            </div>
+          </div> <!-- end system tab -->
 
 	      </div>
 	    </div>

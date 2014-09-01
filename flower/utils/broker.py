@@ -1,8 +1,15 @@
 from __future__ import absolute_import
 
 import sys
+import json
+import socket
 import logging
 import numbers
+
+from tornado import ioloop
+from tornado import gen
+from tornado import httpclient
+
 
 try:
     from urllib.parse import urlparse, urljoin, quote, unquote
@@ -10,16 +17,14 @@ except ImportError:
     from urlparse import urlparse, urljoin
     from urllib import quote, unquote
 
-try:
-    import requests
-    logging.getLogger("requests").setLevel(logging.WARNING)
-except ImportError:
-    requests = None
 
 try:
     import redis
 except ImportError:
     redis = None
+
+
+logger = logging.getLogger(__name__)
 
 
 class BrokerBase(object):
@@ -40,38 +45,46 @@ class BrokerBase(object):
 
 
 class RabbitMQ(BrokerBase):
-    def __init__(self, broker_url, broker_api_url):
+    def __init__(self, broker_url, mgmnt_api, io_loop=None):
         super(RabbitMQ, self).__init__(broker_url)
+        self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
-        self.port = int(self.port or 5672)
+        self.port = 15672
         self.vhost = quote(self.vhost, '') or '/'
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
-        self._broker_api_url = broker_api_url
+        if not mgmnt_api:
+            mgmnt_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
+                    self.username, self.password, self.host, self.vhost)
 
-        if not requests:
-            raise ImportError("'python-requests' library is required")
+        self._mgmnt_api = mgmnt_api
 
+    @gen.coroutine
     def queues(self, names):
-        if not self._broker_api_url.endswith('/'):
-            self._broker_api_url += '/'
-        url = urljoin(self._broker_api_url, 'queues/' + self.vhost)
-        api_url = urlparse(self._broker_api_url)
+        url = urljoin(self._mgmnt_api, 'queues/' + self.vhost)
+        api_url = urlparse(self._mgmnt_api)
         username = unquote(api_url.username or '') or self.username
         password = unquote(api_url.password or '') or self.password
-        auth = requests.auth.HTTPBasicAuth(username, password)
-        r = requests.get(url, auth=auth)
 
-        if r.status_code == 200:
-            try:
-                info = r.json()
-            except TypeError:
-                info = r.json
-            return [x for x in info if x['name'] in names]
+        http_client = httpclient.AsyncHTTPClient()
+        try:
+            response = yield http_client.fetch(
+                    url, auth_username=username, auth_password=password)
+        except (socket.error, httpclient.HTTPError) as e:
+            logger.error("RabbitMQ management API call failed: %s", e)
+            logger.error("Make sure RabbitMQ Management Plugin is enabled "
+                         "(rabbitmq-plugins enable rabbitmq_management)")
+            raise gen.Return([])
+        finally:
+            http_client.close()
+
+        if response.code == 200:
+            info = json.loads(response.body)
+            raise gen.Return([x for x in info if x['name'] in names])
         else:
-            r.raise_for_status()
+            response.rethrow()
 
 
 class Redis(BrokerBase):
@@ -87,6 +100,7 @@ class Redis(BrokerBase):
         self._redis = redis.Redis(host=self.host, port=self.port,
                                   db=self.vhost, password=self.password)
 
+    @gen.coroutine
     def queues(self, names):
         return [dict(name=x, messages=self._redis.llen(x)) for x in names]
 
@@ -117,13 +131,22 @@ class Broker(object):
             raise NotImplementedError
 
 
-if __name__ == "__main__":
+@gen.coroutine
+def main():
     broker_url = sys.argv[1] if len(sys.argv) > 1 else 'amqp://'
     queue_name = sys.argv[2] if len(sys.argv) > 2 else 'celery'
     if len(sys.argv) > 3:
-        broker_api_url = sys.argv[3]
+        mgmnt_api = sys.argv[3]
     else:
-        broker_api_url = 'http://guest:guest@localhost:55672/api/'
+        mgmnt_api = 'http://guest:guest@localhost:15672/api/'
 
-    broker = Broker(broker_url, broker_api_url=broker_api_url)
-    print(broker.queues([queue_name]))
+    broker = Broker(broker_url, mgmnt_api=mgmnt_api)
+    queues = yield broker.queues([queue_name])
+    if queues:
+        print(queues)
+    io_loop.stop()
+
+if __name__ == "__main__":
+    io_loop = ioloop.IOLoop.instance()
+    io_loop.add_callback(main)
+    io_loop.start()

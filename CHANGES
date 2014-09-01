@@ -3,6 +3,18 @@ Celery Flower
 
 Here you can see the full list of changes between each release.
 
+Version 0.8
+-----------
+
+- Google OAuth 2.0 support
+- add --conf option to change the default configuration file name
+- exceptions are shown as a result for failed tasks
+- performance improvements
+- improvements in monitor page
+- improvements in docs
+- improvements in logging
+- bug fixes
+
 Version 0.7
 -----------
 

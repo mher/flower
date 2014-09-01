@@ -3,9 +3,12 @@ from __future__ import absolute_import
 from collections import defaultdict
 
 from tornado import web
+from tornado import gen
 from celery import states
 
 from ..views import BaseHandler
+from ..utils.broker import Broker
+from ..api.control import ControlHandler
 
 
 class Monitor(BaseHandler):
@@ -83,11 +86,18 @@ class FailedTaskMonitor(BaseHandler):
 
 class BrokerMonitor(BaseHandler):
     @web.authenticated
+    @gen.coroutine
     def get(self):
-        state = self.application.state
+        app = self.application
+        capp = app.celery_app
+
+        broker = Broker(capp.connection().as_uri(include_password=True),
+                        mgmnt_api=app.broker_api)
+        queue_names = ControlHandler.get_active_queue_names()
+        queues = yield broker.queues(queue_names)
 
         data = defaultdict(int)
-        for queue in state.broker_queues:
+        for queue in queues:
             data[queue['name']] = queue['messages']
 
         self.write(data)

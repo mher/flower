@@ -5,6 +5,7 @@ import time
 import shelve
 import logging
 import threading
+import collections
 
 from functools import partial
 
@@ -28,10 +29,16 @@ class EventsState(State):
 
     def __init__(self, *args, **kwargs):
         super(EventsState, self).__init__(*args, **kwargs)
+        self.counter = collections.defaultdict(collections.Counter)
 
     def event(self, event):
+        worker_name = event['hostname']
+        event_type = event['type']
+
+        self.counter[worker_name][event_type] += 1
+
         # Send event to api subscribers (via websockets)
-        classname = api.events.getClassName(event['type'])
+        classname = api.events.getClassName(event_type)
         cls = getattr(api.events, classname, None)
         if cls:
             cls.send_message(event)
@@ -43,7 +50,7 @@ class EventsState(State):
 class Events(threading.Thread):
 
     def __init__(self, celery_app, db=None, persistent=False,
-                 io_loop=None, **kwargs):
+                 enable_events=True, io_loop=None, **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
@@ -52,6 +59,7 @@ class Events(threading.Thread):
         self._db = db
         self._persistent = persistent
         self.state = None
+        self.enable_events = enable_events
 
         if self._persistent and celery.__version__ < '3.0.15':
             logger.warning('Persistent mode is available with '
@@ -73,8 +81,8 @@ class Events(threading.Thread):
 
     def start(self):
         threading.Thread.start(self)
-        # Celery versions prior to 3 don't support enable_events
-        if celery.VERSION[0] > 2:
+        # Celery versions prior to 2 don't support enable_events
+        if self.enable_events and celery.VERSION[0] > 2:
             self._timer.start()
 
     def stop(self):
@@ -113,7 +121,6 @@ class Events(threading.Thread):
     def on_enable_events(self):
         # Periodically enable events for workers
         # launched after flower
-        logger.debug('Enabling events')
         try:
             self._celery_app.control.enable_events()
         except Exception as e:

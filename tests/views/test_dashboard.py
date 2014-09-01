@@ -1,9 +1,9 @@
 from tests import AsyncHTTPTestCase
 
 
-class WorkerTests(AsyncHTTPTestCase):
+class DashboardTests(AsyncHTTPTestCase):
     def test_workers_page(self):
-        r = self.get('/workers')
+        r = self.get('/dashboard')
         self.assertEqual(200, r.code)
         self.assertTrue('Broker' in str(r.body))
 

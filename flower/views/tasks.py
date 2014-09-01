@@ -1,17 +1,23 @@
 from __future__ import absolute_import
 
+import copy
+try:
+    from itertools import imap
+except ImportError:
+    imap = map
+
 import celery
 
 from tornado import web
 
 from ..views import BaseHandler
-from ..models import TaskModel, WorkersModel
+from ..utils.tasks import iter_tasks, get_task_by_id
 
 
 class TaskView(BaseHandler):
     @web.authenticated
     def get(self, task_id):
-        task = TaskModel.get_task_by_id(self.application, task_id)
+        task = get_task_by_id(self.application, task_id)
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
 
@@ -31,10 +37,12 @@ class TasksView(BaseHandler):
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
-        tasks = TaskModel.iter_tasks(app, limit=limit, type=type,
-                                     worker=worker, state=state)
-        workers = WorkersModel.get_workers(app)
-        seen_task_types = TaskModel.seen_task_types(app)
+        tasks = iter_tasks(app, limit=limit, type=type,
+                           worker=worker, state=state)
+        tasks = imap(self.format_task, tasks)
+        workers = app.events.state.workers
+        seen_task_types = app.events.state.task_types()
+        time = 'natural-time' if app.natural_time else 'time'
 
         self.render("tasks.html", tasks=tasks,
                     task_types=seen_task_types,
@@ -43,4 +51,13 @@ class TasksView(BaseHandler):
                     limit=limit,
                     worker=worker,
                     type=type,
-                    state=state)
+                    state=state,
+                    time=time)
+
+    def format_task(self, args):
+        uuid, task = args
+        custom_format_task = self.application.format_task
+
+        if custom_format_task:
+            task = custom_format_task(copy.copy(task))
+        return uuid, task

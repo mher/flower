@@ -1,14 +1,21 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="workers", absolute_url=absolute_url) %}
+  {% module Template("navbar.html", active_tab="dashboard") %}
 {% end %}
 
 {% block container %}
   <div class="container-fluid">
-    <div class="page-header">
-      <h1>Workers</h1>
+    <div class="btn-group btn-group-justified">
+        <a id="btn-active" class="btn btn-default btn-large" href="/tasks?limit=100&state=STARTED">Active: {{ sum(map(lambda x:x.get('active', 0), workers.values() )) }}</a>
+        <a id="btn-processed" class="btn btn-default btn-large" href="/tasks?limit=100">Processed: {{ sum(map(lambda x:x.get('task-received', 0), workers.values() )) }}</a>
+        <a id="btn-failed" class="btn btn-default btn-large" href="/tasks?limit=100&state=FAILURE">Failed: {{ sum(map(lambda x:x.get('task-failed', 0), workers.values() )) }}</a>
+        <a id="btn-revoked" class="btn btn-default btn-large" href="/tasks?limit=100&state=REVOKED">Revoked: {{ sum(map(lambda x:x.get('task-revoked', 0), workers.values() )) }}</a>
+        <a id="btn-retried" class="btn btn-default btn-large" href="/tasks?limit=100&state=RETRY">Retried: {{ sum(map(lambda x:x.get('task-retried', 0), workers.values() )) }}</a>
     </div>
+
+    <div class="panel panel-default">
+        <div class="panel-body">
 
     <div class="btn-toolbar">
       <div class="btn-group">
@@ -36,19 +43,21 @@
       <thead>
       <tr>
         <th style="width: 15px; min-width: 15px;"></th>
-        <th>Name</th>
+        <th>Worker Name</th>
         <th>Status</th>
-        <th>Concurrency</th>
-        <th>Completed Tasks</th>
-        <th>Running Tasks</th>
-        <th>Queues</th>
+        <th>Active</th>
+        <th>Processed</th>
+        <th>Failed</th>
+        <th>Revoked</th>
+        <th>Retried</th>
+        <th>Load Average</th>
       </tr>
       </thead>
       <tbody>
-      {% for name,info in workers.items() %}
+      {% for name, info in workers.items() %}
       <tr id="{{ url_escape(name) }}">
         <td class="is_selected"><input type="checkbox"></td>
-        <td><a href="{{ absolute_url('worker/' + name) }}">{{ name }}</a></td>
+        <td><a href="{{ '/worker/' + name }}">{{ name }}</a></td>
         <td>
           {% if info['status'] %}
           <span class="label label-success">Online</span>
@@ -56,18 +65,19 @@
           <span class="label label-important">Offline</span>
           {% end %}
         </td>
-        <td>{{ humanize(info['concurrency']) }}</td>
-        <td>{{ info['completed_tasks'] }}</td>
-        <td>{{ info['running_tasks'] }}</td>
-        <td>{{ humanize(info['queues']) }}</td>
+        <td>{{ info['active'] }}</td>
+        <td>{{ info.get('task-received', 0) }}</td>
+        <td>{{ info.get('task-failed', 0) }}</td>
+        <td>{{ info.get('task-revoked', 0) }}</td>
+        <td>{{ info.get('task-retried', 0) }}</td>
+        <td>{{ humanize(info['loadavg']) }}</td>
       </tr>
       {% end %}
       </tbody>
     </table>
 
-    <p>
-    <strong>Broker:</strong> {{ broker }}
-    </p>
+        </div>
+    </div>
 
   </div>
 
@@ -77,7 +87,12 @@
               <td class="is_selected"><input type="checkbox"></td>
               <td><a href=""></a></td>
               <td><span class="label label-success">Online</span></td>
-              <td></td><td></td><td></td><td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
           </tr>
       </table>
   </div>

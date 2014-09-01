@@ -23,7 +23,7 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
         if settings.URL_PREFIX:
             qs = dict(parse_qsl(urlparse(self.request.uri).query))
             next = qs.get('next', '/')
-            callback_uri = self.absolute_url('/login')
+            callback_uri = '/login'
             callback_uri += '?' + urlencode(dict(next=next))
 
         if self.get_argument('code', False):
@@ -58,9 +58,6 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
         self.set_secure_cookie("user", str(email))
 
         next = self.get_argument('next', '/')
-        if settings.URL_PREFIX:
-            next = self.absolute_url(next)
-
         self.redirect(next)
 
 
