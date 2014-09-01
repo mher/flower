@@ -3,7 +3,10 @@ from __future__ import absolute_import
 import logging
 
 from functools import partial
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 
 from tornado import web
 from tornado import websocket
