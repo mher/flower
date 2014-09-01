@@ -142,7 +142,7 @@ object and returns the modified version.
 
 `format_task` is useful for filtering out sensitive information.
 
-The example below shows how to filter arguments and limit display lengths.::
+The example below shows how to filter arguments and limit display lengths:
 
 .. code-block:: python
 
