@@ -7,7 +7,10 @@ Version 0.8
 -----------
 
 - Google OAuth 2.0 support
-- add --conf option to change the default configuration file name
+- --conf option to change the default configuration file
+- --enable_events option to disable periodic `enable_events` commands
+- show time in natural format (e.g. 3 minutes ago)
+- format_task option to filter out sensitive information
 - exceptions are shown as a result for failed tasks
 - performance improvements
 - improvements in monitor page
