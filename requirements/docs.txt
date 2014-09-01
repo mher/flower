@@ -1,4 +1,5 @@
 -r default.txt
+futures
 Sphinx
 sphinxcontrib-fulltoc
 sphinxcontrib-httpdomain
