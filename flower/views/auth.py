@@ -1,31 +1,19 @@
 from __future__ import absolute_import
 
-try:
-    from urllib.parse import urlparse, parse_qsl, urlencode
-except ImportError:
-    from urlparse import urlparse, parse_qsl
-    from urllib import urlencode
-
 import re
-import tornado.web
-import tornado.auth
-from tornado import httpclient
 import json
 
-from .. import settings
+import tornado.web
+import tornado.auth
+
+from tornado import httpclient
+
 from ..views import BaseHandler
 
 
 class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
     @tornado.web.asynchronous
     def get(self):
-        callback_uri = None
-        if settings.URL_PREFIX:
-            qs = dict(parse_qsl(urlparse(self.request.uri).query))
-            next = qs.get('next', '/')
-            callback_uri = '/login'
-            callback_uri += '?' + urlencode(dict(next=next))
-
         redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
         if self.get_argument('code', False):
             self.get_authenticated_user(

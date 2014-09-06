@@ -18,7 +18,6 @@ from celery.events import EventReceiver
 from celery.events.state import State
 
 from . import api
-from .settings import CELERY_EVENTS_ENABLE_INTERVAL
 
 
 logger = logging.getLogger(__name__)
@@ -48,6 +47,7 @@ class EventsState(State):
 
 
 class Events(threading.Thread):
+    events_enable_interval = 5000
 
     def __init__(self, celery_app, db=None, persistent=False,
                  enable_events=True, io_loop=None, **kwargs):
@@ -77,7 +77,7 @@ class Events(threading.Thread):
             self.state = EventsState(**kwargs)
 
         self._timer = PeriodicCallback(self.on_enable_events,
-                                       CELERY_EVENTS_ENABLE_INTERVAL)
+                                       self.events_enable_interval)
 
     def start(self):
         threading.Thread.start(self)

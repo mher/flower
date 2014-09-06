@@ -9,6 +9,7 @@ import os
 import types
 
 from pprint import pformat
+from os.path import join, abspath, dirname
 
 from tornado.options import define, options
 from tornado.options import parse_command_line, parse_config_file
@@ -17,15 +18,17 @@ from tornado.auth import GoogleOAuth2Mixin
 
 from celery.bin.base import Command
 
-from . import settings
 from . import __version__
-from .app import Flower
+from .utils import gen_cookie_secret
+
+
+DEFAULT_CONFIG_FILE = 'flowerconfig.py'
 
 
 define("port", default=5555, help="run on the given port", type=int)
 define("address", default='', help="run on the given address", type=str)
 define("debug", default=False, help="run in debug mode", type=bool)
-define("inspect_timeout", default=settings.CELERY_INSPECT_TIMEOUT, type=float,
+define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
        help="regexp of emails to grant access")
@@ -47,8 +50,9 @@ define("certfile", type=str, default=None, help="path to SSL certificate file")
 define("keyfile", type=str, default=None, help="path to SSL key file")
 define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
+define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 define("cookie_secret", type=str, default=None, help="secure cookie secret")
-define("conf", default=settings.CONFIG_FILE, help="configuration file")
+define("conf", default=DEFAULT_CONFIG_FILE, help="configuration file")
 define("enable_events", type=bool, default=True,
        help="periodically enable Celery events")
 define("format_task", type=types.FunctionType, default=None,
@@ -59,16 +63,21 @@ define("natural_time", type=bool, default=True,
 # deprecated options
 define("url_prefix", type=str, help="base url prefix")
 define("inspect", default=False, help="inspect workers", type=bool)
-define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 
 
 logger = logging.getLogger(__name__)
 
 
 class FlowerCommand(Command):
+    project_root = abspath(dirname(__file__))
+    app_settings = dict(
+        template_path=join(project_root, "templates"),
+        static_path=join(project_root, "static"),
+        cookie_secret=gen_cookie_secret(),
+        login_url='/login',
+    )
 
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
-        app_settings = settings.APP_SETTINGS
         argv = list(filter(self.flower_option, argv))
         # parse the command line to get --conf option
         parse_command_line([prog_name] + argv)
@@ -76,9 +85,10 @@ class FlowerCommand(Command):
             parse_config_file(options.conf, final=False)
             parse_command_line([prog_name] + argv)
         except IOError:
-            if options.conf != settings.CONFIG_FILE:
+            if options.conf != DEFAULT_CONFIG_FILE:
                 raise
 
+        app_settings = self.app_settings
         app_settings['debug'] = options.debug
         if options.cookie_secret:
             app_settings['cookie_secret'] = options.cookie_secret
@@ -101,6 +111,7 @@ class FlowerCommand(Command):
         self.app.connection = self.app.broker_connection
 
         self.app.loader.import_default_modules()
+        from .app import Flower
         flower = Flower(celery_app=self.app, options=options,
                         **app_settings)
         atexit.register(flower.stop)

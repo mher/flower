@@ -12,7 +12,6 @@ from tornado import web
 from tornado import websocket
 from tornado.ioloop import PeriodicCallback
 
-from .. import settings
 from ..views import BaseHandler
 
 
@@ -42,20 +41,20 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
     listeners = []
     periodic_callback = None
     workers = None
+    page_update_interval = 2000
 
     def open(self):
-        if not settings.AUTO_REFRESH:
+        app = self.application
+        if not app.options.auto_refresh:
             self.write_message({})
             return
-
-        app = self.application
 
         if not self.listeners:
             if self.periodic_callback is None:
                 cls = DashboardUpdateHandler
                 cls.periodic_callback = PeriodicCallback(
                     partial(cls.on_update_time, app),
-                    settings.PAGE_UPDATE_INTERVAL)
+                    self.page_update_interval)
             if not self.periodic_callback._running:
                 logger.debug('Starting a timer for dashboard updates')
                 self.periodic_callback.start()

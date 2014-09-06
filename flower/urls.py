@@ -38,7 +38,7 @@ from .views.monitor import (
 
 
 from .views.error import NotFoundErrorHandler
-from .settings import APP_SETTINGS
+from .command import FlowerCommand
 
 
 handlers = [
@@ -87,7 +87,7 @@ handlers = [
     (r"/monitor/broker", BrokerMonitor),
     # Static
     (r"/static/(.*)", StaticFileHandler,
-     {"path": APP_SETTINGS['static_path']}),
+     {"path": FlowerCommand.app_settings['static_path']}),
     # Auth
     (r"/login", auth.LoginHandler),
     (r"/logout", auth.LogoutHandler),
