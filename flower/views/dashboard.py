@@ -90,7 +90,7 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
                 active=worker.active,
                 processed=counter.get('task-received', 0),
                 failed=counter.get('task-failed', 0),
-                revoked=counter.get('task-revoked', 0),
+                succeeded=counter.get('task-succeeded', 0),
                 retried=counter.get('task-retried', 0),
                 loadavg=worker.loadavg)
         return workers

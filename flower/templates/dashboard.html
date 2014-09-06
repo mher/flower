@@ -10,7 +10,7 @@
         <a id="btn-active" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=STARTED">Active: {{ sum(map(lambda x:x.get('active', 0), workers.values() )) }}</a>
         <a id="btn-processed" class="btn btn-default btn-large" href="/tasks?limit=100">Processed: {{ sum(map(lambda x:x.get('task-received', 0), workers.values() )) }}</a>
         <a id="btn-failed" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=FAILURE">Failed: {{ sum(map(lambda x:x.get('task-failed', 0), workers.values() )) }}</a>
-        <a id="btn-revoked" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=REVOKED">Revoked: {{ sum(map(lambda x:x.get('task-revoked', 0), workers.values() )) }}</a>
+        <a id="btn-succeeded" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=SUCCESS">Succeeded: {{ sum(map(lambda x:x.get('task-succeeded', 0), workers.values() )) }}</a>
         <a id="btn-retried" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=RETRY">Retried: {{ sum(map(lambda x:x.get('task-retried', 0), workers.values() )) }}</a>
     </div>
 
@@ -51,7 +51,7 @@
         <th>Active</th>
         <th>Processed</th>
         <th>Failed</th>
-        <th>Revoked</th>
+        <th>Succeeded</th>
         <th>Retried</th>
         <th>Load Average</th>
       </tr>
@@ -71,7 +71,7 @@
         <td>{{ info['active'] }}</td>
         <td>{{ info.get('task-received', 0) }}</td>
         <td>{{ info.get('task-failed', 0) }}</td>
-        <td>{{ info.get('task-revoked', 0) }}</td>
+        <td>{{ info.get('task-succeeded', 0) }}</td>
         <td>{{ info.get('task-retried', 0) }}</td>
         <td>{{ humanize(info['loadavg']) }}</td>
       </tr>

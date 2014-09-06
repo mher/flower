@@ -338,7 +338,7 @@ var flower = (function () {
 
     function on_dashboard_update(update) {
         var total_active = 0, total_processed = 0, total_failed = 0,
-            total_revoked = 0, total_retried = 0;
+            total_succeeded = 0, total_retried = 0;
 
         $.each(update, function (name) {
             var id = encodeURIComponent(name),
@@ -355,7 +355,7 @@ var flower = (function () {
                 active = tr.children('td:eq(3)'),
                 processed = tr.children('td:eq(4)'),
                 failed = tr.children('td:eq(5)'),
-                revoked = tr.children('td:eq(6)'),
+                succeeded = tr.children('td:eq(6)'),
                 retried = tr.children('td:eq(7)'),
                 loadavg = tr.children('td:eq(8)');
 
@@ -365,14 +365,14 @@ var flower = (function () {
             active.text($(this).attr('active'));
             processed.text($(this).attr('processed'));
             failed.text($(this).attr('failed'));
-            revoked.text($(this).attr('revoked'));
+            succeeded.text($(this).attr('succeeded'));
             retried.text($(this).attr('retried'));
             loadavg.text($(this).attr('loadavg').toString().replace(/,/g, ', '));
 
             total_active += $(this).attr('active');
             total_processed += $(this).attr('processed');
             total_failed += $(this).attr('failed');
-            total_revoked += $(this).attr('revoked');
+            total_succeeded += $(this).attr('succeeded');
             total_retried += $(this).attr('retried');
 
         });
@@ -380,7 +380,7 @@ var flower = (function () {
         $('a#btn-active').text('Active: ' + total_active);
         $('a#btn-processed').text('Processed: ' + total_processed);
         $('a#btn-failed').text('Failed: ' + total_failed);
-        $('a#btn-revoked').text('Revoked: ' + total_revoked);
+        $('a#btn-succeeded').text('Succeeded: ' + total_succeeded);
         $('a#btn-retried').text('Retried: ' + total_retried);
     }
 
