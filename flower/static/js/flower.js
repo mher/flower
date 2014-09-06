@@ -36,8 +36,10 @@ var flower = (function () {
     function toggle_selected_workers(event) {
         var $checkbox = $('#select-workers-toggler');
 
-        $checkbox.is(':checked') ? select_all_workers()
-                                 : select_none_workers();
+        if ($checkbox.is(':checked'))
+            select_all_workers();
+        else
+            select_none_workers();
     }
 
     function shutdown_selected(event) {
@@ -419,7 +421,7 @@ var flower = (function () {
         var ticksTreatment = 'glow';
 
         var timeUnit = new Rickshaw.Fixtures.Time.Local();
-        timeUnit.formatTime = function(d) { return moment(d).format("yyyy.mm.dd HH:mm:ss"); }
+        timeUnit.formatTime = function(d) { return moment(d).format("yyyy.mm.dd HH:mm:ss"); };
         timeUnit.unit("minute");
 
         var xAxis = new Rickshaw.Graph.Axis.Time({
@@ -498,7 +500,7 @@ var flower = (function () {
     $.urlParam = function(name){
         var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
         return results && results[1] || 0;
-    }
+    };
 
     $(document).ready(function () {
         if ($.inArray($(location).attr('pathname'), ['/', '/dashboard']) != -1) {
@@ -512,7 +514,7 @@ var flower = (function () {
         }
 
         //https://github.com/twitter/bootstrap/issues/1768
-        var shiftWindow = function() { scrollBy(0, -50) };
+        var shiftWindow = function() { scrollBy(0, -50); };
         if (location.hash) shiftWindow();
         window.addEventListener("hashchange", shiftWindow);
 
