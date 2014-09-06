@@ -12,7 +12,7 @@ from tornado import web
 from tornado import websocket
 from tornado.ioloop import PeriodicCallback
 
-from . import settings
+from .. import settings
 from ..views import BaseHandler
 
 
