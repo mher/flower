@@ -63,7 +63,7 @@ class RabbitMQ(BrokerBase):
 
     @gen.coroutine
     def queues(self, names):
-        url = urljoin(self._mgmnt_api, 'queues/' + self.vhost)
+        url = urljoin(self._mgmnt_api, 'queues2/' + self.vhost)
         api_url = urlparse(self._mgmnt_api)
         username = unquote(api_url.username or '') or self.username
         password = unquote(api_url.password or '') or self.password
@@ -102,7 +102,7 @@ class Redis(BrokerBase):
 
     @gen.coroutine
     def queues(self, names):
-        return [dict(name=x, messages=self._redis.llen(x)) for x in names]
+        raise gen.Return([dict(name=x, messages=self._redis.llen(x)) for x in names])
 
     def _prepare_virtual_host(self, vhost):
         if not isinstance(vhost, numbers.Integral):
