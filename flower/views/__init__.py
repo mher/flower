@@ -5,16 +5,10 @@ import inspect
 import traceback
 
 from distutils.util import strtobool
-
-try:
-    from urllib.parse import urljoin
-except ImportError:
-    from urlparse import urljoin
 from base64 import b64decode
 
 import tornado
 
-from .. import settings
 from ..utils import template, bugreport
 
 
