@@ -63,7 +63,7 @@ class RabbitMQ(BrokerBase):
 
     @gen.coroutine
     def queues(self, names):
-        url = urljoin(self._mgmnt_api, 'queues2/' + self.vhost)
+        url = urljoin(self._mgmnt_api, 'queues/' + self.vhost)
         api_url = urlparse(self._mgmnt_api)
         username = unquote(api_url.username or '') or self.username
         password = unquote(api_url.password or '') or self.password
