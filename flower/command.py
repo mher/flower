@@ -47,7 +47,6 @@ define("certfile", type=str, default=None, help="path to SSL certificate file")
 define("keyfile", type=str, default=None, help="path to SSL key file")
 define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
-define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 define("cookie_secret", type=str, default=None, help="secure cookie secret")
 define("conf", default=settings.CONFIG_FILE, help="configuration file")
 define("enable_events", type=bool, default=True,
@@ -60,6 +59,7 @@ define("natural_time", type=bool, default=True,
 # deprecated options
 define("url_prefix", type=str, help="base url prefix")
 define("inspect", default=False, help="inspect workers", type=bool)
+define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 
 
 logger = logging.getLogger(__name__)
@@ -85,8 +85,6 @@ class FlowerCommand(Command):
 
         if options.url_prefix:
             logger.error('url_prefix option is not supported anymore')
-
-        settings.AUTO_REFRESH = options.auto_refresh
 
         if options.debug and options.logging == 'info':
             options.logging = 'debug'
