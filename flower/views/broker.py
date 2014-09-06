@@ -22,8 +22,8 @@ class BrokerView(BaseHandler):
 
         mgmnt_api = None
 
-        if app.transport == 'amqp' and app.broker_api:
-            mgmnt_api = app.broker_api
+        if app.transport == 'amqp' and app.options.broker_api:
+            mgmnt_api = app.options.broker_api
 
         broker = Broker(capp.connection().as_uri(include_password=True),
                         mgmnt_api=mgmnt_api)

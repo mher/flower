@@ -51,7 +51,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def get_current_user(self):
         # Basic Auth
-        basic_auth = self.application.basic_auth
+        basic_auth = self.application.options.basic_auth
         if basic_auth:
             auth_header = self.request.headers.get("Authorization", "")
             try:
@@ -63,13 +63,13 @@ class BaseHandler(tornado.web.RequestHandler):
                 raise tornado.web.HTTPError(401)
 
         # Google OpenID
-        if not self.application.auth:
+        if not self.application.options.auth:
             return True
         user = self.get_secure_cookie('user')
         if user:
             if not isinstance(user, str):
                 user = user.decode()
-            if re.search(self.application.auth, user):
+            if re.search(self.application.options.auth, user):
                 return user
         return None
 
