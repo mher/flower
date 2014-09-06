@@ -92,7 +92,7 @@ class BrokerMonitor(BaseHandler):
         capp = app.celery_app
 
         broker = Broker(capp.connection().as_uri(include_password=True),
-                        mgmnt_api=app.options.broker_api)
+                        http_api=app.options.broker_api)
         queue_names = ControlHandler.get_active_queue_names()
         queues = yield broker.queues(queue_names)
 

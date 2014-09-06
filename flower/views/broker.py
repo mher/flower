@@ -20,13 +20,13 @@ class BrokerView(BaseHandler):
         app = self.application
         capp = app.celery_app
 
-        mgmnt_api = None
+        http_api = None
 
         if app.transport == 'amqp' and app.options.broker_api:
-            mgmnt_api = app.options.broker_api
+            http_api = app.options.broker_api
 
         broker = Broker(capp.connection().as_uri(include_password=True),
-                        mgmnt_api=mgmnt_api)
+                        http_api=http_api)
         queue_names = ControlHandler.get_active_queue_names()
         queues = yield broker.queues(queue_names)
 

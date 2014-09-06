@@ -45,7 +45,7 @@ class BrokerBase(object):
 
 
 class RabbitMQ(BrokerBase):
-    def __init__(self, broker_url, mgmnt_api, io_loop=None):
+    def __init__(self, broker_url, http_api, io_loop=None):
         super(RabbitMQ, self).__init__(broker_url)
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
@@ -55,16 +55,16 @@ class RabbitMQ(BrokerBase):
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
-        if not mgmnt_api:
-            mgmnt_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
+        if not http_api:
+            http_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
                 self.username, self.password, self.host, self.vhost)
 
-        self._mgmnt_api = mgmnt_api
+        self._http_api = http_api
 
     @gen.coroutine
     def queues(self, names):
-        url = urljoin(self._mgmnt_api, 'queues/' + self.vhost)
-        api_url = urlparse(self._mgmnt_api)
+        url = urljoin(self._http_api, 'queues/' + self.vhost)
+        api_url = urlparse(self._http_api)
         username = unquote(api_url.username or '') or self.username
         password = unquote(api_url.password or '') or self.password
 
@@ -136,11 +136,11 @@ def main():
     broker_url = sys.argv[1] if len(sys.argv) > 1 else 'amqp://'
     queue_name = sys.argv[2] if len(sys.argv) > 2 else 'celery'
     if len(sys.argv) > 3:
-        mgmnt_api = sys.argv[3]
+        http_api = sys.argv[3]
     else:
-        mgmnt_api = 'http://guest:guest@localhost:15672/api/'
+        http_api = 'http://guest:guest@localhost:15672/api/'
 
-    broker = Broker(broker_url, mgmnt_api=mgmnt_api)
+    broker = Broker(broker_url, http_api=http_api)
     queues = yield broker.queues([queue_name])
     if queues:
         print(queues)
