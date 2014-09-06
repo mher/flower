@@ -7,11 +7,11 @@
 {% block container %}
   <div class="container-fluid">
     <div class="btn-group btn-group-justified">
-        <a id="btn-active" class="btn btn-default btn-large" href="/tasks?limit=100&state=STARTED">Active: {{ sum(map(lambda x:x.get('active', 0), workers.values() )) }}</a>
+        <a id="btn-active" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=STARTED">Active: {{ sum(map(lambda x:x.get('active', 0), workers.values() )) }}</a>
         <a id="btn-processed" class="btn btn-default btn-large" href="/tasks?limit=100">Processed: {{ sum(map(lambda x:x.get('task-received', 0), workers.values() )) }}</a>
-        <a id="btn-failed" class="btn btn-default btn-large" href="/tasks?limit=100&state=FAILURE">Failed: {{ sum(map(lambda x:x.get('task-failed', 0), workers.values() )) }}</a>
-        <a id="btn-revoked" class="btn btn-default btn-large" href="/tasks?limit=100&state=REVOKED">Revoked: {{ sum(map(lambda x:x.get('task-revoked', 0), workers.values() )) }}</a>
-        <a id="btn-retried" class="btn btn-default btn-large" href="/tasks?limit=100&state=RETRY">Retried: {{ sum(map(lambda x:x.get('task-retried', 0), workers.values() )) }}</a>
+        <a id="btn-failed" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=FAILURE">Failed: {{ sum(map(lambda x:x.get('task-failed', 0), workers.values() )) }}</a>
+        <a id="btn-revoked" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=REVOKED">Revoked: {{ sum(map(lambda x:x.get('task-revoked', 0), workers.values() )) }}</a>
+        <a id="btn-retried" class="btn btn-default btn-large" href="/tasks?limit=100&amp;state=RETRY">Retried: {{ sum(map(lambda x:x.get('task-retried', 0), workers.values() )) }}</a>
     </div>
 
     <div class="panel panel-default">
@@ -19,9 +19,12 @@
 
     <div class="btn-toolbar">
       <div class="btn-group">
-        <button class="btn" onclick="flower.toggle_selected_workers(event);"><input id="select-workers-toggler" type="checkbox" style="margin: 0;"></button>
-        <button class="btn dropdown-toggle" data-toggle="dropdown"><span
-          class="caret"></span></button>
+        <button class="btn" onclick="flower.toggle_selected_workers(event);">
+            <input id="select-workers-toggler" type="checkbox" style="margin: 0;">
+        </button>
+        <button class="btn dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+        </button>
         <ul class="dropdown-menu">
           <li><a href="#" onclick="flower.select_all_workers(event);">All</a></li>
           <li><a href="#" onclick="flower.select_none_workers(event);">None</a></li>
