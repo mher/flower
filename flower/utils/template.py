@@ -36,7 +36,7 @@ def humanize(obj, type=None, length=None):
     elif type == 'natural-time':
         delta = time.time() - float(obj)
         if timedelta(seconds=delta) < timedelta(days=1):
-            obj = format_timedelta(delta, locale='en_US')  + ' ago'
+            obj = format_timedelta(delta, locale='en_US') + ' ago'
         else:
             obj = format_time(float(obj)) if obj else ''
     elif isinstance(obj, string_types) and not re.match(UUID_REGEX, obj):

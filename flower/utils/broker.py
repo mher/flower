@@ -57,7 +57,7 @@ class RabbitMQ(BrokerBase):
 
         if not mgmnt_api:
             mgmnt_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
-                    self.username, self.password, self.host, self.vhost)
+                self.username, self.password, self.host, self.vhost)
 
         self._mgmnt_api = mgmnt_api
 
@@ -71,7 +71,7 @@ class RabbitMQ(BrokerBase):
         http_client = httpclient.AsyncHTTPClient()
         try:
             response = yield http_client.fetch(
-                    url, auth_username=username, auth_password=password)
+                url, auth_username=username, auth_password=password)
         except (socket.error, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)
             logger.error("Make sure RabbitMQ Management Plugin is enabled "

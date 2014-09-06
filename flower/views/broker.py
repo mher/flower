@@ -30,5 +30,6 @@ class BrokerView(BaseHandler):
         queue_names = ControlHandler.get_active_queue_names()
         queues = yield broker.queues(queue_names)
 
-        self.render("broker.html", broker_url=capp.connection().as_uri(),
-                                   queues=queues)
+        self.render("broker.html",
+                    broker_url=capp.connection().as_uri(),
+                    queues=queues)

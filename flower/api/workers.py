@@ -53,8 +53,9 @@ List workers
         """
         refresh = self.get_argument('refresh', default=False, type=bool)
         workername = self.get_argument('workername', default=None)
-        if self.worker_cache and not refresh and workername in self.worker_cache:
-            self.write({workername:self.worker_cache[workername]})
+        if self.worker_cache and not refresh and\
+                workername in self.worker_cache:
+            self.write({workername: self.worker_cache[workername]})
             return
 
         if refresh:
@@ -64,6 +65,6 @@ List workers
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         if workername:
-            self.write({workername:self.worker_cache[workername]})
+            self.write({workername: self.worker_cache[workername]})
         else:
             self.write(self.worker_cache)

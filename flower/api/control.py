@@ -29,8 +29,9 @@ class ControlHandler(BaseHandler):
 
         futures = []
         destination = [workername] if workername else None
-        timeout = app.options.inspect_timeout /1000.0
-        inspect = app.celery_app.control.inspect(timeout=timeout, destination=destination)
+        timeout = app.options.inspect_timeout / 1000.0
+        inspect = app.celery_app.control.inspect(
+            timeout=timeout, destination=destination)
         for method in cls.INSPECT_METHODS:
             futures.append(app.delay(getattr(inspect, method)))
 
@@ -38,7 +39,8 @@ class ControlHandler(BaseHandler):
 
         for i, result in enumerate(results):
             if result is None:
-                logger.warning("'%s' inspect method failed", cls.INSPECT_METHODS[i])
+                logger.warning("'%s' inspect method failed",
+                               cls.INSPECT_METHODS[i])
                 continue
             for worker, response in result.items():
                 if response:

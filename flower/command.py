@@ -31,9 +31,12 @@ define("auth", default='', type=str,
        help="regexp of emails to grant access")
 define("basic_auth", type=str, default=None, multiple=True,
        help="enable http basic authentication")
-define("oauth2_key", type=str, default=None, help="Google oauth2 key (requires --auth)")
-define("oauth2_secret", type=str, default=None, help="Google oauth2 secret (requires --auth)")
-define("oauth2_redirect_uri", type=str, default=None, help="Google oauth2 redirect uri (requires --auth)")
+define("oauth2_key", type=str, default=None,
+       help="Google oauth2 key (requires --auth)")
+define("oauth2_secret", type=str, default=None,
+       help="Google oauth2 secret (requires --auth)")
+define("oauth2_redirect_uri", type=str, default=None,
+       help="Google oauth2 redirect uri (requires --auth)")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory (default 10000)")
 define("db", type=str, default='flower', help="flower database file")
@@ -47,9 +50,12 @@ define("xheaders", type=bool, default=False,
 define("auto_refresh", default=True, help="refresh dashboards", type=bool)
 define("cookie_secret", type=str, default=None, help="secure cookie secret")
 define("conf", default=settings.CONFIG_FILE, help="configuration file")
-define("enable_events", type=bool, default=True, help="periodically enable Celery events")
-define("format_task", type=types.FunctionType, default=None, help="use custom task formatter")
-define("natural_time", type=bool, default=True, help="show time in relative format")
+define("enable_events", type=bool, default=True,
+       help="periodically enable Celery events")
+define("format_task", type=types.FunctionType, default=None,
+       help="use custom task formatter")
+define("natural_time", type=bool, default=True,
+       help="show time in relative format")
 
 # deprecated options
 define("url_prefix", type=str, help="base url prefix")

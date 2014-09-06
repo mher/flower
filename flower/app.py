@@ -59,8 +59,8 @@ class Flower(tornado.web.Application):
         self.listen(self.options.port, address=self.options.address,
                     ssl_options=self.ssl, xheaders=self.options.xheaders)
         self.io_loop.add_future(
-                control.ControlHandler.update_workers(app=self),
-                callback=lambda x: logger.debug('Updated workers cache'))
+            control.ControlHandler.update_workers(app=self),
+            callback=lambda x: logger.debug('Updated workers cache'))
         self.io_loop.start()
 
     def stop(self):

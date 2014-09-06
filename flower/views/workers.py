@@ -15,8 +15,8 @@ class WorkerView(BaseHandler):
     def get(self, name):
         refresh = self.get_argument('refresh', default=False, type=bool)
 
-        url = self.request.protocol + "://" + self.request.host + "/api/workers"
-        url += "?workername=%s" % name
+        url = self.request.protocol + "://" + self.request.host +\
+            "/api/workers" + "?workername=%s" % name
         if refresh:
             url += '&refresh=%s' % refresh
 

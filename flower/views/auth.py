@@ -26,27 +26,29 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
             callback_uri = '/login'
             callback_uri += '?' + urlencode(dict(next=next))
 
+        redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
         if self.get_argument('code', False):
             self.get_authenticated_user(
-                redirect_uri=self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri'],
+                redirect_uri=redirect_uri,
                 code=self.get_argument('code'),
                 callback=self._on_auth,
             )
         else:
             self.authorize_redirect(
-                redirect_uri=self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri'],
+                redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['profile', 'email'],
                 response_type='code',
                 extra_params={'approval_prompt': 'auto'}
             )
 
-
     def _on_auth(self, user):
         if not user:
             raise tornado.web.HTTPError(500, 'Google auth failed')
         access_token = user['access_token']
-        response = httpclient.HTTPClient().fetch('https://www.googleapis.com/plus/v1/people/me', headers={'Authorization': 'Bearer %s' % access_token})
+        response = httpclient.HTTPClient().fetch(
+            'https://www.googleapis.com/plus/v1/people/me',
+            headers={'Authorization': 'Bearer %s' % access_token})
         email = json.loads(response.body.decode('utf-8'))['emails'][0]['value']
         if not re.match(self.application.auth, email):
             raise tornado.web.HTTPError(
