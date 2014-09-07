@@ -11,9 +11,9 @@ import tornado.web
 
 from tornado import ioloop
 
-from flower.api import control
-from flower.urls import handlers
-from flower.events import Events
+from .api import control
+from .urls import handlers
+from .events import Events
 
 
 logger = logging.getLogger(__name__)

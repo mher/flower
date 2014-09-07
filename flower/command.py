@@ -1,25 +1,24 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import atexit
-import logging
-import signal
-import sys
 import os
+import sys
 import types
+import atexit
+import signal
+import logging
 
 from pprint import pformat
-from os.path import join, abspath, dirname
 
 from tornado.options import define, options
 from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
 from tornado.auth import GoogleOAuth2Mixin
-
 from celery.bin.base import Command
 
 from . import __version__
-from .utils import gen_cookie_secret
+from .app import Flower
+from .urls import settings
 
 
 DEFAULT_CONFIG_FILE = 'flowerconfig.py'
@@ -69,14 +68,6 @@ logger = logging.getLogger(__name__)
 
 
 class FlowerCommand(Command):
-    project_root = abspath(dirname(__file__))
-    app_settings = dict(
-        template_path=join(project_root, "templates"),
-        static_path=join(project_root, "static"),
-        cookie_secret=gen_cookie_secret(),
-        login_url='/login',
-    )
-
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
         argv = list(filter(self.flower_option, argv))
         # parse the command line to get --conf option
@@ -88,10 +79,9 @@ class FlowerCommand(Command):
             if options.conf != DEFAULT_CONFIG_FILE:
                 raise
 
-        app_settings = self.app_settings
-        app_settings['debug'] = options.debug
+        settings['debug'] = options.debug
         if options.cookie_secret:
-            app_settings['cookie_secret'] = options.cookie_secret
+            settings['cookie_secret'] = options.cookie_secret
 
         if options.url_prefix:
             logger.error('url_prefix option is not supported anymore')
@@ -101,7 +91,7 @@ class FlowerCommand(Command):
             enable_pretty_logging()
 
         if options.auth:
-            app_settings[GoogleOAuth2Mixin._OAUTH_SETTINGS_KEY] = {
+            settings[GoogleOAuth2Mixin._OAUTH_SETTINGS_KEY] = {
               'key': options.oauth2_key or os.environ.get('GOOGLE_OAUTH2_KEY'),
               'secret': options.oauth2_secret or os.environ.get('GOOGLE_OAUTH2_SECRET'),
               'redirect_uri': options.oauth2_redirect_uri or os.environ.get('GOOGLE_OAUTH2_REDIRECT_URI'),
@@ -111,25 +101,15 @@ class FlowerCommand(Command):
         self.app.connection = self.app.broker_connection
 
         self.app.loader.import_default_modules()
-        from .app import Flower
-        flower = Flower(celery_app=self.app, options=options,
-                        **app_settings)
+        flower = Flower(celery_app=self.app, options=options, **settings)
         atexit.register(flower.stop)
 
-        # graceful shutdown on SIGTERM
-        def signal_handler(signal, frame):
+        def sigterm_handler(signal, frame):
             logger.info('SIGTERM detected, shutting down')
             sys.exit(0)
-        signal.signal(signal.SIGTERM, signal_handler)
+        signal.signal(signal.SIGTERM, sigterm_handler)
 
-        logger.info('Visit me at http%s://%s:%s',
-                    's' if flower.ssl else '',
-                    options.address or 'localhost',
-                    options.port)
-        logger.info('Broker: %s', self.app.connection().as_uri())
-        logger.debug('Registered tasks: \n%s',
-                     pformat(sorted(self.app.tasks.keys())))
-        logger.debug('Settings: %s', pformat(app_settings))
+        self.print_banner(flower.ssl)
 
         try:
             flower.start()
@@ -149,3 +129,11 @@ class FlowerCommand(Command):
         name, _, value = arg.lstrip('-').partition("=")
         name = name.replace('-', '_')
         return hasattr(options, name)
+
+    def print_banner(self, ssl):
+        logger.info("Visit me at http%s://%s:%s", 's' if ssl else '',
+                    options.address or 'localhost', options.port)
+        logger.info('Broker: %s', self.app.connection().as_uri())
+        logger.info('Registered tasks: \n%s',
+                     pformat(sorted(self.app.tasks.keys())))
+        logger.debug('Settings: %s', pformat(settings))

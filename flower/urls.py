@@ -1,44 +1,29 @@
 from __future__ import absolute_import
 
+import os
+
 from tornado.web import StaticFileHandler
-
-from .views.dashboard import (
-    DashboardView,
-    DashboardUpdateHandler,
-)
-
-from .views.workers import (
-    WorkerView,
-)
-
-from .views.tasks import (
-    TaskView,
-    TasksView,
-)
-
-from .views.broker import (
-    BrokerView,
-)
-
-from .views import auth
 
 from .api import events
 from .api import control
 from .api import tasks
 from .api import workers
-
-
-from .views.monitor import (
-    Monitor,
-    SucceededTaskMonitor,
-    FailedTaskMonitor,
-    TimeToCompletionMonitor,
-    BrokerMonitor,
-)
-
-
+from .views import auth
+from .views import monitor
+from .views.broker import BrokerView
+from .views.workers import WorkerView
+from .views.tasks import TaskView, TasksView
 from .views.error import NotFoundErrorHandler
-from .command import FlowerCommand
+from .views.dashboard import DashboardView, DashboardUpdateHandler
+from .utils import gen_cookie_secret
+
+
+settings = dict(
+    template_path=os.path.join(os.path.dirname(__file__), "templates"),
+    static_path=os.path.join(os.path.dirname(__file__), "static"),
+    cookie_secret=gen_cookie_secret(),
+    login_url='/login',
+)
 
 
 handlers = [
@@ -80,14 +65,14 @@ handlers = [
     # WebSocket Updates
     (r"/update-dashboard", DashboardUpdateHandler),
     # Monitors
-    (r"/monitor", Monitor),
-    (r"/monitor/succeeded-tasks", SucceededTaskMonitor),
-    (r"/monitor/failed-tasks", FailedTaskMonitor),
-    (r"/monitor/completion-time", TimeToCompletionMonitor),
-    (r"/monitor/broker", BrokerMonitor),
+    (r"/monitor", monitor.Monitor),
+    (r"/monitor/succeeded-tasks", monitor.SucceededTaskMonitor),
+    (r"/monitor/failed-tasks", monitor.FailedTaskMonitor),
+    (r"/monitor/completion-time", monitor.TimeToCompletionMonitor),
+    (r"/monitor/broker", monitor.BrokerMonitor),
     # Static
     (r"/static/(.*)", StaticFileHandler,
-     {"path": FlowerCommand.app_settings['static_path']}),
+     {"path": settings['static_path']}),
     # Auth
     (r"/login", auth.LoginHandler),
     (r"/logout", auth.LogoutHandler),
