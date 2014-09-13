@@ -18,18 +18,16 @@ class BrokerView(BaseHandler):
     @gen.coroutine
     def get(self):
         app = self.application
-        capp = app.capp
 
         http_api = None
-
         if app.transport == 'amqp' and app.options.broker_api:
             http_api = app.options.broker_api
 
-        broker = Broker(capp.connection().as_uri(include_password=True),
+        broker = Broker(app.capp.connection().as_uri(include_password=True),
                         http_api=http_api)
         queue_names = ControlHandler.get_active_queue_names()
         queues = yield broker.queues(queue_names)
 
         self.render("broker.html",
-                    broker_url=capp.connection().as_uri(),
+                    broker_url=app.capp.connection().as_uri(),
                     queues=queues)
