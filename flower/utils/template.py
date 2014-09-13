@@ -8,12 +8,11 @@ from datetime import datetime
 from datetime import timedelta
 from babel.dates import format_timedelta
 
+
 PY2 = sys.version_info[0] == 2
 if not PY2:
-    text_type = str
     string_types = (str,)
 else:
-    text_type = unicode
     string_types = (str, unicode)
 
 
