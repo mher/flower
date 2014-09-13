@@ -381,7 +381,7 @@ Start consuming from a queue
             logger.error(response)
             self.set_status(403)
             self.write("Failed to add '%s' consumer to '%s' worker: %s" % (
-                workername, self.error_reason(workername, response)
+                queue, workername, self.error_reason(workername, response)
             ))
 
 
@@ -438,7 +438,7 @@ Stop consuming from a queue
             self.set_status(403)
             self.write(
                 "Failed to cancel '%s' consumer from '%s' worker: %s" % (
-                    workername, self.error_reason(workername, response)
+                    queue, workername, self.error_reason(workername, response)
                 ))
 
 
