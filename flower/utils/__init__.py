@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
-import base64
 import uuid
+import base64
+import os.path
 
 from .. import __version__
 
@@ -16,3 +17,11 @@ def bugreport():
         return 'flower   -> %s' % __version__ + celery.bugreport()
     except (ImportError, AttributeError):
         return 'Unknown Celery version'
+
+
+def abs_path(path):
+    path = os.path.expanduser(path)
+    if not os.path.isabs(path):
+        cwd = os.environ.get('PWD') or os.getcwd()
+        path = os.path.join(cwd, path)
+    return path

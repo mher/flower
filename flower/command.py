@@ -19,14 +19,18 @@ from celery.bin.base import Command
 from . import __version__
 from .app import Flower
 from .urls import settings
+from .utils import abs_path
 
 
 DEFAULT_CONFIG_FILE = 'flowerconfig.py'
 
 
-define("port", default=5555, help="run on the given port", type=int)
-define("address", default='', help="run on the given address", type=str)
-define("debug", default=False, help="run in debug mode", type=bool)
+define("port", default=5555,
+       help="run on the given port", type=int)
+define("address", default='',
+       help="run on the given address", type=str)
+define("debug", default=False,
+       help="run in debug mode", type=bool)
 define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
@@ -40,24 +44,32 @@ define("oauth2_secret", type=str, default=None,
 define("oauth2_redirect_uri", type=str, default=None,
        help="Google oauth2 redirect uri (requires --auth)")
 define("max_tasks", type=int, default=10000,
-       help="maximum number of tasks to keep in memory (default 10000)")
-define("db", type=str, default='flower', help="flower database file")
-define("persistent", type=bool, default=False, help="enable persistent mode")
+       help="maximum number of tasks to keep in memory")
+define("db", type=str, default='flower',
+       help="flower database file")
+define("persistent", type=bool, default=False,
+       help="enable persistent mode")
 define("broker_api", type=str, default=None,
        help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
-define("certfile", type=str, default=None, help="path to SSL certificate file")
-define("keyfile", type=str, default=None, help="path to SSL key file")
+define("certfile", type=str, default=None,
+       help="SSL certificate file")
+define("keyfile", type=str, default=None,
+       help="SSL key file")
 define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
-define("auto_refresh", default=True, help="refresh dashboards", type=bool)
-define("cookie_secret", type=str, default=None, help="secure cookie secret")
-define("conf", default=DEFAULT_CONFIG_FILE, help="configuration file")
+define("auto_refresh", default=True,
+       help="refresh dashboards", type=bool)
+define("cookie_secret", type=str, default=None,
+       help="secure cookie secret")
+define("conf", default=DEFAULT_CONFIG_FILE,
+       help="configuration file")
 define("enable_events", type=bool, default=True,
        help="periodically enable Celery events")
 define("format_task", type=types.FunctionType, default=None,
        help="use custom task formatter")
 define("natural_time", type=bool, default=True,
        help="show time in relative format")
+
 
 # deprecated options
 define("url_prefix", type=str, help="base url prefix")
@@ -97,6 +109,10 @@ class FlowerCommand(Command):
               'redirect_uri': options.oauth2_redirect_uri or os.environ.get('GOOGLE_OAUTH2_REDIRECT_URI'),
             }
 
+        if options.certfile and options.keyfile:
+            settings['ssl_options'] = dict(certfile=abs_path(options.certfile),
+                                           keyfile=abs_path(options.keyfile))
+
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection
 
@@ -109,7 +125,7 @@ class FlowerCommand(Command):
             sys.exit(0)
         signal.signal(signal.SIGTERM, sigterm_handler)
 
-        self.print_banner(flower.ssl)
+        self.print_banner('ssl_options' in settings)
 
         try:
             flower.start()

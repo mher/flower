@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import os
 import logging
 
 from functools import partial
@@ -29,14 +28,7 @@ class Flower(tornado.web.Application):
         super(Flower, self).__init__(**kwargs)
         self.options = options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
-
-        self.ssl = None
-        if options and self.options.certfile and self.options.keyfile:
-            cwd = os.environ.get('PWD') or os.getcwd()
-            self.ssl = {
-                'certfile': os.path.join(cwd, self.options.certfile),
-                'keyfile': os.path.join(cwd, self.options.keyfile),
-            }
+        self.ssl_options = kwargs.get('ssl_options', None)
 
         self.capp = capp or celery.Celery()
         self.events = events or Events(self.capp, db=options.db,
@@ -49,7 +41,7 @@ class Flower(tornado.web.Application):
         self.pool = self.pool_executor_cls(max_workers=self.max_workers)
         self.events.start()
         self.listen(self.options.port, address=self.options.address,
-                    ssl_options=self.ssl, xheaders=self.options.xheaders)
+                    ssl_options=self.ssl_options, xheaders=self.options.xheaders)
         self.io_loop.add_future(
             control.ControlHandler.update_workers(app=self),
             callback=lambda x: logger.debug('Updated workers cache'))
