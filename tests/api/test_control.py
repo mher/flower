@@ -22,7 +22,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
         ControlHandler.is_worker = self.is_worker
 
     def test_shutdown(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.broadcast = MagicMock()
         r = self.post('/api/worker/shutdown/test', body={})
         self.assertEqual(200, r.code)
@@ -30,14 +30,14 @@ class WorkerControlTests(AsyncHTTPTestCase):
                                                          destination=['test'])
 
     def test_pool_restart(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.broadcast = MagicMock(return_value=[{'test': 'ok'}])
         r = self.post('/api/worker/pool/restart/test', body={})
         self.assertEqual(200, r.code)
         celery.control.broadcast.assert_called_once()
 
     def test_pool_grow(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.pool_grow = MagicMock(return_value=[{'test': 'ok'}])
         r = self.post('/api/worker/pool/grow/test', body={'n': 3})
         self.assertEqual(200, r.code)
@@ -45,7 +45,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             n=3, reply=True, destination=['test'])
 
     def test_pool_shrink(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.pool_shrink = MagicMock(return_value=[{'test': 'ok'}])
         r = self.post('/api/worker/pool/shrink/test', body={})
         self.assertEqual(200, r.code)
@@ -53,7 +53,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             n=1, reply=True, destination=['test'])
 
     def test_pool_autoscale(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.broadcast = MagicMock(return_value=[{'test': 'ok'}])
         r = self.post('/api/worker/pool/autoscale/test',
                       body={'min': 2, 'max': 5})
@@ -64,7 +64,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             arguments={'min': 2, 'max': 5})
 
     def test_add_consumer(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.broadcast = MagicMock(
             return_value=[{'test': {'ok': ''}}])
         r = self.post('/api/worker/queue/add-consumer/test',
@@ -76,7 +76,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             arguments={'queue': 'foo'})
 
     def test_cancel_consumer(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.broadcast = MagicMock(
             return_value=[{'test': {'ok': ''}}])
         r = self.post('/api/worker/queue/cancel-consumer/test',
@@ -88,7 +88,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             arguments={'queue': 'foo'})
 
     def test_task_timeout(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.time_limit = MagicMock(
             return_value=[{'foo': {'ok': ''}}])
 
@@ -100,7 +100,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             reply=True)
 
     def test_task_ratelimit(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.rate_limit = MagicMock(
             return_value=[{'foo': {'ok': ''}}])
 
@@ -111,7 +111,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             'celery.map', '20', destination=['foo'], reply=True)
 
     def test_task_ratelimit_non_integer(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.rate_limit = MagicMock(
             return_value=[{'foo': {'ok': ''}}])
 
@@ -124,7 +124,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
 
 class TaskControlTests(AsyncHTTPTestCase):
     def test_revoke(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.revoke = MagicMock()
         r = self.post('/api/task/revoke/test', body={})
         self.assertEqual(200, r.code)
@@ -132,7 +132,7 @@ class TaskControlTests(AsyncHTTPTestCase):
                                                       terminate=False)
 
     def test_terminate(self):
-        celery = self.app.celery_app
+        celery = self._app.celery_app
         celery.control.revoke = MagicMock()
         r = self.post('/api/task/revoke/test', body={'terminate': True})
         self.assertEqual(200, r.code)
