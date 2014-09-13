@@ -93,7 +93,7 @@ Execute a task
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task
         """
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         args, kwargs, options = self.get_task_args()
         logger.info("Invoking a task '%s' with '%s' and '%s'",
@@ -152,7 +152,7 @@ Execute a task by name (doesn't require task sources)
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task
         """
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking task '%s' with '%s' and '%s'",

@@ -89,7 +89,7 @@ class BrokerMonitor(BaseHandler):
     @gen.coroutine
     def get(self):
         app = self.application
-        capp = app.celery_app
+        capp = app.capp
 
         broker = Broker(capp.connection().as_uri(include_password=True),
                         http_api=app.options.broker_api)

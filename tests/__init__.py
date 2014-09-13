@@ -17,9 +17,9 @@ from flower import command # side effect - define options
 
 class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
-        celery_app = celery.Celery()
-        events = Events(celery_app)
-        app = Flower(celery_app=celery_app, events=events,
+        capp = celery.Celery()
+        events = Events(capp)
+        app = Flower(capp=capp, events=events,
                      options=tornado.options.options,
                      handlers=handlers, **settings)
         app.delay = lambda method, *args, **kwargs: method(*args, **kwargs)

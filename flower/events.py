@@ -49,13 +49,13 @@ class EventsState(State):
 class Events(threading.Thread):
     events_enable_interval = 5000
 
-    def __init__(self, celery_app, db=None, persistent=False,
+    def __init__(self, capp, db=None, persistent=False,
                  enable_events=True, io_loop=None, **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
         self._io_loop = io_loop or IOLoop.instance()
-        self._celery_app = celery_app
+        self._capp = capp
         self._db = db
         self._persistent = persistent
         self.state = None
@@ -98,10 +98,10 @@ class Events(threading.Thread):
             try:
                 try_interval *= 2
 
-                with self._celery_app.connection() as conn:
+                with self._capp.connection() as conn:
                     recv = EventReceiver(conn,
                                          handlers={"*": self.on_event},
-                                         app=self._celery_app)
+                                         app=self._capp)
                     recv.capture(limit=None, timeout=None)
 
                 try_interval = 1
@@ -122,7 +122,7 @@ class Events(threading.Thread):
         # Periodically enable events for workers
         # launched after flower
         try:
-            self._celery_app.control.enable_events()
+            self._capp.control.enable_events()
         except Exception as e:
             logger.debug("Failed to enable events: '%s'", e)
 

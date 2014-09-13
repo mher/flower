@@ -23,7 +23,7 @@ class DashboardView(BaseHandler):
     def get(self):
         app = self.application
         events = app.events.state
-        broker = app.celery_app.connection().as_uri()
+        broker = app.capp.connection().as_uri()
 
         workers = dict((k, dict(v)) for (k, v) in events.counter.items())
         for name, info in workers.items():

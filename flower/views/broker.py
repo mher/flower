@@ -18,7 +18,7 @@ class BrokerView(BaseHandler):
     @gen.coroutine
     def get(self):
         app = self.application
-        capp = app.celery_app
+        capp = app.capp
 
         http_api = None
 

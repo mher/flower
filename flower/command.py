@@ -101,7 +101,7 @@ class FlowerCommand(Command):
         self.app.connection = self.app.broker_connection
 
         self.app.loader.import_default_modules()
-        flower = Flower(celery_app=self.app, options=options, **settings)
+        flower = Flower(capp=self.app, options=options, **settings)
         atexit.register(flower.stop)
 
         def sigterm_handler(signal, frame):

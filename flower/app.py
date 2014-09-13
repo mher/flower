@@ -23,7 +23,7 @@ class Flower(tornado.web.Application):
     pool_executor_cls = ThreadPoolExecutor
     max_workers = 4
 
-    def __init__(self, options, celery_app=None, events=None,
+    def __init__(self, options, capp=None, events=None,
                  io_loop=None, **kwargs):
         kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
@@ -38,8 +38,8 @@ class Flower(tornado.web.Application):
                 'keyfile': os.path.join(cwd, self.options.keyfile),
             }
 
-        self.celery_app = celery_app or celery.Celery()
-        self.events = events or Events(self.celery_app, db=options.db,
+        self.capp = capp or celery.Celery()
+        self.events = events or Events(self.capp, db=options.db,
                                        persistent=options.persistent,
                                        enable_events=options.enable_events,
                                        io_loop=self.io_loop,
@@ -64,5 +64,5 @@ class Flower(tornado.web.Application):
 
     @property
     def transport(self):
-        return getattr(self.celery_app.connection().transport,
+        return getattr(self.capp.connection().transport,
                        'driver_type', None)

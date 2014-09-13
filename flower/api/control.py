@@ -30,7 +30,7 @@ class ControlHandler(BaseHandler):
         futures = []
         destination = [workername] if workername else None
         timeout = app.options.inspect_timeout / 1000.0
-        inspect = app.celery_app.control.inspect(
+        inspect = app.capp.control.inspect(
             timeout=timeout, destination=destination)
         for method in cls.INSPECT_METHODS:
             futures.append(app.delay(getattr(inspect, method)))
@@ -102,7 +102,7 @@ Shut down a worker
         """
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         logger.info("Shutting down '%s' worker", workername)
         celery.control.broadcast('shutdown', destination=[workername])
@@ -143,7 +143,7 @@ Restart worker's pool
         """
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         logger.info("Restarting '%s' worker's pool", workername)
         response = celery.control.broadcast('pool_restart',
@@ -197,7 +197,7 @@ Grow worker's pool
 
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         n = self.get_argument('n', default=1, type=int)
 
@@ -250,7 +250,7 @@ Shrink worker's pool
 
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         n = self.get_argument('n', default=1, type=int)
 
@@ -306,7 +306,7 @@ Autoscale worker pool
 
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         min = self.get_argument('min', type=int)
         max = self.get_argument('max', type=int)
@@ -365,7 +365,7 @@ Start consuming from a queue
         """
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         queue = self.get_argument('queue')
 
@@ -421,7 +421,7 @@ Stop consuming from a queue
         """
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         queue = self.get_argument('queue')
 
@@ -475,7 +475,7 @@ Revoke a task
 :statuscode 401: unauthorized request
         """
         logger.info("Revoking task '%s'", taskid)
-        celery = self.application.celery_app
+        celery = self.application.capp
         terminate = self.get_argument('terminate', default=False, type=bool)
         celery.control.revoke(taskid, terminate=terminate)
         self.write(dict(message="Revoked '%s'" % taskid))
@@ -516,7 +516,7 @@ Change soft and hard time limits for a task
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task/worker
         """
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         workername = self.get_argument('workername')
         hard = self.get_argument('hard', default=None, type=float)
@@ -578,7 +578,7 @@ Change rate limit for a task
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task/worker
         """
-        celery = self.application.celery_app
+        celery = self.application.capp
 
         workername = self.get_argument('workername')
         ratelimit = self.get_argument('ratelimit')
