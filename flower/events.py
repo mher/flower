@@ -54,21 +54,22 @@ class Events(threading.Thread):
         threading.Thread.__init__(self)
         self.daemon = True
 
-        self._io_loop = io_loop or IOLoop.instance()
-        self._capp = capp
-        self._db = db
-        self._persistent = persistent
-        self.state = None
-        self.enable_events = enable_events
+        self.io_loop = io_loop or IOLoop.instance()
+        self.capp = capp
 
-        if self._persistent and celery.__version__ < '3.0.15':
+        self.db = db
+        self.persistent = persistent
+        self.enable_events = enable_events
+        self.state = None
+
+        if self.persistent and celery.__version__ < '3.0.15':
             logger.warning('Persistent mode is available with '
                            'Celery 3.0.15 and later')
-            self._persistent = False
+            self.persistent = False
 
-        if self._persistent:
-            logger.debug("Loading state from '%s'...", db)
-            state = shelve.open(self._db)
+        if self.persistent:
+            logger.debug("Loading state from '%s'...", self.db)
+            state = shelve.open(self.db)
             if state:
                 self.state = state['events']
             state.close()
@@ -76,19 +77,19 @@ class Events(threading.Thread):
         if not self.state:
             self.state = EventsState(**kwargs)
 
-        self._timer = PeriodicCallback(self.on_enable_events,
-                                       self.events_enable_interval)
+        self.timer = PeriodicCallback(self.on_enable_events,
+                                      self.events_enable_interval)
 
     def start(self):
         threading.Thread.start(self)
         # Celery versions prior to 2 don't support enable_events
         if self.enable_events and celery.VERSION[0] > 2:
-            self._timer.start()
+            self.timer.start()
 
     def stop(self):
-        if self._persistent:
+        if self.persistent:
             logger.debug("Saving state to '%s'...", self._db)
-            state = shelve.open(self._db)
+            state = shelve.open(self.db)
             state['events'] = self.state
             state.close()
 
@@ -98,10 +99,10 @@ class Events(threading.Thread):
             try:
                 try_interval *= 2
 
-                with self._capp.connection() as conn:
+                with self.capp.connection() as conn:
                     recv = EventReceiver(conn,
                                          handlers={"*": self.on_event},
-                                         app=self._capp)
+                                         app=self.capp)
                     recv.capture(limit=None, timeout=None)
 
                 try_interval = 1
@@ -122,10 +123,10 @@ class Events(threading.Thread):
         # Periodically enable events for workers
         # launched after flower
         try:
-            self._capp.control.enable_events()
+            self.capp.control.enable_events()
         except Exception as e:
             logger.debug("Failed to enable events: '%s'", e)
 
     def on_event(self, event):
         # Call EventsState.event in ioloop thread to avoid synchronization
-        self._io_loop.add_callback(partial(self.state.event, event))
+        self.io_loop.add_callback(partial(self.state.event, event))
