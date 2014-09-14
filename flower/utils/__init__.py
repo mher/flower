@@ -14,7 +14,11 @@ def gen_cookie_secret():
 def bugreport():
     try:
         import celery
-        return 'flower   -> %s' % __version__ + celery.bugreport()
+        import tornado
+        import babel
+        return 'flower   -> flower:%s tornado:%s babel:%s' %\
+                (__version__, tornado.version, babel.__version__)\
+                + celery.bugreport()
     except (ImportError, AttributeError):
         return 'Unknown Celery version'
 
