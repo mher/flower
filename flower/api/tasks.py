@@ -93,14 +93,12 @@ Execute a task
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task
         """
-        celery = self.application.capp
-
         args, kwargs, options = self.get_task_args()
         logger.info("Invoking a task '%s' with '%s' and '%s'",
                     taskname, args, kwargs)
 
         try:
-            task = celery.tasks[taskname]
+            task = self.capp.tasks[taskname]
         except KeyError:
             raise HTTPError(404, "Unknown task '%s'" % taskname)
 
@@ -152,13 +150,11 @@ Execute a task by name (doesn't require task sources)
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task
         """
-        celery = self.application.capp
-
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
-        result = celery.send_task(taskname, args=args,
-                                  kwargs=kwargs, **options)
+        result = self.capp.send_task(
+            taskname, args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if self.backend_configured(result):
             response.update(state=result.state)
@@ -350,9 +346,7 @@ List (seen) task types
 :statuscode 200: no error
 :statuscode 401: unauthorized request
         """
-        app = self.application
-
-        seen_task_types = app.events.state.task_types()
+        seen_task_types = self.application.events.state.task_types()
 
         response = {}
         response['task-types'] = seen_task_types

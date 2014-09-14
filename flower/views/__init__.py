@@ -88,3 +88,8 @@ class BaseHandler(tornado.web.RequestHandler):
                     "Invalid argument '%s' of type '%s'" % (
                         arg, type.__name__))
         return arg
+
+    @property
+    def capp(self):
+        "return Celery application object"
+        return self.application.capp
