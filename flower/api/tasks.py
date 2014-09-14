@@ -306,7 +306,7 @@ List tasks
 
         result = []
         for task_id, task in tasks.iter_tasks(
-                app, limit=limit, type=type,
+                app.events, limit=limit, type=type,
                 worker=worker, state=state):
             task = task.as_dict()
             task.pop('worker')
@@ -411,7 +411,7 @@ Get a task info
 :statuscode 404: unknown task
         """
 
-        task = tasks.get_task_by_id(self.application, taskid)
+        task = tasks.get_task_by_id(self.application.events, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
         response = {}

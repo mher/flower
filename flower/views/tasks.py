@@ -17,7 +17,7 @@ from ..utils.tasks import iter_tasks, get_task_by_id
 class TaskView(BaseHandler):
     @web.authenticated
     def get(self, task_id):
-        task = get_task_by_id(self.application, task_id)
+        task = get_task_by_id(self.application.events, task_id)
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
 
@@ -37,7 +37,7 @@ class TasksView(BaseHandler):
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
-        tasks = iter_tasks(app, limit=limit, type=type,
+        tasks = iter_tasks(app.events, limit=limit, type=type,
                            worker=worker, state=state)
         tasks = imap(self.format_task, tasks)
         workers = app.events.state.workers
