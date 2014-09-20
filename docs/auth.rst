@@ -39,10 +39,10 @@ For instance, if you want to grant access to `me@gmail.com` and `you@gmail.com`:
     $ celery flower --auth="me@gmail.com|you@gmail.com" --oauth2_key=... --oauth2_secret=... --auth2_redirect_uri=http://flower.example.com/login
 
 Alternatively you can set environment variables instead of command line arguments: ::
- 
-    $ export GOOGLE_OAUTH2_KEY=...
-    $ export GOOGLE_OAUTH2_SECRET=...
-    $ export GOOGLE_OAUTH2_REDIRECT_URI=http://flower.example.com/login
+
+    $ export FLOWER_GOOGLE_OAUTH2_KEY=...
+    $ export FLOWER_GOOGLE_OAUTH2_SECRET=...
+    $ export FLOWER_GOOGLE_OAUTH2_REDIRECT_URI=http://flower.example.com/login
     $ celery flower --auth=.*@example\.com
-    
+
 .. _Google Developer Console: https://console.developers.google.com
