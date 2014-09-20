@@ -7,7 +7,7 @@ Flower can be configured from the command line: ::
 
     $ flower --auto_refresh=False
 
-Or, using :file:`flowerconfig.py` configuration file:
+Using :file:`flowerconfig.py` configuration file:
 
 .. code-block:: python
 
@@ -19,6 +19,11 @@ Or, using :file:`flowerconfig.py` configuration file:
 
     # Enable debug logging
     logging = 'DEBUG'
+
+Or, using the environment variables. All flower options should be
+prefixed with `FLOWER_`::
+
+    $ export FLOWER_BASIC_AUTH=foo:bar
 
 Options passed through the command line have precedence over the options
 defined in the configuration file. The configuration file name and path
