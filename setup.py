@@ -43,7 +43,7 @@ classifiers = [s.strip() for s in classes.split('\n') if s]
 
 install_requires=get_requirements('default.txt')
 if sys.version_info < (3, 0):
-    install_requires.extend(['futures', 'babel'])
+    install_requires.append('futures')
 
 
 setup(
