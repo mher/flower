@@ -84,12 +84,18 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
 
         for name, worker in sorted(state.workers.items()):
             counter = state.counter[name]
+            started=counter.get('task-started', 0)
+            processed=counter.get('task-received', 0)
+            failed=counter.get('task-failed', 0)
+            succeeded=counter.get('task-succeeded', 0)
+            retried=counter.get('task-retried', 0)
+
             workers[name] = dict(
                 status=worker.alive,
-                active=worker.active,
-                processed=counter.get('task-received', 0),
-                failed=counter.get('task-failed', 0),
-                succeeded=counter.get('task-succeeded', 0),
-                retried=counter.get('task-retried', 0),
+                active=started - succeeded - failed,
+                processed=processed,
+                failed=failed,
+                succeeded=succeeded,
+                retried=retried,
                 loadavg=worker.loadavg)
         return workers
