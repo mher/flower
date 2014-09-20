@@ -11,7 +11,7 @@ def main():
         flower.execute_from_commandline()
     except:
         import sys
-        print(bugreport(), file=sys.stderr)
+        print(bugreport(app=flower.app), file=sys.stderr)
         raise
 
 
