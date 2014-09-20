@@ -38,7 +38,7 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
             'https://www.googleapis.com/plus/v1/people/me',
             headers={'Authorization': 'Bearer %s' % access_token})
         email = json.loads(response.body.decode('utf-8'))['emails'][0]['value']
-        if not re.match(self.application.auth, email):
+        if not re.match(self.application.options.auth, email):
             raise tornado.web.HTTPError(
                 404,
                 "Access denied to '{email}'. "
