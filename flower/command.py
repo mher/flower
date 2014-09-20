@@ -80,7 +80,21 @@ logger = logging.getLogger(__name__)
 
 
 class FlowerCommand(Command):
+    ENV_VAR_PREFIX = 'FLOWER_'
+
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
+        env_options = filter(lambda x: x.startswith(self.ENV_VAR_PREFIX),
+                             os.environ)
+        for env_var_name in env_options:
+            name = env_var_name.lstrip(self.ENV_VAR_PREFIX).lower()
+            value = os.environ[env_var_name]
+            option = options._options[name]
+            if option.multiple:
+                value = map(option.type, value.split(','))
+            else:
+                value = option.type(value)
+            setattr(options, name, value)
+
         argv = list(filter(self.flower_option, argv))
         # parse the command line to get --conf option
         parse_command_line([prog_name] + argv)
