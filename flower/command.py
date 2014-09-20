@@ -3,14 +3,13 @@ from __future__ import print_function
 
 import os
 import sys
-import types
 import atexit
 import signal
 import logging
 
 from pprint import pformat
 
-from tornado.options import define, options
+from tornado.options import options
 from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
 from tornado.auth import GoogleOAuth2Mixin
@@ -20,60 +19,7 @@ from . import __version__
 from .app import Flower
 from .urls import settings
 from .utils import abs_path
-
-
-DEFAULT_CONFIG_FILE = 'flowerconfig.py'
-
-
-define("port", default=5555,
-       help="run on the given port", type=int)
-define("address", default='',
-       help="run on the given address", type=str)
-define("debug", default=False,
-       help="run in debug mode", type=bool)
-define("inspect_timeout", default=1000, type=float,
-       help="inspect timeout (in milliseconds)")
-define("auth", default='', type=str,
-       help="regexp of emails to grant access")
-define("basic_auth", type=str, default=None, multiple=True,
-       help="enable http basic authentication")
-define("oauth2_key", type=str, default=None,
-       help="Google oauth2 key (requires --auth)")
-define("oauth2_secret", type=str, default=None,
-       help="Google oauth2 secret (requires --auth)")
-define("oauth2_redirect_uri", type=str, default=None,
-       help="Google oauth2 redirect uri (requires --auth)")
-define("max_tasks", type=int, default=10000,
-       help="maximum number of tasks to keep in memory")
-define("db", type=str, default='flower',
-       help="flower database file")
-define("persistent", type=bool, default=False,
-       help="enable persistent mode")
-define("broker_api", type=str, default=None,
-       help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
-define("certfile", type=str, default=None,
-       help="SSL certificate file")
-define("keyfile", type=str, default=None,
-       help="SSL key file")
-define("xheaders", type=bool, default=False,
-       help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
-define("auto_refresh", default=True,
-       help="refresh dashboards", type=bool)
-define("cookie_secret", type=str, default=None,
-       help="secure cookie secret")
-define("conf", default=DEFAULT_CONFIG_FILE,
-       help="configuration file")
-define("enable_events", type=bool, default=True,
-       help="periodically enable Celery events")
-define("format_task", type=types.FunctionType, default=None,
-       help="use custom task formatter")
-define("natural_time", type=bool, default=True,
-       help="show time in relative format")
-
-
-# deprecated options
-define("url_prefix", type=str, help="base url prefix")
-define("inspect", default=False, help="inspect workers", type=bool)
+from .options import DEFAULT_CONFIG_FILE
 
 
 logger = logging.getLogger(__name__)

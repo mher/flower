@@ -13,6 +13,7 @@ from tornado import ioloop
 from .api import control
 from .urls import handlers
 from .events import Events
+from .options import default_options
 
 
 logger = logging.getLogger(__name__)
@@ -22,20 +23,20 @@ class Flower(tornado.web.Application):
     pool_executor_cls = ThreadPoolExecutor
     max_workers = 4
 
-    def __init__(self, options, capp=None, events=None,
+    def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
         kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
-        self.options = options
+        self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.ssl_options = kwargs.get('ssl_options', None)
 
         self.capp = capp or celery.Celery()
-        self.events = events or Events(self.capp, db=options.db,
-                                       persistent=options.persistent,
-                                       enable_events=options.enable_events,
+        self.events = events or Events(self.capp, db=self.options.db,
+                                       persistent=self.options.persistent,
+                                       enable_events=self.options.enable_events,
                                        io_loop=self.io_loop,
-                                       max_tasks_in_memory=options.max_tasks)
+                                       max_tasks_in_memory=self.options.max_tasks)
 
     def start(self):
         self.pool = self.pool_executor_cls(max_workers=self.max_workers)
