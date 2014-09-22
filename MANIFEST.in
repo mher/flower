@@ -7,3 +7,4 @@ recursive-include docs *
 recursive-include flower/static *
 recursive-include flower/templates *
 recursive-include tests *
+recursive-include requirements *.txt
