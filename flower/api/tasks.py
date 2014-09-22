@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import json
 import logging
+from celery.contrib.abortable import AbortableAsyncResult
 
 from tornado import web
 from tornado.escape import json_decode
@@ -204,6 +205,45 @@ Get a task result
             else:
                 response.update({'result': self.safe_result(result.result)})
         self.write(response)
+
+class TaskAbort(BaseTaskHandler):
+    @web.authenticated
+    def post(self, taskid):
+        """
+aborting a task
+
+**Example request**:
+
+.. sourcecode:: http
+
+  POST /api/task/abort/1480b55c-b8b2-462c-985e-24af3e9158f9?terminate=true
+  Content-Length: 0
+  Content-Type: application/x-www-form-urlencoded; charset=utf-8
+  Host: localhost:5555
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 61
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "message": "Aborted '1480b55c-b8b2-462c-985e-24af3e9158f9'"
+  }
+
+:query abort: abort the task if it is running
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+        """
+        result = AbortableAsyncResult(taskid)
+        logger.info("Aborting task '%s'", taskid)
+        if not self.backend_configured(result):
+            raise HTTPError(503)
+        result.abort()
+        self.write(dict(message="Aborted '%s'" % taskid))
 
 
 class ListTasks(BaseTaskHandler):
