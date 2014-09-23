@@ -53,6 +53,8 @@ define("format_task", type=types.FunctionType, default=None,
        help="use custom task formatter")
 define("natural_time", type=bool, default=True,
        help="show time in relative format")
+define("allowed_hosts", type=str, default="localhost", multiple=True,
+       help="hosts whose origins we allow")
 
 # deprecated options
 define("url_prefix", type=str, help="base url prefix")
