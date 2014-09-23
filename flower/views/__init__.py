@@ -19,6 +19,9 @@ class BaseHandler(tornado.web.RequestHandler):
         kwargs.update(functions)
         super(BaseHandler, self).render(*args, **kwargs)
 
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+
     def write_error(self, status_code, **kwargs):
         if status_code == 404:
             message = None
