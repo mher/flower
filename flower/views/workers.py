@@ -7,6 +7,7 @@ from tornado import gen
 from tornado import httpclient
 
 from ..views import BaseHandler
+from ..api.workers import ListWorkers
 
 
 class WorkerView(BaseHandler):
@@ -15,19 +16,12 @@ class WorkerView(BaseHandler):
     def get(self, name):
         refresh = self.get_argument('refresh', default=False, type=bool)
 
-        url = self.request.protocol + "://" + self.request.host +\
-            "/api/workers" + "?workername=%s" % name
         if refresh:
-            url += '&refresh=%s' % refresh
+            yield ListWorkers.update_workers(app=self.application, workername=name)
 
-        http_client = httpclient.AsyncHTTPClient()
-        try:
-            response = yield http_client.fetch(url)
-            worker = json.loads(response.body)[name]
-        except (AttributeError, httpclient.HTTPError):
+        worker = ListWorkers.worker_cache.get(name)
+
+        if worker is None:
             raise web.HTTPError(404, "Unknown worker '%s'" % name)
-        finally:
-            http_client.close()
 
-        worker['name'] = name
-        self.render("worker.html", worker=worker)
+        self.render("worker.html", worker=dict(worker, name=name))
