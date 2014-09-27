@@ -103,7 +103,7 @@ class Events(threading.Thread):
                     recv = EventReceiver(conn,
                                          handlers={"*": self.on_event},
                                          app=self.capp)
-                    recv.capture(limit=None, timeout=None)
+                    recv.capture(limit=None, timeout=None, wakeup=True)
 
                 try_interval = 1
             except (KeyboardInterrupt, SystemExit):
