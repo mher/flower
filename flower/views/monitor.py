@@ -98,6 +98,6 @@ class BrokerMonitor(BaseHandler):
 
         data = defaultdict(int)
         for queue in queues:
-            data[queue['name']] = queue['messages']
+            data[queue['name']] = queue.get('messages', 0)
 
         self.write(data)
