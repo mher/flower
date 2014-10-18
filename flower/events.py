@@ -19,6 +19,11 @@ from celery.events.state import State
 
 from . import api
 
+try:
+    from collections import Counter
+except ImportError:
+    from flower.backports.collections import Counter
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +33,7 @@ class EventsState(State):
 
     def __init__(self, *args, **kwargs):
         super(EventsState, self).__init__(*args, **kwargs)
-        self.counter = collections.defaultdict(collections.Counter)
+        self.counter = collections.defaultdict(Counter)
 
     def event(self, event):
         worker_name = event['hostname']
