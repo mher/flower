@@ -73,9 +73,13 @@ For more info checkout `API Reference`_ and `examples`_.
 Installation
 ------------
 
-To install, simply: ::
+PyPI version: ::
 
     $ pip install flower
+
+Development version: ::
+
+    $ pip install https://github.com/mher/flower/zipball/master
 
 Usage
 -----
