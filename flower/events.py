@@ -22,7 +22,7 @@ from . import api
 try:
     from collections import Counter
 except ImportError:
-    from flower.backports.collections import Counter
+    from .utils.backports.collections import Counter
 
 
 logger = logging.getLogger(__name__)
