@@ -1,10 +1,7 @@
 from __future__ import absolute_import
 
-import json
-
 from tornado import web
 from tornado import gen
-from tornado import httpclient
 
 from ..views import BaseHandler
 from ..api.workers import ListWorkers
