@@ -10,10 +10,7 @@ from babel.dates import format_timedelta
 
 
 PY2 = sys.version_info[0] == 2
-if not PY2:
-    string_types = (str,)
-else:
-    string_types = (str, unicode)
+string_types = (str, unicode) if PY2 else (str,)
 
 
 KEYWORDS_UP = ('ssl', 'uri', 'url', 'uuid', 'eta')
