@@ -46,8 +46,9 @@ class TestHumanize(unittest.TestCase):
         self.assertEqual([4, {1: 1}], humanize([4, {1: 1}]))
 
     def test_time(self):
+        from pytz import utc
         self.assertEqual(1343911558.305793, humanize(1343911558.305793))
-        self.assertEqual(format_time(1343911558.305793),
+        self.assertEqual(format_time(1343911558.305793, utc),
                          humanize(1343911558.305793, type='time'))
 
     def test_strings(self):
