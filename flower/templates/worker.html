@@ -334,20 +334,22 @@
               <table class="table table-bordered table-striped">
                 <caption>System usage statistics</caption>
                 <tbody>
+                {% if isinstance(worker['stats']['rusage'], dict) %}
                   {% for name, value in worker['stats']['rusage'].items() %}
                       <tr>
                         <td>{{ name }}</td>
                         <td>{{ value }}</td>
                       </tr>
                   {% end %}
+                {% end %}
                 </tbody>
               </table>
             </div>
           </div> <!-- end system tab -->
 
-	      </div>
-	    </div>
-	  </div>
+         </div>
+        </div>
+      </div>
   </div>
   </div>
 {% end %}
