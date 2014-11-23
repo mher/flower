@@ -2,11 +2,11 @@ from __future__ import absolute_import
 
 import re
 import sys
-import time
 
 from datetime import datetime
 from datetime import timedelta
 from babel.dates import format_timedelta
+from pytz import timezone, utc
 
 
 PY2 = sys.version_info[0] == 2
@@ -18,8 +18,8 @@ KEYWORDS_DOWN = ('args', 'kwargs')
 UUID_REGEX = re.compile(r'^[\w]{8}(-[\w]{4}){3}-[\w]{12}$')
 
 
-def format_time(time):
-    dt = datetime.fromtimestamp(time)
+def format_time(time, tz):
+    dt = datetime.fromtimestamp(time, tz=tz)
     return '%s.%s' % (
         dt.strftime("%Y-%m-%d %H:%M:%S"), dt.microsecond)
 
@@ -27,14 +27,18 @@ def format_time(time):
 def humanize(obj, type=None, length=None):
     if obj is None:
         obj = ''
-    elif type == 'time':
-        obj = format_time(float(obj)) if obj else ''
-    elif type == 'natural-time':
-        delta = time.time() - float(obj)
-        if timedelta(seconds=delta) < timedelta(days=1):
+    elif type and type.startswith('time'):
+        tz = type[len('time'):].lstrip('-')
+        tz = timezone(tz) if tz else utc
+        obj = format_time(float(obj), tz) if obj else ''
+    elif type and type.startswith('natural-time'):
+        tz = type[len('natural-time'):].lstrip('-')
+        tz = timezone(tz) if tz else utc
+        delta = datetime.now(tz) - datetime.fromtimestamp(float(obj), tz)
+        if delta < timedelta(days=1):
             obj = format_timedelta(delta, locale='en_US') + ' ago'
         else:
-            obj = format_time(float(obj)) if obj else ''
+            obj = format_time(float(obj), tz) if obj else ''
     elif isinstance(obj, string_types) and not re.match(UUID_REGEX, obj):
         obj = obj.replace('-', ' ').replace('_', ' ')
         obj = re.sub('|'.join(KEYWORDS_UP),

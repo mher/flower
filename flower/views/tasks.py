@@ -28,6 +28,7 @@ class TasksView(BaseHandler):
     @web.authenticated
     def get(self):
         app = self.application
+        capp = self.application.capp
         limit = self.get_argument('limit', default=None, type=int)
         worker = self.get_argument('worker', None)
         type = self.get_argument('type', None)
@@ -43,6 +44,8 @@ class TasksView(BaseHandler):
         workers = app.events.state.workers
         seen_task_types = app.events.state.task_types()
         time = 'natural-time' if app.options.natural_time else 'time'
+        if capp.conf.CELERY_TIMEZONE:
+            time += '-' + capp.conf.CELERY_TIMEZONE
 
         self.render("tasks.html", tasks=tasks,
                     task_types=seen_task_types,
