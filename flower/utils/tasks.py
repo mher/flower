@@ -5,7 +5,8 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
                sort_by=None):
     i = 0
     tasks = events.state.tasks_by_timestamp()
-    tasks = sort_tasks(tasks, sort_by)
+    if sort_by is not None:
+        tasks = sort_tasks(tasks, sort_by)
 
     for uuid, task in tasks:
         if type and task.name != type:
@@ -21,14 +22,13 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
 
 
 def sort_tasks(tasks, sort_by):
-    sorted_keys = ['name', 'state', 'received', 'started']
-    if sort_by and sort_by.lstrip('-') in sorted_keys:
-        if sort_by.startswith('-'):
-            sort_by = sort_by.lstrip('-')
-            tasks = sorted(tasks, key=lambda x: getattr(x[1], sort_by), reverse=True)
-        else:
-            tasks = sorted(tasks, key=lambda x: getattr(x[1], sort_by))
-    return tasks
+    assert sort_by.lstrip('-') in ('name', 'state', 'received', 'started')
+    reverse = False
+    if sort_by.startswith('-'):
+        sort_by = sort_by.lstrip('-')
+        reverse = True
+    for task in sorted(tasks, key=lambda x: getattr(x[1], sort_by), reverse=reverse):
+        yield task
 
 
 def get_task_by_id(events, task_id):
