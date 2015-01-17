@@ -14,6 +14,12 @@
       padding-right: 0;
       padding-bottom: 0;
     }
+    tr th a.sort.desc::before {
+      content: "↓↓";
+    }
+    tr th a.sort.asc::before {
+      content: "↑↑";
+    }
   </style>
 {% end %}
 
@@ -86,14 +92,14 @@
   <table class="table table-bordered table-striped">
     <thead>
     <tr>
-      <th>Name</th>
+      <th>{% raw sort_url("Name", "name", sort_by, params) %}</th>
       <th>UUID</th>
-      <th>State</th>
+      <th>{% raw sort_url("State", "state", sort_by, params) %}</th>
       <th>args</th>
       <th>kwargs</th>
       <th>Result</th>
-      <th>Received</th>
-      <th>Started</th>
+      <th>{% raw sort_url("Received", "received", sort_by, params) %}</th>
+      <th>{% raw sort_url("Started", "started", sort_by, params) %}</th>
     </tr>
     </thead>
     <tbody>
