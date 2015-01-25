@@ -391,6 +391,7 @@ var flower = (function () {
 
         $('#task-filter-form').each(function () {
             $(this).find('SELECT').val('');
+            $(this).find('.datetimepicker').val('');
         });
 
         $('#task-filter-form').submit();

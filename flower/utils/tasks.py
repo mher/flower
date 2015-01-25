@@ -1,12 +1,18 @@
+import datetime
+import time
 from celery.events.state import Task
 
 
 def iter_tasks(events, limit=None, type=None, worker=None, state=None,
-               sort_by=None):
+               sort_by=None, received_start=None, received_end=None,
+               started_start=None, started_end=None):
     i = 0
     tasks = events.state.tasks_by_timestamp()
     if sort_by is not None:
         tasks = sort_tasks(tasks, sort_by)
+    convert = lambda x: time.mktime(
+        datetime.datetime.strptime(x, '%Y-%m-%d %H:%M').timetuple()
+    )
 
     for uuid, task in tasks:
         if type and task.name != type:
@@ -15,6 +21,15 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
             continue
         if state and task.state != state:
             continue
+        if received_start and task.received < convert(received_start):
+            continue
+        if received_end and task.received > convert(received_end):
+            continue
+        if started_start and task.started < convert(started_start):
+            continue
+        if started_end and task.started > convert(started_end):
+            continue
+
         yield uuid, task
         i += 1
         if i == limit:

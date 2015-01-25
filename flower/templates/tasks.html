@@ -78,6 +78,23 @@
                 </select>
               </div>
             </div>
+            <div class="control-group">
+              <label class="control-label" for="input-received-start">Received:</label>
+              <div class="controls">
+                <input type="text" class="input datetimepicker" name="received-start" id="input-received-start" value="{{ received_start or '' }}" data-date-format="yyyy-mm-dd hh:ii"> to
+                <input type="text" class="input datetimepicker" name="received-end" id="input-received-end" value="{{ received_end or '' }}" data-date-format="yyyy-mm-dd hh:ii">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="input-started-start">Started:</label>
+              <div class="controls">
+                <input type="text" class="input datetimepicker" name="started-start" id="input-started-start" value="{{ started_start or '' }}" data-date-format="yyyy-mm-dd hh:ii"> to
+                <input type="text" class="input datetimepicker" name="started-end" id="input-started-end" value="{{ started_end or '' }}" data-date-format="yyyy-mm-dd hh:ii">
+              </div>
+            </div>
+            {% if sort_by %}
+            <input type="hidden" name="sort" value="{{ sort_by}}">
+            {% end %}
             <div class="form-actions">
               <button class="btn btn-primary" type="submit">Apply filter</button>
               <button class="btn" onclick="flower.on_cancel_task_filter(event)">Cancel
@@ -134,4 +151,14 @@
     {% end %}
   </table>
 </div>
+{% end %}
+
+{% block extra_scripts %}
+<script>
+  $(".datetimepicker").datetimepicker({
+    autoclose: true,
+    todayBtn: true,
+    todayHighlight: true
+  });
+</script>
 {% end %}

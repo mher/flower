@@ -34,13 +34,21 @@ class TasksView(BaseHandler):
         type = self.get_argument('type', None)
         state = self.get_argument('state', None)
         sort_by = self.get_argument('sort', None)
+        received_start = self.get_argument('received-start', None)
+        received_end = self.get_argument('received-end', None)
+        started_start = self.get_argument('started-start', None)
+        started_end = self.get_argument('started-end', None)
 
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
         tasks = iter_tasks(app.events, limit=limit, type=type,
-                           worker=worker, state=state, sort_by=sort_by)
+                           worker=worker, state=state, sort_by=sort_by,
+                           received_start=received_start,
+                           received_end=received_end,
+                           started_start=started_start,
+                           started_end=started_end)
         tasks = imap(self.format_task, tasks)
         workers = app.events.state.workers
         seen_task_types = app.events.state.task_types()
@@ -59,7 +67,11 @@ class TasksView(BaseHandler):
                     state=state,
                     time=time,
                     sort_by=sort_by,
-                    params=params)
+                    params=params,
+                    received_start=received_start,
+                    received_end=received_end,
+                    started_start=started_start,
+                    started_end=started_end)
 
     def format_task(self, args):
         uuid, task = args

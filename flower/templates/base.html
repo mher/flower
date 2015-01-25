@@ -16,6 +16,7 @@
     <link href="{{ static_url('css/bootstrap-responsive.css') }}" rel="stylesheet">
     <link href="{{ static_url('css/rickshaw.min.css') }}" rel="stylesheet">
     <link href="{{ static_url('css/jquery-ui.css') }}" rel="stylesheet">
+    <link href="{{ static_url('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
     <link href="{{ static_url('css/flower.css') }}" rel="stylesheet">
 
     {% block extra_styles %}
@@ -70,7 +71,12 @@
     <script src="{{ static_url('js/d3.min.js') }}"></script>
     <script src="{{ static_url('js/d3.layout.min.js') }}"></script>
     <script src="{{ static_url('js/rickshaw.min.js') }}"></script>
+    <script src="{{ static_url('js/bootstrap-datetimepicker.min.js') }}"></script>
 
     <script src="{{ static_url('js/flower.js') }}"></script>
+
+    {% block extra_scripts %}
+    {% end %}
+
   </body>
 </html>
