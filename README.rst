@@ -1,12 +1,12 @@
 Celery Flower
 =============
 
-.. image:: https://badge.fury.io/py/flower.png
-        :target: http://badge.fury.io/py/flower
-.. image:: https://travis-ci.org/mher/flower.png?branch=master
+.. image:: https://pypip.in/version/flower/badge.svg?style=flat
+        :target: https://pypi.python.org/pypi/flower
+.. image:: https://travis-ci.org/mher/flower.svg?branch=master
         :target: https://travis-ci.org/mher/flower
-.. image:: https://pypip.in/d/flower/badge.png
-        :target: https://crate.io/packages/flower/
+.. image:: https://pypip.in/d/flower/badge.svg?style=flat
+        :target: https://pypi.python.org/pypi/flower
 
 Flower is a web based tool for monitoring and administrating Celery clusters.
 
