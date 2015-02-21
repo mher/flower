@@ -5,7 +5,7 @@ python:
   - "3.4"
   - "pypy"
 install:
-  - pip install -r requirements/dev.txt --use-mirrors
+  - travis_retry pip install -r requirements/dev.txt --use-mirrors
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install futures; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then pip install futures; fi
 script:
