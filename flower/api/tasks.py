@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import json
 import logging
+import datetime
 
 from tornado import web
 from tornado.escape import json_decode
@@ -51,6 +52,12 @@ class BaseTaskHandler(BaseHandler):
 
 
 class TaskAsyncApply(BaseTaskHandler):
+    option_types = dict(
+            eta=datetime.datetime,
+            countdown=float,
+            expires=lambda x:int if x.isdigit() else datetime.datetime
+        )
+
     @web.authenticated
     def post(self, taskname):
         """
@@ -101,6 +108,10 @@ Execute a task
             task = self.capp.tasks[taskname]
         except KeyError:
             raise HTTPError(404, "Unknown task '%s'" % taskname)
+
+        for name, value in options.items():
+            if name in self.option_types:
+                options[name] = self.option_types[name](value)
 
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
