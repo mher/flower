@@ -7,6 +7,8 @@ Version 0.8
 -----------
 
 - Google OAuth 2.0 support
+- tasks can be sorted by state, received and started times
+- tasks can be filters by time range
 - --conf option to change the default configuration file
 - --enable_events option to disable periodic `enable_events` commands
 - show time in natural format (e.g. 3 minutes ago)
