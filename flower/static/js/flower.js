@@ -88,6 +88,42 @@ var flower = (function () {
         });
     }
 
+    function refresh_selected(event) {
+        var $selected_workers = get_selected_workers();
+
+        if (!$selected_workers.length) {
+            $.ajax({
+                type: 'GET',
+                url: '/api/workers',
+                data: { refresh: 1 },
+                success: function (data) {
+                    show_success_alert('Refreshed');
+                },
+                error: function (data) {
+                    show_error_alert(data.responseText);
+                }
+            });
+        }
+
+        $selected_workers.each(function () {
+            var $worker = $(this),
+                worker_name = $worker.attr('id');
+
+            $.ajax({
+                type: 'GET',
+                url: '/api/workers',
+                dataType: 'json',
+                data: { workername: unescape(worker_name), refresh: 1 },
+                success: function (data) {
+                    show_success_alert(data.message || 'Refreshed');
+                },
+                error: function (data) {
+                    show_error_alert(data.responseText);
+                }
+            });
+        });
+    }
+
     function on_worker_refresh(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -623,6 +659,7 @@ var flower = (function () {
         select_none_workers: select_none_workers,
         shutdown_selected: shutdown_selected,
         restart_selected: restart_selected,
+        refresh_selected: refresh_selected,
         on_alert_close: on_alert_close,
         on_worker_refresh: on_worker_refresh,
         on_pool_grow: on_pool_grow,
