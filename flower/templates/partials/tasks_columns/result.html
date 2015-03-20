@@ -1,0 +1,5 @@
+{% if task.state == "SUCCESS" %}
+    {{ task.result }}
+{% elif task.state == "FAILURE" %}
+    {{ task.exception }}
+{% end %}

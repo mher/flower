@@ -53,6 +53,8 @@ define("format_task", type=types.FunctionType, default=None,
        help="use custom task formatter")
 define("natural_time", type=bool, default=True,
        help="show time in relative format")
+define("tasks_columns", type=str, default="name,uuid,state,args,kwargs,result,received,started",
+       help="Slugs of columns on /tasks/ page, delimited by comma")
 
 # deprecated options
 define("url_prefix", type=str, help="base url prefix")

@@ -57,21 +57,32 @@ class TasksView(BaseHandler):
             time += '-' + capp.conf.CELERY_TIMEZONE
         params = {k: v[-1] for k, v in self.request.query_arguments.items()}
 
-        self.render("tasks.html", tasks=tasks,
-                    task_types=seen_task_types,
-                    all_states=celery.states.ALL_STATES,
-                    workers=workers,
-                    limit=limit,
-                    worker=worker,
-                    type=type,
-                    state=state,
-                    time=time,
-                    sort_by=sort_by,
-                    params=params,
-                    received_start=received_start,
-                    received_end=received_end,
-                    started_start=started_start,
-                    started_end=started_end)
+        ordered_columns = app.options.tasks_columns.split(',')
+        columns_common_context = dict(self._get_template_functions())
+        columns_common_context.update({
+            'sort_by': sort_by,
+            'params': params,
+            'time': time,
+        })
+
+        self.render(
+            "tasks.html",
+            tasks=tasks,
+            columns=ordered_columns,
+            task_types=seen_task_types,
+            all_states=celery.states.ALL_STATES,
+            workers=workers,
+            limit=limit,
+            worker=worker,
+            type=type,
+            state=state,
+            sort_by=sort_by,
+            received_start=received_start,
+            received_end=received_end,
+            started_start=started_start,
+            started_end=started_end,
+            columns_common_context=columns_common_context,
+        )
 
     def format_task(self, args):
         uuid, task = args

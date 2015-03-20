@@ -109,14 +109,9 @@
   <table class="table table-bordered table-striped">
     <thead>
     <tr>
-      <th>{% raw sort_url("Name", "name", sort_by, params) %}</th>
-      <th>UUID</th>
-      <th>{% raw sort_url("State", "state", sort_by, params) %}</th>
-      <th>args</th>
-      <th>kwargs</th>
-      <th>Result</th>
-      <th>{% raw sort_url("Received", "received", sort_by, params) %}</th>
-      <th>{% raw sort_url("Started", "started", sort_by, params) %}</th>
+      {% for column_name in columns %}
+        <th>{% module Template('partials/tasks_columns/head_%s.html' % column_name, **columns_common_context) %}</th>
+      {% end %}
     </tr>
     </thead>
     <tbody>
@@ -125,29 +120,9 @@
        {% if getattr(task, 'name', None) is None %}
            {% continue %}
        {% end %}
-      <td>{{ task.name }}</td>
-      <td><a href="{{ '/task/' + task.uuid }}">{{ task.uuid }}</a></td>
-      <td>
-        {% if task.state == "SUCCESS" %}
-          <span class="label label-success">{{ task.state }}</span>
-        {% elif task.state == "FAILURE" %}
-          <span class="label label-important">{{ task.state }}</span>
-        {% else %}
-          <span class="label label-default">{{ task.state }}</span>
-        {% end %}
-      </td>
-      <td>{{ task.args }}</td>
-      <td>{{ task.kwargs }}</td>
-      <td>
-          {% if task.state == "SUCCESS" %}
-            {{ task.result }}
-          {% elif task.state == "FAILURE" %}
-            {{ task.exception }}
-          {% end %}
-      </td>
-      <td>{{ humanize(task.received, type=time) }}</td>
-      <td>{{ humanize(task.started, type=time) }}</td>
-    </tr>
+      {% for column_name in columns %}
+        <td>{% module Template('partials/tasks_columns/%s.html' % column_name, task=task, **columns_common_context) %}</td>
+      {% end %}
     {% end %}
   </table>
 </div>
