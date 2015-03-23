@@ -1,7 +1,0 @@
-{% if task.state == "SUCCESS" %}
-    <span class="label label-success">{{ task.state }}</span>
-{% elif task.state == "FAILURE" %}
-    <span class="label label-important">{{ task.state }}</span>
-{% else %}
-    <span class="label label-default">{{ task.state }}</span>
-{% end %}

@@ -1,3 +1,0 @@
-{% if task.timestamp and task.started %}
-    {{ '%.2f' % humanize(task.timestamp - task.started) }} sec
-{% end %}
