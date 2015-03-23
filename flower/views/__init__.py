@@ -14,7 +14,7 @@ from ..utils import template, bugreport
 
 class BaseHandler(tornado.web.RequestHandler):
     def render(self, *args, **kwargs):
-        functions = inspect.getmembers(template, inspect.isfunction)
+        functions = self._get_template_functions()
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
         super(BaseHandler, self).render(*args, **kwargs)
@@ -93,3 +93,7 @@ class BaseHandler(tornado.web.RequestHandler):
     def capp(self):
         "return Celery application object"
         return self.application.capp
+
+    @staticmethod
+    def _get_template_functions():
+        return inspect.getmembers(template, inspect.isfunction)

@@ -211,3 +211,10 @@ xheaders
 Enable support of `X-Real-Ip` and `X-Scheme` headers
 (by default, `xheaders=False`)
 
+tasks_columns
+~~~~~~~~~~~~~
+
+Specifies list of comma-delimited columns on /tasks/ page.
+Order of slugs in the option is unrelated to order of columns on the page.
+Avalible slugs: `name`, `uuid`, `state`, `args`, `kwargs`,
+`result`, `received`, `started`, `runtime`

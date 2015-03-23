@@ -109,14 +109,33 @@
   <table class="table table-bordered table-striped">
     <thead>
     <tr>
-      <th>{% raw sort_url("Name", "name", sort_by, params) %}</th>
-      <th>UUID</th>
-      <th>{% raw sort_url("State", "state", sort_by, params) %}</th>
-      <th>args</th>
-      <th>kwargs</th>
-      <th>Result</th>
-      <th>{% raw sort_url("Received", "received", sort_by, params) %}</th>
-      <th>{% raw sort_url("Started", "started", sort_by, params) %}</th>
+      {% if 'name' in columns %}
+        <th>{% raw sort_url("Name", "name", sort_by, params) %}</th>
+      {% end %}
+      {% if 'uuid' in columns %}
+        <th>UUID</th>
+      {% end %}
+      {% if 'state' in columns %}
+        <th>{% raw sort_url("State", "state", sort_by, params) %}</th>
+      {% end %}
+      {% if 'args' in columns %}
+        <th>args</th>
+      {% end %}
+      {% if 'kwargs' in columns %}
+        <th>kwargs</th>
+      {% end %}
+      {% if 'result' in columns %}
+        <th>Result</th>
+      {% end %}
+      {% if 'received' in columns %}
+        <th>{% raw sort_url("Received", "received", sort_by, params) %}</th>
+      {% end %}
+      {% if 'started' in columns %}
+        <th>{% raw sort_url("Started", "started", sort_by, params) %}</th>
+      {% end %}
+      {% if 'runtime' in columns %}
+        <th>Runtime</th>
+      {% end %}
     </tr>
     </thead>
     <tbody>
@@ -125,29 +144,63 @@
        {% if getattr(task, 'name', None) is None %}
            {% continue %}
        {% end %}
-      <td>{{ task.name }}</td>
-      <td><a href="{{ '/task/' + task.uuid }}">{{ task.uuid }}</a></td>
-      <td>
-        {% if task.state == "SUCCESS" %}
-          <span class="label label-success">{{ task.state }}</span>
-        {% elif task.state == "FAILURE" %}
-          <span class="label label-important">{{ task.state }}</span>
-        {% else %}
-          <span class="label label-default">{{ task.state }}</span>
-        {% end %}
-      </td>
-      <td>{{ task.args }}</td>
-      <td>{{ task.kwargs }}</td>
-      <td>
+      {% if 'name' in columns %}
+        <td>
+          {{ task.name }}
+        </td>
+      {% end %}
+      {% if 'uuid' in columns %}
+        <td>
+          <a href="{{ '/task/' + task.uuid }}">{{ task.uuid }}</a>
+        </td>
+      {% end %}
+      {% if 'state' in columns %}
+        <td>
           {% if task.state == "SUCCESS" %}
-            {{ task.result }}
+              <span class="label label-success">{{ task.state }}</span>
           {% elif task.state == "FAILURE" %}
-            {{ task.exception }}
+              <span class="label label-important">{{ task.state }}</span>
+          {% else %}
+              <span class="label label-default">{{ task.state }}</span>
           {% end %}
-      </td>
-      <td>{{ humanize(task.received, type=time) }}</td>
-      <td>{{ humanize(task.started, type=time) }}</td>
-    </tr>
+        </td>
+      {% end %}
+      {% if 'args' in columns %}
+        <td>
+          {{ task.args }}
+        </td>
+      {% end %}
+      {% if 'kwargs' in columns %}
+        <td>
+          {{ task.kwargs }}
+        </td>
+      {% end %}
+      {% if 'result' in columns %}
+        <td>
+          {% if task.state == "SUCCESS" %}
+              {{ task.result }}
+          {% elif task.state == "FAILURE" %}
+              {{ task.exception }}
+          {% end %}
+        </td>
+      {% end %}
+      {% if 'received' in columns %}
+        <td>
+          {{ humanize(task.received, type=time) }}
+        </td>
+      {% end %}
+      {% if 'started' in columns %}
+        <td>
+          {{ humanize(task.received, type=time) }}
+        </td>
+      {% end %}
+      {% if 'runtime' in columns %}
+        <td>
+          {% if task.timestamp and task.started %}
+              {{ '%.2f' % humanize(task.timestamp - task.started) }} sec
+          {% end %}
+        </td>
+      {% end %}
     {% end %}
   </table>
 </div>
