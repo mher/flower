@@ -92,8 +92,10 @@ class WorkerControlTests(AsyncHTTPTestCase):
         celery.control.time_limit = MagicMock(
             return_value=[{'foo': {'ok': ''}}])
 
-        r = self.post('/api/task/timeout/celery.map',
-                body={'workername': 'foo', 'hard': 3.1, 'soft': 1.2})
+        r = self.post(
+            '/api/task/timeout/celery.map',
+            body={'workername': 'foo', 'hard': 3.1, 'soft': 1.2}
+        )
         self.assertEqual(200, r.code)
         celery.control.time_limit.assert_called_once_with(
             'celery.map', hard=3.1, soft=1.2, destination=['foo'],

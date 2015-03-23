@@ -21,7 +21,9 @@ class WorkerView(BaseHandler):
         if worker is None:
             raise web.HTTPError(404, "Unknown worker '%s'" % name)
         if 'stats' not in worker:
-            raise web.HTTPError(404,
-                    "Unable to get stats for '%s' worker" % name)
+            raise web.HTTPError(
+                404,
+                "Unable to get stats for '%s' worker" % name
+            )
 
         self.render("worker.html", worker=dict(worker, name=name))

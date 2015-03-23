@@ -111,7 +111,6 @@ Execute a task
         except ValueError:
             raise HTTPError(400, 'Invalid option')
 
-
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if self.backend_configured(result):

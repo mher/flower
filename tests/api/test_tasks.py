@@ -24,7 +24,7 @@ class AsyncApplyTests(AsyncHTTPTestCase):
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
-                args=[], kwargs={}, eta=tomorrow)
+            args=[], kwargs={}, eta=tomorrow)
 
     def test_async_apply_countdown(self):
         task = self._app.capp.tasks['foo'] = Mock()
@@ -34,7 +34,7 @@ class AsyncApplyTests(AsyncHTTPTestCase):
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
-                args=[], kwargs={}, countdown=3)
+            args=[], kwargs={}, countdown=3)
 
     def test_async_apply_expires(self):
         task = self._app.capp.tasks['foo'] = Mock()
@@ -44,7 +44,7 @@ class AsyncApplyTests(AsyncHTTPTestCase):
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
-                args=[], kwargs={}, expires=60)
+            args=[], kwargs={}, expires=60)
 
     def test_async_apply_expires_datetime(self):
         task = self._app.capp.tasks['foo'] = Mock()
@@ -55,4 +55,4 @@ class AsyncApplyTests(AsyncHTTPTestCase):
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
-                args=[], kwargs={}, expires=tomorrow)
+            args=[], kwargs={}, expires=tomorrow)

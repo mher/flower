@@ -251,7 +251,7 @@ Shrink worker's pool
 
         logger.info("Shrinking '%s' worker's pool by '%s'", workername, n)
         response = self.capp.control.pool_shrink(
-                n=n, reply=True, destination=[workername])
+            n=n, reply=True, destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(message="Shrinking '%s' worker's pool by %s" % (
                             workername, n)))

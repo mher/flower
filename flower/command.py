@@ -64,9 +64,9 @@ class FlowerCommand(Command):
 
         if options.auth:
             settings[GoogleOAuth2Mixin._OAUTH_SETTINGS_KEY] = {
-              'key': options.oauth2_key or os.environ.get('GOOGLE_OAUTH2_KEY'),
-              'secret': options.oauth2_secret or os.environ.get('GOOGLE_OAUTH2_SECRET'),
-              'redirect_uri': options.oauth2_redirect_uri or os.environ.get('GOOGLE_OAUTH2_REDIRECT_URI'),
+                'key': options.oauth2_key or os.environ.get('GOOGLE_OAUTH2_KEY'),
+                'secret': options.oauth2_secret or os.environ.get('GOOGLE_OAUTH2_SECRET'),
+                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('GOOGLE_OAUTH2_REDIRECT_URI'),
             }
 
         if options.certfile and options.keyfile:
@@ -107,9 +107,13 @@ class FlowerCommand(Command):
         return hasattr(options, name)
 
     def print_banner(self, ssl):
-        logger.info("Visit me at http%s://%s:%s", 's' if ssl else '',
-                    options.address or 'localhost', options.port)
+        logger.info(
+            "Visit me at http%s://%s:%s", 's' if ssl else '',
+            options.address or 'localhost', options.port
+        )
         logger.info('Broker: %s', self.app.connection().as_uri())
-        logger.info('Registered tasks: \n%s',
-                     pformat(sorted(self.app.tasks.keys())))
+        logger.info(
+            'Registered tasks: \n%s',
+            pformat(sorted(self.app.tasks.keys()))
+        )
         logger.debug('Settings: %s', pformat(settings))
