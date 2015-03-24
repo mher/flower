@@ -16,9 +16,12 @@ def bugreport(app=None):
         import celery
         import tornado
         import babel
-        return 'flower   -> flower:%s tornado:%s babel:%s' %\
-                (__version__, tornado.version, babel.__version__)\
-                + celery.bugreport(app)
+        return 'flower   -> flower:%s tornado:%s babel:%s%s' % (
+            __version__,
+            tornado.version,
+            babel.__version__,
+            celery.bugreport(app)
+        )
     except (ImportError, AttributeError):
         return 'Unknown Celery version'
 

@@ -42,7 +42,7 @@ classes = """
 classifiers = [s.strip() for s in classes.split('\n') if s]
 
 
-install_requires=get_requirements('default.txt')
+install_requires = get_requirements('default.txt')
 if sys.version_info < (3, 0):
     install_requires.append('futures')
 
