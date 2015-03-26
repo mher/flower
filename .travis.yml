@@ -7,7 +7,7 @@ python:
   - "pypy"
 install:
   - travis_retry pip install -r requirements/dev.txt --use-mirrors
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install ordereddict futures mock; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2 ordereddict futures; fi
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install futures; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then pip install futures; fi
 script:
