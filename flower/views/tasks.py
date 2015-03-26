@@ -55,7 +55,7 @@ class TasksView(BaseHandler):
         time = 'natural-time' if app.options.natural_time else 'time'
         if capp.conf.CELERY_TIMEZONE:
             time += '-' + capp.conf.CELERY_TIMEZONE
-        params = {k: v[-1] for k, v in self.request.query_arguments.items()}
+        params = dict((k, v[-1]) for (k, v) in self.request.query_arguments.items())
 
         columns = app.options.tasks_columns.split(',')
         self.render(
