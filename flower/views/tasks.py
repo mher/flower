@@ -18,10 +18,11 @@ class TaskView(BaseHandler):
     @web.authenticated
     def get(self, task_id):
         task = get_task_by_id(self.application.events, task_id)
+        wsport = self.get_argument('wsport', default=None, type=int)
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
 
-        self.render("task.html", task=task)
+        self.render("task.html", task=task, wsport=wsport)
 
 
 class TasksView(BaseHandler):
@@ -38,6 +39,7 @@ class TasksView(BaseHandler):
         received_end = self.get_argument('received-end', None)
         started_start = self.get_argument('started-start', None)
         started_end = self.get_argument('started-end', None)
+        wsport = self.get_argument('wsport', default=None, type=int)
 
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
@@ -76,6 +78,7 @@ class TasksView(BaseHandler):
             started_end=started_end,
             params=params,
             time=time,
+            wsport=wsport,
         )
 
     def format_task(self, args):

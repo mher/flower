@@ -8,6 +8,11 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
+try:
+    from urllib.parse import urlparse  # py2
+except ImportError:
+    from urlparse import urlparse  # py3
+
 from tornado import web
 from tornado import gen
 from tornado import websocket
@@ -25,6 +30,7 @@ class DashboardView(BaseHandler):
     @gen.coroutine
     def get(self):
         refresh = self.get_argument('refresh', default=False, type=bool)
+        wsport  = self.get_argument('wsport', default=None, type=int)
 
         app = self.application
         events = app.events.state
@@ -38,7 +44,7 @@ class DashboardView(BaseHandler):
             worker = events.workers[name]
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
-        self.render("dashboard.html", workers=workers, broker=broker)
+        self.render("dashboard.html", workers=workers, broker=broker, wsport=wsport)
 
     @classmethod
     def _as_dict(cls, worker):
@@ -50,6 +56,19 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
     periodic_callback = None
     workers = None
     page_update_interval = 2000
+    ws_allowed_hosts = None
+
+    def __init__(self, *va, **kva):
+        super(DashboardUpdateHandler, self).__init__(*va, **kva)
+        app = self.application
+        if app.options.ws_allowed_hosts is not None:
+            self.ws_allowed_hosts = [ urlparse(host).netloc for host in app.options.ws_allowed_hosts ]
+
+    def check_origin(self, origin):
+        if not self.ws_allowed_hosts:
+            return super(DashboardUpdateHandler, self).check_origin(origin)
+        parsed_origin = urlparse(origin)
+        return parsed_origin.netloc in self.ws_allowed_hosts
 
     def open(self):
         app = self.application

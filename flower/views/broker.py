@@ -18,6 +18,7 @@ class BrokerView(BaseHandler):
     @gen.coroutine
     def get(self):
         app = self.application
+        wsport = self.get_argument('wsport', default=None, type=int)
 
         http_api = None
         if app.transport == 'amqp' and app.options.broker_api:
@@ -30,4 +31,5 @@ class BrokerView(BaseHandler):
 
         self.render("broker.html",
                     broker_url=app.capp.connection().as_uri(),
-                    queues=queues)
+                    queues=queues,
+                    wsport=wsport)

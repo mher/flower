@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="tasks") %}
+  {% module Template("navbar.html", active_tab="tasks", wsport=wsport) %}
 {% end %}
 
 {% block extra_styles %}

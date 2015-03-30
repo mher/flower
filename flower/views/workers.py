@@ -12,6 +12,7 @@ class WorkerView(BaseHandler):
     @gen.coroutine
     def get(self, name):
         refresh = self.get_argument('refresh', default=False, type=bool)
+        wsport  = self.get_argument('wsport', default=None, type=int)
 
         if refresh:
             yield ListWorkers.update_workers(app=self.application, workername=name)
@@ -26,4 +27,4 @@ class WorkerView(BaseHandler):
                 "Unable to get stats for '%s' worker" % name
             )
 
-        self.render("worker.html", worker=dict(worker, name=name))
+        self.render("worker.html", worker=dict(worker, name=name), wsport=wsport)

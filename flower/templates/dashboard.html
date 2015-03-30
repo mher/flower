@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="dashboard") %}
+  {% module Template("navbar.html", active_tab="dashboard", wsport=wsport) %}
 {% end %}
 
 {% block container %}
