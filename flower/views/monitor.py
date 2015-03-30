@@ -14,7 +14,8 @@ from ..api.control import ControlHandler
 class Monitor(BaseHandler):
     @web.authenticated
     def get(self):
-        self.render("monitor.html")
+        wsport = self.get_argument('wsport', default=None, type=int)
+        self.render("monitor.html", wsport=wsport)
 
 
 class SucceededTaskMonitor(BaseHandler):
