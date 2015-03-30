@@ -17,6 +17,8 @@ class BaseHandler(tornado.web.RequestHandler):
         functions = self._get_template_functions()
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
+        if 'wsport' not in kwargs:
+            kwargs['wsport'] = self.get_argument('wsport', default=None, type=int)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
