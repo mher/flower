@@ -42,6 +42,12 @@ class BaseTaskHandler(BaseHandler):
     def write_error(self, status_code, **kwargs):
         self.set_status(status_code)
 
+    def update_response_result(self, response, result):
+        if result.state == states.FAILURE:
+            response.update({'result': self.safe_result(result.result), 'traceback': result.traceback})
+        else:
+            response.update({'result': self.safe_result(result.result)})
+
     def safe_result(self, result):
         "returns json encodable result"
         try:
@@ -113,6 +119,10 @@ Execute a task
 
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
+        if 'wait' in options:
+            # wait until task finished
+            result.get()
+            self.update_response_result(response, result)
         if self.backend_configured(result):
             response.update(state=result.state)
         self.write(response)
@@ -221,11 +231,7 @@ Get a task result
             raise HTTPError(503)
         response = {'task-id': taskid, 'state': result.state}
         if result.ready():
-            if result.state == states.FAILURE:
-                response.update({'result': self.safe_result(result.result),
-                                 'traceback': result.traceback})
-            else:
-                response.update({'result': self.safe_result(result.result)})
+            self.update_response_result(response, result)
         self.write(response)
 
 
