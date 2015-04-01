@@ -120,8 +120,8 @@ Execute a task
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if 'wait' in options:
-            # wait until task finished
-            result.get()
+            # wait until task finished and do not raise anything
+            result.get(propagate=False)
             self.update_response_result(response, result)
         if self.backend_configured(result):
             response.update(state=result.state)
