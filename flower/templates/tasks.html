@@ -79,6 +79,12 @@
               </div>
             </div>
             <div class="control-group">
+              <label class="control-label" for="input-search">Search:</label>
+              <div class="controls">
+                <input name="search" type="text" class="input-small" id="input-search" value="{{ search or ''}}">
+              </div>
+            </div>
+            <div class="control-group">
               <label class="control-label" for="input-received-start">Received:</label>
               <div class="controls">
                 <input type="text" class="input datetimepicker" name="received-start" id="input-received-start" value="{{ received_start or '' }}" data-date-format="yyyy-mm-dd hh:ii"> to

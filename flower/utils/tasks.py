@@ -1,11 +1,16 @@
+from __future__ import absolute_import
+
 import datetime
 import time
+
 from celery.events.state import Task
+
+from .search import satisfies_search_terms
 
 
 def iter_tasks(events, limit=None, type=None, worker=None, state=None,
                sort_by=None, received_start=None, received_end=None,
-               started_start=None, started_end=None):
+               started_start=None, started_end=None, search_terms=None):
     i = 0
     tasks = events.state.tasks_by_timestamp()
     if sort_by is not None:
@@ -13,6 +18,9 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
     convert = lambda x: time.mktime(
         datetime.datetime.strptime(x, '%Y-%m-%d %H:%M').timetuple()
     )
+    any_value_search_term = search_terms.get('any', None)
+    result_search_term = search_terms.get('result', None)
+    kwargs_search_terms = search_terms.get('kwargs', None)
 
     for uuid, task in tasks:
         if type and task.name != type:
@@ -29,7 +37,8 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
             continue
         if started_end and task.started > convert(started_end):
             continue
-
+        if not satisfies_search_terms(task, any_value_search_term, result_search_term, kwargs_search_terms):
+            continue
         yield uuid, task
         i += 1
         if i == limit:
