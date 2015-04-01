@@ -35,7 +35,8 @@ class AsyncApplyTests(AsyncHTTPTestCase):
                 r = self.post('/api/task/async-apply/foo', body='{"wait": true}')
 
         self.assertEqual(200, r.code)
-        self.assertEqual(result, json.loads(r.body)['result'])
+        body = bytes.decode(r.body)
+        self.assertEqual(result, json.loads(body)['result'])
         task.apply_async.assert_called_once_with(args=[], kwargs={}, wait=True)
 
 
