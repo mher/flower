@@ -21,13 +21,17 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
             continue
         if state and task.state != state:
             continue
-        if received_start and task.received < convert(received_start):
+        if received_start and task.received and\
+                task.received < convert(received_start):
             continue
-        if received_end and task.received > convert(received_end):
+        if received_end and task.received and\
+                task.received > convert(received_end):
             continue
-        if started_start and task.started < convert(started_start):
+        if started_start and task.started and\
+                task.started < convert(started_start):
             continue
-        if started_end and task.started > convert(started_end):
+        if started_end and task.started and\
+                task.started > convert(started_end):
             continue
 
         yield uuid, task
