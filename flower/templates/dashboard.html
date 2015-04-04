@@ -63,18 +63,18 @@
         <td class="is_selected"><input type="checkbox"></td>
         <td><a href="{{ '/worker/' + name }}">{{ name }}</a></td>
         <td>
-          {% if info['status'] %}
+          {% if info.get('status', None) %}
           <span class="label label-success">Online</span>
           {% else %}
           <span class="label label-important">Offline</span>
           {% end %}
         </td>
-        <td>{{ info['active'] }}</td>
+        <td>{{ info.get('active', 0) }}</td>
         <td>{{ info.get('task-received', 0) }}</td>
         <td>{{ info.get('task-failed', 0) }}</td>
         <td>{{ info.get('task-succeeded', 0) }}</td>
         <td>{{ info.get('task-retried', 0) }}</td>
-        <td>{{ humanize(info['loadavg']) }}</td>
+        <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
       </tr>
       {% end %}
       </tbody>

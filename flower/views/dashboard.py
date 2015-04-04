@@ -35,6 +35,8 @@ class DashboardView(BaseHandler):
 
         workers = dict((k, dict(v)) for (k, v) in events.counter.items())
         for name, info in workers.items():
+            if name not in events.workers:
+                continue
             worker = events.workers[name]
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
