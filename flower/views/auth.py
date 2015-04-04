@@ -43,7 +43,7 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
                 "Access denied to '{email}'. Please use another account or "
                 "ask your admin to add your email to flower --auth."
             ).format(email=email)
-            raise tornado.web.HTTPError(404, message)
+            raise tornado.web.HTTPError(401, message)
 
         self.set_secure_cookie("user", str(email))
 
