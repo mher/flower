@@ -62,6 +62,7 @@ class TaskAsyncApply(BaseTaskHandler):
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
     @web.authenticated
+    @web.asynchronous
     def post(self, taskname):
         """
 Execute a task
@@ -120,12 +121,23 @@ Execute a task
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if 'wait' in options:
+            self.async_wait(result, response)
+        else:
+            self.write_result(result, response)
+
+    def async_wait(self, result, response):
+        import thread
+        def wait_results(result, response):
             # wait until task finished and do not raise anything
-            result.get(propagate=False)
-            self.update_response_result(response, result)
+            r = result.get(propagate=False)
+            self.write_result(result, response)
+        thread.start_new_thread(wait_results, (result, response, ))
+
+    def write_result(self, result, response):
+        self.update_response_result(response, result)
         if self.backend_configured(result):
             response.update(state=result.state)
-        self.write(response)
+        self.finish(response)
 
     def normalize_options(self, options):
         if 'eta' in options:
@@ -140,7 +152,6 @@ Execute a task
             except ValueError:
                 expires = datetime.strptime(expires, self.DATE_FORMAT)
             options['expires'] = expires
-
 
 class TaskSend(BaseTaskHandler):
     @web.authenticated
