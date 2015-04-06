@@ -14,17 +14,27 @@ class TestSearchParser(unittest.TestCase):
     def test_result_value(self):
         self.assertEqual(
             {'result': 'resval'},
-            parse_search_terms('result=resval')
+            parse_search_terms('result:resval')
         )
 
     def test_kwargs(self):
         self.assertEqual(
             {'kwargs': {'some_kwarg': 'some_value'}},
-            parse_search_terms('some_kwarg=some_value')
+            parse_search_terms('kwargs:some_kwarg=some_value')
         )
         self.assertEqual(
             {'kwargs': {'some_kwarg1': 'some_value1', 'some_kwarg2': 'some_value2'}},
-            parse_search_terms('some_kwarg1=some_value1,some_kwarg2=some_value2')
+            parse_search_terms('kwargs:some_kwarg1=some_value1 kwargs:some_kwarg2=some_value2')
+        )
+
+    def test_args(self):
+        self.assertEqual(
+            {'args': ['some_value']},
+            parse_search_terms('args:some_value')
+        )
+        self.assertEqual(
+            {'args': ['some_value1', 'some_value2']},
+            parse_search_terms('args:some_value1 args:some_value2')
         )
 
     def test_strip_spaces(self):
@@ -34,7 +44,17 @@ class TestSearchParser(unittest.TestCase):
         )
         self.assertEqual(
             {'kwargs': {'some_kwarg': 'some_value'}},
-            parse_search_terms('     some_kwarg=some_value   ')
+            parse_search_terms('     kwargs:some_kwarg=some_value   ')
+        )
+
+    def test_quotes(self):
+        self.assertEqual(
+            {'result': 'complex kwarg'},
+            parse_search_terms('result:"complex kwarg"')
+        )
+        self.assertEqual(
+            {'kwargs': {'some_kwarg1': 'some value1', 'some_kwarg2': 'some value2'}},
+            parse_search_terms('kwargs:some_kwarg1="some value1" kwargs:some_kwarg2="some value2"')
         )
 
 
@@ -66,16 +86,41 @@ class TestTaskFiltering(unittest.TestCase):
         return TaskMockClass(result, args, kwargs)
 
     def setUp(self):
-        self.task = self._create_task(kwargs="{'kwarg1': 1, 'kwarg2': 22}")
+        self.task = self._create_task(
+            args=['arg1'],
+            kwargs="{'kwarg1': 1, 'kwarg2': 22, 'kwarg3': '345'}",
+        )
 
     def test_kwarg_search_works(self):
         self.assertEqual(
             True,
-            satisfies_search_terms(self.task, None, None, {'kwarg1': 1})
+            satisfies_search_terms(self.task, None, None, None, {'kwarg1': 1})
         )
         self.assertEqual(
             False,
-            satisfies_search_terms(self.task, None, None, {'kwarg1': 2})
+            satisfies_search_terms(self.task, None, None, None, {'kwarg1': 2})
+        )
+        self.assertEqual(
+            False,
+            satisfies_search_terms(self.task, None, None, None, {'kwarg2': 2})
+        )
+        self.assertEqual(
+            True,
+            satisfies_search_terms(self.task, None, None, None, {'kwarg3': '345'})
+        )
+
+    def test_args_search_works(self):
+        self.assertEqual(
+            True,
+            satisfies_search_terms(self.task, None, None, ['arg1'], None)
+        )
+        self.assertEqual(
+            False,
+            satisfies_search_terms(self.task, None, None, ['arg2'], None)
+        )
+        self.assertEqual(
+            False,
+            satisfies_search_terms(self.task, None, None, ['arg'], None)
         )
 
 
