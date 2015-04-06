@@ -126,13 +126,14 @@ Execute a task
             self.write_result(result, response)
 
     def async_wait(self, result, response):
-        import thread
+        from threading import Thread
         def wait_results(result, response):
             # wait until task finished and do not raise anything
             r = result.get(propagate=False)
             self.update_response_result(response, result)
             self.write_result(result, response)
-        thread.start_new_thread(wait_results, (result, response, ))
+        th = Thread(target=wait_results, args=(result, response, ))
+        th.start()
 
     def write_result(self, result, response):
         if self.backend_configured(result):
