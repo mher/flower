@@ -130,11 +130,11 @@ Execute a task
         def wait_results(result, response):
             # wait until task finished and do not raise anything
             r = result.get(propagate=False)
+            self.update_response_result(response, result)
             self.write_result(result, response)
         thread.start_new_thread(wait_results, (result, response, ))
 
     def write_result(self, result, response):
-        self.update_response_result(response, result)
         if self.backend_configured(result):
             response.update(state=result.state)
         self.finish(response)
