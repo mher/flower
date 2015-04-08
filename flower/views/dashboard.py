@@ -107,5 +107,5 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
                 failed=failed,
                 succeeded=succeeded,
                 retried=retried,
-                loadavg=worker.loadavg)
+                loadavg=getattr(worker, 'loadavg', None))
         return workers
