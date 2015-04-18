@@ -72,6 +72,8 @@ class FlowerCommand(Command):
         if options.certfile and options.keyfile:
             settings['ssl_options'] = dict(certfile=abs_path(options.certfile),
                                            keyfile=abs_path(options.keyfile))
+            if options.ca_certs:
+                settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection

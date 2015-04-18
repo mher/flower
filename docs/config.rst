@@ -99,6 +99,17 @@ Flower uses `RabbitMQ Managment Plugin`_ to get info about queues.
 
 .. _`RabbitMQ Managment Plugin`: https://www.rabbitmq.com/management.html
 
+.. _ca_certs:
+
+ca_certs
+~~~~~~~~
+
+A path to `ca_certs` file. The `ca_certs` file contains a set of concatenated “certification authority”
+certificates, which are used to validate certificates passed from the other end of the connection.
+For more info see :ref:`Python SSL`_
+
+.. _`Python SSL`: https://docs.python.org/3.4/library/ssl.html
+
 .. _certfile:
 
 certfile
