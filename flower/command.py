@@ -64,9 +64,9 @@ class FlowerCommand(Command):
 
         if options.auth:
             settings[GoogleOAuth2Mixin._OAUTH_SETTINGS_KEY] = {
-                'key': options.oauth2_key or os.environ.get('GOOGLE_OAUTH2_KEY'),
-                'secret': options.oauth2_secret or os.environ.get('GOOGLE_OAUTH2_SECRET'),
-                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('GOOGLE_OAUTH2_REDIRECT_URI'),
+                'key': options.oauth2_key or os.environ.get('FLOWER_GOOGLE_OAUTH2_KEY'),
+                'secret': options.oauth2_secret or os.environ.get('FLOWER_GOOGLE_OAUTH2_SECRET'),
+                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_GOOGLE_OAUTH2_REDIRECT_URI'),
             }
 
         if options.certfile and options.keyfile:
