@@ -102,7 +102,7 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
 
             workers[name] = dict(
                 status=worker.alive,
-                active=started - succeeded - failed,
+                active=started - succeeded - failed - retried,
                 processed=processed,
                 failed=failed,
                 succeeded=succeeded,
