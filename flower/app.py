@@ -47,8 +47,8 @@ class Flower(tornado.web.Application):
         self.io_loop.add_future(
             control.ControlHandler.update_workers(app=self),
             callback=lambda x: logger.debug('Successfully updated worker cache'))
-        self.io_loop.start()
         self.started = True
+        self.io_loop.start()
 
     def stop(self):
         if self.started:
