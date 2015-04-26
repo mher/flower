@@ -58,7 +58,9 @@ Or terminate executing task by: ::
 
     $ curl -X POST -d 'terminate=True' http://localhost:5555/api/task/revoke/8a4da87b-e12b-4547-b89a-e92e4d1f8efd
 
-Or receive task completion events in real-time: ::
+Or receive task completion events in real-time:
+
+.. code-block:: javascript 
 
     var ws = new WebSocket('ws://localhost:5555/api/task/events/task-succeeded/');
     ws.onmessage = function (event) {

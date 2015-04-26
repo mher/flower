@@ -334,11 +334,13 @@
               <table class="table table-bordered table-striped">
                 <caption>System usage statistics</caption>
                 <tbody>
-                {% for name, value in worker['stats'].get('rusage', {}).items() %}
-                    <tr>
-                      <td>{{ name }}</td>
-                      <td>{{ value }}</td>
-                    </tr>
+                {% if isinstance(worker['stats'].get('rusage', None), dict) %}
+                    {% for name, value in worker['stats']['rusage'].items() %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td>{{ value }}</td>
+                        </tr>
+                    {% end %}
                 {% end %}
                 </tbody>
               </table>
