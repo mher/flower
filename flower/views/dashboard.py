@@ -99,10 +99,13 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
             failed = counter.get('task-failed', 0)
             succeeded = counter.get('task-succeeded', 0)
             retried = counter.get('task-retried', 0)
+            active = started - succeeded - failed - retried
+            if active < 0:
+                active = 'N/A'
 
             workers[name] = dict(
                 status=worker.alive,
-                active=started - succeeded - failed - retried,
+                active=active,
                 processed=processed,
                 failed=failed,
                 succeeded=succeeded,
