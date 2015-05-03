@@ -539,11 +539,27 @@ var flower = (function () {
         return results && results[1] || 0;
     };
 
+    function querystring(qs) {
+        return qs ? qs.substr(1).split('&').map(
+            function(v){
+                return v.split('=');
+            }
+        ).reduce(
+            function(prev, curr) {
+                prev[curr[0]] = curr[1];
+                return prev;
+            },
+        {}) : {};
+    }
+
+
     $(document).ready(function () {
         if ($.inArray($(location).attr('pathname'), ['/', '/dashboard']) != -1) {
-            var host = $(location).attr('host'),
+            var qs = querystring($(location).attr('search')),
+                host = $(location).attr('host'),
+                port = qs.wsport ? ':' + qs.wsport : '',
                 protocol = $(location).attr('protocol') == 'http:' ? 'ws://' : 'wss://',
-                ws = new WebSocket(protocol + host + "/update-dashboard");
+                ws = new WebSocket(protocol + host + port + "/update-dashboard");
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
                 on_dashboard_update(update);

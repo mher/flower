@@ -55,6 +55,8 @@ define("natural_time", type=bool, default=True,
        help="show time in relative format")
 define("tasks_columns", type=str, default="name,uuid,state,args,kwargs,result,received,started",
        help="Slugs of columns on /tasks/ page, delimited by comma")
+define("ws_allowed_hosts", type=str, default=None, multiple=True,
+       help="List of CORS enabled host:port")
 
 # deprecated options
 define("url_prefix", type=str, help="base url prefix")

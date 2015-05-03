@@ -36,7 +36,7 @@
 
   <body>
     {% block navbar %}
-    {% module Template("navbar.html", active_tab="") %}
+    {% module Template("navbar.html", active_tab="", wsport=wsport) %}
     {% end %}
 
     <div class="container-fluid">
