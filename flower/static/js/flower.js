@@ -405,7 +405,7 @@ var flower = (function () {
             retried.text($(this).attr('retried'));
             loadavg.text($(this).attr('loadavg').toString().replace(/,/g, ', '));
 
-            total_active += $(this).attr('active');
+            total_active += $(this).attr('active') ? $(this).attr('active') > 0 : 0;
             total_processed += $(this).attr('processed');
             total_failed += $(this).attr('failed');
             total_succeeded += $(this).attr('succeeded');

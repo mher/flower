@@ -35,6 +35,8 @@ class DashboardView(BaseHandler):
 
         workers = dict((k, dict(v)) for (k, v) in events.counter.items())
         for name, info in workers.items():
+            if name not in events.workers:
+                continue
             worker = events.workers[name]
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
@@ -97,13 +99,16 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
             failed = counter.get('task-failed', 0)
             succeeded = counter.get('task-succeeded', 0)
             retried = counter.get('task-retried', 0)
+            active = started - succeeded - failed - retried
+            if active < 0:
+                active = 'N/A'
 
             workers[name] = dict(
                 status=worker.alive,
-                active=started - succeeded - failed,
+                active=active,
                 processed=processed,
                 failed=failed,
                 succeeded=succeeded,
                 retried=retried,
-                loadavg=worker.loadavg)
+                loadavg=getattr(worker, 'loadavg', None))
         return workers

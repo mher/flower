@@ -39,14 +39,16 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
         if i == limit:
             break
 
-
+sort_keys = {'name': str, 'state': str, 'received': float, 'started': float}
 def sort_tasks(tasks, sort_by):
-    assert sort_by.lstrip('-') in ('name', 'state', 'received', 'started')
+    assert sort_by.lstrip('-') in sort_keys
     reverse = False
     if sort_by.startswith('-'):
         sort_by = sort_by.lstrip('-')
         reverse = True
-    for task in sorted(tasks, key=lambda x: getattr(x[1], sort_by), reverse=reverse):
+    for task in sorted(tasks,
+                       key=lambda x: getattr(x[1], sort_by) or sort_keys[sort_by](),
+                       reverse=reverse):
         yield task
 
 

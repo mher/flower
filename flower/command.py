@@ -32,7 +32,7 @@ class FlowerCommand(Command):
         env_options = filter(lambda x: x.startswith(self.ENV_VAR_PREFIX),
                              os.environ)
         for env_var_name in env_options:
-            name = env_var_name.lstrip(self.ENV_VAR_PREFIX).lower()
+            name = env_var_name.replace(self.ENV_VAR_PREFIX, '', 1).lower()
             value = os.environ[env_var_name]
             option = options._options[name]
             if option.multiple:
@@ -64,14 +64,16 @@ class FlowerCommand(Command):
 
         if options.auth:
             settings[GoogleOAuth2Mixin._OAUTH_SETTINGS_KEY] = {
-                'key': options.oauth2_key or os.environ.get('GOOGLE_OAUTH2_KEY'),
-                'secret': options.oauth2_secret or os.environ.get('GOOGLE_OAUTH2_SECRET'),
-                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('GOOGLE_OAUTH2_REDIRECT_URI'),
+                'key': options.oauth2_key or os.environ.get('FLOWER_GOOGLE_OAUTH2_KEY'),
+                'secret': options.oauth2_secret or os.environ.get('FLOWER_GOOGLE_OAUTH2_SECRET'),
+                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_GOOGLE_OAUTH2_REDIRECT_URI'),
             }
 
         if options.certfile and options.keyfile:
             settings['ssl_options'] = dict(certfile=abs_path(options.certfile),
                                            keyfile=abs_path(options.keyfile))
+            if options.ca_certs:
+                settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
 
         # Monkey-patch to support Celery 2.5.5
         self.app.connection = self.app.broker_connection

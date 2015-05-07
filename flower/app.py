@@ -37,6 +37,7 @@ class Flower(tornado.web.Application):
                                        enable_events=self.options.enable_events,
                                        io_loop=self.io_loop,
                                        max_tasks_in_memory=self.options.max_tasks)
+        self.started = False
 
     def start(self):
         self.pool = self.pool_executor_cls(max_workers=self.max_workers)
@@ -46,11 +47,14 @@ class Flower(tornado.web.Application):
         self.io_loop.add_future(
             control.ControlHandler.update_workers(app=self),
             callback=lambda x: logger.debug('Successfully updated worker cache'))
+        self.started = True
         self.io_loop.start()
 
     def stop(self):
-        self.events.stop()
-        self.pool.shutdown(wait=False)
+        if self.started:
+            self.events.stop()
+            self.pool.shutdown(wait=False)
+            self.started = False
 
     def delay(self, method, *args, **kwargs):
         return self.pool.submit(partial(method, *args, **kwargs))
