@@ -4,6 +4,7 @@ import json
 import logging
 
 from datetime import datetime
+from threading import Thread
 
 from tornado import web
 from tornado.escape import json_decode
@@ -44,9 +45,24 @@ class BaseTaskHandler(BaseHandler):
 
     def update_response_result(self, response, result):
         if result.state == states.FAILURE:
-            response.update({'result': self.safe_result(result.result), 'traceback': result.traceback})
+            response.update({'result': self.safe_result(result.result),
+                             'traceback': result.traceback})
         else:
             response.update({'result': self.safe_result(result.result)})
+
+    def normalize_options(self, options):
+        if 'eta' in options:
+            options['eta'] = datetime.strptime(options['eta'],
+                                               self.DATE_FORMAT)
+        if 'countdown' in options:
+            options['countdown'] = float(options['countdown'])
+        if 'expires' in options:
+            expires = options['expires']
+            try:
+                expires = float(expires)
+            except ValueError:
+                expires = datetime.strptime(expires, self.DATE_FORMAT)
+            options['expires'] = expires
 
     def safe_result(self, result):
         "returns json encodable result"
@@ -58,11 +74,86 @@ class BaseTaskHandler(BaseHandler):
             return result
 
 
+class TaskApply(BaseTaskHandler):
+    @web.authenticated
+    @web.asynchronous
+    def post(self, taskname):
+        """
+Execute a task by name and wait results
+
+**Example request**:
+
+.. sourcecode:: http
+
+  POST /api/task/apply/tasks.add HTTP/1.1
+  Accept: application/json
+  Accept-Encoding: gzip, deflate, compress
+  Content-Length: 16
+  Content-Type: application/json; charset=utf-8
+  Host: localhost:5555
+
+  {
+      "args": [1, 2]
+  }
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 71
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "state": "SUCCESS",
+      "task-id": "c60be250-fe52-48df-befb-ac66174076e6",
+      "result": 3
+  }
+
+:query args: a list of arguments
+:query kwargs: a dictionary of arguments
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+:statuscode 404: unknown task
+        """
+        args, kwargs, options = self.get_task_args()
+        logger.info("Invoking a task '%s' with '%s' and '%s'",
+                    taskname, args, kwargs)
+
+        try:
+            task = self.capp.tasks[taskname]
+        except KeyError:
+            raise HTTPError(404, "Unknown task '%s'" % taskname)
+
+        try:
+            self.normalize_options(options)
+        except ValueError:
+            raise HTTPError(400, 'Invalid option')
+
+        result = task.apply_async(args=args, kwargs=kwargs, **options)
+        response = {'task-id': result.task_id}
+
+        # In tornado for not blocking event loop we must return results
+        # from other thread by self.finish()
+        th = Thread(target=self.wait_results, args=(result, response, ))
+        th.start()
+        # So just exit
+
+    def wait_results(self, result, response):
+        # Wait until task finished and do not raise anything
+        r = result.get(propagate=False)
+        # Write results and finish async function
+        self.update_response_result(response, result)
+        if self.backend_configured(result):
+            response.update(state=result.state)
+        self.finish(response)
+
+
 class TaskAsyncApply(BaseTaskHandler):
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
     @web.authenticated
-    @web.asynchronous
     def post(self, taskname):
         """
 Execute a task
@@ -120,39 +211,10 @@ Execute a task
 
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
-        if 'wait' in options:
-            self.async_wait(result, response)
-        else:
-            self.write_result(result, response)
-
-    def async_wait(self, result, response):
-        from threading import Thread
-        def wait_results(result, response):
-            # wait until task finished and do not raise anything
-            r = result.get(propagate=False)
-            self.update_response_result(response, result)
-            self.write_result(result, response)
-        th = Thread(target=wait_results, args=(result, response, ))
-        th.start()
-
-    def write_result(self, result, response):
         if self.backend_configured(result):
             response.update(state=result.state)
-        self.finish(response)
+        self.write(response)
 
-    def normalize_options(self, options):
-        if 'eta' in options:
-            options['eta'] = datetime.strptime(options['eta'],
-                                               self.DATE_FORMAT)
-        if 'countdown' in options:
-            options['countdown'] = float(options['countdown'])
-        if 'expires' in options:
-            expires = options['expires']
-            try:
-                expires = float(expires)
-            except ValueError:
-                expires = datetime.strptime(expires, self.DATE_FORMAT)
-            options['expires'] = expires
 
 class TaskSend(BaseTaskHandler):
     @web.authenticated

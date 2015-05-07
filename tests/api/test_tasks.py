@@ -6,17 +6,8 @@ import celery.states as states
 
 from tests import AsyncHTTPTestCase
 
-
-class AsyncApplyTests(AsyncHTTPTestCase):
-    def test_async_apply(self):
-        task = self._app.capp.tasks['foo'] = Mock()
-        task.apply_async = Mock(return_value=AsyncResult(123))
-        r = self.post('/api/task/async-apply/foo', body={})
-
-        self.assertEqual(200, r.code)
-        task.apply_async.assert_called_once_with(args=[], kwargs={})
-
-    def test_async_apply_wait(self):
+class ApplyTests(AsyncHTTPTestCase):
+    def test_apply(self):
         from mock import patch, PropertyMock
         import json
 
@@ -32,13 +23,21 @@ class AsyncApplyTests(AsyncHTTPTestCase):
                 task = self._app.capp.tasks['foo'] = Mock()
                 task.apply_async = Mock(return_value=ar)
 
-                r = self.post('/api/task/async-apply/foo', body='{"wait": true}')
+                r = self.post('/api/task/apply/foo', body='')
 
         self.assertEqual(200, r.code)
         body = bytes.decode(r.body)
         self.assertEqual(result, json.loads(body)['result'])
-        task.apply_async.assert_called_once_with(args=[], kwargs={}, wait=True)
+        task.apply_async.assert_called_once_with(args=[], kwargs={})
 
+class AsyncApplyTests(AsyncHTTPTestCase):
+    def test_async_apply(self):
+        task = self._app.capp.tasks['foo'] = Mock()
+        task.apply_async = Mock(return_value=AsyncResult(123))
+        r = self.post('/api/task/async-apply/foo', body={})
+
+        self.assertEqual(200, r.code)
+        task.apply_async.assert_called_once_with(args=[], kwargs={})
 
     def test_async_apply_eta(self):
         task = self._app.capp.tasks['foo'] = Mock()
