@@ -12,6 +12,7 @@ from tornado import web
 
 from ..views import BaseHandler
 from ..utils.tasks import iter_tasks, get_task_by_id
+from ..utils.search import parse_search_terms
 
 
 class TaskView(BaseHandler):
@@ -38,17 +39,25 @@ class TasksView(BaseHandler):
         received_end = self.get_argument('received-end', None)
         started_start = self.get_argument('started-start', None)
         started_end = self.get_argument('started-end', None)
+        search = self.get_argument('search', None)
 
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
-        tasks = iter_tasks(app.events, limit=limit, type=type,
-                           worker=worker, state=state, sort_by=sort_by,
-                           received_start=received_start,
-                           received_end=received_end,
-                           started_start=started_start,
-                           started_end=started_end)
+        tasks = iter_tasks(
+            app.events,
+            limit=limit,
+            type=type,
+            worker=worker,
+            state=state,
+            sort_by=sort_by,
+            received_start=received_start,
+            received_end=received_end,
+            started_start=started_start,
+            started_end=started_end,
+            search_terms=parse_search_terms(search),
+        )
         tasks = imap(self.format_task, tasks)
         workers = app.events.state.workers
         seen_task_types = app.events.state.task_types()
@@ -76,6 +85,7 @@ class TasksView(BaseHandler):
             started_end=started_end,
             params=params,
             time=time,
+            search=search
         )
 
     def format_task(self, args):
