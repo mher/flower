@@ -7,11 +7,13 @@ import tornado.web
 import tornado.auth
 
 from tornado import httpclient
+from tornado.options import options
+from celery.utils.imports import instantiate
 
 from ..views import BaseHandler
 
 
-class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
+class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
     @tornado.web.asynchronous
     def get(self):
         redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
@@ -49,6 +51,11 @@ class LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
         next = self.get_argument('next', '/')
         self.redirect(next)
+
+
+class LoginHandler(BaseHandler):
+    def __new__(cls, *args, **kwargs):
+        return instantiate(options.auth_provider, *args, **kwargs)
 
 
 class LogoutHandler(BaseHandler):
