@@ -47,6 +47,8 @@ List workers
       }
   }
 
+:query refresh: run inspect to get updated list of workers
+:query workername: get info for workername
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
