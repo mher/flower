@@ -7,6 +7,7 @@ from datetime import datetime
 from threading import Thread
 
 from tornado import web
+from tornado import gen
 from tornado.escape import json_decode
 from tornado.web import HTTPError
 
@@ -16,6 +17,8 @@ from celery.backends.base import DisabledBackend
 
 from ..utils import tasks
 from ..views import BaseHandler
+from ..utils.broker import Broker
+from ..api.control import ControlHandler
 
 
 logger = logging.getLogger(__name__)
@@ -307,6 +310,21 @@ Get a task result
         if result.ready():
             self.update_response_result(response, result)
         self.write(response)
+
+class GetQueueLengths(BaseTaskHandler):
+    @web.authenticated
+    @gen.coroutine
+    def get(self):
+        app = self.application
+        http_api = None
+        if app.transport == 'amqp' and app.options.broker_api:
+            http_api = app.options.broker_api
+
+        broker = Broker(app.capp.connection().as_uri(include_password=True),
+                        http_api=http_api)
+        queue_names = ControlHandler.get_active_queue_names()
+        queues = yield broker.queues(sorted(queue_names))
+        self.write({'active_queues': queues})
 
 
 class ListTasks(BaseTaskHandler):
