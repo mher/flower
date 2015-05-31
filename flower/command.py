@@ -34,12 +34,13 @@ class FlowerCommand(Command):
         for env_var_name in env_options:
             name = env_var_name.replace(self.ENV_VAR_PREFIX, '', 1).lower()
             value = os.environ[env_var_name]
-            option = options._options[name]
-            if option.multiple:
-                value = map(option.type, value.split(','))
-            else:
-                value = option.type(value)
-            setattr(options, name, value)
+            if name in options._options:
+                option = options._options[name]
+                if option.multiple:
+                    value = map(option.type, value.split(','))
+                else:
+                    value = option.type(value)
+                setattr(options, name, value)
 
         argv = list(filter(self.flower_option, argv))
         # parse the command line to get --conf option
