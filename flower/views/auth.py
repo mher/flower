@@ -16,6 +16,8 @@ from ..views import BaseHandler
 
 
 class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
+    _OAUTH_SETTINGS_KEY = 'oauth'
+
     @tornado.web.asynchronous
     def get(self):
         redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
@@ -65,7 +67,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     _OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
     _OAUTH_ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token"
     _OAUTH_NO_CALLBACKS = False
-    _OAUTH_SETTINGS_KEY = 'google_oauth'
+    _OAUTH_SETTINGS_KEY = 'oauth'
 
     @tornado.auth._auth_return_future
     def get_authenticated_user(self, redirect_uri, code, callback):
