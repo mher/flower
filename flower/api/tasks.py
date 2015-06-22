@@ -121,8 +121,8 @@ Execute a task by name and wait results
 :statuscode 404: unknown task
         """
         args, kwargs, options = self.get_task_args()
-        logger.info("Invoking a task '%s' with '%s' and '%s'",
-                    taskname, args, kwargs)
+        logger.debug("Invoking a task '%s' with '%s' and '%s'",
+                     taskname, args, kwargs)
 
         try:
             task = self.capp.tasks[taskname]
@@ -199,8 +199,8 @@ Execute a task
 :statuscode 404: unknown task
         """
         args, kwargs, options = self.get_task_args()
-        logger.info("Invoking a task '%s' with '%s' and '%s'",
-                    taskname, args, kwargs)
+        logger.debug("Invoking a task '%s' with '%s' and '%s'",
+                     taskname, args, kwargs)
 
         try:
             task = self.capp.tasks[taskname]
