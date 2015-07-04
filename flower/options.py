@@ -35,6 +35,8 @@ define("persistent", type=bool, default=False,
        help="enable persistent mode")
 define("broker_api", type=str, default=None,
        help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
+define("ca_certs", type=str, default=None,
+       help="SSL certificate authority (CA) file")
 define("certfile", type=str, default=None,
        help="SSL certificate file")
 define("keyfile", type=str, default=None,
