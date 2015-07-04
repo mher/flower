@@ -283,7 +283,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: url_prefix() + '/api/task/timeout/' + taskname,
+            url: '/api/task/timeout/' + taskname,
             dataType: 'json',
             data: {
                 'workername': workername,
