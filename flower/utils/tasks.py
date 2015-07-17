@@ -20,6 +20,7 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
     )
     any_value_search_term = search_terms.get('any', None)
     result_search_term = search_terms.get('result', None)
+    args_search_terms = search_terms.get('args', None)
     kwargs_search_terms = search_terms.get('kwargs', None)
 
     for uuid, task in tasks:
