@@ -41,7 +41,7 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
         if started_end and task.started and\
                 task.started > convert(started_end):
             continue
-        if not satisfies_search_terms(task, any_value_search_term, result_search_term, kwargs_search_terms):
+        if not satisfies_search_terms(task, any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms):
             continue
         yield uuid, task
         i += 1
