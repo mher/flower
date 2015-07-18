@@ -307,8 +307,8 @@ Get a task result
         if not self.backend_configured(result):
             raise HTTPError(503)
         response = {'task-id': taskid, 'state': result.state}
-        if result.ready():
-            self.update_response_result(response, result)
+
+        self.update_response_result(response, result)
         self.write(response)
 
 class GetQueueLengths(BaseTaskHandler):
