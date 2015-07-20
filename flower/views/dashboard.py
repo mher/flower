@@ -33,13 +33,15 @@ class DashboardView(BaseHandler):
         if refresh:
             yield ListWorkers.update_workers(app=app)
 
-        workers = dict((k, dict(v)) for (k, v) in events.counter.items())
-        for name, info in workers.items():
+        workers = {}
+        for name, values in events.counter.items():
             if name not in events.workers:
                 continue
             worker = events.workers[name]
+            info = dict(values)
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
+            workers[name] = info
         self.render("dashboard.html", workers=workers, broker=broker)
 
     @classmethod
