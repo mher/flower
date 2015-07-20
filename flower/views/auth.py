@@ -125,8 +125,8 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                                      headers={'Authorization': 'token ' + access_token, 'User-agent': 'Tornado auth'})
         response = httpclient.HTTPClient().fetch(req)
 
-        emails = {email['email'].lower() for email in json.loads(response.body.decode('utf-8'))
-                  if email['verified'] and re.match(self.application.options.auth, email['email'])}
+        emails = [email['email'].lower() for email in json.loads(response.body.decode('utf-8'))
+                  if email['verified'] and re.match(self.application.options.auth, email['email'])]
 
         if not emails:
             message = (
