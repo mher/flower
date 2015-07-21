@@ -41,7 +41,7 @@ class FlowerCommand(Command):
                 value = option.type(value)
             setattr(options, name, value)
 
-        argv = list(filter(self.flower_option, argv))
+        argv = list(filter(self.is_flower_option, argv))
         # parse the command line to get --conf option
         parse_command_line([prog_name] + argv)
         try:
@@ -103,7 +103,7 @@ class FlowerCommand(Command):
             super(FlowerCommand, self).early_version(argv)
 
     @staticmethod
-    def flower_option(arg):
+    def is_flower_option(arg):
         name, _, value = arg.lstrip('-').partition("=")
         name = name.replace('-', '_')
         return hasattr(options, name)
