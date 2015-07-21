@@ -1,9 +1,14 @@
 from __future__ import absolute_import
 
+import logging
+
 from tornado import web
 from tornado import gen
 
 from .control import ControlHandler
+
+
+logger = logging.getLogger(__name__)
 
 
 class ListWorkers(ControlHandler):
@@ -61,7 +66,12 @@ List workers
             return
 
         if refresh:
-            yield self.update_cache(workername=workername)
+            try:
+                yield self.update_cache(workername=workername)
+            except Exception as e:
+                msg = "Failed to update workers: %s" % e
+                logger.error(msg)
+                raise web.HTTPError(503, msg)
 
         if workername and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
