@@ -12,7 +12,6 @@ from pprint import pformat
 from tornado.options import options
 from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
-from tornado.auth import GoogleOAuth2Mixin
 from celery.bin.base import Command
 
 from . import __version__
