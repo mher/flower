@@ -433,10 +433,11 @@ var flower = (function () {
         $('#task-filter-form').submit();
     }
 
-    function create_graph(data, id, width, height) {
+    function create_graph(data, id, width, height, metric) {
         id = id || '';
         width = width || 500;
         height = height || 300;
+        metric = metric || '';
 
         var name, seriesData = [];
         for (name in data) {
@@ -482,9 +483,9 @@ var flower = (function () {
             graph: graph,
             yFormatter: function(y) {
                 if (y % 1 === 0)
-                    return y;
+                    return y + metric;
                 else
-                    return y.toFixed(2);
+                    return y.toFixed(2) + metric;
             }
         });
 
@@ -600,7 +601,7 @@ var flower = (function () {
                 url: '/monitor/completion-time',
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
-                    time_graph = create_graph(data, '-time');
+                    time_graph = create_graph(data, '-time', null, null,  's');
                     time_graph.update();
 
                     time_graph.series.setTimeInterval(updateinterval);
