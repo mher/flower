@@ -298,17 +298,25 @@ Get a task result
       "task-id": "c60be250-fe52-48df-befb-ac66174076e6"
   }
 
+:query timeout: how long to wait, in seconds, before the operation times out
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
 :statuscode 503: result backend is not configured
         """
+        timeout = self.get_argument('timeout', None)
+        timeout = float(timeout) if timeout is not None else None
+
         result = AsyncResult(taskid)
         if not self.backend_configured(result):
             raise HTTPError(503)
         response = {'task-id': taskid, 'state': result.state}
 
-        self.update_response_result(response, result)
+        if timeout:
+            result.get(timeout=timeout, propagate=False)
+            self.update_response_result(response, result)
+        elif result.ready():
+            self.update_response_result(response, result)
         self.write(response)
 
 class GetQueueLengths(BaseTaskHandler):
