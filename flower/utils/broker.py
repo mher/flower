@@ -59,12 +59,12 @@ class RabbitMQ(BrokerBase):
             http_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
                 self.username, self.password, self.host, self.vhost)
 
-        self._http_api = http_api
+        self.http_api = http_api
 
     @gen.coroutine
     def queues(self, names):
-        url = urljoin(self._http_api, 'queues/' + self.vhost)
-        api_url = urlparse(self._http_api)
+        url = urljoin(self.http_api, 'queues/' + self.vhost)
+        api_url = urlparse(self.http_api)
         username = unquote(api_url.username or '') or self.username
         password = unquote(api_url.password or '') or self.password
 
@@ -97,12 +97,12 @@ class Redis(BrokerBase):
         if not redis:
             raise ImportError('redis library is required')
 
-        self._redis = redis.Redis(host=self.host, port=self.port,
+        self.redis = redis.Redis(host=self.host, port=self.port,
                                   db=self.vhost, password=self.password)
 
     @gen.coroutine
     def queues(self, names):
-        raise gen.Return([dict(name=x, messages=self._redis.llen(x)) for x in names])
+        raise gen.Return([dict(name=x, messages=self.redis.llen(x)) for x in names])
 
     def _prepare_virtual_host(self, vhost):
         if not isinstance(vhost, numbers.Integral):
