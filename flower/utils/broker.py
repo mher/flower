@@ -59,6 +59,7 @@ class RabbitMQ(BrokerBase):
             http_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
                 self.username, self.password, self.host, self.vhost)
 
+        self.validate_http_api(http_api)
         self.http_api = http_api
 
     @gen.coroutine
@@ -85,6 +86,14 @@ class RabbitMQ(BrokerBase):
             raise gen.Return([x for x in info if x['name'] in names])
         else:
             response.rethrow()
+
+    @classmethod
+    def validate_http_api(cls, http_api):
+        url = urlparse(http_api)
+        if url.scheme not in ('http', 'https'):
+            raise ValueError("Invalid http api schema: %s" % url.scheme)
+        if url.path != '/api/':
+            raise ValueError("Invalid http api path: %s" % url.path)
 
 
 class Redis(BrokerBase):
