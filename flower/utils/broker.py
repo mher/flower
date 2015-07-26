@@ -92,7 +92,7 @@ class RabbitMQ(BrokerBase):
         url = urlparse(http_api)
         if url.scheme not in ('http', 'https'):
             raise ValueError("Invalid http api schema: %s" % url.scheme)
-        if url.path != '/api/':
+        if not url.path.startswith('/api/'):
             raise ValueError("Invalid http api path: %s" % url.path)
 
 
