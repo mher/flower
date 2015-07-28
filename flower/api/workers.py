@@ -54,12 +54,22 @@ List workers
 
 :query refresh: run inspect to get updated list of workers
 :query workername: get info for workername
+:query status: only get worker status info
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
         """
         refresh = self.get_argument('refresh', default=False, type=bool)
+        status = self.get_argument('status', default=False, type=bool)
         workername = self.get_argument('workername', default=None)
+
+        if status:
+          info = {}
+          for name, worker in self.application.events.state.workers.items():
+            info[name] = worker.alive
+          self.write(info)
+          return
+
         if self.worker_cache and not refresh and\
                 workername in self.worker_cache:
             self.write({workername: self.worker_cache[workername]})
