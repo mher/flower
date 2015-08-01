@@ -24,8 +24,12 @@ class BrokerView(BaseHandler):
             http_api = app.options.broker_api
 
         broker = Broker(app.capp.connection().as_uri(include_password=True),
-                        http_api=http_api)
+                        http_api=http_api, celery_conf=self.capp.conf)
         queue_names = ControlHandler.get_active_queue_names()
+
+        if not queue_names:
+            queue_names = {self.capp.conf.CELERY_DEFAULT_QUEUE}
+
         queues = yield broker.queues(sorted(queue_names))
 
         self.render("broker.html",
