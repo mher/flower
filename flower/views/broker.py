@@ -28,7 +28,7 @@ class BrokerView(BaseHandler):
         queue_names = ControlHandler.get_active_queue_names()
 
         if not queue_names:
-            queue_names = {self.capp.conf.CELERY_DEFAULT_QUEUE}
+            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE])
 
         queues = yield broker.queues(sorted(queue_names))
 
