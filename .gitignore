@@ -20,3 +20,4 @@ Documentation/
 .project
 .pydevproject
 .idea
+.vagrant
