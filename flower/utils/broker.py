@@ -45,7 +45,7 @@ class BrokerBase(object):
 
 
 class RabbitMQ(BrokerBase):
-    def __init__(self, broker_url, http_api, io_loop=None):
+    def __init__(self, broker_url, http_api, io_loop=None, **kwargs):
         super(RabbitMQ, self).__init__(broker_url)
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
