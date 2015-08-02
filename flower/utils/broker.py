@@ -114,10 +114,10 @@ class Redis(BrokerBase):
         self.redis = redis.Redis(host=self.host, port=self.port,
                                  db=self.vhost, password=self.password)
 
-        celery_conf = kwargs.get('celery_conf')
+        broker_options = kwargs.get('broker_options')
 
-        if celery_conf and 'priority_steps' in celery_conf.BROKER_TRANSPORT_OPTIONS:
-            self.priority_steps = celery_conf.BROKER_TRANSPORT_OPTIONS['priority_steps']
+        if broker_options and 'priority_steps' in broker_options:
+            self.priority_steps = broker_options['priority_steps']
         else:
             self.priority_steps = DEFAULT_REDIS_PRIORITY_STEPS
 
