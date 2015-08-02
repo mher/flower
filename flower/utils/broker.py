@@ -96,7 +96,12 @@ class RabbitMQ(BrokerBase):
             raise ValueError("Invalid http api path: %s" % url.path)
 
 
+DEFAULT_REDIS_PRIORITY_STEPS = [0, 3, 6, 9]
+
+
 class Redis(BrokerBase):
+    sep = '\x06\x16'
+
     def __init__(self, broker_url, *args, **kwargs):
         super(Redis, self).__init__(broker_url)
         self.host = self.host or 'localhost'
@@ -107,11 +112,30 @@ class Redis(BrokerBase):
             raise ImportError('redis library is required')
 
         self.redis = redis.Redis(host=self.host, port=self.port,
-                                  db=self.vhost, password=self.password)
+                                 db=self.vhost, password=self.password)
+
+        broker_options = kwargs.get('broker_options')
+
+        if broker_options and 'priority_steps' in broker_options:
+            self.priority_steps = broker_options['priority_steps']
+        else:
+            self.priority_steps = DEFAULT_REDIS_PRIORITY_STEPS
+
+    def _q_for_pri(self, queue, pri):
+        if pri not in self.priority_steps:
+            raise ValueError('Priority not in priority steps')
+        return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
 
     @gen.coroutine
     def queues(self, names):
-        raise gen.Return([dict(name=x, messages=self.redis.llen(x)) for x in names])
+        queue_stats = []
+        for name in names:
+            priority_names = [self._q_for_pri(name, pri) for pri in self.priority_steps]
+            queue_stats.append({
+                'name': name,
+                'messages': sum([self.redis.llen(x) for x in priority_names])
+            })
+        raise gen.Return(queue_stats)
 
     def _prepare_virtual_host(self, vhost):
         if not isinstance(vhost, numbers.Integral):
