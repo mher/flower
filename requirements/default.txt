@@ -2,4 +2,3 @@ celery>=3.1.0
 tornado>=4.0.0
 babel
 pytz
-futures>=3.0.3
