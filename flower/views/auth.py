@@ -38,18 +38,23 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
     def _on_auth(self, user):
         if not user:
-            raise tornado.web.HTTPError(500, 'Google auth failed')
+            raise tornado.web.HTTPError(403, 'Google auth failed')
         access_token = user['access_token']
-        response = httpclient.HTTPClient().fetch(
-            'https://www.googleapis.com/plus/v1/people/me',
-            headers={'Authorization': 'Bearer %s' % access_token})
+
+        try:
+            response = httpclient.HTTPClient().fetch(
+                'https://www.googleapis.com/plus/v1/people/me',
+                headers={'Authorization': 'Bearer %s' % access_token})
+        except Exception as e:
+            raise tornado.web.HTTPError(403, 'Google auth failed: %s' % e)
+
         email = json.loads(response.body.decode('utf-8'))['emails'][0]['value']
         if not re.match(self.application.options.auth, email):
             message = (
                 "Access denied to '{email}'. Please use another account or "
                 "ask your admin to add your email to flower --auth."
             ).format(email=email)
-            raise tornado.web.HTTPError(401, message)
+            raise tornado.web.HTTPError(403, message)
 
         self.set_secure_cookie("user", str(email))
 
