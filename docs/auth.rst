@@ -53,8 +53,8 @@ GitHub OAuth
 ------------
 
 Flower also supports GitHub OAuth. Flower should be registered in
-[https://github.com/settings/applications/new](https://github.com/settings/applications/new)
-before getting started. See `GitHub OAuth API`_ docs for more info.
+<https://github.com/settings/applications/new> before getting started.
+See `GitHub OAuth API`_ docs for more info.
 
 GitHub OAuth should be activated using `--auth_provider` option.
 The client id, secret and redirect uri should be provided using
