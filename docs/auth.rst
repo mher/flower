@@ -46,3 +46,25 @@ Alternatively you can set environment variables instead of command line argument
     $ celery flower --auth=.*@example\.com
 
 .. _Google Developer Console: https://console.developers.google.com
+
+.. _github-oauth:
+
+GitHub OAuth
+------------
+
+Flower also supports GitHub OAuth. Flower should be registered in
+[https://github.com/settings/applications/new](https://github.com/settings/applications/new)
+before getting started. See `GitHub OAuth API`_ docs for more info.
+
+GitHub OAuth should be activated using `--auth_provider` option.
+The client id, secret and redirect uri should be provided using
+`--oauth2_key`, `--oauth2_secret` and `--oauth2_redirect_uri` options or using
+`FLOWER_OAUTH2_KEY`, `FLOWER_OAUTH2_SECRET` and `FLOWER_OAUTH2_REDIRECT_URI`
+environment variables.: ::
+
+    $ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
+    $ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
+    $ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
+    $ celery flower --auth_provider=flower.views.auth.GithubLoginHandler --auth=.*@example\.com
+
+.. _GitHub OAuth API: https://developer.github.com/v3/oauth/
