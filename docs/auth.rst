@@ -21,18 +21,18 @@ this argument: ::
 
 See also :ref:`reverse-proxy`
 
-.. _google-openid:
+.. _google-oauth:
 
 Google OAuth 2.0
 ----------------
 
-Flower also supports Google OAuth 2.0. This way you can authenticate any user
+Flower supports Google OAuth 2.0. This way you can authenticate any user
 with a Google account. Google OAuth 2.0 authentication is enabled using the
---auth, --oauth2_key, --oauth2_secret and --oauth2_redirect_uri options.
+`--auth`, `--oauth2_key`, `--oauth2_secret` and `--oauth2_redirect_uri` options.
 
---auth is a regular expression, for granting access only to the specified email pattern.
---oauth2_key and --oauth2_secret are your credentials from your `Google Developer Console`_.
---oauth2_redirect_uri is there to specify what is the redirect_uri associated to you key and secret
+`--auth` is a regular expression, for granting access only to the specified email pattern.
+`--oauth2_key` and `--oauth2_secret` are your credentials from your `Google Developer Console`_.
+`--oauth2_redirect_uri` is there to specify what is the redirect_uri associated to you key and secret
 
 For instance, if you want to grant access to `me@gmail.com` and `you@gmail.com`: ::
 
