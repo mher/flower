@@ -22,11 +22,11 @@ define("auth", default='', type=str,
 define("basic_auth", type=str, default=None, multiple=True,
        help="enable http basic authentication")
 define("oauth2_key", type=str, default=None,
-       help="Google oauth2 key (requires --auth)")
+       help="OAuth2 key (requires --auth)")
 define("oauth2_secret", type=str, default=None,
-       help="Google oauth2 secret (requires --auth)")
+       help="OAuth2 secret (requires --auth)")
 define("oauth2_redirect_uri", type=str, default=None,
-       help="Google oauth2 redirect uri (requires --auth)")
+       help="OAuth2 redirect uri (requires --auth)")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory")
 define("db", type=str, default='flower',
@@ -35,6 +35,8 @@ define("persistent", type=bool, default=False,
        help="enable persistent mode")
 define("broker_api", type=str, default=None,
        help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
+define("ca_certs", type=str, default=None,
+       help="SSL certificate authority (CA) file")
 define("certfile", type=str, default=None,
        help="SSL certificate file")
 define("keyfile", type=str, default=None,
@@ -55,6 +57,8 @@ define("natural_time", type=bool, default=True,
        help="show time in relative format")
 define("tasks_columns", type=str, default="name,uuid,state,args,kwargs,result,received,started",
        help="Slugs of columns on /tasks/ page, delimited by comma")
+define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
+       help="auth handler class")
 
 # deprecated options
 define("url_prefix", type=str, help="base url prefix")

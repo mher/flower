@@ -212,3 +212,20 @@
 .panel>.table, .panel>.table-responsive>.table {
       margin-bottom: 0;
 }
+
+.filter-column {
+  width: 50%;
+}
+
+.filter-column.left {
+  float: left;
+}
+
+.filter-column.right{
+  float: right;
+}
+
+.filter-actions {
+  width: 100%;
+  display: inline-block;
+}

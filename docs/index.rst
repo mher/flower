@@ -18,6 +18,7 @@ Contents
    screenshots
    install
    config
+   tasks_filter
    api
    auth
    reverse-proxy

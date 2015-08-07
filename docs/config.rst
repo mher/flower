@@ -227,5 +227,5 @@ tasks_columns
 
 Specifies list of comma-delimited columns on /tasks/ page.
 Order of slugs in the option is unrelated to order of columns on the page.
-Avalible slugs: `name`, `uuid`, `state`, `args`, `kwargs`,
+Available slugs: `name`, `uuid`, `state`, `args`, `kwargs`,
 `result`, `received`, `started`, `runtime`

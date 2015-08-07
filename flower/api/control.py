@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import time
 import logging
 import collections
 
@@ -46,6 +47,7 @@ class ControlHandler(BaseHandler):
                 if response:
                     info = cls.worker_cache[worker]
                     info[cls.INSPECT_METHODS[i]] = response
+                    info['timestamp'] = time.time()
 
     def is_worker(self, workername):
         return workername and workername in self.worker_cache

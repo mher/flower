@@ -4,8 +4,10 @@ import json
 import logging
 
 from datetime import datetime
+from threading import Thread
 
 from tornado import web
+from tornado import gen
 from tornado.escape import json_decode
 from tornado.web import HTTPError
 
@@ -15,6 +17,8 @@ from celery.backends.base import DisabledBackend
 
 from ..utils import tasks
 from ..views import BaseHandler
+from ..utils.broker import Broker
+from ..api.control import ControlHandler
 
 
 logger = logging.getLogger(__name__)
@@ -42,6 +46,27 @@ class BaseTaskHandler(BaseHandler):
     def write_error(self, status_code, **kwargs):
         self.set_status(status_code)
 
+    def update_response_result(self, response, result):
+        if result.state == states.FAILURE:
+            response.update({'result': self.safe_result(result.result),
+                             'traceback': result.traceback})
+        else:
+            response.update({'result': self.safe_result(result.result)})
+
+    def normalize_options(self, options):
+        if 'eta' in options:
+            options['eta'] = datetime.strptime(options['eta'],
+                                               self.DATE_FORMAT)
+        if 'countdown' in options:
+            options['countdown'] = float(options['countdown'])
+        if 'expires' in options:
+            expires = options['expires']
+            try:
+                expires = float(expires)
+            except ValueError:
+                expires = datetime.strptime(expires, self.DATE_FORMAT)
+            options['expires'] = expires
+
     def safe_result(self, result):
         "returns json encodable result"
         try:
@@ -50,6 +75,82 @@ class BaseTaskHandler(BaseHandler):
             return repr(result)
         else:
             return result
+
+
+class TaskApply(BaseTaskHandler):
+    @web.authenticated
+    @web.asynchronous
+    def post(self, taskname):
+        """
+Execute a task by name and wait results
+
+**Example request**:
+
+.. sourcecode:: http
+
+  POST /api/task/apply/tasks.add HTTP/1.1
+  Accept: application/json
+  Accept-Encoding: gzip, deflate, compress
+  Content-Length: 16
+  Content-Type: application/json; charset=utf-8
+  Host: localhost:5555
+
+  {
+      "args": [1, 2]
+  }
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 71
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "state": "SUCCESS",
+      "task-id": "c60be250-fe52-48df-befb-ac66174076e6",
+      "result": 3
+  }
+
+:query args: a list of arguments
+:query kwargs: a dictionary of arguments
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+:statuscode 404: unknown task
+        """
+        args, kwargs, options = self.get_task_args()
+        logger.debug("Invoking a task '%s' with '%s' and '%s'",
+                     taskname, args, kwargs)
+
+        try:
+            task = self.capp.tasks[taskname]
+        except KeyError:
+            raise HTTPError(404, "Unknown task '%s'" % taskname)
+
+        try:
+            self.normalize_options(options)
+        except ValueError:
+            raise HTTPError(400, 'Invalid option')
+
+        result = task.apply_async(args=args, kwargs=kwargs, **options)
+        response = {'task-id': result.task_id}
+
+        # In tornado for not blocking event loop we must return results
+        # from other thread by self.finish()
+        th = Thread(target=self.wait_results, args=(result, response, ))
+        th.start()
+        # So just exit
+
+    def wait_results(self, result, response):
+        # Wait until task finished and do not raise anything
+        r = result.get(propagate=False)
+        # Write results and finish async function
+        self.update_response_result(response, result)
+        if self.backend_configured(result):
+            response.update(state=result.state)
+        self.finish(response)
 
 
 class TaskAsyncApply(BaseTaskHandler):
@@ -98,8 +199,8 @@ Execute a task
 :statuscode 404: unknown task
         """
         args, kwargs, options = self.get_task_args()
-        logger.info("Invoking a task '%s' with '%s' and '%s'",
-                    taskname, args, kwargs)
+        logger.debug("Invoking a task '%s' with '%s' and '%s'",
+                     taskname, args, kwargs)
 
         try:
             task = self.capp.tasks[taskname]
@@ -116,20 +217,6 @@ Execute a task
         if self.backend_configured(result):
             response.update(state=result.state)
         self.write(response)
-
-    def normalize_options(self, options):
-        if 'eta' in options:
-            options['eta'] = datetime.strptime(options['eta'],
-                                               self.DATE_FORMAT)
-        if 'countdown' in options:
-            options['countdown'] = float(options['countdown'])
-        if 'expires' in options:
-            expires = options['expires']
-            try:
-                expires = float(expires)
-            except ValueError:
-                expires = datetime.strptime(expires, self.DATE_FORMAT)
-            options['expires'] = expires
 
 
 class TaskSend(BaseTaskHandler):
@@ -211,22 +298,49 @@ Get a task result
       "task-id": "c60be250-fe52-48df-befb-ac66174076e6"
   }
 
+:query timeout: how long to wait, in seconds, before the operation times out
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
 :statuscode 503: result backend is not configured
         """
+        timeout = self.get_argument('timeout', None)
+        timeout = float(timeout) if timeout is not None else None
+
         result = AsyncResult(taskid)
         if not self.backend_configured(result):
             raise HTTPError(503)
         response = {'task-id': taskid, 'state': result.state}
-        if result.ready():
-            if result.state == states.FAILURE:
-                response.update({'result': self.safe_result(result.result),
-                                 'traceback': result.traceback})
-            else:
-                response.update({'result': self.safe_result(result.result)})
+
+        if timeout:
+            result.get(timeout=timeout, propagate=False)
+            self.update_response_result(response, result)
+        elif result.ready():
+            self.update_response_result(response, result)
         self.write(response)
+
+
+class GetQueueLengths(BaseTaskHandler):
+    @web.authenticated
+    @gen.coroutine
+    def get(self):
+        app = self.application
+        broker_options = self.capp.conf.BROKER_TRANSPORT_OPTIONS
+
+        http_api = None
+        if app.transport == 'amqp' and app.options.broker_api:
+            http_api = app.options.broker_api
+
+        broker = Broker(app.capp.connection().as_uri(include_password=True),
+                        http_api=http_api, broker_options=broker_options)
+
+        queue_names = ControlHandler.get_active_queue_names()
+
+        if not queue_names:
+            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE])
+
+        queues = yield broker.queues(sorted(queue_names))
+        self.write({'active_queues': queues})
 
 
 class ListTasks(BaseTaskHandler):
