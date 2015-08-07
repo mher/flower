@@ -45,7 +45,7 @@ setup(
     license='BSD',
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
-    install_requires=['celery', 'tornado', 'requests', 'redis'],
+    install_requires=['celery >= 3.0.0, <= 3.0.19', 'tornado == 3.2', 'requests', 'redis'],
     package_data={'flower': ['templates/*', 'static/**/*']},
     entry_points={
         'console_scripts': [
