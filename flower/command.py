@@ -60,6 +60,9 @@ class FlowerCommand(Command):
         if options.debug and options.logging == 'info':
             options.logging = 'debug'
             enable_pretty_logging()
+        else:
+            logging.getLogger("tornado.access").addHandler(logging.NullHandler())
+            logging.getLogger("tornado.access").propagate = False
 
         if options.auth:
             settings['oauth'] = {
