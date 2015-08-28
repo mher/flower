@@ -18,11 +18,6 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
     convert = lambda x: time.mktime(
         datetime.datetime.strptime(x, '%Y-%m-%d %H:%M').timetuple()
     )
-    any_value_search_term = search_terms.get('any', None)
-    result_search_term = search_terms.get('result', None)
-    args_search_terms = search_terms.get('args', None)
-    kwargs_search_terms = search_terms.get('kwargs', None)
-    args_search_terms = search_terms.get('args', None)
 
     for uuid, task in tasks:
         if type and task.name != type:
@@ -43,8 +38,13 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
         if started_end and task.started and\
                 task.started > convert(started_end):
             continue
-        if not satisfies_search_terms(task, any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms):
-            continue
+        if search_terms :
+                any_value_search_term = search_terms.get('any', None)
+                result_search_term = search_terms.get('result', None)
+                args_search_terms = search_terms.get('args', None)
+                kwargs_search_terms = search_terms.get('kwargs', None)
+                if not satisfies_search_terms(task, any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms):
+                    continue
         yield uuid, task
         i += 1
         if i == limit:
