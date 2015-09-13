@@ -18,11 +18,11 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
     convert = lambda x: time.mktime(
         datetime.datetime.strptime(x, '%Y-%m-%d %H:%M').timetuple()
     )
+    search_terms = search_terms or {}
     any_value_search_term = search_terms.get('any', None)
     result_search_term = search_terms.get('result', None)
     args_search_terms = search_terms.get('args', None)
     kwargs_search_terms = search_terms.get('kwargs', None)
-    args_search_terms = search_terms.get('args', None)
 
     for uuid, task in tasks:
         if type and task.name != type:
