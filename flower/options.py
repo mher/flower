@@ -22,11 +22,11 @@ define("auth", default='', type=str,
 define("basic_auth", type=str, default=None, multiple=True,
        help="enable http basic authentication")
 define("oauth2_key", type=str, default=None,
-       help="Google oauth2 key (requires --auth)")
+       help="OAuth2 key (requires --auth)")
 define("oauth2_secret", type=str, default=None,
-       help="Google oauth2 secret (requires --auth)")
+       help="OAuth2 secret (requires --auth)")
 define("oauth2_redirect_uri", type=str, default=None,
-       help="Google oauth2 redirect uri (requires --auth)")
+       help="OAuth2 redirect uri (requires --auth)")
 define("max_tasks", type=int, default=10000,
        help="maximum number of tasks to keep in memory")
 define("db", type=str, default='flower',

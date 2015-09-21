@@ -12,7 +12,6 @@ from pprint import pformat
 from tornado.options import options
 from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
-from tornado.auth import GoogleOAuth2Mixin
 from celery.bin.base import Command
 
 from . import __version__
@@ -41,7 +40,7 @@ class FlowerCommand(Command):
                 value = option.type(value)
             setattr(options, name, value)
 
-        argv = list(filter(self.flower_option, argv))
+        argv = list(filter(self.is_flower_option, argv))
         # parse the command line to get --conf option
         parse_command_line([prog_name] + argv)
         try:
@@ -61,12 +60,15 @@ class FlowerCommand(Command):
         if options.debug and options.logging == 'info':
             options.logging = 'debug'
             enable_pretty_logging()
+        else:
+            logging.getLogger("tornado.access").addHandler(logging.NullHandler())
+            logging.getLogger("tornado.access").propagate = False
 
         if options.auth:
-            settings[GoogleOAuth2Mixin._OAUTH_SETTINGS_KEY] = {
-                'key': options.oauth2_key or os.environ.get('FLOWER_GOOGLE_OAUTH2_KEY'),
-                'secret': options.oauth2_secret or os.environ.get('FLOWER_GOOGLE_OAUTH2_SECRET'),
-                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_GOOGLE_OAUTH2_REDIRECT_URI'),
+            settings['oauth'] = {
+                'key': options.oauth2_key or os.environ.get('FLOWER_OAUTH2_KEY'),
+                'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
+                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_AUTH2_REDIRECT_URI'),
             }
 
         if options.certfile and options.keyfile:
@@ -103,7 +105,7 @@ class FlowerCommand(Command):
             super(FlowerCommand, self).early_version(argv)
 
     @staticmethod
-    def flower_option(arg):
+    def is_flower_option(arg):
         name, _, value = arg.lstrip('-').partition("=")
         name = name.replace('-', '_')
         return hasattr(options, name)

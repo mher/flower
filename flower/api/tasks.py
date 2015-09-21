@@ -298,31 +298,47 @@ Get a task result
       "task-id": "c60be250-fe52-48df-befb-ac66174076e6"
   }
 
+:query timeout: how long to wait, in seconds, before the operation times out
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
 :statuscode 503: result backend is not configured
         """
+        timeout = self.get_argument('timeout', None)
+        timeout = float(timeout) if timeout is not None else None
+
         result = AsyncResult(taskid)
         if not self.backend_configured(result):
             raise HTTPError(503)
         response = {'task-id': taskid, 'state': result.state}
-        if result.ready():
+
+        if timeout:
+            result.get(timeout=timeout, propagate=False)
+            self.update_response_result(response, result)
+        elif result.ready():
             self.update_response_result(response, result)
         self.write(response)
+
 
 class GetQueueLengths(BaseTaskHandler):
     @web.authenticated
     @gen.coroutine
     def get(self):
         app = self.application
+        broker_options = self.capp.conf.BROKER_TRANSPORT_OPTIONS
+
         http_api = None
         if app.transport == 'amqp' and app.options.broker_api:
             http_api = app.options.broker_api
 
         broker = Broker(app.capp.connection().as_uri(include_password=True),
-                        http_api=http_api)
+                        http_api=http_api, broker_options=broker_options)
+
         queue_names = ControlHandler.get_active_queue_names()
+
+        if not queue_names:
+            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE])
+
         queues = yield broker.queues(sorted(queue_names))
         self.write({'active_queues': queues})
 

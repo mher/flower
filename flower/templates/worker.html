@@ -204,8 +204,8 @@
                       <td>{{ humanize(task['time_start'], type='time') }}</td>
                       <td>{{ task['acknowledged'] }}</td>
                       <td>{{ task['worker_pid'] }}</td>
-                      <td>{{ task['args'] }}</td>
-                      <td>{{ task['kwargs'] }}</td>
+                      <td>{{ task.get('args', 'N/A') }}</td>
+                      <td>{{ task.get('kwargs', 'N/A') }}</td>
                     </tr>
                   {% end %}
                 </tbody>

@@ -34,7 +34,12 @@ class WorkerControlTests(AsyncHTTPTestCase):
         celery.control.broadcast = MagicMock(return_value=[{'test': 'ok'}])
         r = self.post('/api/worker/pool/restart/test', body={})
         self.assertEqual(200, r.code)
-        celery.control.broadcast.assert_called_once()
+        celery.control.broadcast.assert_called_once_with(
+            'pool_restart',
+            arguments={'reload': False},
+            destination=['test'],
+            reply=True,
+        )
 
     def test_pool_grow(self):
         celery = self._app.capp

@@ -7,12 +7,14 @@
         <span class="icon-bar"></span>
       </a>
       <a class="brand" href="/">Celery Flower</a>
-      <div class="nav-collapse">
+      <div class="nav-collapse collapse">
         <ul class="nav">
             <li {% if active_tab == "dashboard" %}class="active"{% end %}><a href="/dashboard">Dashboard</a></li>
             <li {% if active_tab == "tasks" %}class="active"{% end %}><a href="/tasks?limit=100">Tasks</a></li>
             <li {% if active_tab == "broker" %}class="active"{% end %}><a href="/broker">Broker</a></li>
             <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="/monitor">Monitor</a></li>
+        </ul>
+        <ul class="nav pull-right">
           <li><a href="http://flower.readthedocs.org" target="_blank">Docs</a></li>
           <li><a href="https://github.com/mher/flower" target="_blank">Code</a></li>
         </ul>
