@@ -64,6 +64,7 @@ handlers = [
     (r"/api/task/events/task-failed/(.*)", events.TaskFailed),
     (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
     (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
+    (r"/api/task/events/task-progress/(.*)", events.TaskProgress),
     # WebSocket Updates
     (r"/update-dashboard", DashboardUpdateHandler),
     # Monitors
