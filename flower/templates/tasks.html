@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-{% module Template("navbar.html", active_tab="tasks") %}
+{% module Template("navbar.html", active_tab="tasks", prefix_uri=prefix_uri) %}
 {% end %}
 
 {% block extra_styles %}
@@ -34,7 +34,7 @@
       </div>
       <div id="task-filter-form-container" class="accordion-body in collapse">
         <div class="accordion-inner" style="padding-left: 0; padding-right: 0;">
-          <form id="task-filter-form" class="form-horizontal" action="/tasks" method="GET">
+          <form id="task-filter-form" class="form-horizontal" action="{{ prefix_uri('/tasks') }}" method="GET">
             <div class="filter-column left">
               <div class="control-group">
                 <label class="control-label" for="input-limit">Limit:</label>

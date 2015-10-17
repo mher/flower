@@ -17,7 +17,14 @@ class BaseHandler(tornado.web.RequestHandler):
         functions = self._get_template_functions()
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
+        kwargs['url_prefix'] = self.application.options.url_prefix
+        kwargs['prefix_uri'] = self.prefix_uri
         super(BaseHandler, self).render(*args, **kwargs)
+
+    def prefix_uri(self, uri):
+        if self.application.options.url_prefix:
+            uri = self.application.options.url_prefix + uri
+        return uri
 
     def write_error(self, status_code, **kwargs):
         if status_code in (404, 403):

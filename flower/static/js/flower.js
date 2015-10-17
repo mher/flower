@@ -3,6 +3,19 @@ var flower = (function () {
     /*jslint browser: true */
     /*global $, WebSocket, jQuery, Rickshaw */
 
+    function escape_regex(str) {
+        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    }
+
+    function prefix_uri(uri) {
+        return FLOWER_URL_PREFIX + uri;
+    }
+
+    function unprefix_uri(uri) {
+        var prefix_regex = new RegExp('^' + escape_regex(uri));
+        return uri.replace(prefix_regex, '');
+    }
+
     function on_alert_close(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -52,7 +65,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/shutdown/' + worker_name,
+                url: prefix_uri('/api/worker/shutdown/' + worker_name),
                 dataType: 'json',
                 data: { workername: worker_name },
                 success: function (data) {
@@ -75,7 +88,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/pool/restart/' + worker_name,
+                url: prefix_uri('/api/worker/pool/restart/' + worker_name),
                 dataType: 'json',
                 data: { workername: worker_name },
                 success: function (data) {
@@ -94,7 +107,7 @@ var flower = (function () {
         if (!$selected_workers.length) {
             $.ajax({
                 type: 'GET',
-                url: '/api/workers',
+                url: prefix_uri('/api/workers'),
                 data: { refresh: 1 },
                 success: function (data) {
                     show_success_alert('Refreshed');
@@ -111,7 +124,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/api/workers',
+                url: prefix_uri('/api/workers'),
                 dataType: 'json',
                 data: { workername: unescape(worker_name), refresh: 1 },
                 success: function (data) {
@@ -151,7 +164,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/pool/grow/' + workername,
+            url: prefix_uri('/api/worker/pool/grow/' + workername),
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -175,7 +188,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/pool/shrink/' + workername,
+            url: prefix_uri('/api/worker/pool/shrink/' + workername),
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -200,7 +213,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/pool/autoscale/' + workername,
+            url: prefix_uri('/api/worker/pool/autoscale/' + workername),
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -225,7 +238,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/queue/add-consumer/' + workername,
+            url: prefix_uri('/api/worker/queue/add-consumer/' + workername),
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -234,7 +247,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
+                    $('#tab-queues').load(prefix_uri('/worker/' + workername + ' #tab-queues')).fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -252,7 +265,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/queue/cancel-consumer/' + workername,
+            url: prefix_uri('/api/worker/queue/cancel-consumer/' + workername),
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -261,7 +274,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
+                    $('#tab-queues').load(prefix_uri('/worker/' + workername + ' #tab-queues')).fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -283,7 +296,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/timeout/' + taskname,
+            url: prefix_uri('/api/task/timeout/' + taskname),
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -310,7 +323,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/rate-limit/' + taskname,
+            url: prefix_uri('/api/task/rate-limit/' + taskname),
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -319,7 +332,7 @@ var flower = (function () {
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
-                    $('#tab-limits').load('/worker/' + workername + ' #tab-limits').fadeIn('show');
+                    $('#tab-limits').load(prefix_uri('/worker/' + workername + ' #tab-limits')).fadeIn('show');
                 }, 10000);
             },
             error: function (data) {
@@ -336,7 +349,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/revoke/' + taskid,
+            url: prefix_uri('/api/task/revoke/' + taskid),
             dataType: 'json',
             data: {
                 'terminate': false,
@@ -358,7 +371,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/revoke/' + taskid,
+            url: prefix_uri('/api/task/revoke/' + taskid),
             dataType: 'json',
             data: {
                 'terminate': true,
@@ -384,7 +397,7 @@ var flower = (function () {
             if (tr.length === 0) {
                 $('#workers-table-row').clone().removeClass('hidden').attr('id', id).appendTo('tbody');
                 tr = $('#' + sel);
-                tr.children('td').children('a').attr('href', '/worker/' + name).text(name);
+                tr.children('td').children('a').attr('href', prefix_uri('/worker/' + name)).text(name);
             }
 
             var stat = tr.children('td:eq(2)').children(),
@@ -541,10 +554,11 @@ var flower = (function () {
     };
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), ['/', '/dashboard']) != -1) {
+        var uri = unprefix_uri($(location).attr('pathname'));
+        if ($.inArray(uri, ['/', '/dashboard']) != -1) {
             var host = $(location).attr('host'),
                 protocol = $(location).attr('protocol') == 'http:' ? 'ws://' : 'wss://',
-                ws = new WebSocket(protocol + host + "/update-dashboard");
+                ws = new WebSocket(protocol + host + prefix_uri("/update-dashboard"));
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
                 on_dashboard_update(update);
@@ -567,7 +581,7 @@ var flower = (function () {
             });
         });
 
-        if ($(location).attr('pathname') === '/monitor') {
+        if (uri === '/monitor') {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
                 tts = current_unix_time(),
@@ -579,7 +593,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/succeeded-tasks',
+                url: prefix_uri('/monitor/succeeded-tasks'),
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     succeeded_graph = create_graph(data, '-succeeded');
@@ -588,7 +602,7 @@ var flower = (function () {
                     succeeded_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(succeeded_graph,
-                                     '/monitor/succeeded-tasks',
+                                     prefix_uri('/monitor/succeeded-tasks'),
                                      sts);
                         sts = current_unix_time();
                     }, updateinterval);
@@ -598,7 +612,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/completion-time',
+                url: prefix_uri('/monitor/completion-time'),
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     time_graph = create_graph(data, '-time', null, null,  's');
@@ -607,7 +621,7 @@ var flower = (function () {
                     time_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(time_graph,
-                                     '/monitor/completion-time',
+                                     prefix_uri('/monitor/completion-time'),
                                      tts);
                         tts = current_unix_time();
                     }, updateinterval);
@@ -617,7 +631,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/failed-tasks',
+                url: prefix_uri('/monitor/failed-tasks'),
                 data: {lastquery: current_unix_time()},
                 success: function (data) {
                     failed_graph = create_graph(data, '-failed');
@@ -626,7 +640,7 @@ var flower = (function () {
                     failed_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(failed_graph,
-                                     '/monitor/failed-tasks',
+                                     prefix_uri('/monitor/failed-tasks'),
                                      fts);
                         fts = current_unix_time();
                     }, updateinterval);
@@ -636,7 +650,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/broker',
+                url: prefix_uri('/monitor/broker'),
                 success: function (data) {
                     broker_graph = create_graph(data, '-broker');
                     broker_graph.update();
@@ -644,7 +658,7 @@ var flower = (function () {
                     broker_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(broker_graph,
-                                     '/monitor/broker');
+                                     prefix_uri('/monitor/broker'));
                     }, updateinterval);
 
                 },
