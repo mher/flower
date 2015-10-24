@@ -654,6 +654,10 @@ var flower = (function () {
 
     });
 
+    $(document).ready(function(){
+        $('#workers-table').DataTable();
+    });
+
     return {
         toggle_selected_workers: toggle_selected_workers,
         select_all_workers: select_all_workers,
