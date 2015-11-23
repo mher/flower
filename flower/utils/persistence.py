@@ -39,7 +39,8 @@ class ShelvePersistence(PersistenceBase):
     def read(self, key):
         logger.info("Saving with ShelvePersistence.")
         with shelve.open(self.db) as state:
-            return state[key]
+            if state:
+                return state[key]
 
 class RedisPersistence(PersistenceBase):
     PERSISTENCE_HASH = 'flower:persistence'
@@ -62,7 +63,9 @@ class RedisPersistence(PersistenceBase):
 
     def read(self, key):
         logger.info("Reading with RedisPersistence.")
-        return pickle.loads(self.redis.hget(self.PERSISTENCE_HASH, key))
+        pickled = self.redis.hget(self.PERSISTENCE_HASH, key)
+        if pickled:
+            return pickle.loads(pickled)
 
     def _prepare_virtual_host(self, vhost):
         if not isinstance(vhost, numbers.Integral):
