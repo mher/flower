@@ -18,6 +18,7 @@ from celery.events import EventReceiver
 from celery.events.state import State
 
 from . import api
+from .utils.persistence import Persistence
 
 try:
     from collections import Counter
@@ -74,10 +75,7 @@ class Events(threading.Thread):
 
         if self.persistent:
             logger.debug("Loading state from '%s'...", self.db)
-            state = shelve.open(self.db)
-            if state:
-                self.state = state['events']
-            state.close()
+            self.state = Persistence(self.db).read('events')
 
         if not self.state:
             self.state = EventsState(**kwargs)
@@ -94,9 +92,7 @@ class Events(threading.Thread):
     def stop(self):
         if self.persistent:
             logger.debug("Saving state to '%s'...", self.db)
-            state = shelve.open(self.db)
-            state['events'] = self.state
-            state.close()
+            Persistence(self.db).save('events', self.state)
 
     def run(self):
         try_interval = 1
