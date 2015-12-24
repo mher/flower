@@ -20,6 +20,11 @@ from .urls import settings
 from .utils import abs_path
 from .options import DEFAULT_CONFIG_FILE
 
+try:
+    from logging import NullHandler
+except ImportError:
+    from .utils.backports import NullHandler
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +66,7 @@ class FlowerCommand(Command):
             options.logging = 'debug'
             enable_pretty_logging()
         else:
-            logging.getLogger("tornado.access").addHandler(logging.NullHandler())
+            logging.getLogger("tornado.access").addHandler(NullHandler())
             logging.getLogger("tornado.access").propagate = False
 
         if options.auth:
