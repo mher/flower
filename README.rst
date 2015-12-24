@@ -130,6 +130,12 @@ More screenshots_
 
 .. _screenshots: https://github.com/mher/flower/tree/master/docs/screenshots
 
+License
+-------
+
+Flower is licensed under BSD 3-Clause License. See the LICENSE file
+in the top distribution directory for the full license text.
+
 Getting help
 ------------
 
