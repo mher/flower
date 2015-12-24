@@ -3,7 +3,11 @@ from __future__ import absolute_import
 import json
 import functools
 import re
-import urllib as urllib_parse
+
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
 
 import tornado.web
 import tornado.auth
@@ -77,7 +81,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     @tornado.auth._auth_return_future
     def get_authenticated_user(self, redirect_uri, code, callback):
         http = self.get_auth_http_client()
-        body = urllib_parse.urlencode({
+        body = urlencode({
             "redirect_uri": redirect_uri,
             "code": code,
             "client_id": self.settings[self._OAUTH_SETTINGS_KEY]['key'],
