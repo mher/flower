@@ -439,6 +439,7 @@ List tasks
         received_end = self.get_argument('received-end', None)
         started_start = self.get_argument('started-start', None)
         started_end = self.get_argument('started-end', None)
+        task_id = self.get_argument('task-id', None)
 
         limit = limit and int(limit)
         worker = worker if worker != 'All' else None
@@ -450,7 +451,8 @@ List tasks
                 app.events, limit=limit, type=type,
                 worker=worker, state=state,
                 received_start=received_start, received_end=received_end,
-                started_start=started_start, started_end=started_end):
+                started_start=started_start, started_end=started_end,
+                task_id=task_id):
             task = task.as_dict()
             task.pop('worker')
             result.append((task_id, task))

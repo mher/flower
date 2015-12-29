@@ -10,7 +10,8 @@ from .search import satisfies_search_terms
 
 def iter_tasks(events, limit=None, type=None, worker=None, state=None,
                sort_by=None, received_start=None, received_end=None,
-               started_start=None, started_end=None, search_terms=None):
+               started_start=None, started_end=None, search_terms=None,
+               task_id=None):
     i = 0
     tasks = events.state.tasks_by_timestamp()
     if sort_by is not None:
@@ -25,6 +26,8 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
     kwargs_search_terms = search_terms.get('kwargs', None)
 
     for uuid, task in tasks:
+        if task_id and uuid != task_id:
+            continue
         if type and task.name != type:
             continue
         if worker and task.worker and task.worker.hostname != worker:
