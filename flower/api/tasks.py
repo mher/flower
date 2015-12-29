@@ -435,6 +435,10 @@ List tasks
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
+        received_start = self.get_argument('received-start', None)
+        received_end = self.get_argument('received-end', None)
+        started_start = self.get_argument('started-start', None)
+        started_end = self.get_argument('started-end', None)
 
         limit = limit and int(limit)
         worker = worker if worker != 'All' else None
@@ -444,7 +448,9 @@ List tasks
         result = []
         for task_id, task in tasks.iter_tasks(
                 app.events, limit=limit, type=type,
-                worker=worker, state=state):
+                worker=worker, state=state,
+                received_start=received_start, received_end=received_end,
+                started_start=started_start, started_end=started_end):
             task = task.as_dict()
             task.pop('worker')
             result.append((task_id, task))
