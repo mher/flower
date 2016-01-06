@@ -60,7 +60,7 @@ class FlowerCommand(Command):
             settings['cookie_secret'] = options.cookie_secret
 
         if options.url_prefix:
-            logger.error('url_prefix option is not supported anymore')
+            settings['url_prefix'] = options.url_prefix
 
         if options.debug and options.logging == 'info':
             options.logging = 'debug'
