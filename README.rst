@@ -100,6 +100,11 @@ Broker URL and other configuration options can be passed through the standard Ce
 
     $ celery flower -A proj --broker=amqp://guest:guest@localhost:5672//
 
+Or run with unix socket file: ::
+
+    $ flower --unix_socket='/tmp/flower.sock'
+
+
 Documentation
 -------------
 

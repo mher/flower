@@ -13,6 +13,8 @@ define("port", default=5555,
        help="run on the given port", type=int)
 define("address", default='',
        help="run on the given address", type=str)
+define("unix_socket", default='',
+       help="Path to unix socket to bind", type=str)
 define("debug", default=False,
        help="run in debug mode", type=bool)
 define("inspect_timeout", default=1000, type=float,
