@@ -62,7 +62,7 @@ setup(
     install_requires=install_requires,
     test_suite="tests",
     tests_require=get_requirements('test.txt'),
-    package_data={'flower': ['templates/*', 'static/**/*', 'static/*.*']},
+    package_data={'flower': ['templates/*', 'static/**/*', 'static/*.*', 'static/css/images/*.*']},
     entry_points={
         'console_scripts': [
             'flower = flower.__main__:main',
