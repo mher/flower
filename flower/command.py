@@ -82,9 +82,6 @@ class FlowerCommand(Command):
             if options.ca_certs:
                 settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
 
-        # Monkey-patch to support Celery 2.5.5
-        self.app.connection = self.app.broker_connection
-
         self.app.loader.import_default_modules()
         flower = Flower(capp=self.app, options=options, **settings)
         atexit.register(flower.stop)
