@@ -445,8 +445,9 @@ List tasks
         for task_id, task in tasks.iter_tasks(
                 app.events, limit=limit, type=type,
                 worker=worker, state=state):
-            task = task.as_dict()
-            task.pop('worker')
+            task = tasks.as_dict(task)
+            if 'worker' in task:
+                task.pop('worker')
             result.append((task_id, task))
         self.write(dict(result))
 

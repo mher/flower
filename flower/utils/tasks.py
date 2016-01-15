@@ -72,3 +72,12 @@ def get_task_by_id(events, task_id):
         if task is not None:
             task._fields = _fields
         return task
+
+
+def as_dict(task):
+    # as_dict is new in Celery 3.1.7
+    if hasattr(Task, 'as_dict'):
+        return task.as_dict()
+    # old version
+    else:
+        return task.info(fields=task._defaults.keys())
