@@ -113,10 +113,14 @@ class FlowerCommand(Command):
         return hasattr(options, name)
 
     def print_banner(self, ssl):
-        logger.info(
-            "Visit me at http%s://%s:%s", 's' if ssl else '',
-            options.address or 'localhost', options.port
-        )
+        if not options.unix_socket:
+            logger.info(
+                "Visit me at http%s://%s:%s", 's' if ssl else '',
+                options.address or 'localhost', options.port
+            )
+        else:
+            logger.info("Visit me via unix socket file: %s" % options.unix_socket)
+
         logger.info('Broker: %s', self.app.connection().as_uri())
         logger.info(
             'Registered tasks: \n%s',
