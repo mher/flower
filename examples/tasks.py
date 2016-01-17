@@ -5,6 +5,7 @@ from celery import Celery
 
 
 app = Celery("tasks", broker="amqp://", backend="amqp")
+app.conf.CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 
 
 @app.task
