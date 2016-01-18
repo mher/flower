@@ -655,7 +655,10 @@ var flower = (function () {
     });
 
     $(document).ready(function(){
-        $('#workers-table').DataTable();
+        $('#workers-table').DataTable({
+            paginate: false,
+            searching: false
+        });
     });
 
     return {
