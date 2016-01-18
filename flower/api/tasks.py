@@ -145,7 +145,7 @@ Execute a task by name and wait results
 
     def wait_results(self, result, response):
         # Wait until task finished and do not raise anything
-        r = result.get(propagate=False)
+        result.get(propagate=False)
         # Write results and finish async function
         self.update_response_result(response, result)
         if self.backend_configured(result):

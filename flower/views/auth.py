@@ -93,12 +93,14 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             self._OAUTH_ACCESS_TOKEN_URL,
             functools.partial(self._on_access_token, callback),
             method="POST",
-            headers={'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json'}, body=body)
+            headers={'Content-Type': 'application/x-www-form-urlencoded',
+                     'Accept': 'application/json'}, body=body)
 
     @tornado.web.asynchronous
     def _on_access_token(self, future, response):
         if response.error:
-            future.set_exception(tornado.auth.AuthError('OAuth authentication error: %s' % str(response)))
+            future.set_exception(tornado.auth.AuthError(
+                'OAuth authentication error: %s' % str(response)))
             return
 
         future.set_result(json.loads(response.body))
@@ -130,8 +132,10 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             raise tornado.web.HTTPError(500, 'OAuth authentication failed')
         access_token = user['access_token']
 
-        req = httpclient.HTTPRequest('https://api.github.com/user/emails',
-                                     headers={'Authorization': 'token ' + access_token, 'User-agent': 'Tornado auth'})
+        req = httpclient.HTTPRequest(
+            'https://api.github.com/user/emails',
+            headers={'Authorization': 'token ' + access_token,
+                     'User-agent': 'Tornado auth'})
         response = httpclient.HTTPClient().fetch(req)
 
         emails = [email['email'].lower() for email in json.loads(response.body.decode('utf-8'))

@@ -34,11 +34,12 @@ class Flower(tornado.web.Application):
         self.ssl_options = kwargs.get('ssl_options', None)
 
         self.capp = capp or celery.Celery()
-        self.events = events or Events(self.capp, db=self.options.db,
-                                       persistent=self.options.persistent,
-                                       enable_events=self.options.enable_events,
-                                       io_loop=self.io_loop,
-                                       max_tasks_in_memory=self.options.max_tasks)
+        self.events = events or Events(
+            self.capp, db=self.options.db,
+            persistent=self.options.persistent,
+            enable_events=self.options.enable_events,
+            io_loop=self.io_loop,
+            max_tasks_in_memory=self.options.max_tasks)
         self.started = False
 
     def start(self):
@@ -47,7 +48,8 @@ class Flower(tornado.web.Application):
 
         if not self.options.unix_socket:
             self.listen(self.options.port, address=self.options.address,
-                        ssl_options=self.ssl_options, xheaders=self.options.xheaders)
+                        ssl_options=self.ssl_options,
+                        xheaders=self.options.xheaders)
         else:
             server = HTTPServer(self)
             socket = bind_unix_socket(self.options.unix_socket)
