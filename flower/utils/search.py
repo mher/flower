@@ -29,7 +29,7 @@ def satisfies_search_terms(task, any_value_search_term, result_search_term, args
     if not any([any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms]):
         return True
     terms = [
-        any_value_search_term and any_value_search_term in '|'.join([task.args, task.kwargs, str(task.result)]),
+        any_value_search_term and any_value_search_term in '|'.join(filter(None([task.args, task.kwargs, str(task.result)])),
         result_search_term and result_search_term in task.result,
         kwargs_search_terms and all(
             stringified_dict_contains_value(k, v, task.kwargs) for k, v in kwargs_search_terms.items()
