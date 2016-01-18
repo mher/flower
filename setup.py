@@ -63,6 +63,7 @@ setup(
     test_suite="tests",
     tests_require=get_requirements('test.txt'),
     package_data={'flower': ['templates/*', 'static/**/*', 'static/*.*', 'static/css/images/*.*']},
+    exclude_package_data={'flower': ['static/css/images'], },
     entry_points={
         'console_scripts': [
             'flower = flower.__main__:main',
