@@ -91,8 +91,13 @@ class BrokerMonitor(BaseHandler):
         app = self.application
         capp = app.capp
 
-        broker = Broker(capp.connection().as_uri(include_password=True),
-                        http_api=app.options.broker_api)
+        try:
+            broker = Broker(capp.connection().as_uri(include_password=True),
+                            http_api=app.options.broker_api)
+        except NotImplementedError:
+            self.write({})
+            return
+
         queue_names = ControlHandler.get_active_queue_names()
         queues = yield broker.queues(queue_names)
 

@@ -1,4 +1,4 @@
 celery>=2.5.0
-tornado>=4.0.0
-babel
-pytz
+tornado==4.2.0
+babel==2.2.0
+pytz==2015.7

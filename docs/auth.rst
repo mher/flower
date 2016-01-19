@@ -45,6 +45,9 @@ Alternatively you can set environment variables instead of command line argument
     $ export FLOWER_OAUTH2_REDIRECT_URI=http://flower.example.com/login
     $ celery flower --auth=.*@example\.com
 
+NOTE: Enable Google Plus API in the Google Developers Console under `APIs & auth` -> `APIs` -> `Google+ API`
+    Otherwise you will get a `403 Forbidden` error despite correct OAuth configuration.
+
 .. _Google Developer Console: https://console.developers.google.com
 
 .. _github-oauth:

@@ -24,8 +24,12 @@ class BrokerView(BaseHandler):
         if app.transport == 'amqp' and app.options.broker_api:
             http_api = app.options.broker_api
 
-        broker = Broker(app.capp.connection().as_uri(include_password=True),
-                        http_api=http_api, broker_options=broker_options)
+        try:
+            broker = Broker(app.capp.connection().as_uri(include_password=True),
+                            http_api=http_api, broker_options=broker_options)
+        except NotImplementedError:
+            raise web.HTTPError(
+                404, "'%s' broker is not supported" % app.transport)
 
         queue_names = ControlHandler.get_active_queue_names()
 
