@@ -9,7 +9,6 @@ import celery
 import tornado.web
 
 from tornado import ioloop
-from tornado.netutil import bind_unix_socket
 from tornado.httpserver import HTTPServer
 
 from .api import control
@@ -51,6 +50,7 @@ class Flower(tornado.web.Application):
                         ssl_options=self.ssl_options,
                         xheaders=self.options.xheaders)
         else:
+            from tornado.netutil import bind_unix_socket
             server = HTTPServer(self)
             socket = bind_unix_socket(self.options.unix_socket)
             server.add_socket(socket)
