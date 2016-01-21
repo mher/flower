@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import re
 
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
@@ -12,7 +13,7 @@ from tornado import ioloop
 from tornado.httpserver import HTTPServer
 
 from .api import control
-from .urls import handlers
+from .urls import get_handlers
 from .events import Events
 from .options import default_options
 
@@ -26,9 +27,10 @@ class Flower(tornado.web.Application):
 
     def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
-        kwargs.update(handlers=handlers)
+        options = options or default_options
+        kwargs.update(handlers=get_handlers(options.url_prefix))
         super(Flower, self).__init__(**kwargs)
-        self.options = options or default_options
+        self.options = options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.ssl_options = kwargs.get('ssl_options', None)
 

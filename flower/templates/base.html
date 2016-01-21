@@ -37,7 +37,7 @@
 
   <body>
     {% block navbar %}
-    {% module Template("navbar.html", active_tab="") %}
+    {% module Template("navbar.html", active_tab="", prefix_uri=prefix_uri) %}
     {% end %}
 
     <div class="container-fluid">
@@ -74,6 +74,9 @@
     <script src="{{ static_url('js/rickshaw.min.js') }}"></script>
     <script src="{{ static_url('js/bootstrap-datetimepicker.min.js') }}"></script>
 
+    <script type="text/javascript">
+        var FLOWER_URL_PREFIX = '{{ url_prefix or '' }}';
+    </script>
     <script src="{{ static_url('js/flower.js') }}"></script>
 
     {% block extra_scripts %}

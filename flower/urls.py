@@ -25,8 +25,7 @@ settings = dict(
     login_url='/login',
 )
 
-
-handlers = [
+app_handlers = [
     # App
     (r"/", DashboardView),
     (r"/dashboard", DashboardView),
@@ -78,7 +77,20 @@ handlers = [
     # Auth
     (r"/login", auth.LoginHandler),
     (r"/logout", auth.LogoutHandler),
+]
 
+error_handlers = [
     # Error
     (r".*", NotFoundErrorHandler),
 ]
+
+handlers = app_handlers + error_handlers
+
+
+def get_handlers(url_prefix):
+    if url_prefix:
+        def prefix_uri(t):
+            return tuple((url_prefix + t[0],) + t[1:])
+        return map(prefix_uri, app_handlers) + error_handlers
+    else:
+        return handlers
