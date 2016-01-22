@@ -47,37 +47,45 @@
       <thead>
       <tr>
         <th style="width: 15px; min-width: 15px;"></th>
-        <th>Worker Name</th>
-        <th>Status</th>
-        <th>Active</th>
-        <th>Processed</th>
-        <th>Failed</th>
-        <th>Succeeded</th>
-        <th>Retried</th>
+        <th data-sort="string">Worker</th>
+        <th data-sort="string">Hostname</th>
+        <th data-sort="string">Status</th>
+        <th data-sort="int">Active</th>
+        <th data-sort="int">Processed</th>
+        <th data-sort="int">Failed</th>
+        <th data-sort="int">Succeeded</th>
+        <th data-sort="int">Retried</th>
         <th>Load Average</th>
       </tr>
       </thead>
-      <tbody>
-      {% for name, info in workers.items() %}
-      <tr id="{{ url_escape(name) }}">
-        <td class="is_selected"><input type="checkbox"></td>
-        <td><a href="{{ '/worker/' + name }}">{{ name }}</a></td>
-        <td>
-          {% if info.get('status', None) %}
-          <span class="label label-success">Online</span>
-          {% else %}
-          <span class="label label-important">Offline</span>
-          {% end %}
-        </td>
-        <td>{{ info.get('active', 0) }}</td>
-        <td>{{ info.get('task-received', 0) }}</td>
-        <td>{{ info.get('task-failed', 0) }}</td>
-        <td>{{ info.get('task-succeeded', 0) }}</td>
-        <td>{{ info.get('task-retried', 0) }}</td>
-        <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
-      </tr>
-      {% end %}
+      {% for hostname in sorted(hosts.keys()) %}
+      <tbody id="{{ hostname }}">
+        <tr>
+          <th colspan="10">[ <span class='workers_count'>{{ len(hosts[hostname]) }}</span> ] workers on {{ hostname }}</th>
+        </tr>
+        {% for name in sorted(hosts[hostname].keys()) %}
+          {% set info = hosts[hostname][name] %}
+          <tr id="{{ url_escape(name) }}">
+            <td class="is_selected"><input type="checkbox"></td>
+            <td><a href="{{ '/worker/' + name }}">{{ info.get('workername', 'N/A') }}</a></td>
+            <td><a href="{{ '/worker/' + name }}">{{ info.get('hostname', 'N/A') }}</a></td>
+            <td>
+              {% if info.get('status', None) %}
+              <span class="label label-success">Online</span>
+              {% else %}
+              <span class="label label-important">Offline</span>
+              {% end %}
+            </td>
+            <td>{{ info.get('active', 0) }}</td>
+            <td>{{ info.get('task-received', 0) }}</td>
+            <td>{{ info.get('task-failed', 0) }}</td>
+            <td>{{ info.get('task-succeeded', 0) }}</td>
+            <td>{{ info.get('task-retried', 0) }}</td>
+            <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
+          </tr>
+        {% end %}
       </tbody>
+      {% end %}
     </table>
 
         </div>
@@ -89,6 +97,7 @@
       <table>
           <tr id="workers-table-row">
               <td class="is_selected"><input type="checkbox"></td>
+              <td><a href=""></a></td>
               <td><a href=""></a></td>
               <td><span class="label label-success">Online</span></td>
               <td></td>

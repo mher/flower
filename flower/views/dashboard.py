@@ -33,16 +33,24 @@ class DashboardView(BaseHandler):
         if refresh:
             yield ListWorkers.update_workers(app=app)
 
+        hosts = {}
         workers = {}
         for name, values in events.counter.items():
             if name not in events.workers:
                 continue
             worker = events.workers[name]
+            workername, hostname =name.split('@')
             info = dict(values)
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
+            info.update(workername=workername)
+            info.update(hostname=hostname)
+            if hostname not in hosts:
+                hosts[hostname] = {}
+            hosts[hostname][name] = info
             workers[name] = info
-        self.render("dashboard.html", workers=workers, broker=broker)
+
+        self.render("dashboard.html", workers=workers, hosts=hosts, broker=broker)
 
     @classmethod
     def _as_dict(cls, worker):
@@ -119,6 +127,7 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
             succeeded = counter.get('task-succeeded', 0)
             retried = counter.get('task-retried', 0)
             active = started - succeeded - failed - retried
+            workername, hostname = name.split('@')
             if active < 0:
                 active = 'N/A'
 
@@ -128,6 +137,8 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
                 processed=processed,
                 failed=failed,
                 succeeded=succeeded,
+                workername=workername,
+                hostname=hostname,
                 retried=retried,
                 loadavg=getattr(worker, 'loadavg', None))
         return workers

@@ -379,21 +379,27 @@ var flower = (function () {
         $.each(update, function (name) {
             var id = encodeURIComponent(name),
                 sel = id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/%@])/g,'\\$1'),
-                tr = $('#' + sel);
+                tr = $('#' + sel),
+                hostname = $(this).attr('hostname');
 
             if (tr.length === 0) {
-                $('#workers-table-row').clone().removeClass('hidden').attr('id', id).appendTo('tbody');
+                if ($('tbody[id="' + hostname + '"]').length == 0)
+                  $('#workers-table').append($('<tbody id="' + hostname +'"><tr><th colspan="10">[ <span class="workers_count">0</span> ] workers on ' + hostname + ' </th></tr></tbody>'));
+
+                $('#workers-table-row').clone().removeClass('hidden').attr('id', id).appendTo('tbody[id="' + hostname + '"]');
                 tr = $('#' + sel);
-                tr.children('td').children('a').attr('href', '/worker/' + name).text(name);
+                tr.children('td:eq(1)').children('a').attr('href', '/worker/' + name).text($(this).attr('workername'));
+                tr.children('td:eq(2)').children('a').attr('href', '/worker/' + name).text($(this).attr('hostname'));
+                $('tbody[id="' + hostname + '"]').find('.workers_count').text($('tbody[id="' + hostname + '"]').children().length - 1);
             }
 
-            var stat = tr.children('td:eq(2)').children(),
-                active = tr.children('td:eq(3)'),
-                processed = tr.children('td:eq(4)'),
-                failed = tr.children('td:eq(5)'),
-                succeeded = tr.children('td:eq(6)'),
-                retried = tr.children('td:eq(7)'),
-                loadavg = tr.children('td:eq(8)');
+            var stat = tr.children('td:eq(3)').children(),
+                active = tr.children('td:eq(4)'),
+                processed = tr.children('td:eq(5)'),
+                failed = tr.children('td:eq(6)'),
+                succeeded = tr.children('td:eq(7)'),
+                retried = tr.children('td:eq(8)'),
+                loadavg = tr.children('td:eq(9)');
 
             stat.text($(this).attr('status') ? "Online" : "Offline");
             stat.removeClass("label-success label-important");

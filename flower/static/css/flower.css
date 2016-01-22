@@ -229,3 +229,7 @@
   width: 100%;
   display: inline-block;
 }
+
+tbody th {
+  background-color: #DADADA!important;
+}
