@@ -42,8 +42,7 @@ class DashboardView(BaseHandler):
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
             workers[name] = info
-            
-        workers = OrderedDict(sorted(workers.items()))
+
         self.render("dashboard.html", workers=workers, broker=broker)
 
     @classmethod
