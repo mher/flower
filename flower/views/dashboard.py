@@ -124,6 +124,7 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
                 active = 'N/A'
 
             workers[name] = dict(
+                name=name,
                 status=worker.alive,
                 active=active,
                 processed=processed,

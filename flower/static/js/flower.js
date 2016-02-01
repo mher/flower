@@ -22,7 +22,10 @@ var flower = (function () {
     }
 
     function get_selected_workers() {
-        return $('#workers-table tr').has('td.is_selected > input:checked');
+        var table = $('#workers-table').DataTable();
+        return $.map(table.rows('.selected').data(), function(row) {
+            return row.name;
+        });
     }
 
     function select_all_workers() {
@@ -43,18 +46,18 @@ var flower = (function () {
     }
 
     function shutdown_selected(event) {
-        var $selected_workes = get_selected_workers();
+        var selected_workers = get_selected_workers();
+        if (selected_workers.length == 0) {
+            show_error_alert('Please select a worker');
+            return;
+        }
 
-        /* atomic would be better with list of ids (not-names) */
-        $selected_workes.each(function () {
-            var $worker = $(this),
-                worker_name = $worker.attr('id');
-
+        $.each(selected_workers, function (index, worker) {
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/shutdown/' + worker_name,
+                url: '/api/worker/shutdown/' + worker,
                 dataType: 'json',
-                data: { workername: worker_name },
+                data: { workername: worker},
                 success: function (data) {
                     show_success_alert(data.message);
                 },
@@ -66,18 +69,19 @@ var flower = (function () {
     }
 
     function restart_selected(event) {
-        var $selected_workes = get_selected_workers();
+        var selected_workers = get_selected_workers();
+        if (selected_workers.length == 0) {
+            show_error_alert('Please select a worker');
+            return;
+        }
 
-        /* atomic would be better with list of ids (not-names) */
-        $selected_workes.each(function () {
-            var $worker = $(this),
-                worker_name = $worker.attr('id');
+        $.each(selected_workers, function (index, worker) {
 
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/pool/restart/' + worker_name,
+                url: '/api/worker/pool/restart/' + worker,
                 dataType: 'json',
-                data: { workername: worker_name },
+                data: { workername: worker},
                 success: function (data) {
                     show_success_alert(data.message);
                 },
@@ -89,9 +93,9 @@ var flower = (function () {
     }
 
     function refresh_selected(event) {
-        var $selected_workers = get_selected_workers();
+        var selected_workers = get_selected_workers();
 
-        if (!$selected_workers.length) {
+        if (!selected_workers.length) {
             $.ajax({
                 type: 'GET',
                 url: '/api/workers',
@@ -105,15 +109,13 @@ var flower = (function () {
             });
         }
 
-        $selected_workers.each(function () {
-            var $worker = $(this),
-                worker_name = $worker.attr('id');
-
+        $.each(selected_workers, function (index, worker) {
+            console.log(worker);
             $.ajax({
                 type: 'GET',
                 url: '/api/workers',
                 dataType: 'json',
-                data: { workername: unescape(worker_name), refresh: 1 },
+                data: { workername: unescape(worker), refresh: 1 },
                 success: function (data) {
                     show_success_alert(data.message || 'Refreshed');
                 },
@@ -372,54 +374,28 @@ var flower = (function () {
         });
     }
 
-    function on_dashboard_update(update) {
-        var total_active = 0, total_processed = 0, total_failed = 0,
-            total_succeeded = 0, total_retried = 0;
-
-        $.each(update, function (name) {
-            var id = encodeURIComponent(name),
-                sel = id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/%@])/g,'\\$1'),
-                tr = $('#' + sel);
-
-            if (tr.length === 0) {
-                $('#workers-table-row').clone().removeClass('hidden').attr('id', id).appendTo('tbody');
-                tr = $('#' + sel);
-                tr.children('td').children('a').attr('href', '/worker/' + name).text(name);
-            }
-
-            var stat = tr.children('td:eq(2)').children(),
-                active = tr.children('td:eq(3)'),
-                processed = tr.children('td:eq(4)'),
-                failed = tr.children('td:eq(5)'),
-                succeeded = tr.children('td:eq(6)'),
-                retried = tr.children('td:eq(7)'),
-                loadavg = tr.children('td:eq(8)');
-
-            stat.text($(this).attr('status') ? "Online" : "Offline");
-            stat.removeClass("label-success label-important");
-            stat.addClass($(this).attr('status') ? "label-success" : "label-important");
-            active.text($(this).attr('active'));
-            processed.text($(this).attr('processed'));
-            failed.text($(this).attr('failed'));
-            succeeded.text($(this).attr('succeeded'));
-            retried.text($(this).attr('retried'));
-            loadavg.text($(this).attr('loadavg').toString().replace(/,/g, ', '));
-
-            total_active += $(this).attr('active') ? $(this).attr('active') > 0 : 0;
-            total_processed += $(this).attr('processed');
-            total_failed += $(this).attr('failed');
-            total_succeeded += $(this).attr('succeeded');
-            total_retried += $(this).attr('retried');
-
-        });
-
-        $('a#btn-active').text('Active: ' + total_active);
-        $('a#btn-processed').text('Processed: ' + total_processed);
-        $('a#btn-failed').text('Failed: ' + total_failed);
-        $('a#btn-succeeded').text('Succeeded: ' + total_succeeded);
-        $('a#btn-retried').text('Retried: ' + total_retried);
+    function sum(a, b) {
+        return parseInt(a) + parseInt(b);
     }
 
+    function on_dashboard_update(update) {
+        var table = $('#workers-table').DataTable();
+
+        $.each(update, function (name, info) {
+            var row = table.row('#'+name);
+            if (row)
+                row.data(info);
+            else
+                table.row.add(info);
+        });
+        table.draw();
+
+        $('a#btn-active').text('Active: ' + table.column(2).data().reduce(sum, 0));
+        $('a#btn-processed').text('Processed: ' + table.column(3).data().reduce(sum, 0));
+        $('a#btn-failed').text('Failed: ' + table.column(4).data().reduce(sum, 0));
+        $('a#btn-succeeded').text('Succeeded: ' + table.column(5).data().reduce(sum, 0));
+        $('a#btn-retried').text('Retried: ' + table.column(6).data().reduce(sum, 0));
+    }
 
     function on_cancel_task_filter(event) {
         event.preventDefault();
@@ -656,8 +632,38 @@ var flower = (function () {
 
     $(document).ready(function(){
         $('#workers-table').DataTable({
+            rowId: 'name',
+            searching: true,
             paginate: false,
-            searching: false
+            select: true,
+            scrollX: true,
+            scrollY: 500,
+            scrollCollapse: true,
+            order: [[ 1, "asc" ]],
+            columnDefs: [
+                {targets: 0,
+                    data: 'name',
+                    render: function (data, type, full, meta) {
+                        return '<a href="/worker/' + data + '">' + data + '</a>';
+                    }
+                },
+                {targets: 1,
+                    data: 'status',
+                    render: function (data, type, full, meta) {
+                        if (data)
+                            return '<span class="label label-success">Online</span>'
+                        else
+                            return '<span class="label label-important">Offline</span>'
+                    }
+                },
+                {targets: 2, data: 'active'},
+                {targets: 3, data: 'processed'},
+                {targets: 4, data: 'failed'},
+                {targets: 5, data: 'succeeded'},
+                {targets: 6, data: 'retried'},
+                {targets: 7, data: 'loadavg'},
+            ],
+
         });
     });
 

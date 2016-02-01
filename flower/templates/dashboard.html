@@ -17,20 +17,6 @@
     <div class="panel panel-default">
         <div class="panel-body">
 
-    <div class="btn-toolbar">
-      <div class="btn-group">
-        <button class="btn" onclick="flower.toggle_selected_workers(event);">
-            <input id="select-workers-toggler" type="checkbox" style="margin: 0;">
-        </button>
-        <button class="btn dropdown-toggle" data-toggle="dropdown">
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-          <li><a href="#" onclick="flower.select_all_workers(event);">All</a></li>
-          <li><a href="#" onclick="flower.select_none_workers(event);">None</a></li>
-        </ul>
-      </div>
-
       <div class="btn-group">
         <button class="btn" onclick="flower.shutdown_selected(event);">Shut Down</button>
         <button class="btn dropdown-toggle" data-toggle="dropdown"><span
@@ -46,7 +32,6 @@
     <table id="workers-table" class="table table-bordered table-striped">
       <thead>
       <tr>
-        <th style="width: 15px; min-width: 15px;"></th>
         <th>Worker Name</th>
         <th>Status</th>
         <th>Active</th>
@@ -60,15 +45,8 @@
       <tbody>
       {% for name, info in workers.items() %}
       <tr id="{{ url_escape(name) }}">
-        <td class="is_selected"><input type="checkbox"></td>
-        <td><a href="{{ '/worker/' + name }}">{{ name }}</a></td>
-        <td>
-          {% if info.get('status', None) %}
-          <span class="label label-success">Online</span>
-          {% else %}
-          <span class="label label-important">Offline</span>
-          {% end %}
-        </td>
+        <td>{{ name }}</td>
+        <td>{{ info.get('status', None) }}</td>
         <td>{{ info.get('active', 0) }}</td>
         <td>{{ info.get('task-received', 0) }}</td>
         <td>{{ info.get('task-failed', 0) }}</td>
@@ -83,22 +61,6 @@
         </div>
     </div>
 
-  </div>
-
-  <div class="hidden">
-      <table>
-          <tr id="workers-table-row">
-              <td class="is_selected"><input type="checkbox"></td>
-              <td><a href=""></a></td>
-              <td><span class="label label-success">Online</span></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-          </tr>
-      </table>
   </div>
 
 {% end %}
