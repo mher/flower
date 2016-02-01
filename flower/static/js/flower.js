@@ -28,23 +28,6 @@ var flower = (function () {
         });
     }
 
-    function select_all_workers() {
-        $('#workers-table td.is_selected > input').filter(':not(:checked)').click();
-    }
-
-    function select_none_workers() {
-        $('#workers-table td.is_selected > input:checked').click();
-    }
-
-    function toggle_selected_workers(event) {
-        var $checkbox = $('#select-workers-toggler');
-
-        if ($checkbox.is(':checked'))
-            select_all_workers();
-        else
-            select_none_workers();
-    }
-
     function shutdown_selected(event) {
         var selected_workers = get_selected_workers();
         if (selected_workers.length == 0) {
@@ -668,9 +651,6 @@ var flower = (function () {
     });
 
     return {
-        toggle_selected_workers: toggle_selected_workers,
-        select_all_workers: select_all_workers,
-        select_none_workers: select_none_workers,
         shutdown_selected: shutdown_selected,
         restart_selected: restart_selected,
         refresh_selected: refresh_selected,
