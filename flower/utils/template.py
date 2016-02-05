@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import re
 import sys
 
+from celery import current_app
 from datetime import datetime
 from datetime import timedelta
 try:
@@ -26,8 +27,7 @@ UUID_REGEX = re.compile(r'^[\w]{8}(-[\w]{4}){3}-[\w]{12}$')
 
 def format_time(time, tz):
     dt = datetime.fromtimestamp(time, tz=tz)
-    return '%s.%s' % (
-        dt.strftime("%Y-%m-%d %H:%M:%S"), dt.microsecond)
+    return dt.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
 
 
 def humanize(obj, type=None, length=None):
@@ -35,11 +35,11 @@ def humanize(obj, type=None, length=None):
         obj = ''
     elif type and type.startswith('time'):
         tz = type[len('time'):].lstrip('-')
-        tz = timezone(tz) if tz else utc
+        tz = timezone(tz) if tz else current_app.timezone or utc
         obj = format_time(float(obj), tz) if obj else ''
     elif type and type.startswith('natural-time'):
         tz = type[len('natural-time'):].lstrip('-')
-        tz = timezone(tz) if tz else utc
+        tz = timezone(tz) if tz else current_app.timezone or utc
         delta = datetime.now(tz) - datetime.fromtimestamp(float(obj), tz)
         if delta < timedelta(days=1):
             obj = format_timedelta(delta, locale='en_US') + ' ago'

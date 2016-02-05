@@ -145,7 +145,7 @@ Execute a task by name and wait results
 
     def wait_results(self, result, response):
         # Wait until task finished and do not raise anything
-        r = result.get(propagate=False)
+        result.get(propagate=False)
         # Write results and finish async function
         self.update_response_result(response, result)
         if self.backend_configured(result):
@@ -445,8 +445,8 @@ List tasks
         for task_id, task in tasks.iter_tasks(
                 app.events, limit=limit, type=type,
                 worker=worker, state=state):
-            task = task.as_dict()
-            task.pop('worker')
+            task = tasks.as_dict(task)
+            task.pop('worker', None)
             result.append((task_id, task))
         self.write(dict(result))
 

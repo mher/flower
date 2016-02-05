@@ -28,7 +28,8 @@ class BrokerView(BaseHandler):
             broker = Broker(app.capp.connection().as_uri(include_password=True),
                             http_api=http_api, broker_options=broker_options)
         except NotImplementedError:
-            raise web.HTTPError(404, "'%s' broker is not supported" % app.transport)
+            raise web.HTTPError(
+                404, "'%s' broker is not supported" % app.transport)
 
         queue_names = ControlHandler.get_active_queue_names()
 

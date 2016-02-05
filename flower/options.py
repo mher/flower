@@ -13,6 +13,8 @@ define("port", default=5555,
        help="run on the given port", type=int)
 define("address", default='',
        help="run on the given address", type=str)
+define("unix_socket", default='',
+       help="Path to unix socket to bind", type=str)
 define("debug", default=False,
        help="run in debug mode", type=bool)
 define("inspect_timeout", default=1000, type=float,
@@ -55,7 +57,8 @@ define("format_task", type=types.FunctionType, default=None,
        help="use custom task formatter")
 define("natural_time", type=bool, default=True,
        help="show time in relative format")
-define("tasks_columns", type=str, default="name,uuid,state,args,kwargs,result,received,started",
+define("tasks_columns", type=str,
+       default="name,uuid,state,args,kwargs,result,received,started",
        help="Slugs of columns on /tasks/ page, delimited by comma")
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")

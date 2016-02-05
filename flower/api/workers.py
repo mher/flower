@@ -159,11 +159,11 @@ List workers
         workername = self.get_argument('workername', default=None)
 
         if status:
-          info = {}
-          for name, worker in self.application.events.state.workers.items():
-            info[name] = worker.alive
-          self.write(info)
-          return
+            info = {}
+            for name, worker in self.application.events.state.workers.items():
+                info[name] = worker.alive
+            self.write(info)
+            return
 
         if self.worker_cache and not refresh and\
                 workername in self.worker_cache:

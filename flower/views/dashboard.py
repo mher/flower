@@ -46,7 +46,24 @@ class DashboardView(BaseHandler):
 
     @classmethod
     def _as_dict(cls, worker):
-        return dict((k, worker.__getattribute__(k)) for k in worker._fields)
+        if hasattr(worker, '_fields'):
+            return dict((k, worker.__getattribute__(k)) for k in worker._fields)
+        else:
+            return cls._info(worker)
+
+    @classmethod
+    def _info(cls, worker):
+        _fields = ('hostname', 'pid', 'freq', 'heartbeats', 'clock',
+                   'active', 'processed', 'loadavg', 'sw_ident',
+                   'sw_ver', 'sw_sys')
+
+        def _keys():
+            for key in _fields:
+                value = getattr(worker, key, None)
+                if value is not None:
+                    yield key, value
+
+        return dict(_keys())
 
 
 class DashboardUpdateHandler(websocket.WebSocketHandler):

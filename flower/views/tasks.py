@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
 import copy
+import logging
+
 try:
     from itertools import imap
 except ImportError:
@@ -14,11 +16,14 @@ from ..views import BaseHandler
 from ..utils.tasks import iter_tasks, get_task_by_id
 from ..utils.search import parse_search_terms
 
+logger = logging.getLogger(__name__)
+
 
 class TaskView(BaseHandler):
     @web.authenticated
     def get(self, task_id):
         task = get_task_by_id(self.application.events, task_id)
+
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
 

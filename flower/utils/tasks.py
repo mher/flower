@@ -43,23 +43,29 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
         if started_end and task.started and\
                 task.started > convert(started_end):
             continue
-        if not satisfies_search_terms(task, any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms):
+        if not satisfies_search_terms(task, any_value_search_term,
+                                      result_search_term, args_search_terms,
+                                      kwargs_search_terms):
             continue
         yield uuid, task
         i += 1
         if i == limit:
             break
 
+
 sort_keys = {'name': str, 'state': str, 'received': float, 'started': float}
+
+
 def sort_tasks(tasks, sort_by):
     assert sort_by.lstrip('-') in sort_keys
     reverse = False
     if sort_by.startswith('-'):
         sort_by = sort_by.lstrip('-')
         reverse = True
-    for task in sorted(tasks,
-                       key=lambda x: getattr(x[1], sort_by) or sort_keys[sort_by](),
-                       reverse=reverse):
+    for task in sorted(
+            tasks,
+            key=lambda x: getattr(x[1], sort_by) or sort_keys[sort_by](),
+            reverse=reverse):
         yield task
 
 
@@ -72,3 +78,12 @@ def get_task_by_id(events, task_id):
         if task is not None:
             task._fields = _fields
         return task
+
+
+def as_dict(task):
+    # as_dict is new in Celery 3.1.7
+    if hasattr(Task, 'as_dict'):
+        return task.as_dict()
+    # old version
+    else:
+        return task.info(fields=task._defaults.keys())

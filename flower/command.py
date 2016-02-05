@@ -20,6 +20,11 @@ from .urls import settings
 from .utils import abs_path
 from .options import DEFAULT_CONFIG_FILE
 
+try:
+    from logging import NullHandler
+except ImportError:
+    from .utils.backports import NullHandler
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +66,7 @@ class FlowerCommand(Command):
             options.logging = 'debug'
             enable_pretty_logging()
         else:
-            logging.getLogger("tornado.access").addHandler(logging.NullHandler())
+            logging.getLogger("tornado.access").addHandler(NullHandler())
             logging.getLogger("tornado.access").propagate = False
 
         if options.auth:
@@ -76,9 +81,6 @@ class FlowerCommand(Command):
                                            keyfile=abs_path(options.keyfile))
             if options.ca_certs:
                 settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
-
-        # Monkey-patch to support Celery 2.5.5
-        self.app.connection = self.app.broker_connection
 
         self.app.loader.import_default_modules()
         flower = Flower(capp=self.app, options=options, **settings)
@@ -111,10 +113,14 @@ class FlowerCommand(Command):
         return hasattr(options, name)
 
     def print_banner(self, ssl):
-        logger.info(
-            "Visit me at http%s://%s:%s", 's' if ssl else '',
-            options.address or 'localhost', options.port
-        )
+        if not options.unix_socket:
+            logger.info(
+                "Visit me at http%s://%s:%s", 's' if ssl else '',
+                options.address or 'localhost', options.port
+            )
+        else:
+            logger.info("Visit me via unix socket file: %s" % options.unix_socket)
+
         logger.info('Broker: %s', self.app.connection().as_uri())
         logger.info(
             'Registered tasks: \n%s',

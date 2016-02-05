@@ -2,7 +2,8 @@ import re
 
 
 def parse_search_terms(raw_search_value):
-    search_regexp = r'(?:[^\s,"]|"(?:\\.|[^"])*")+'  # splits by space, ignores space in quotes
+    # splits by space, ignores space in quotes
+    search_regexp = r'(?:[^\s,"]|"(?:\\.|[^"])*")+'
     if not raw_search_value:
         return {}
     parsed_search = {}
@@ -25,11 +26,13 @@ def parse_search_terms(raw_search_value):
     return parsed_search
 
 
-def satisfies_search_terms(task, any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms):
-    if not any([any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms]):
+def satisfies_search_terms(task, any_value_search_term, result_search_term,
+                           args_search_terms, kwargs_search_terms):
+    if not any([any_value_search_term, result_search_term,
+                args_search_terms, kwargs_search_terms]):
         return True
     terms = [
-        any_value_search_term and any_value_search_term in '|'.join([task.args, task.kwargs, str(task.result)]),
+        any_value_search_term and any_value_search_term in '|'.join(filter(None, ([task.args, task.kwargs, str(task.result)]))),
         result_search_term and result_search_term in task.result,
         kwargs_search_terms and all(
             stringified_dict_contains_value(k, v, task.kwargs) for k, v in kwargs_search_terms.items()
@@ -40,20 +43,20 @@ def satisfies_search_terms(task, any_value_search_term, result_search_term, args
 
 
 def stringified_dict_contains_value(key, value, str_dict):
-    """
-        Checks if dict in for of string like "{'test': 5}" contains key/value pair.
-
-        This works faster, then creating actual dict from string since this operation is called
-        for each task in case of kwargs search.
-    """
+    """Checks if dict in for of string like "{'test': 5}" contains
+    key/value pair. This works faster, then creating actual dict
+    from string since this operation is called for each task in case
+    of kwargs search."""
     value = str(value)
     try:
-        key_index = str_dict.index(key) + len(key) + 3  # + 3 for key right quote, one for colon and one for space
-    except ValueError:  # key not found
+        # + 3 for key right quote, one for colon and one for space
+        key_index = str_dict.index(key) + len(key) + 3
+    except ValueError:
         return False
     try:
         comma_index = str_dict.index(',', key_index)
-    except ValueError:  # last value in dict
+    except ValueError:
+        # last value in dict
         comma_index = str_dict.index('}', key_index)
     return str(value) == str_dict[key_index:comma_index].strip('"\'')
 
