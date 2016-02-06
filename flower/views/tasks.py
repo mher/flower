@@ -34,7 +34,6 @@ class TasksView(BaseHandler):
     def get(self):
         app = self.application
         capp = self.application.capp
-        limit = self.get_argument('limit', default=None, type=int)
         worker = self.get_argument('worker', None)
         type = self.get_argument('type', None)
         state = self.get_argument('state', None)
@@ -53,7 +52,6 @@ class TasksView(BaseHandler):
 
         tasks = iter_tasks(
             app.events,
-            limit=limit,
             type=type,
             worker=worker,
             state=state,
@@ -80,7 +78,6 @@ class TasksView(BaseHandler):
             task_types=seen_task_types,
             all_states=celery.states.ALL_STATES,
             workers=workers,
-            limit=limit,
             worker=worker,
             type=type,
             state=state,
