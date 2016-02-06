@@ -43,8 +43,6 @@ class TasksView(BaseHandler):
         started_start = self.get_argument('started-start', None)
         started_end = self.get_argument('started-end', None)
         search = self.get_argument('search', None)
-        if search:
-            search = 'state:' + search
 
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
@@ -60,7 +58,7 @@ class TasksView(BaseHandler):
             received_end=received_end,
             started_start=started_start,
             started_end=started_end,
-            search=search,
+            search=search and 'state:' + search,
         )
         tasks = imap(self.format_task, tasks)
         workers = app.events.state.workers
