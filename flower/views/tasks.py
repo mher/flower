@@ -44,6 +44,8 @@ class TasksView(BaseHandler):
         started_start = self.get_argument('started-start', None)
         started_end = self.get_argument('started-end', None)
         search = self.get_argument('search', None)
+        if search:
+            search = 'state:' + search
 
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None

@@ -661,6 +661,7 @@ var flower = (function () {
                 url: '/tasks/datatable'
             },
             order: [[ 7, "asc" ]],
+            oSearch: {"sSearch": $.urlParam('state') ? 'state:' + $.urlParam('state') : ''},
             columnDefs: [
                 {targets: 0,
                     data: 'name',
