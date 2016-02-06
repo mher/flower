@@ -646,8 +646,74 @@ var flower = (function () {
                 {targets: 6, data: 'retried'},
                 {targets: 7, data: 'loadavg'},
             ],
-
         });
+
+        $('#tasks-table').DataTable({
+            rowId: 'uuid',
+            searching: true,
+            paginate: true,
+            scrollX: true,
+            scrollCollapse: true,
+            processing: true,
+            serverSide: true,
+            colReorder: true,
+            ajax: {
+                url: '/tasks/datatable'
+            },
+            order: [[ 7, "asc" ]],
+            columnDefs: [
+                {targets: 0,
+                    data: 'name',
+                    render: function (data, type, full, meta) {
+                        return '<a href="/task/' + data + '">' + data + '</a>';
+                    }
+                },
+                {targets: 1,
+                    data: 'uuid',
+                    orderable: false,
+                    render: function (data, type, full, meta) {
+                        return '<a href="/task/' + data + '">' + data + '</a>';
+                    }
+                },
+                {targets: 2,
+                    data: 'state',
+                    render: function (data, type, full, meta) {
+                        switch (data) {
+                            case 'SUCCESS':
+                                return '<span class="label label-success">' + data + '</span>'
+                            case 'FAILURE':
+                                return '<span class="label label-important">' + data + '</span>'
+                            default:
+                                return '<span class="label label-default">' + data + '</span>'
+                        }
+                    }
+                },
+                {targets: 3, data: 'args'},
+                {targets: 4, data: 'kwargs'},
+                {targets: 5, data: 'result'},
+                {targets: 6,
+                    data: 'received',
+                    render: function (data, type, full, meta) {
+                        return data ? moment.unix(data).format() : data;
+                    }
+
+                },
+                {targets: 7,
+                    data: 'started',
+                    render: function (data, type, full, meta) {
+                        return data ? moment.unix(data).format() : data;
+                    }
+                },
+                {targets: 8,
+                    data: 'runtime',
+                    render: function (data, type, full, meta) {
+                        return data ? data.toFixed(3) : data;
+                    }
+                },
+                {targets: 9, data: 'worker'},
+            ],
+        });
+
     });
 
     return {
