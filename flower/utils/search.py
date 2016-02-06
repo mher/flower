@@ -25,7 +25,12 @@ def parse_search_terms(raw_search_value):
     return parsed_search
 
 
-def satisfies_search_terms(task, any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms):
+def satisfies_search_terms(task, search_terms):
+    any_value_search_term = search_terms.get('any')
+    result_search_term = search_terms.get('result')
+    args_search_terms = search_terms.get('args')
+    kwargs_search_terms = search_terms.get('kwargs')
+
     if not any([any_value_search_term, result_search_term, args_search_terms, kwargs_search_terms]):
         return True
     terms = [

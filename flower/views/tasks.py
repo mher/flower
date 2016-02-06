@@ -14,7 +14,6 @@ from tornado import web
 
 from ..views import BaseHandler
 from ..utils.tasks import iter_tasks, get_task_by_id, as_dict
-from ..utils.search import parse_search_terms
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ class TasksView(BaseHandler):
             received_end=received_end,
             started_start=started_start,
             started_end=started_end,
-            search_terms=parse_search_terms(search),
+            search=search,
         )
         tasks = imap(self.format_task, tasks)
         workers = app.events.state.workers
@@ -115,8 +114,7 @@ class TasksDataTable(BaseHandler):
         sort_by = self.get_argument('columns[%s][data]' % column, type=str)
         sort_order = self.get_argument('order[0][dir]', type=str) == 'asc'
 
-        tasks = sorted(iter_tasks(app.events,
-                       search_terms=parse_search_terms(search)),
+        tasks = sorted(iter_tasks(app.events, search=search),
                        key=lambda x: getattr(x[1], sort_by),
                        reverse=sort_order)
         filtered_tasks = []
