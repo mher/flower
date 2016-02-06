@@ -3,9 +3,9 @@ from __future__ import absolute_import
 import datetime
 import time
 
-from celery.events.state import Task
-
 from .search import satisfies_search_terms, parse_search_terms
+
+from celery.events.state import Task
 
 
 def iter_tasks(events, limit=None, type=None, worker=None, state=None,
@@ -45,6 +45,7 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
         i += 1
         if i == limit:
             break
+
 
 sort_keys = {'name': str, 'state': str, 'received': float, 'started': float}
 def sort_tasks(tasks, sort_by):
