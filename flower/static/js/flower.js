@@ -658,7 +658,10 @@ var flower = (function () {
                 {targets: 7,
                     data: 'loadavg',
                     render: function (data, type, full, meta) {
-                        return data;
+                        if( Object.prototype.toString.call(data) === '[object Array]' )
+                            return data.join(', ');
+                        else
+                            return data;
                     }
                 },
             ],
