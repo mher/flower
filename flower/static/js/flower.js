@@ -494,6 +494,17 @@ var flower = (function () {
                         now.getUTCMinutes(), now.getUTCSeconds())/1000;
     }
 
+    function format_time(timestamp) {
+        var time = $('#time').val(),
+            prefix = time.startsWith('natural-time') ? 'natural-time' : 'time',
+            tz = time.substr(prefix.length+1) || 'UTC';
+
+        if (prefix === 'natural-time')
+            return moment.unix(timestamp).tz(tz).fromNow();
+        else
+            return moment.unix(timestamp).tz(tz).format('YYYY-MM-DD HH:mm:ss.SSS');
+    }
+
     $.urlParam = function(name){
         var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
         return results && results[1] || 0;
@@ -644,7 +655,12 @@ var flower = (function () {
                 {targets: 4, data: 'failed'},
                 {targets: 5, data: 'succeeded'},
                 {targets: 6, data: 'retried'},
-                {targets: 7, data: 'loadavg'},
+                {targets: 7,
+                    data: 'loadavg',
+                    render: function (data, type, full, meta) {
+                        return data;
+                    }
+                },
             ],
         });
 
@@ -695,14 +711,20 @@ var flower = (function () {
                 {targets: 6,
                     data: 'received',
                     render: function (data, type, full, meta) {
-                        return data ? moment.unix(data).format() : data;
+                        if (data)
+                            return format_time(data);
+                        else
+                            return data
                     }
 
                 },
                 {targets: 7,
                     data: 'started',
                     render: function (data, type, full, meta) {
-                        return data ? moment.unix(data).format() : data;
+                        if (data)
+                            return format_time(data);
+                        else
+                            return data
                     }
                 },
                 {targets: 8,

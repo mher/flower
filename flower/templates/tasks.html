@@ -4,7 +4,10 @@
 {% module Template("navbar.html", active_tab="tasks") %}
 {% end %}
 
+
 {% block container %}
+<input type="hidden" value="{{ time }}" id='time'>
+
 <div class="container-fluid">
 
   <table id="tasks-table" class="table table-bordered table-striped">
