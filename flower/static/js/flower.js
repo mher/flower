@@ -658,7 +658,7 @@ var flower = (function () {
                 {targets: 7,
                     data: 'loadavg',
                     render: function (data, type, full, meta) {
-                        if( Object.prototype.toString.call(data) === '[object Array]' )
+                        if(Array.isArray(data))
                             return data.join(', ');
                         else
                             return data;
