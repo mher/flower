@@ -505,6 +505,15 @@ var flower = (function () {
             return moment.unix(timestamp).tz(tz).format('YYYY-MM-DD HH:mm:ss.SSS');
     }
 
+    function isColumnVisible(name) {
+        var columns = $('#columns').val();
+        if (columns) {
+            columns = columns.split(',').map(function(e){return e.trim();});
+            return columns.indexOf(name) != -1;
+        }
+        return true;
+    }
+
     $.urlParam = function(name){
         var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
         return results && results[1] || 0;
@@ -684,12 +693,14 @@ var flower = (function () {
             columnDefs: [
                 {targets: 0,
                     data: 'name',
+                    visible: isColumnVisible('name'),
                     render: function (data, type, full, meta) {
                         return '<a href="/task/' + data + '">' + data + '</a>';
                     }
                 },
                 {targets: 1,
                     data: 'uuid',
+                    visible: isColumnVisible('uuid'),
                     orderable: false,
                     render: function (data, type, full, meta) {
                         return '<a href="/task/' + data + '">' + data + '</a>';
@@ -697,6 +708,7 @@ var flower = (function () {
                 },
                 {targets: 2,
                     data: 'state',
+                    visible: isColumnVisible('state'),
                     render: function (data, type, full, meta) {
                         switch (data) {
                             case 'SUCCESS':
@@ -708,11 +720,12 @@ var flower = (function () {
                         }
                     }
                 },
-                {targets: 3, data: 'args'},
-                {targets: 4, data: 'kwargs'},
-                {targets: 5, data: 'result'},
+                {targets: 3, data: 'args', visible: isColumnVisible('args')},
+                {targets: 4, data: 'kwargs', visible: isColumnVisible('kwargs')},
+                {targets: 5, data: 'result', visible: isColumnVisible('result')},
                 {targets: 6,
                     data: 'received',
+                    visible: isColumnVisible('received'),
                     render: function (data, type, full, meta) {
                         if (data)
                             return format_time(data);
@@ -723,6 +736,7 @@ var flower = (function () {
                 },
                 {targets: 7,
                     data: 'started',
+                    visible: isColumnVisible('started'),
                     render: function (data, type, full, meta) {
                         if (data)
                             return format_time(data);
@@ -732,11 +746,12 @@ var flower = (function () {
                 },
                 {targets: 8,
                     data: 'runtime',
+                    visible: isColumnVisible('runtime'),
                     render: function (data, type, full, meta) {
                         return data ? data.toFixed(3) : data;
                     }
                 },
-                {targets: 9, data: 'worker'},
+                {targets: 9, data: 'worker', visible: isColumnVisible('worker')},
             ],
         });
 

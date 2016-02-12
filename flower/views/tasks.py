@@ -111,11 +111,10 @@ class TasksView(TasksDataTable):
             time += '-' + capp.conf.CELERY_TIMEZONE
         params = dict((k, v[-1]) for (k, v) in self.request.query_arguments.items())
 
-        columns = app.options.tasks_columns.split(',')
         self.render(
             "tasks.html",
             tasks=tasks,
-            columns=columns,
+            columns=app.options.tasks_columns,
             task_types=seen_task_types,
             all_states=celery.states.ALL_STATES,
             workers=workers,
