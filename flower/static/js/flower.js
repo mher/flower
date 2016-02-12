@@ -752,6 +752,13 @@ var flower = (function () {
                     }
                 },
                 {targets: 9, data: 'worker', visible: isColumnVisible('worker')},
+                {targets: 10, data: 'exchange', visible: isColumnVisible('exchange')},
+                {targets: 11, data: 'routing_key', visible: isColumnVisible('routing_key')},
+                {targets: 12, data: 'retries', visible: isColumnVisible('retries')},
+                {targets: 13, data: 'revoked', visible: isColumnVisible('revoked')},
+                {targets: 14, data: 'exception', visible: isColumnVisible('exception')},
+                {targets: 15, data: 'expires', visible: isColumnVisible('expires')},
+                {targets: 16, data: 'eta', visible: isColumnVisible('eta')},
             ],
         });
 

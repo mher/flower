@@ -24,6 +24,13 @@
       <th>Started</th>
       <th>Runtime</th>
       <th>Worker</th>
+      <th>Exchange</th>
+      <th>Routing Key</th>
+      <th>Retries</th>
+      <th>Revoked</th>
+      <th>Exception</th>
+      <th>Expires</th>
+      <th>ETA</th>
     </tr>
     </thead>
     <tbody>
@@ -52,6 +59,13 @@
         {% end %}
       </td>
       <td>{{ task.worker }}</td>
+      <td>{{ task.exchange }}</td>
+      <td>{{ task.routing_key }}</td>
+      <td>{{ task.retries }}</td>
+      <td>{{ task.revoked }}</td>
+      <td>{{ task.exception }}</td>
+      <td>{{ task.expires }}</td>
+      <td>{{ task.eta }}</td>
     </tr>
       {% end %}
     </tbody>
