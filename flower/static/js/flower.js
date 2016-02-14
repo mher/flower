@@ -411,9 +411,11 @@ var flower = (function () {
             palette, graph, ticksTreatment, timeUnit, xAxis, yAxis, hoverDetail,
             legend, shelving, order, highlighter;
         for (name in data) {
-            seriesData.push({
-                name: name
-            });
+            if (data.hasOwnProperty(name)) {
+                seriesData.push({
+                    name: name
+                });
+            }
         }
 
         palette = new Rickshaw.Color.Palette({
@@ -543,7 +545,7 @@ var flower = (function () {
 
     $.urlParam = function (name) {
         var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        return results && results[1] || 0;
+        return (results && results[1]) || 0;
     };
 
     $(document).ready(function () {
@@ -671,6 +673,10 @@ var flower = (function () {
     });
 
     $(document).ready(function () {
+        if ($.inArray($(location).attr('pathname'), ['/tasks', '/broker', '/monitor']) !== -1) {
+            return;
+        }
+
         $('#workers-table').DataTable({
             rowId: 'name',
             searching: true,
@@ -724,6 +730,13 @@ var flower = (function () {
                 }
             }, ],
         });
+
+    });
+
+    $(document).ready(function () {
+        if ($.inArray($(location).attr('pathname'), ['/', '/dashboard', '/broker', '/monitor']) !== -1) {
+            return;
+        }
 
         $('#tasks-table').DataTable({
             rowId: 'uuid',
