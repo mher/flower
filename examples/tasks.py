@@ -1,10 +1,13 @@
+import os
 import time
 from datetime import datetime
 
 from celery import Celery
 
 
-app = Celery("tasks", broker="amqp://", backend="amqp")
+app = Celery("tasks",
+             broker=os.environ.get('CELERY_BROKER_URL', 'amqp://'),
+             backend=os.environ.get('CELERY_RESULT_BACKEND', 'amqp'))
 app.conf.CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 
 
