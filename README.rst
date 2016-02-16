@@ -113,28 +113,6 @@ Documentation is available at `Read the Docs`_ and `IPython Notebook Viewer`_
 .. _Read the Docs: http://flower.readthedocs.org
 .. _IPython Notebook Viewer: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
-Screenshots
------------
-
-.. image:: https://raw.github.com/mher/flower/master/docs/screenshots/dashboard.png
-   :width: 100%
-
-.. image:: https://raw.github.com/mher/flower/master/docs/screenshots/pool.png
-   :width: 100%
-
-.. image:: https://raw.github.com/mher/flower/master/docs/screenshots/tasks.png
-   :width: 100%
-
-.. image:: https://raw.github.com/mher/flower/master/docs/screenshots/task.png
-   :width: 100%
-
-.. image:: https://raw.github.com/mher/flower/master/docs/screenshots/monitor.png
-   :width: 100%
-
-More screenshots_
-
-.. _screenshots: https://github.com/mher/flower/tree/master/docs/screenshots
-
 License
 -------
 
