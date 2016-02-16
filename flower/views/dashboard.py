@@ -42,6 +42,7 @@ class DashboardView(BaseHandler):
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
             workers[name] = info
+
         self.render("dashboard.html", workers=workers, broker=broker)
 
     @classmethod
@@ -123,6 +124,7 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
                 active = 'N/A'
 
             workers[name] = dict(
+                name=name,
                 status=worker.alive,
                 active=active,
                 processed=processed,

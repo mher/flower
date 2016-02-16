@@ -4,223 +4,71 @@
 {% module Template("navbar.html", active_tab="tasks") %}
 {% end %}
 
-{% block extra_styles %}
-<style type="text/css">
-  #task-filter-form, #task-filter-form .form-actions {
-    margin-bottom: 0;
-  }
-  #task-filter-form-accordion .accordion-inner {
-    padding-left: 0;
-    padding-right: 0;
-    padding-bottom: 0;
-  }
-  tr th a.sort.desc::before {
-    content: "↓↓";
-  }
-  tr th a.sort.asc::before {
-    content: "↑↑";
-  }
-</style>
-{% end %}
 
 {% block container %}
-<div class="container-fluid">
-  <div id="task-filter-form-accordion" class="accordion">
-    <div class="accordion-group">
-      <div class="accordion-heading">
-        <a class="accordion-toggle" data-toggle="collapse" data-parent="#task-filter-form-accordion" href="#task-filter-form-container">
-          Filter tasks
-        </a>
-      </div>
-      <div id="task-filter-form-container" class="accordion-body in collapse">
-        <div class="accordion-inner" style="padding-left: 0; padding-right: 0;">
-          <form id="task-filter-form" class="form-horizontal" action="/tasks" method="GET">
-            <div class="filter-column left">
-              <div class="control-group">
-                <label class="control-label" for="input-limit">Limit:</label>
-                <div class="controls">
-                  <input name="limit" type="text" class="input-small" id="input-limit"
-                         value="{{ limit or '' }}">
-                </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="select-worker">Workers:</label>
-                <div class="controls">
-                  <select name="worker" id="select-worker">
-                    <option>All</option>
-                    {% for name in workers %}
-                    <option {% if name==worker %} selected {% end %}>{{ name }}</option>
-                    {% end %}
-                  </select>
-                </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="select-task">Seen task types:</label>
-                <div class="controls">
-                  <select name="type" id="select-task">
-                    <option>All</option>
-                    {% for name in task_types %}
-                    <option {% if name==type %} selected {% end %}>{{ name }}</option>
-                    {% end %}
-                  </select>
-                </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="select-state">State:</label>
-                <div class="controls">
-                  <select name="state" id="select-state">
-                    <option>All</option>
-                    {% for name in all_states %}
-                    <option {% if name==state %} selected {% end %}>{{ name }}</option>
-                    {% end %}
-                  </select>
-                </div>
-              </div>
-              {% if sort_by %}
-              <input type="hidden" name="sort" value="{{ sort_by}}">
-              {% end %}
-            </div>
-            <div class="filter-column right">
-              <div class="control-group">
-                <label class="control-label" for="input-search">Search:</label>
-                <div class="controls">
-                  <input name="search" type="text" class="input" id="input-search" value="{{ search or ''}}">
-                </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="input-received-start">Received:</label>
-                <div class="controls">
-                  <input type="text" class="input datetimepicker" name="received-start" id="input-received-start" value="{{ received_start or '' }}" data-date-format="yyyy-mm-dd hh:ii"> to
-                  <input type="text" class="input datetimepicker" name="received-end" id="input-received-end" value="{{ received_end or '' }}" data-date-format="yyyy-mm-dd hh:ii">
-                </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label" for="input-started-start">Started:</label>
-                <div class="controls">
-                  <input type="text" class="input datetimepicker" name="started-start" id="input-started-start" value="{{ started_start or '' }}" data-date-format="yyyy-mm-dd hh:ii"> to
-                  <input type="text" class="input datetimepicker" name="started-end" id="input-started-end" value="{{ started_end or '' }}" data-date-format="yyyy-mm-dd hh:ii">
-                </div>
-              </div>
-            </div>
-            <div class="filter-actions">
-              <div class="form-actions">
-                <button class="btn btn-primary" type="submit">Apply filter</button>
-                <button class="btn" onclick="flower.on_cancel_task_filter(event)">Cancel
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+<input type="hidden" value="{{ time }}" id='time'>
+<input type="hidden" value="{{ columns }}" id='columns'>
 
-  <table class="table table-bordered table-striped">
+<div class="container-fluid">
+
+  <table id="tasks-table" class="table table-bordered table-striped">
     <thead>
     <tr>
-      {% if 'name' in columns %}
-      <th>{% raw sort_url("Name", "name", sort_by, params) %}</th>
-      {% end %}
-      {% if 'uuid' in columns %}
+      <th>Name</th>
       <th>UUID</th>
-      {% end %}
-      {% if 'state' in columns %}
-      <th>{% raw sort_url("State", "state", sort_by, params) %}</th>
-      {% end %}
-      {% if 'args' in columns %}
+      <th>State</th>
       <th>args</th>
-      {% end %}
-      {% if 'kwargs' in columns %}
       <th>kwargs</th>
-      {% end %}
-      {% if 'result' in columns %}
       <th>Result</th>
-      {% end %}
-      {% if 'received' in columns %}
-      <th>{% raw sort_url("Received", "received", sort_by, params) %}</th>
-      {% end %}
-      {% if 'started' in columns %}
-      <th>{% raw sort_url("Started", "started", sort_by, params) %}</th>
-      {% end %}
-      {% if 'runtime' in columns %}
+      <th>Received</th>
+      <th>Started</th>
       <th>Runtime</th>
-      {% end %}
+      <th>Worker</th>
+      <th>Exchange</th>
+      <th>Routing Key</th>
+      <th>Retries</th>
+      <th>Revoked</th>
+      <th>Exception</th>
+      <th>Expires</th>
+      <th>ETA</th>
     </tr>
     </thead>
     <tbody>
     {% for uuid, task in tasks %}
+        {% if getattr(task, 'name', None) is None %}
+            {% continue %}
+        {% end %}
     <tr>
-      {% if getattr(task, 'name', None) is None %}
-      {% continue %}
-      {% end %}
-      {% if 'name' in columns %}
-      <td>
-        {{ task.name }}
-      </td>
-      {% end %}
-      {% if 'uuid' in columns %}
-      <td>
-        <a href="{{ '/task/' + task.uuid }}">{{ task.uuid }}</a>
-      </td>
-      {% end %}
-      {% if 'state' in columns %}
+      <td>{{ task.name }}</td>
+      <td>{{ task.uuid }}</td>
+      <td>{{ task.state }}</td>
+      <td>{{ task.args }}</td>
+      <td>{{ task.kwargs }}</td>
       <td>
         {% if task.state == "SUCCESS" %}
-        <span class="label label-success">{{ task.state }}</span>
+            {{ task.result }}
         {% elif task.state == "FAILURE" %}
-        <span class="label label-important">{{ task.state }}</span>
-        {% else %}
-        <span class="label label-default">{{ task.state }}</span>
+            {{ task.exception }}
         {% end %}
       </td>
-      {% end %}
-      {% if 'args' in columns %}
-      <td>
-        {{ task.args }}
-      </td>
-      {% end %}
-      {% if 'kwargs' in columns %}
-      <td>
-        {{ task.kwargs }}
-      </td>
-      {% end %}
-      {% if 'result' in columns %}
-      <td>
-        {% if task.state == "SUCCESS" %}
-        {{ task.result }}
-        {% elif task.state == "FAILURE" %}
-        {{ task.exception }}
-        {% end %}
-      </td>
-      {% end %}
-      {% if 'received' in columns %}
-      <td>
-        {{ humanize(task.received, type=time) }}
-      </td>
-      {% end %}
-      {% if 'started' in columns %}
-      <td>
-        {{ humanize(task.received, type=time) }}
-      </td>
-      {% end %}
-      {% if 'runtime' in columns %}
+      <td>{{ humanize(task.started, type=time) }}</td>
+      <td>{{ humanize(task.received, type=time) }}</td>
       <td>
         {% if task.timestamp and task.started %}
-        {{ '%.2f' % humanize(task.timestamp - task.started) }} sec
+            {{ '%.2f' % humanize(task.timestamp - task.started) }} sec
         {% end %}
       </td>
+      <td>{{ task.worker }}</td>
+      <td>{{ task.exchange }}</td>
+      <td>{{ task.routing_key }}</td>
+      <td>{{ task.retries }}</td>
+      <td>{{ task.revoked }}</td>
+      <td>{{ task.exception }}</td>
+      <td>{{ task.expires }}</td>
+      <td>{{ task.eta }}</td>
+    </tr>
       {% end %}
-      {% end %}
+    </tbody>
   </table>
 </div>
-{% end %}
-
-{% block extra_scripts %}
-<script>
-  $(".datetimepicker").datetimepicker({
-    autoclose: true,
-    todayBtn: true,
-    todayHighlight: true
-  });
-</script>
 {% end %}

@@ -1,6 +1,7 @@
 var flower = (function () {
     "use strict";
     /*jslint browser: true */
+    /*jslint unparam: true, node: true */
     /*global $, WebSocket, jQuery, Rickshaw */
 
     function on_alert_close(event) {
@@ -22,39 +23,27 @@ var flower = (function () {
     }
 
     function get_selected_workers() {
-        return $('#workers-table tr').has('td.is_selected > input:checked');
-    }
-
-    function select_all_workers() {
-        $('#workers-table td.is_selected > input').filter(':not(:checked)').click();
-    }
-
-    function select_none_workers() {
-        $('#workers-table td.is_selected > input:checked').click();
-    }
-
-    function toggle_selected_workers(event) {
-        var $checkbox = $('#select-workers-toggler');
-
-        if ($checkbox.is(':checked'))
-            select_all_workers();
-        else
-            select_none_workers();
+        var table = $('#workers-table').DataTable();
+        return $.map(table.rows('.selected').data(), function (row) {
+            return row.name;
+        });
     }
 
     function shutdown_selected(event) {
-        var $selected_workes = get_selected_workers();
+        var selected_workers = get_selected_workers();
+        if (selected_workers.length === 0) {
+            show_error_alert('Please select a worker');
+            return;
+        }
 
-        /* atomic would be better with list of ids (not-names) */
-        $selected_workes.each(function () {
-            var $worker = $(this),
-                worker_name = $worker.attr('id');
-
+        $.each(selected_workers, function (index, worker) {
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/shutdown/' + worker_name,
+                url: '/api/worker/shutdown/' + worker,
                 dataType: 'json',
-                data: { workername: worker_name },
+                data: {
+                    workername: worker
+                },
                 success: function (data) {
                     show_success_alert(data.message);
                 },
@@ -66,18 +55,21 @@ var flower = (function () {
     }
 
     function restart_selected(event) {
-        var $selected_workes = get_selected_workers();
+        var selected_workers = get_selected_workers();
+        if (selected_workers.length === 0) {
+            show_error_alert('Please select a worker');
+            return;
+        }
 
-        /* atomic would be better with list of ids (not-names) */
-        $selected_workes.each(function () {
-            var $worker = $(this),
-                worker_name = $worker.attr('id');
+        $.each(selected_workers, function (index, worker) {
 
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/pool/restart/' + worker_name,
+                url: '/api/worker/pool/restart/' + worker,
                 dataType: 'json',
-                data: { workername: worker_name },
+                data: {
+                    workername: worker
+                },
                 success: function (data) {
                     show_success_alert(data.message);
                 },
@@ -89,13 +81,15 @@ var flower = (function () {
     }
 
     function refresh_selected(event) {
-        var $selected_workers = get_selected_workers();
+        var selected_workers = get_selected_workers();
 
-        if (!$selected_workers.length) {
+        if (!selected_workers.length) {
             $.ajax({
                 type: 'GET',
                 url: '/api/workers',
-                data: { refresh: 1 },
+                data: {
+                    refresh: 1
+                },
                 success: function (data) {
                     show_success_alert('Refreshed');
                 },
@@ -105,15 +99,15 @@ var flower = (function () {
             });
         }
 
-        $selected_workers.each(function () {
-            var $worker = $(this),
-                worker_name = $worker.attr('id');
-
+        $.each(selected_workers, function (index, worker) {
             $.ajax({
                 type: 'GET',
                 url: '/api/workers',
                 dataType: 'json',
-                data: { workername: unescape(worker_name), refresh: 1 },
+                data: {
+                    workername: unescape(worker),
+                    refresh: 1
+                },
                 success: function (data) {
                     show_success_alert(data.message || 'Refreshed');
                 },
@@ -276,7 +270,6 @@ var flower = (function () {
 
         var workername = $('#workername').text(),
             taskname = $(event.target).closest("tr").children("td:eq(0)").text(),
-            type = $(event.target).html().toLowerCase(),
             timeout = $(event.target).siblings().closest("input").val();
 
         taskname = taskname.split(' ')[0]; // removes [rate_limit=xxx]
@@ -372,54 +365,29 @@ var flower = (function () {
         });
     }
 
-    function on_dashboard_update(update) {
-        var total_active = 0, total_processed = 0, total_failed = 0,
-            total_succeeded = 0, total_retried = 0;
-
-        $.each(update, function (name) {
-            var id = encodeURIComponent(name),
-                sel = id.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/%@])/g,'\\$1'),
-                tr = $('#' + sel);
-
-            if (tr.length === 0) {
-                $('#workers-table-row').clone().removeClass('hidden').attr('id', id).appendTo('tbody');
-                tr = $('#' + sel);
-                tr.children('td').children('a').attr('href', '/worker/' + name).text(name);
-            }
-
-            var stat = tr.children('td:eq(2)').children(),
-                active = tr.children('td:eq(3)'),
-                processed = tr.children('td:eq(4)'),
-                failed = tr.children('td:eq(5)'),
-                succeeded = tr.children('td:eq(6)'),
-                retried = tr.children('td:eq(7)'),
-                loadavg = tr.children('td:eq(8)');
-
-            stat.text($(this).attr('status') ? "Online" : "Offline");
-            stat.removeClass("label-success label-important");
-            stat.addClass($(this).attr('status') ? "label-success" : "label-important");
-            active.text($(this).attr('active'));
-            processed.text($(this).attr('processed'));
-            failed.text($(this).attr('failed'));
-            succeeded.text($(this).attr('succeeded'));
-            retried.text($(this).attr('retried'));
-            loadavg.text($(this).attr('loadavg').toString().replace(/,/g, ', '));
-
-            total_active += $(this).attr('active') ? $(this).attr('active') > 0 : 0;
-            total_processed += $(this).attr('processed');
-            total_failed += $(this).attr('failed');
-            total_succeeded += $(this).attr('succeeded');
-            total_retried += $(this).attr('retried');
-
-        });
-
-        $('a#btn-active').text('Active: ' + total_active);
-        $('a#btn-processed').text('Processed: ' + total_processed);
-        $('a#btn-failed').text('Failed: ' + total_failed);
-        $('a#btn-succeeded').text('Succeeded: ' + total_succeeded);
-        $('a#btn-retried').text('Retried: ' + total_retried);
+    function sum(a, b) {
+        return parseInt(a, 10) + parseInt(b, 10);
     }
 
+    function on_dashboard_update(update) {
+        var table = $('#workers-table').DataTable();
+
+        $.each(update, function (name, info) {
+            var row = table.row('#' + name);
+            if (row) {
+                row.data(info);
+            } else {
+                table.row.add(info);
+            }
+        });
+        table.draw();
+
+        $('a#btn-active').text('Active: ' + table.column(2).data().reduce(sum, 0));
+        $('a#btn-processed').text('Processed: ' + table.column(3).data().reduce(sum, 0));
+        $('a#btn-failed').text('Failed: ' + table.column(4).data().reduce(sum, 0));
+        $('a#btn-succeeded').text('Succeeded: ' + table.column(5).data().reduce(sum, 0));
+        $('a#btn-retried').text('Retried: ' + table.column(6).data().reduce(sum, 0));
+    }
 
     function on_cancel_task_filter(event) {
         event.preventDefault();
@@ -439,30 +407,45 @@ var flower = (function () {
         height = height || 300;
         metric = metric || '';
 
-        var name, seriesData = [];
+        var name, seriesData = [],
+            palette, graph, ticksTreatment, timeUnit, xAxis, yAxis, hoverDetail,
+            legend, shelving, order, highlighter;
         for (name in data) {
-            seriesData.push({name: name});
+            if (data.hasOwnProperty(name)) {
+                seriesData.push({
+                    name: name
+                });
+            }
         }
 
-        var palette = new Rickshaw.Color.Palette({scheme: 'colorwheel'});
+        palette = new Rickshaw.Color.Palette({
+            scheme: 'colorwheel'
+        });
 
-        var graph = new Rickshaw.Graph({
+        graph = new Rickshaw.Graph({
             element: document.getElementById("chart" + id),
             width: width,
             height: height,
             renderer: 'stack',
             series: new Rickshaw.Series(seriesData, palette),
             maxDataPoints: 10000,
-            padding: {top: 0.1, left: 0.01, right: 0.01, bottom: 0.01},
+            padding: {
+                top: 0.1,
+                left: 0.01,
+                right: 0.01,
+                bottom: 0.01
+            },
         });
 
-        var ticksTreatment = 'glow';
+        ticksTreatment = 'glow';
 
-        var timeUnit = new Rickshaw.Fixtures.Time.Local();
-        timeUnit.formatTime = function(d) { return moment(d).format("yyyy.mm.dd HH:mm:ss"); };
+        timeUnit = new Rickshaw.Fixtures.Time.Local();
+        timeUnit.formatTime = function (d) {
+            return moment(d).format("yyyy.mm.dd HH:mm:ss");
+        };
         timeUnit.unit("minute");
 
-        var xAxis = new Rickshaw.Graph.Axis.Time({
+        xAxis = new Rickshaw.Graph.Axis.Time({
             graph: graph,
             timeFixture: new Rickshaw.Fixtures.Time.Local(),
             ticksTreatment: ticksTreatment,
@@ -471,7 +454,7 @@ var flower = (function () {
 
         xAxis.render();
 
-        var yAxis = new Rickshaw.Graph.Axis.Y({
+        yAxis = new Rickshaw.Graph.Axis.Y({
             graph: graph,
             tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
             ticksTreatment: ticksTreatment,
@@ -479,32 +462,33 @@ var flower = (function () {
 
         yAxis.render();
 
-        var hoverDetail = new Rickshaw.Graph.HoverDetail({
+        hoverDetail = new Rickshaw.Graph.HoverDetail({
             graph: graph,
-            yFormatter: function(y) {
-                if (y % 1 === 0)
+            yFormatter: function (y) {
+                if (y % 1 === 0) {
                     return y + metric;
-                else
+                } else {
                     return y.toFixed(2) + metric;
+                }
             }
         });
 
-        var legend = new Rickshaw.Graph.Legend({
+        legend = new Rickshaw.Graph.Legend({
             graph: graph,
             element: document.getElementById('legend' + id)
         });
 
-        var shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
+        shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
             graph: graph,
             legend: legend
         });
 
-        var order = new Rickshaw.Graph.Behavior.Series.Order({
+        order = new Rickshaw.Graph.Behavior.Series.Order({
             graph: graph,
             legend: legend
         });
 
-        var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
+        highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
             graph: graph,
             legend: legend
         });
@@ -520,7 +504,9 @@ var flower = (function () {
         $.ajax({
             type: 'GET',
             url: url,
-            data: {lastquery: lastquery},
+            data: {
+                lastquery: lastquery
+            },
             success: function (data) {
                 graph.series.addData(data);
                 graph.update();
@@ -531,19 +517,41 @@ var flower = (function () {
     function current_unix_time() {
         var now = new Date();
         return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(),
-                        now.getUTCDate(),  now.getUTCHours(),
-                        now.getUTCMinutes(), now.getUTCSeconds())/1000;
+            now.getUTCDate(), now.getUTCHours(),
+            now.getUTCMinutes(), now.getUTCSeconds()) / 1000;
     }
 
-    $.urlParam = function(name){
+    function format_time(timestamp) {
+        var time = $('#time').val(),
+            prefix = time.startsWith('natural-time') ? 'natural-time' : 'time',
+            tz = time.substr(prefix.length + 1) || 'UTC';
+
+        if (prefix === 'natural-time') {
+            return moment.unix(timestamp).tz(tz).fromNow();
+        }
+        return moment.unix(timestamp).tz(tz).format('YYYY-MM-DD HH:mm:ss.SSS');
+    }
+
+    function isColumnVisible(name) {
+        var columns = $('#columns').val();
+        if (columns) {
+            columns = columns.split(',').map(function (e) {
+                return e.trim();
+            });
+            return columns.indexOf(name) !== -1;
+        }
+        return true;
+    }
+
+    $.urlParam = function (name) {
         var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        return results && results[1] || 0;
+        return (results && results[1]) || 0;
     };
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), ['/', '/dashboard']) != -1) {
+        if ($.inArray($(location).attr('pathname'), ['/', '/dashboard']) !== -1) {
             var host = $(location).attr('host'),
-                protocol = $(location).attr('protocol') == 'http:' ? 'ws://' : 'wss://',
+                protocol = $(location).attr('protocol') === 'http:' ? 'ws://' : 'wss://',
                 ws = new WebSocket(protocol + host + "/update-dashboard");
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
@@ -552,8 +560,12 @@ var flower = (function () {
         }
 
         //https://github.com/twitter/bootstrap/issues/1768
-        var shiftWindow = function() { scrollBy(0, -50); };
-        if (location.hash) shiftWindow();
+        var shiftWindow = function () {
+            scrollBy(0, -50);
+        };
+        if (location.hash) {
+            shiftWindow();
+        }
         window.addEventListener("hashchange", shiftWindow);
 
         // Make bootstrap tabs persistent
@@ -571,7 +583,7 @@ var flower = (function () {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
                 tts = current_unix_time(),
-                updateinterval = parseInt($.urlParam('updateInterval')) || 3000,
+                updateinterval = parseInt($.urlParam('updateInterval'), 10) || 3000,
                 succeeded_graph = null,
                 failed_graph = null,
                 time_graph = null,
@@ -580,7 +592,9 @@ var flower = (function () {
             $.ajax({
                 type: 'GET',
                 url: '/monitor/succeeded-tasks',
-                data: {lastquery: current_unix_time()},
+                data: {
+                    lastquery: current_unix_time()
+                },
                 success: function (data) {
                     succeeded_graph = create_graph(data, '-succeeded');
                     succeeded_graph.update();
@@ -588,8 +602,8 @@ var flower = (function () {
                     succeeded_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(succeeded_graph,
-                                     '/monitor/succeeded-tasks',
-                                     sts);
+                            '/monitor/succeeded-tasks',
+                            sts);
                         sts = current_unix_time();
                     }, updateinterval);
 
@@ -599,16 +613,18 @@ var flower = (function () {
             $.ajax({
                 type: 'GET',
                 url: '/monitor/completion-time',
-                data: {lastquery: current_unix_time()},
+                data: {
+                    lastquery: current_unix_time()
+                },
                 success: function (data) {
-                    time_graph = create_graph(data, '-time', null, null,  's');
+                    time_graph = create_graph(data, '-time', null, null, 's');
                     time_graph.update();
 
                     time_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(time_graph,
-                                     '/monitor/completion-time',
-                                     tts);
+                            '/monitor/completion-time',
+                            tts);
                         tts = current_unix_time();
                     }, updateinterval);
 
@@ -618,7 +634,9 @@ var flower = (function () {
             $.ajax({
                 type: 'GET',
                 url: '/monitor/failed-tasks',
-                data: {lastquery: current_unix_time()},
+                data: {
+                    lastquery: current_unix_time()
+                },
                 success: function (data) {
                     failed_graph = create_graph(data, '-failed');
                     failed_graph.update();
@@ -626,8 +644,8 @@ var flower = (function () {
                     failed_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(failed_graph,
-                                     '/monitor/failed-tasks',
-                                     fts);
+                            '/monitor/failed-tasks',
+                            fts);
                         fts = current_unix_time();
                     }, updateinterval);
 
@@ -644,7 +662,7 @@ var flower = (function () {
                     broker_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(broker_graph,
-                                     '/monitor/broker');
+                            '/monitor/broker');
                     }, updateinterval);
 
                 },
@@ -654,10 +672,197 @@ var flower = (function () {
 
     });
 
+    $(document).ready(function () {
+        if ($.inArray($(location).attr('pathname'), ['/tasks', '/broker', '/monitor']) !== -1) {
+            return;
+        }
+
+        $('#workers-table').DataTable({
+            rowId: 'name',
+            searching: true,
+            paginate: false,
+            select: true,
+            scrollX: true,
+            scrollY: 500,
+            scrollCollapse: true,
+            order: [
+                [1, "asc"]
+            ],
+            columnDefs: [{
+                targets: 0,
+                data: 'name',
+                render: function (data, type, full, meta) {
+                    return '<a href="/worker/' + data + '">' + data + '</a>';
+                }
+            }, {
+                targets: 1,
+                data: 'status',
+                render: function (data, type, full, meta) {
+                    if (data) {
+                        return '<span class="label label-success">Online</span>';
+                    } else {
+                        return '<span class="label label-important">Offline</span>';
+                    }
+                }
+            }, {
+                targets: 2,
+                data: 'active'
+            }, {
+                targets: 3,
+                data: 'processed'
+            }, {
+                targets: 4,
+                data: 'failed'
+            }, {
+                targets: 5,
+                data: 'succeeded'
+            }, {
+                targets: 6,
+                data: 'retried'
+            }, {
+                targets: 7,
+                data: 'loadavg',
+                render: function (data, type, full, meta) {
+                    if (Array.isArray(data)) {
+                        return data.join(', ');
+                    }
+                    return data;
+                }
+            }, ],
+        });
+
+    });
+
+    $(document).ready(function () {
+        if ($.inArray($(location).attr('pathname'), ['/', '/dashboard', '/broker', '/monitor']) !== -1) {
+            return;
+        }
+
+        $('#tasks-table').DataTable({
+            rowId: 'uuid',
+            searching: true,
+            paginate: true,
+            scrollX: true,
+            scrollCollapse: true,
+            processing: true,
+            serverSide: true,
+            colReorder: true,
+            ajax: {
+                url: '/tasks/datatable'
+            },
+            order: [
+                [7, "asc"]
+            ],
+            oSearch: {
+                "sSearch": $.urlParam('state') ? 'state:' + $.urlParam('state') : ''
+            },
+            columnDefs: [{
+                targets: 0,
+                data: 'name',
+                visible: isColumnVisible('name'),
+                render: function (data, type, full, meta) {
+                    return '<a href="/task/' + data + '">' + data + '</a>';
+                }
+            }, {
+                targets: 1,
+                data: 'uuid',
+                visible: isColumnVisible('uuid'),
+                orderable: false,
+                render: function (data, type, full, meta) {
+                    return '<a href="/task/' + data + '">' + data + '</a>';
+                }
+            }, {
+                targets: 2,
+                data: 'state',
+                visible: isColumnVisible('state'),
+                render: function (data, type, full, meta) {
+                    switch (data) {
+                    case 'SUCCESS':
+                        return '<span class="label label-success">' + data + '</span>';
+                    case 'FAILURE':
+                        return '<span class="label label-important">' + data + '</span>';
+                    default:
+                        return '<span class="label label-default">' + data + '</span>';
+                    }
+                }
+            }, {
+                targets: 3,
+                data: 'args',
+                visible: isColumnVisible('args')
+            }, {
+                targets: 4,
+                data: 'kwargs',
+                visible: isColumnVisible('kwargs')
+            }, {
+                targets: 5,
+                data: 'result',
+                visible: isColumnVisible('result')
+            }, {
+                targets: 6,
+                data: 'received',
+                visible: isColumnVisible('received'),
+                render: function (data, type, full, meta) {
+                    if (data) {
+                        return format_time(data);
+                    }
+                    return data;
+                }
+
+            }, {
+                targets: 7,
+                data: 'started',
+                visible: isColumnVisible('started'),
+                render: function (data, type, full, meta) {
+                    if (data) {
+                        return format_time(data);
+                    }
+                    return data;
+                }
+            }, {
+                targets: 8,
+                data: 'runtime',
+                visible: isColumnVisible('runtime'),
+                render: function (data, type, full, meta) {
+                    return data ? data.toFixed(3) : data;
+                }
+            }, {
+                targets: 9,
+                data: 'worker',
+                visible: isColumnVisible('worker')
+            }, {
+                targets: 10,
+                data: 'exchange',
+                visible: isColumnVisible('exchange')
+            }, {
+                targets: 11,
+                data: 'routing_key',
+                visible: isColumnVisible('routing_key')
+            }, {
+                targets: 12,
+                data: 'retries',
+                visible: isColumnVisible('retries')
+            }, {
+                targets: 13,
+                data: 'revoked',
+                visible: isColumnVisible('revoked')
+            }, {
+                targets: 14,
+                data: 'exception',
+                visible: isColumnVisible('exception')
+            }, {
+                targets: 15,
+                data: 'expires',
+                visible: isColumnVisible('expires')
+            }, {
+                targets: 16,
+                data: 'eta',
+                visible: isColumnVisible('eta')
+            }, ],
+        });
+
+    });
+
     return {
-        toggle_selected_workers: toggle_selected_workers,
-        select_all_workers: select_all_workers,
-        select_none_workers: select_none_workers,
         shutdown_selected: shutdown_selected,
         restart_selected: restart_selected,
         refresh_selected: refresh_selected,

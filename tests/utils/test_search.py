@@ -94,33 +94,33 @@ class TestTaskFiltering(unittest.TestCase):
     def test_kwarg_search_works(self):
         self.assertEqual(
             True,
-            satisfies_search_terms(self.task, None, None, None, {'kwarg1': 1})
+            satisfies_search_terms(self.task, dict(kwargs={'kwarg1': 1}))
         )
         self.assertEqual(
             False,
-            satisfies_search_terms(self.task, None, None, None, {'kwarg1': 2})
+            satisfies_search_terms(self.task, dict(kwargs={'kwarg1': 2}))
         )
         self.assertEqual(
             False,
-            satisfies_search_terms(self.task, None, None, None, {'kwarg2': 2})
+            satisfies_search_terms(self.task, dict(kwargs={'kwarg2': 2}))
         )
         self.assertEqual(
             True,
-            satisfies_search_terms(self.task, None, None, None, {'kwarg3': '345'})
+            satisfies_search_terms(self.task, dict(kwargs={'kwarg3': '345'}))
         )
 
     def test_args_search_works(self):
         self.assertEqual(
             True,
-            satisfies_search_terms(self.task, None, None, ['arg1'], None)
+            satisfies_search_terms(self.task, dict(args=['arg1']))
         )
         self.assertEqual(
             False,
-            satisfies_search_terms(self.task, None, None, ['arg2'], None)
+            satisfies_search_terms(self.task, dict(args=['arg2']))
         )
         self.assertEqual(
             False,
-            satisfies_search_terms(self.task, None, None, ['arg'], None)
+            satisfies_search_terms(self.task, dict(args=['arg']))
         )
 
 
