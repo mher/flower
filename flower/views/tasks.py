@@ -8,8 +8,6 @@ try:
 except ImportError:
     imap = map
 
-import celery
-
 from tornado import web
 
 from ..views import BaseHandler
@@ -38,7 +36,7 @@ class TasksDataTable(BaseHandler):
         length = self.get_argument('length', type=int)
         search = self.get_argument('search[value]', type=str)
 
-        column= self.get_argument('order[0][column]', type=int)
+        column = self.get_argument('order[0][column]', type=int)
         sort_by = self.get_argument('columns[%s][data]' % column, type=str)
         sort_order = self.get_argument('order[0][dir]', type=str) == 'asc'
 

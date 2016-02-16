@@ -6,6 +6,7 @@ import celery.states as states
 
 from tests import AsyncHTTPTestCase
 
+
 class ApplyTests(AsyncHTTPTestCase):
     def test_apply(self):
         from mock import patch, PropertyMock
@@ -29,6 +30,7 @@ class ApplyTests(AsyncHTTPTestCase):
         body = bytes.decode(r.body)
         self.assertEqual(result, json.loads(body)['result'])
         task.apply_async.assert_called_once_with(args=[], kwargs={})
+
 
 class AsyncApplyTests(AsyncHTTPTestCase):
     def test_async_apply(self):
