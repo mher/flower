@@ -43,7 +43,7 @@ class TasksDataTable(BaseHandler):
         tasks = sorted(iter_tasks(app.events, search=search),
                        key=lambda x: getattr(x[1], sort_by),
                        reverse=sort_order)
-        tasks = map(self.format_task, tasks)
+        tasks = list(map(self.format_task, tasks))
         filtered_tasks = []
         i = 0
         for _, task in tasks:
