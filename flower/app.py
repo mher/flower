@@ -4,6 +4,7 @@ import logging
 
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
+import re
 
 import celery
 import tornado.web
@@ -12,9 +13,10 @@ from tornado import ioloop
 from tornado.httpserver import HTTPServer
 
 from .api import control
-from .urls import handlers
+from .urls import handlers, make_handlers
 from .events import Events
 from .options import default_options
+
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +28,11 @@ class Flower(tornado.web.Application):
 
     def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
-        kwargs.update(handlers=handlers)
+        url_prefix = kwargs.get('url_prefix')
+        if url_prefix:
+            kwargs['static_url_prefix'] = \
+              re.sub(r'\/+', '/', (url_prefix + '/static/'))
+        kwargs.update(handlers=make_handlers(handlers, url_prefix))
         super(Flower, self).__init__(**kwargs)
         self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()

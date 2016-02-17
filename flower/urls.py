@@ -83,3 +83,21 @@ handlers = [
     # Error
     (r".*", NotFoundErrorHandler),
 ]
+
+def make_handlers(handlers, prefix=None):
+    if prefix is None:
+        return handlers
+    rv = []
+    for h in handlers:
+        regex = h[0]
+        hdl = h[1]
+        if regex.startswith('/'):
+            regex = prefix + regex
+
+        if hdl == StaticFileHandler:
+            args = h[2]
+            rv.append((regex, hdl, args,))
+            continue
+        rv.append((regex, hdl,))
+
+    return rv
