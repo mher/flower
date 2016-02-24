@@ -31,36 +31,34 @@
 
     <table id="workers-table" class="table table-bordered table-striped">
       <thead>
-      <tr>
-        <th>Worker Name</th>
-        <th>Status</th>
-        <th>Active</th>
-        <th>Processed</th>
-        <th>Failed</th>
-        <th>Succeeded</th>
-        <th>Retried</th>
-        <th>Load Average</th>
-      </tr>
+        <tr>
+            <th>Worker Name</th>
+            <th>Status</th>
+            <th>Active</th>
+            <th>Processed</th>
+            <th>Failed</th>
+            <th>Succeeded</th>
+            <th>Retried</th>
+            <th>Load Average</th>
+        </tr>
       </thead>
       <tbody>
-      {% for name, info in workers.items() %}
-      <tr id="{{ url_escape(name) }}">
-        <td>{{ name }}</td>
-        <td>{{ info.get('status', None) }}</td>
-        <td>{{ info.get('active', 0) }}</td>
-        <td>{{ info.get('task-received', 0) }}</td>
-        <td>{{ info.get('task-failed', 0) }}</td>
-        <td>{{ info.get('task-succeeded', 0) }}</td>
-        <td>{{ info.get('task-retried', 0) }}</td>
-        <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
-      </tr>
-      {% end %}
+        {% for name, info in workers.items() %}
+        <tr id="{{ url_escape(name) }}">
+            <td>{{ name }}</td>
+            <td>{{ info.get('status', None) }}</td>
+            <td>{{ info.get('active', 0) or 0 }}</td>
+            <td>{{ info.get('task-received', 0) }}</td>
+            <td>{{ info.get('task-failed', 0) }}</td>
+            <td>{{ info.get('task-succeeded', 0) }}</td>
+            <td>{{ info.get('task-retried', 0) }}</td>
+            <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
+        </tr>
+        {% end %}
       </tbody>
     </table>
 
         </div>
     </div>
-
-  </div>
 
 {% end %}
