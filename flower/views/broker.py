@@ -31,12 +31,14 @@ class BrokerView(BaseHandler):
             raise web.HTTPError(
                 404, "'%s' broker is not supported" % app.transport)
 
-        queue_names = ControlHandler.get_active_queue_names()
+        try:
+            queue_names = ControlHandler.get_active_queue_names()
+            if not queue_names:
+                queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE])
 
-        if not queue_names:
-            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE])
-
-        queues = yield broker.queues(sorted(queue_names))
+            queues = yield broker.queues(sorted(queue_names))
+        except Exception as e:
+            raise web.HTTPError(404, "Unable to get queues: '%s'" % e)
 
         self.render("broker.html",
                     broker_url=app.capp.connection().as_uri(),
