@@ -2,7 +2,10 @@ from celery.utils import uuid
 from celery.events import Event
 
 
-from HTMLParser import HTMLParser
+try:
+    from HTMLParser import HTMLParser
+except ImportError:
+    from html.parser import HTMLParser
 import xml.etree.ElementTree as ET
 
 
