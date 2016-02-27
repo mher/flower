@@ -50,7 +50,7 @@ class TasksTest(AsyncHTTPTestCase):
         r = self.get('/tasks/datatable?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
 
-        table = json.loads(str(r.body))
+        table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
         self.assertEqual(1, table['recordsTotal'])
         self.assertEqual(1, table['recordsFiltered'])
@@ -82,7 +82,7 @@ class TasksTest(AsyncHTTPTestCase):
         r = self.get('/tasks/datatable?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
 
-        table = json.loads(str(r.body))
+        table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
         self.assertEqual(1, table['recordsTotal'])
         self.assertEqual(1, table['recordsFiltered'])
