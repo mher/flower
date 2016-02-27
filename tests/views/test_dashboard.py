@@ -26,13 +26,13 @@ class DashboardTests(AsyncHTTPTestCase):
     def test_no_workers(self):
         r = self.get('/dashboard')
         self.assertEqual(200, r.code)
-        self.assertIn('Load Average', r.body)
-        self.assertNotIn('<tr id=', r.body)
+        self.assertIn('Load Average', str(r.body))
+        self.assertNotIn('<tr id=', str(r.body))
 
     def test_unknown_worker(self):
         r = self.get('/worker/unknown')
         self.assertEqual(404, r.code)
-        self.assertIn('Unknown worker', r.body)
+        self.assertIn('Unknown worker', str(r.body))
 
     def test_single_workers_offline(self):
         state = EventsState()
@@ -46,7 +46,7 @@ class DashboardTests(AsyncHTTPTestCase):
         r = self.get('/dashboard')
 
         table = HtmlTableParser()
-        table.parse(r.body)
+        table.parse(str(r.body))
 
         self.assertEqual(200, r.code)
         self.assertEqual(1, len(table.rows()))
@@ -65,7 +65,7 @@ class DashboardTests(AsyncHTTPTestCase):
         r = self.get('/dashboard')
 
         table = HtmlTableParser()
-        table.parse(r.body)
+        table.parse(str(r.body))
 
         self.assertEqual(200, r.code)
         self.assertEqual(1, len(table.rows()))
@@ -93,7 +93,7 @@ class DashboardTests(AsyncHTTPTestCase):
         r = self.get('/dashboard')
 
         table = HtmlTableParser()
-        table.parse(r.body)
+        table.parse(str(r.body))
 
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table.rows()))
@@ -123,7 +123,7 @@ class DashboardTests(AsyncHTTPTestCase):
         r = self.get('/dashboard')
 
         table = HtmlTableParser()
-        table.parse(r.body)
+        table.parse(str(r.body))
 
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table.rows()))
@@ -155,7 +155,7 @@ class DashboardTests(AsyncHTTPTestCase):
         r = self.get('/dashboard')
 
         table = HtmlTableParser()
-        table.parse(r.body)
+        table.parse(str(r.body))
 
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table.rows()))
@@ -187,7 +187,7 @@ class DashboardTests(AsyncHTTPTestCase):
         r = self.get('/dashboard')
 
         table = HtmlTableParser()
-        table.parse(r.body)
+        table.parse(str(r.body))
 
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table.rows()))
@@ -221,7 +221,7 @@ class DashboardTests(AsyncHTTPTestCase):
         r = self.get('/dashboard')
 
         table = HtmlTableParser()
-        table.parse(r.body)
+        table.parse(str(r.body))
 
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table.rows()))
@@ -254,7 +254,7 @@ class DashboardTests(AsyncHTTPTestCase):
         r = self.get('/dashboard')
 
         table = HtmlTableParser()
-        table.parse(r.body)
+        table.parse(str(r.body))
 
         self.assertEqual(200, r.code)
         self.assertEqual(3, len(table.rows()))
