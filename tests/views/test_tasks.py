@@ -26,8 +26,8 @@ class TasksTest(AsyncHTTPTestCase):
     def test_no_task(self):
         r = self.get('/tasks')
         self.assertEqual(200, r.code)
-        self.assertTrue('UUID' in r.body)
-        self.assertNotIn('<tr id=', r.body)
+        self.assertTrue('UUID' in str(r.body))
+        self.assertNotIn('<tr id=', str(r.body))
 
     def test_succeeded_task(self):
         state = EventsState()
@@ -50,7 +50,7 @@ class TasksTest(AsyncHTTPTestCase):
         r = self.get('/tasks/datatable?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
 
-        table = json.loads(r.body)
+        table = json.loads(str(r.body))
         self.assertEqual(200, r.code)
         self.assertEqual(1, table['recordsTotal'])
         self.assertEqual(1, table['recordsFiltered'])
@@ -82,7 +82,7 @@ class TasksTest(AsyncHTTPTestCase):
         r = self.get('/tasks/datatable?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
 
-        table = json.loads(r.body)
+        table = json.loads(str(r.body))
         self.assertEqual(200, r.code)
         self.assertEqual(1, table['recordsTotal'])
         self.assertEqual(1, table['recordsFiltered'])

@@ -49,7 +49,7 @@ class HtmlTableParser(HTMLParser):
         if not row:
             return None
         cells = row[0].findall('td')
-        return map(lambda x: getattr(x, 'text'), cells)
+        return list(map(lambda x: getattr(x, 'text'), cells))
 
 
 def task_succeeded_events(worker, id=None, name=None):
