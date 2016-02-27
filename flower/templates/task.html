@@ -73,7 +73,7 @@
                     {{ humanize(getattr(task, name, None), type='time') }}
                     {% elif name == 'worker' %}
                     <a
-                        href="{{ '/worker/' + task.worker.hostname }}">{{ task.worker.hostname }}</a>
+                        href="{{ reverse_url('worker', task.worker.hostname) }}">{{ task.worker.hostname }}</a>
                     {% elif name == 'traceback' %}
                     <pre>{{ getattr(task, name, None) }}</pre>
                     {% else %}

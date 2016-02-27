@@ -17,7 +17,7 @@ from celery.bin.base import Command
 from . import __version__
 from .app import Flower
 from .urls import settings
-from .utils import abs_path
+from .utils import abs_path, prepend_url
 from .options import DEFAULT_CONFIG_FILE
 
 try:
@@ -60,7 +60,8 @@ class FlowerCommand(Command):
             settings['cookie_secret'] = options.cookie_secret
 
         if options.url_prefix:
-            logger.error('url_prefix option is not supported anymore')
+            for name in ['login_url', 'static_url_prefix']:
+                settings[name] = prepend_url(settings[name], options.url_prefix)
 
         if options.debug and options.logging == 'info':
             options.logging = 'debug'

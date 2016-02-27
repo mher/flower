@@ -200,7 +200,7 @@
                 {% for task in worker.get('active', {}) %}
                     <tr>
                       <td>{{ task['name'] }}</td>
-                      <td><a href="{{ '/task/' + task['id'] }}">{{ task['id'] }}</a></td>
+                      <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
                       <td>{{ humanize(task['time_start'], type='time') }}</td>
                       <td>{{ task['acknowledged'] }}</td>
                       <td>{{ task['worker_pid'] }}</td>
@@ -225,7 +225,7 @@
                 {% for task in worker.get('scheduled', {}) %}
                     <tr>
                       <td>{{ task['request']['name'] }}</td>
-                      <td><a href="{{ '/task/' + task['request']['id'] }}">{{ task['request']['id'] }}</a></td>
+                      <td><a href="{{ reverse_url('task', task['request']['id']) }}">{{ task['request']['id'] }}</a></td>
                       <td>{{ task['request']['args'] }}</td>
                       <td>{{ task['request']['kwargs'] }}</td>
                     </tr>
@@ -247,7 +247,7 @@
                 {% for task in worker.get('reserved', {}) %}
                     <tr>
                       <td>{{ task['name'] }}</td>
-                      <td><a href="{{ '/task/' + task['id'] }}">{{ task['id'] }}</a></td>
+                      <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
                       <td>{{ task['args'] }}</td>
                       <td>{{ task['kwargs'] }}</td>
                     </tr>
@@ -265,7 +265,7 @@
                 <tbody>
                   {% for task in worker.get('revoked', []) %}
                     <tr>
-                      <td><a href="{{ '/task/' + task }}">{{ task }}</a></td>
+                      <td><a href="{{ reverse_url('task', task) }}">{{ task }}</a></td>
                     </tr>
                   {% end %}
                 </tbody>

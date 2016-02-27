@@ -29,6 +29,14 @@ var flower = (function () {
         });
     }
 
+    function url_prefix() {
+        var url_prefix = $('#url_prefix').val();
+        if (url_prefix) {
+            return '/' + url_prefix;
+        }
+        return '';
+    }
+
     function shutdown_selected(event) {
         var selected_workers = get_selected_workers();
         if (selected_workers.length === 0) {
@@ -39,7 +47,7 @@ var flower = (function () {
         $.each(selected_workers, function (index, worker) {
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/shutdown/' + worker,
+                url: url_prefix() + '/api/worker/shutdown/' + worker,
                 dataType: 'json',
                 data: {
                     workername: worker
@@ -65,7 +73,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'POST',
-                url: '/api/worker/pool/restart/' + worker,
+                url: url_prefix() + '/api/worker/pool/restart/' + worker,
                 dataType: 'json',
                 data: {
                     workername: worker
@@ -86,7 +94,7 @@ var flower = (function () {
         if (!selected_workers.length) {
             $.ajax({
                 type: 'GET',
-                url: '/api/workers',
+                url: url_prefix() + '/api/workers',
                 data: {
                     refresh: 1
                 },
@@ -102,7 +110,7 @@ var flower = (function () {
         $.each(selected_workers, function (index, worker) {
             $.ajax({
                 type: 'GET',
-                url: '/api/workers',
+                url: url_prefix() + '/api/workers',
                 dataType: 'json',
                 data: {
                     workername: unescape(worker),
@@ -145,7 +153,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/pool/grow/' + workername,
+            url: url_prefix() + '/api/worker/pool/grow/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -169,7 +177,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/pool/shrink/' + workername,
+            url: url_prefix() + '/api/worker/pool/shrink/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -194,7 +202,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/pool/autoscale/' + workername,
+            url: url_prefix() + '/api/worker/pool/autoscale/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -219,7 +227,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/queue/add-consumer/' + workername,
+            url: url_prefix() + '/api/worker/queue/add-consumer/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -246,7 +254,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/worker/queue/cancel-consumer/' + workername,
+            url: url_prefix() + '/api/worker/queue/cancel-consumer/' + workername,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -276,7 +284,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/timeout/' + taskname,
+            url: url_prefix() + '/api/task/timeout/' + taskname,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -303,7 +311,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/rate-limit/' + taskname,
+            url: url_prefix() + '/api/task/rate-limit/' + taskname,
             dataType: 'json',
             data: {
                 'workername': workername,
@@ -329,7 +337,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/revoke/' + taskid,
+            url: url_prefix() + '/api/task/revoke/' + taskid,
             dataType: 'json',
             data: {
                 'terminate': false,
@@ -351,7 +359,7 @@ var flower = (function () {
 
         $.ajax({
             type: 'POST',
-            url: '/api/task/revoke/' + taskid,
+            url: url_prefix() + '/api/task/revoke/' + taskid,
             dataType: 'json',
             data: {
                 'terminate': true,
@@ -612,7 +620,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/completion-time',
+                url: url_prefix() + '/monitor/completion-time',
                 data: {
                     lastquery: current_unix_time()
                 },
@@ -633,7 +641,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/failed-tasks',
+                url: url_prefix() + '/monitor/failed-tasks',
                 data: {
                     lastquery: current_unix_time()
                 },
@@ -654,7 +662,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/broker',
+                url: url_prefix() + '/monitor/broker',
                 success: function (data) {
                     broker_graph = create_graph(data, '-broker');
                     broker_graph.update();
@@ -692,7 +700,7 @@ var flower = (function () {
                 targets: 0,
                 data: 'name',
                 render: function (data, type, full, meta) {
-                    return '<a href="/worker/' + data + '">' + data + '</a>';
+                    return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
                 }
             }, {
                 targets: 1,
@@ -748,7 +756,7 @@ var flower = (function () {
             serverSide: true,
             colReorder: true,
             ajax: {
-                url: '/tasks/datatable'
+                url: url_prefix() + '/tasks/datatable'
             },
             order: [
                 [7, "asc"]
@@ -769,7 +777,7 @@ var flower = (function () {
                 visible: isColumnVisible('uuid'),
                 orderable: false,
                 render: function (data, type, full, meta) {
-                    return '<a href="/task/' + data + '">' + data + '</a>';
+                    return '<a href="' + url_prefix() + '/task/' + data + '">' + data + '</a>';
                 }
             }, {
                 targets: 2,
