@@ -35,11 +35,11 @@ def humanize(obj, type=None, length=None):
         obj = ''
     elif type and type.startswith('time'):
         tz = type[len('time'):].lstrip('-')
-        tz = timezone(tz) if tz else current_app.timezone or utc
+        tz = timezone(tz) if tz else getattr(current_app, 'timezone', '') or utc
         obj = format_time(float(obj), tz) if obj else ''
     elif type and type.startswith('natural-time'):
         tz = type[len('natural-time'):].lstrip('-')
-        tz = timezone(tz) if tz else current_app.timezone or utc
+        tz = timezone(tz) if tz else getattr(current_app, 'timezone', '') or utc
         delta = datetime.now(tz) - datetime.fromtimestamp(float(obj), tz)
         if delta < timedelta(days=1):
             obj = format_timedelta(delta, locale='en_US') + ' ago'
