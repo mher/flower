@@ -45,11 +45,11 @@ class HtmlTableParser(HTMLParser):
         return self.query('tbody/tr')
 
     def get_row(self, row_id):
-        row = self.query('tbody/tr[@id="%s"]' % row_id)
-        if not row:
-            return None
-        cells = row[0].findall('td')
-        return list(map(lambda x: getattr(x, 'text'), cells))
+        rows = self.query('tbody/tr')
+        for r in rows:
+            if r.attrib.get('id') == row_id:
+                cells = r.findall('td')
+                return list(map(lambda x: getattr(x, 'text'), cells))
 
 
 def task_succeeded_events(worker, id=None, name=None):
