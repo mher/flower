@@ -15,6 +15,8 @@ define("address", default='',
        help="run on the given address", type=str)
 define("unix_socket", default='',
        help="Path to unix socket to bind", type=str)
+define("unix_socket_mode", default='600',
+       help="Unix permissions to unix socket (oct value)", type=str)
 define("debug", default=False,
        help="run in debug mode", type=bool)
 define("inspect_timeout", default=1000, type=float,
