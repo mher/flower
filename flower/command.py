@@ -32,6 +32,11 @@ logger = logging.getLogger(__name__)
 class FlowerCommand(Command):
     ENV_VAR_PREFIX = 'FLOWER_'
 
+    @classmethod
+    def get_flower_class(cls):
+        # This method can be overridden in derived classes
+        return Flower
+
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
         env_options = filter(lambda x: x.startswith(self.ENV_VAR_PREFIX),
                              os.environ)
@@ -84,7 +89,8 @@ class FlowerCommand(Command):
                 settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
 
         self.app.loader.import_default_modules()
-        flower = Flower(capp=self.app, options=options, **settings)
+        flower_class = self.get_flower_class()
+        flower = flower_class(capp=self.app, options=options, **settings)
         atexit.register(flower.stop)
 
         def sigterm_handler(signal, frame):

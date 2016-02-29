@@ -26,7 +26,7 @@ class Flower(tornado.web.Application):
 
     def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
-        kwargs.update(handlers=handlers)
+        kwargs.update(handlers=self.get_handlers())
         super(Flower, self).__init__(**kwargs)
         self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
@@ -40,6 +40,11 @@ class Flower(tornado.web.Application):
             io_loop=self.io_loop,
             max_tasks_in_memory=self.options.max_tasks)
         self.started = False
+
+    @classmethod
+    def get_handlers(cls):
+        # This method can be overridden in derived classes
+        return handlers
 
     def start(self):
         self.pool = self.pool_executor_cls(max_workers=self.max_workers)
