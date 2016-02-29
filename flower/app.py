@@ -52,7 +52,8 @@ class Flower(tornado.web.Application):
         else:
             from tornado.netutil import bind_unix_socket
             server = HTTPServer(self)
-            socket = bind_unix_socket(self.options.unix_socket)
+            mode = int(self.options.unix_socket_mode or '600', 8)  # octal value
+            socket = bind_unix_socket(self.options.unix_socket, mode=mode)
             server.add_socket(socket)
 
         self.io_loop.add_future(
