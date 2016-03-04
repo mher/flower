@@ -40,7 +40,7 @@ class FlowerCommand(Command):
             value = os.environ[env_var_name]
             option = options._options[name]
             if option.multiple:
-                value = map(option.type, value.split(','))
+                value = [option.type(i) for i in value.split(',')]
             else:
                 value = option.type(value)
             setattr(options, name, value)
