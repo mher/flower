@@ -185,6 +185,13 @@ keyfile
 
 A path to SSL key file
 
+.. _max_workers:
+
+max_workers
+~~~~~~~~~
+
+Maximum number of workers to keep in memory (by default, `max_workers=5000`)
+
 .. _max_tasks:
 
 max_tasks
