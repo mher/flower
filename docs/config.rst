@@ -11,9 +11,6 @@ Using :file:`flowerconfig.py` configuration file:
 
 .. code-block:: python
 
-    # Broker settings
-    BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-
     # RabbitMQ management api
     broker_api = 'http://guest:guest@localhost:15672/api/'
 
