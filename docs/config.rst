@@ -234,3 +234,28 @@ Columns on the page can be reordered using drag and drop.
 Available columns: `name`, `uuid`, `state`, `args`, `kwargs`,
 `result`, `received`, `started`, `runtime`, `worker`, `retries` ,
 `revoked`, `exception`, `expires`, `eta`
+
+url_prefix
+~~~~~~~~~~
+
+Enables deploying Flower on non-root URL
+
+For example to access Flower on http://example.com/flower run it with: ::
+
+    $ flower --url_prefix=flower
+
+And use the following `nginx` configuration:
+
+.. code-block:: nginx
+
+    server {
+        listen 80;
+        server_name example.com;
+
+        location /flower/ {
+            rewrite ^/flower/(.*)$ /$1 break;
+            proxy_pass http://example.com:5555;
+            proxy_set_header Host $host;
+        }
+
+    }
