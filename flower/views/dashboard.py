@@ -31,7 +31,10 @@ class DashboardView(BaseHandler):
         broker = app.capp.connection().as_uri()
 
         if refresh:
-            yield ListWorkers.update_workers(app=app)
+            try:
+                yield ListWorkers.update_workers(app=app)
+            except Exception as e:
+                logger.exception('Failed to update workers: %s', e)
 
         workers = {}
         for name, values in events.counter.items():
