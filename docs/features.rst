@@ -26,5 +26,5 @@ Features
     - Queue length graphs
 
 - HTTP API
-- Basic Auth and Google OpenID authentication
+- Basic Auth, GitHub OAuth2 and Google OpenID authentication
 
