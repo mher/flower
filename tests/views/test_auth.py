@@ -1,27 +1,23 @@
-import base64
 from tests import AsyncHTTPTestCase
 
 
-class AuthTests(AsyncHTTPTestCase):
-    def test_auth_without_credentials(self):
-        ba = self._app.options.basic_auth
-        self._app.options.basic_auth = ["hello:world"]
-        r = self.get('/')
-        self._app.options.basic_auth = ba
-        self.assertEqual(401, r.code)
+class BasicAuthTests(AsyncHTTPTestCase):
+    def test_with_single_creds(self):
+        with self.mock_option('basic_auth', ['foo:bar']):
+            r = self.fetch('/')
+            self.assertEqual(401, r.code)
+            r = self.fetch('/', auth_username='foo', auth_password='bar')
+            self.assertEqual(200, r.code)
+            r = self.fetch('/', auth_username='foo', auth_password='bar2')
+            self.assertEqual(401, r.code)
 
-    def test_auth_with_bad_credentials(self):
-        ba = self._app.options.basic_auth
-        self._app.options.basic_auth = ["hello:world"]
-        credentials = base64.b64encode("not:good".encode()).decode()
-        r = self.get('/', headers={"Authorization": "Basic " + credentials})
-        self._app.options.basic_auth = ba
-        self.assertEqual(401, r.code)
-
-    def test_auth_with_good_credentials(self):
-        ba = self._app.options.basic_auth
-        self._app.options.basic_auth = ["hello:world"]
-        credentials = base64.b64encode("hello:world".encode()).decode()
-        r = self.get('/', headers={"Authorization": "Basic " + credentials})
-        self._app.options.basic_auth = ba
-        self.assertEqual(200, r.code)
+    def test_with_multiple_creds(self):
+        with self.mock_option('basic_auth', ['user1:pswd1', 'user2:pswd2']):
+            r = self.fetch('/')
+            self.assertEqual(401, r.code)
+            r = self.fetch('/', auth_username='user1', auth_password='pswd1')
+            self.assertEqual(200, r.code)
+            r = self.fetch('/', auth_username='user2', auth_password='pswd2')
+            self.assertEqual(200, r.code)
+            r = self.fetch('/', auth_username='user1', auth_password='pswd2')
+            self.assertEqual(401, r.code)
