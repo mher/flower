@@ -33,55 +33,11 @@ class FlowerCommand(Command):
     ENV_VAR_PREFIX = 'FLOWER_'
 
     def run_from_argv(self, prog_name, argv=None, **_kwargs):
-        env_options = filter(lambda x: x.startswith(self.ENV_VAR_PREFIX),
-                             os.environ)
-        for env_var_name in env_options:
-            name = env_var_name.replace(self.ENV_VAR_PREFIX, '', 1).lower()
-            value = os.environ[env_var_name]
-            option = options._options[name]
-            if option.multiple:
-                value = [option.type(i) for i in value.split(',')]
-            else:
-                value = option.type(value)
-            setattr(options, name, value)
+        self.apply_env_options()
+        self.apply_options(prog_name, argv)
 
-        argv = list(filter(self.is_flower_option, argv))
-        # parse the command line to get --conf option
-        parse_command_line([prog_name] + argv)
-        try:
-            parse_config_file(options.conf, final=False)
-            parse_command_line([prog_name] + argv)
-        except IOError:
-            if options.conf != DEFAULT_CONFIG_FILE:
-                raise
-
-        settings['debug'] = options.debug
-        if options.cookie_secret:
-            settings['cookie_secret'] = options.cookie_secret
-
-        if options.url_prefix:
-            for name in ['login_url', 'static_url_prefix']:
-                settings[name] = prepend_url(settings[name], options.url_prefix)
-
-        if options.debug and options.logging == 'info':
-            options.logging = 'debug'
-            enable_pretty_logging()
-        else:
-            logging.getLogger("tornado.access").addHandler(NullHandler())
-            logging.getLogger("tornado.access").propagate = False
-
-        if options.auth:
-            settings['oauth'] = {
-                'key': options.oauth2_key or os.environ.get('FLOWER_OAUTH2_KEY'),
-                'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
-                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_AUTH2_REDIRECT_URI'),
-            }
-
-        if options.certfile and options.keyfile:
-            settings['ssl_options'] = dict(certfile=abs_path(options.certfile),
-                                           keyfile=abs_path(options.keyfile))
-            if options.ca_certs:
-                settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
+        settings.update(self.extract_settings())
+        self.setup_logging()
 
         self.app.loader.import_default_modules()
         flower = Flower(capp=self.app, options=options, **settings)
@@ -101,6 +57,66 @@ class FlowerCommand(Command):
 
     def handle_argv(self, prog_name, argv=None):
         return self.run_from_argv(prog_name, argv)
+
+    def apply_env_options(self):
+        "apply options passed through environment variables"
+        env_options = filter(lambda x: x.startswith(self.ENV_VAR_PREFIX),
+                             os.environ)
+        for env_var_name in env_options:
+            name = env_var_name.replace(self.ENV_VAR_PREFIX, '', 1).lower()
+            value = os.environ[env_var_name]
+            option = options._options[name]
+            if option.multiple:
+                value = [option.type(i) for i in value.split(',')]
+            else:
+                value = option.type(value)
+            setattr(options, name, value)
+
+    def apply_options(self, prog_name, argv):
+        "apply options passed through the configuration file"
+        argv = list(filter(self.is_flower_option, argv))
+        # parse the command line to get --conf option
+        parse_command_line([prog_name] + argv)
+        try:
+            parse_config_file(options.conf, final=False)
+            parse_command_line([prog_name] + argv)
+        except IOError:
+            if options.conf != DEFAULT_CONFIG_FILE:
+                raise
+
+    def setup_logging(self):
+        if options.debug and options.logging == 'info':
+            options.logging = 'debug'
+            enable_pretty_logging()
+        else:
+            logging.getLogger("tornado.access").addHandler(NullHandler())
+            logging.getLogger("tornado.access").propagate = False
+
+    def extract_settings(self):
+        settings = {}
+        settings['debug'] = options.debug
+
+        if options.cookie_secret:
+            settings['cookie_secret'] = options.cookie_secret
+
+        if options.url_prefix:
+            for name in ['login_url', 'static_url_prefix']:
+                settings[name] = prepend_url(settings[name], options.url_prefix)
+
+        if options.auth:
+            settings['oauth'] = {
+                'key': options.oauth2_key or os.environ.get('FLOWER_OAUTH2_KEY'),
+                'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
+                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_AUTH2_REDIRECT_URI'),
+            }
+
+        if options.certfile and options.keyfile:
+            settings['ssl_options'] = dict(certfile=abs_path(options.certfile),
+                                           keyfile=abs_path(options.keyfile))
+            if options.ca_certs:
+                settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
+
+        return settings
 
     def early_version(self, argv):
         if '--version' in argv:
