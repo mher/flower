@@ -5,9 +5,9 @@ Installing `flower` with `pip <http://www.pip-installer.org/>`_ is simple ::
 
     $ pip install flower
 
-Or, with `easy_install <http://pypi.python.org/pypi/setuptools>`_ ::
+Development version can be installed with ::
 
-    $ easy_install flower
+    $ pip install https://github.com/mher/flower/zipball/master#egg=flower
 
 Usage
 -----
