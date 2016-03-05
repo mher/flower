@@ -4,9 +4,10 @@ except ImportError:
     from urllib import urlencode
 
 import tornado.testing
-import tornado.options
+from tornado.options import options
 
 import celery
+import mock
 
 from flower.app import Flower
 from flower.urls import handlers
@@ -20,8 +21,7 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
         capp = celery.Celery()
         events = Events(capp)
         app = Flower(capp=capp, events=events,
-                     options=tornado.options.options,
-                     handlers=handlers, **settings)
+                     options=options, handlers=handlers, **settings)
         app.delay = lambda method, *args, **kwargs: method(*args, **kwargs)
         return app
 
@@ -32,3 +32,6 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
         if 'body' in kwargs and isinstance(kwargs['body'], dict):
             kwargs['body'] = urlencode(kwargs['body'])
         return self.fetch(url, method='POST', **kwargs)
+
+    def mock_option(self, name, value):
+        return mock.patch.object(options.mockable(), name, value)
