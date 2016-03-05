@@ -58,6 +58,8 @@ OPTIONS
   --inspect_timeout                inspect timeout (in milliseconds) (default
                                    *1000*)
   --keyfile                        path to SSL key file
+  --max_workrs                     maximum number of workers to keep in memory
+                                   (default *5000*)
   --max_tasks                      maximum number of tasks to keep in memory
                                    (default *10000*)
   --persistent                     enable persistent mode (default *False*)

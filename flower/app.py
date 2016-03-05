@@ -38,6 +38,7 @@ class Flower(tornado.web.Application):
             persistent=self.options.persistent,
             enable_events=self.options.enable_events,
             io_loop=self.io_loop,
+            max_workers_in_memory=self.options.max_workers,
             max_tasks_in_memory=self.options.max_tasks)
         self.started = False
 
