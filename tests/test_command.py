@@ -7,6 +7,11 @@ from tornado.options import options
 from tests import AsyncHTTPTestCase
 
 
+# python 2.6 support
+if not hasattr(unittest.TestCase, 'skipUnless'):
+    import unittest2 as unittest
+
+
 class TestFlowerCommand(AsyncHTTPTestCase):
     def test_port(self):
         with self.mock_option('port', 5555):
