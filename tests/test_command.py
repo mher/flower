@@ -32,6 +32,7 @@ class TestFlowerCommand(AsyncHTTPTestCase):
                               'flower', argv=['--conf=foo'])
 
     @unittest.skipUnless(not sys.platform.startswith("win"), 'skip windows')
+    @unittest.skipUnless(sys.version_info[:2] > (2,6), 'skip python 2.6')
     def test_all_options_documented(self):
         def grep(patter, filename):
             return int(subprocess.check_output(
