@@ -24,7 +24,9 @@ prefixed with `FLOWER_`::
 
 Options passed through the command line have precedence over the options
 defined in the configuration file. The configuration file name and path
-can be changed with `conf`_ option.
+can be changed with `conf`_ option. ::
+
+    $ flower --conf=celeryconfig.py
 
 Options
 -------
@@ -36,7 +38,7 @@ the available settings, and their default values.
 .. _`Celery Configuration reference`: http://docs.celeryproject.org/en/latest/configuration.html#configuration
 
 Celery command line options also can be passed to Flower. For example
-the `--broker` sets the default broker url: ::
+the `--broker` sets the default broker URL: ::
 
     $ flower -A proj --broker=amqp://guest:guest@localhost:5672//
 
@@ -185,7 +187,7 @@ A path to SSL key file
 .. _max_workers:
 
 max_workers
-~~~~~~~~~
+~~~~~~~~~~~
 
 Maximum number of workers to keep in memory (by default, `max_workers=5000`)
 
@@ -226,14 +228,32 @@ xheaders
 Enable support of `X-Real-Ip` and `X-Scheme` headers
 (by default, `xheaders=False`)
 
+.. _tasks_columns:
+
 tasks_columns
 ~~~~~~~~~~~~~
 
-Specifies list of comma-delimited columns on /tasks/ page.
+Specifies list of comma-delimited columns on `/tasks/` page.
 Columns on the page can be reordered using drag and drop.
-Available columns: `name`, `uuid`, `state`, `args`, `kwargs`,
-`result`, `received`, `started`, `runtime`, `worker`, `retries` ,
-`revoked`, `exception`, `expires`, `eta`
+Available columns are:
+
+  - `name`
+  - `uuid`
+  - `state`
+  - `args`
+  - `kwargs`
+  - `result`
+  - `received`
+  - `started`
+  - `runtime`
+  - `worker`
+  - `retries`
+  - `revoked`
+  - `exception`
+  - `expires`
+  - `eta`
+
+.. _url_prefix:
 
 url_prefix
 ~~~~~~~~~~
@@ -259,3 +279,29 @@ And use the following `nginx` configuration:
         }
 
     }
+
+.. _unix_socket:
+
+unix_socket
+~~~~~~~~~~~
+
+Path to UNIX socket
+
+.. _cookie_secret:
+
+cookie_secret
+~~~~~~~~~~~~~
+
+Set a secret key for signing cookies
+
+.. _auth_provider:
+
+auth_provider
+~~~~~~~~~~~~~
+
+Sets authentication provider
+
+  - Google `flower.views.auth.GoogleAuth2LoginHandler`
+  - GitHub `flower.views.auth.GithubLoginHandler`
+
+See `Authentication` for usage examples
