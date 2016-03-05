@@ -8,7 +8,7 @@ from tests import AsyncHTTPTestCase
 
 
 # python 2.6 support
-if not hasattr(unittest.TestCase, 'skipUnless'):
+if not hasattr(unittest, 'skipUnless'):
     import unittest2 as unittest
 
 
