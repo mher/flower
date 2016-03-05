@@ -13,7 +13,7 @@ HTTP Basic Authentication
 Securing Flower with Basic Authentication is easy.
 
 The `--basic_auth` option accepts `user:password` pairs separated by
-semicolons. If configured, any client trying to access this
+a comma. If configured, any client trying to access this
 Flower instance will be prompted to provide the credentials specified in
 this argument: ::
 
