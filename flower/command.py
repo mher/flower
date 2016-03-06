@@ -36,7 +36,7 @@ class FlowerCommand(Command):
         self.apply_env_options()
         self.apply_options(prog_name, argv)
 
-        settings.update(self.extract_settings())
+        self.extract_settings()
         self.setup_logging()
 
         self.app.loader.import_default_modules()
@@ -93,7 +93,6 @@ class FlowerCommand(Command):
             logging.getLogger("tornado.access").propagate = False
 
     def extract_settings(self):
-        settings = {}
         settings['debug'] = options.debug
 
         if options.cookie_secret:
@@ -115,8 +114,6 @@ class FlowerCommand(Command):
                                            keyfile=abs_path(options.keyfile))
             if options.ca_certs:
                 settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
-
-        return settings
 
     def early_version(self, argv):
         if '--version' in argv:
