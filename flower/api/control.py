@@ -44,7 +44,7 @@ class ControlHandler(BaseHandler):
                                cls.INSPECT_METHODS[i])
                 continue
             for worker, response in result.items():
-                if response:
+                if response is not None:
                     info = cls.worker_cache[worker]
                     info[cls.INSPECT_METHODS[i]] = response
                     info['timestamp'] = time.time()
