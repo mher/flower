@@ -20,7 +20,6 @@ class EventsApiHandler(BaseWebSocketHandler):
 EVENTS = ('task-sent', 'task-received', 'task-started', 'task-succeeded',
           'task-failed', 'task-revoked', 'task-retried', 'task-custom')
 
-
 def getClassName(eventname):
     return ''.join(map(lambda x: x[0].upper() + x[1:], eventname.split('-')))
 
@@ -32,6 +31,8 @@ for event in EVENTS:
     setattr(thismodule, classname,
             type(classname, (EventsApiHandler, ), {'listeners': []}))
 
+setattr(thismodule, 'TasksUpdate',
+            type('TasksUpdate', (EventsApiHandler, ), {'listeners': []}))
 
 __all__ = list(map(getClassName, EVENTS))
 __all__.append(getClassName)
