@@ -33,7 +33,7 @@ import flower
 # ones.
 extensions = [
     'sphinx.ext.intersphinx',
-    #'sphinxcontrib.fulltoc',
+    # 'sphinxcontrib.fulltoc',
     'sphinxcontrib.httpdomain',
     'sphinxcontrib.autohttp.tornado',
 ]

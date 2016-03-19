@@ -37,5 +37,6 @@ def abs_path(path):
         path = os.path.join(cwd, path)
     return path
 
+
 def prepend_url(url, prefix):
     return '/' + prefix.strip('/') + url

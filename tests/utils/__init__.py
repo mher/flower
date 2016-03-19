@@ -56,18 +56,19 @@ def task_succeeded_events(worker, id=None, name=None):
     id = id or uuid()
     name = name or 'sometask'
     return [Event('task-received', uuid=id, name=name,
-                    args='(2, 2)', kwargs="{'foo': 'bar'}",
-                    retries=0, eta=None, hostname=worker),
+                  args='(2, 2)', kwargs="{'foo': 'bar'}",
+                  retries=0, eta=None, hostname=worker),
             Event('task-started', uuid=id, hostname=worker),
             Event('task-succeeded', uuid=id, result='4',
-                    runtime=0.1234, hostname=worker)]
+                  runtime=0.1234, hostname=worker)]
+
 
 def task_failed_events(worker, id=None, name=None):
     id = id or uuid()
     name = name or 'sometask'
     return [Event('task-received', uuid=id, name=name,
-                    args='(2, 2)', kwargs="{'foo': 'bar'}",
-                    retries=0, eta=None, hostname=worker),
+                  args='(2, 2)', kwargs="{'foo': 'bar'}",
+                  retries=0, eta=None, hostname=worker),
             Event('task-started', uuid=id, hostname=worker),
             Event('task-failed', uuid=id, exception="KeyError('foo')",
-                    traceback='line 1 at main', hostname=worker)]
+                  traceback='line 1 at main', hostname=worker)]
