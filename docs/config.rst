@@ -285,7 +285,7 @@ And use the following `nginx` configuration:
 unix_socket
 ~~~~~~~~~~~
 
-Path to UNIX socket
+Run flower using UNIX socket file
 
 .. _cookie_secret:
 
