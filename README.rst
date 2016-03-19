@@ -102,7 +102,7 @@ Broker URL and other configuration options can be passed through the standard Ce
 
 Or run with unix socket file: ::
 
-    $ flower --unix_socket='/tmp/flower.sock'
+    $ flower --unix_socket=/tmp/flower.sock
 
 
 Documentation
