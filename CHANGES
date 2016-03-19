@@ -3,6 +3,21 @@ Celery Flower
 
 Here you can see the full list of changes between each release.
 
+Version 0.9
+-----------
+
+Released on March 19 2016
+
+- workers can be sorted and filtered
+- tasks can be sorted, filtered by name, state, worker, runtime, etc.
+- tasks columns can be reordered and customized
+- tasks columns for worker, retries, revoked, expires, eta, etc.
+- pagination of tasks
+- GitHub Auth support
+- --max_workers option for limiting the number of workers
+- --unix_socket option for running with unix socket
+- bug fixes
+
 Version 0.8
 -----------
 
