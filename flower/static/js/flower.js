@@ -769,7 +769,7 @@ var flower = (function () {
                 data: 'name',
                 visible: isColumnVisible('name'),
                 render: function (data, type, full, meta) {
-                    return '<a href="/task/' + data + '">' + data + '</a>';
+                    return data;
                 }
             }, {
                 targets: 1,
