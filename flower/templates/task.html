@@ -46,15 +46,15 @@
               </tr>
               <tr>
                 <td>args</td>
-                <td><pre>{{ pprint.pformat(task.args) }}</pre></td>
+                <td>{{ task.args }}</td>
               </tr>
               <tr>
                 <td>kwargs</td>
-                <td><pre>{{ pprint.pformat(task.kwargs) }}</pre></td>
+                <td>{{ task.kwargs }}</td>
               </tr>
               <tr>
                 <td>Result</td>
-                <td>{{ getattr(task, 'result', None) }}</td>
+                <td>{{ getattr(task, 'result', '') }}</td>
               </tr>
               </tbody>
             </table>
