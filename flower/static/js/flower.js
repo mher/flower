@@ -570,7 +570,7 @@ var flower = (function () {
                 var update = $.parseJSON(event.data);
                 on_dashboard_update(update);
             };
-        } else if ($.inArray($(location).attr('pathname'), ['/', '/tasks']) !== -1) {
+        } else if ($.inArray($(location).attr('pathname'), ['/tasks']) !== -1) {
             var host = $(location).attr('host'),
                 protocol = $(location).attr('protocol') === 'http:' ? 'ws://' : 'wss://',
                 ws = new WebSocket(protocol + host + "/api/task/events/update-tasks/");
@@ -782,7 +782,7 @@ var flower = (function () {
                 data: 'name',
                 visible: isColumnVisible('name'),
                 render: function (data, type, full, meta) {
-                    return '<a href="/task/' + data + '">' + data + '</a>';
+                    return data;
                 }
             }, {
                 targets: 1,
