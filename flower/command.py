@@ -18,7 +18,7 @@ from . import __version__
 from .app import Flower
 from .urls import settings
 from .utils import abs_path, prepend_url
-from .options import DEFAULT_CONFIG_FILE
+from .options import DEFAULT_CONFIG_FILE, default_options
 
 try:
     from logging import NullHandler
@@ -60,8 +60,7 @@ class FlowerCommand(Command):
 
     def apply_env_options(self):
         "apply options passed through environment variables"
-        env_options = filter(lambda x: x.startswith(self.ENV_VAR_PREFIX),
-                             os.environ)
+        env_options = filter(self.is_flower_envvar, os.environ)
         for env_var_name in env_options:
             name = env_var_name.replace(self.ENV_VAR_PREFIX, '', 1).lower()
             value = os.environ[env_var_name]
@@ -125,6 +124,10 @@ class FlowerCommand(Command):
         name, _, value = arg.lstrip('-').partition("=")
         name = name.replace('-', '_')
         return hasattr(options, name)
+
+    def is_flower_envvar(self, name):
+        return name.startswith(self.ENV_VAR_PREFIX) and\
+               name[len(self.ENV_VAR_PREFIX):].lower() in default_options
 
     def print_banner(self, ssl):
         if not options.unix_socket:
