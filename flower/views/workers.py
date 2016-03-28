@@ -16,13 +16,10 @@ class WorkerView(BaseHandler):
     @web.authenticated
     @gen.coroutine
     def get(self, name):
-        refresh = self.get_argument('refresh', default=False, type=bool)
-
-        if refresh:
-            try:
-                yield ListWorkers.update_workers(app=self.application, workername=name)
-            except Exception as e:
-                logger.error(e)
+        try:
+            yield ListWorkers.update_workers(app=self.application, workername=name)
+        except Exception as e:
+            logger.error(e)
 
         worker = ListWorkers.worker_cache.get(name)
 
