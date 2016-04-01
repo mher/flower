@@ -59,7 +59,8 @@ class TasksDataTable(BaseHandler):
             if i >= (start + length):
                 break
             task = as_dict(task)
-            task['worker'] = task['worker'].hostname
+            if task['worker']:
+                task['worker'] = task['worker'].hostname
             filtered_tasks.append(task)
             i += 1
 
