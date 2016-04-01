@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import sys
 import copy
 import logging
 
@@ -40,9 +41,14 @@ class TasksDataTable(BaseHandler):
         sort_by = self.get_argument('columns[%s][data]' % column, type=str)
         sort_order = self.get_argument('order[0][dir]', type=str) == 'asc'
 
+        def key(item):
+            val = getattr(item[1], sort_by)
+            if sys.version_info[0] == 3:
+                val = str(val)
+            return val
+
         tasks = sorted(iter_tasks(app.events, search=search),
-                       key=lambda x: getattr(x[1], sort_by),
-                       reverse=sort_order)
+                       key=key, reverse=sort_order)
         tasks = list(map(self.format_task, tasks))
         filtered_tasks = []
         i = 0
