@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Highcharts Example</title>
+
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<style type="text/css">
+#container {
+    min-width: 300px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+		</style>
+		<script type="text/javascript">
+$(function () {
+    $('#container').highcharts({
+        colorAxis: {
+            minColor: '#FFFFFF',
+            maxColor: Highcharts.getOptions().colors[0]
+        },
+        series: [{
+            type: 'treemap',
+            layoutAlgorithm: 'squarified',
+            data: [{
+                name: 'A',
+                value: 6,
+                colorValue: 1
+            }, {
+                name: 'B',
+                value: 6,
+                colorValue: 2
+            }, {
+                name: 'C',
+                value: 4,
+                colorValue: 3
+            }, {
+                name: 'D',
+                value: 3,
+                colorValue: 4
+            }, {
+                name: 'E',
+                value: 2,
+                colorValue: 5
+            }, {
+                name: 'F',
+                value: 2,
+                colorValue: 6
+            }, {
+                name: 'G',
+                value: 1,
+                colorValue: 7
+            }]
+        }],
+        title: {
+            text: 'Highcharts Treemap'
+        }
+    });
+});
+		</script>
+	</head>
+	<body>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+<script src="https://code.highcharts.com/modules/treemap.js"></script>
+<div id="container"></div>
+	</body>
+</html>
