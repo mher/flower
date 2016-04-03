@@ -409,103 +409,87 @@ var flower = (function () {
         $('#task-filter-form').submit();
     }
 
-    function create_graph(data, id, width, height, metric) {
+    function update_time_window() {
+        var windowInSeconds = parseInt($("#time_window").val());
+        $(".chart").each(function(){
+            var chart = $(this).highcharts();
+            if (! windowInSeconds) {
+                // "auto" mode – remove all limits
+                chart.xAxis[0].setExtremes(null, null);
+            }
+            else {
+                var now = (new Date()).getTime();
+                chart.xAxis[0].setExtremes(now-windowInSeconds*1000, null);
+            }
+        })
+    }
+
+    function create_graph(data, id, metric, metric_title) {
         id = id || '';
-        width = width || 500;
-        height = height || 300;
         metric = metric || '';
 
-        var name, seriesData = [],
-            palette, graph, ticksTreatment, timeUnit, xAxis, yAxis, hoverDetail,
-            legend, shelving, order, highlighter;
-        for (name in data) {
+        var seriesData = [];
+        for (var name in data) {
             if (data.hasOwnProperty(name)) {
                 seriesData.push({
-                    name: name
+                    id: name,
+                    name: name,
+                    data: []
                 });
             }
         }
 
-        palette = new Rickshaw.Color.Palette({
-            scheme: 'colorwheel'
-        });
-
-        graph = new Rickshaw.Graph({
-            element: document.getElementById("chart" + id),
-            width: width,
-            height: height,
-            renderer: 'stack',
-            series: new Rickshaw.Series(seriesData, palette),
-            maxDataPoints: 10000,
-            padding: {
-                top: 0.1,
-                left: 0.01,
-                right: 0.01,
-                bottom: 0.01
+        var graph = $("#chart" + id).highcharts({
+            chart: {
+                type: "area"
             },
-        });
-
-        ticksTreatment = 'glow';
-
-        timeUnit = new Rickshaw.Fixtures.Time.Local();
-        timeUnit.formatTime = function (d) {
-            return moment(d).format("yyyy.mm.dd HH:mm:ss");
-        };
-        timeUnit.unit("minute");
-
-        xAxis = new Rickshaw.Graph.Axis.Time({
-            graph: graph,
-            timeFixture: new Rickshaw.Fixtures.Time.Local(),
-            ticksTreatment: ticksTreatment,
-            timeUnit: timeUnit
-        });
-
-        xAxis.render();
-
-        yAxis = new Rickshaw.Graph.Axis.Y({
-            graph: graph,
-            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-            ticksTreatment: ticksTreatment,
-        });
-
-        yAxis.render();
-
-        hoverDetail = new Rickshaw.Graph.HoverDetail({
-            graph: graph,
-            yFormatter: function (y) {
-                if (y % 1 === 0) {
-                    return y + metric;
-                } else {
-                    return y.toFixed(2) + metric;
+            title: {
+                text: ""
+            },
+            xAxis: {
+                tickmarkPlacement: 'on',
+                title: {
+                    enabled: false
+                },
+                type: 'datetime',
+                startOnTick: false
+            },
+            yAxis: {
+                title: {
+                    text: metric_title
+                },
+                labels: {
+                    formatter: function () {
+                        if (this.value % 1 === 0) {
+                            return this.value;
+                        } else {
+                            return this.value.toFixed(2);
+                        }
+                    }
                 }
-            }
+            },
+            tooltip: {
+                shared: true,
+                valueSuffix: " " + metric
+            },
+            plotOptions: {
+                area: {
+                    stacking: 'normal',
+                    lineColor: '#666666',
+                    lineWidth: 1,
+                    marker: {
+                        lineWidth: 1,
+                        lineColor: '#666666'
+                    }
+                }
+            },
+            series: seriesData,
+            credits: false
         });
 
-        legend = new Rickshaw.Graph.Legend({
-            graph: graph,
-            element: document.getElementById('legend' + id)
-        });
+        console.log("generated graph: " + name)
 
-        shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
-            graph: graph,
-            legend: legend
-        });
-
-        order = new Rickshaw.Graph.Behavior.Series.Order({
-            graph: graph,
-            legend: legend
-        });
-
-        highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
-            graph: graph,
-            legend: legend
-        });
-
-        legend.shelving = shelving;
-        graph.series.legend = legend;
-
-        graph.render();
-        return graph;
+        return graph.highcharts();
     }
 
     function update_graph(graph, url, lastquery) {
@@ -516,8 +500,24 @@ var flower = (function () {
                 lastquery: lastquery
             },
             success: function (data) {
-                graph.series.addData(data);
-                graph.update();
+                var now = (new Date()).getTime();
+                for (var name in data) {
+                    if (data.hasOwnProperty(name) && graph.get(name)) {
+                        console.log("updating graph: " + url)
+                        graph.get(name).addPoint([now, data[name]], false)
+                    }
+                }
+
+                // maintain the time window if one is set
+                update_time_window()
+                /*
+                if ($("#time_window").val() != "") {
+                     var now = (new Date()).getTime();
+                    chart.xAxis[0].setExtremes(now-minRange*1000, null);
+                }
+                */
+
+                graph.redraw()
             },
         });
     }
@@ -604,10 +604,7 @@ var flower = (function () {
                     lastquery: current_unix_time()
                 },
                 success: function (data) {
-                    succeeded_graph = create_graph(data, '-succeeded');
-                    succeeded_graph.update();
-
-                    succeeded_graph.series.setTimeInterval(updateinterval);
+                    succeeded_graph = create_graph(data, '-succeeded', "", "Tasks");
                     setInterval(function () {
                         update_graph(succeeded_graph,
                             '/monitor/succeeded-tasks',
@@ -625,10 +622,7 @@ var flower = (function () {
                     lastquery: current_unix_time()
                 },
                 success: function (data) {
-                    time_graph = create_graph(data, '-time', null, null, 's');
-                    time_graph.update();
-
-                    time_graph.series.setTimeInterval(updateinterval);
+                    time_graph = create_graph(data, '-time', 's', "Seconds");
                     setInterval(function () {
                         update_graph(time_graph,
                             '/monitor/completion-time',
@@ -646,10 +640,7 @@ var flower = (function () {
                     lastquery: current_unix_time()
                 },
                 success: function (data) {
-                    failed_graph = create_graph(data, '-failed');
-                    failed_graph.update();
-
-                    failed_graph.series.setTimeInterval(updateinterval);
+                    failed_graph = create_graph(data, '-failed', "", "Tasks");
                     setInterval(function () {
                         update_graph(failed_graph,
                             '/monitor/failed-tasks',
@@ -664,10 +655,7 @@ var flower = (function () {
                 type: 'GET',
                 url: url_prefix() + '/monitor/broker',
                 success: function (data) {
-                    broker_graph = create_graph(data, '-broker');
-                    broker_graph.update();
-
-                    broker_graph.series.setTimeInterval(updateinterval);
+                    broker_graph = create_graph(data, '-broker', "", "Tasks");
                     setInterval(function () {
                         update_graph(broker_graph,
                             '/monitor/broker');
@@ -675,7 +663,6 @@ var flower = (function () {
 
                 },
             });
-
         }
 
     });
@@ -886,6 +873,7 @@ var flower = (function () {
         on_cancel_task_filter: on_cancel_task_filter,
         on_task_revoke: on_task_revoke,
         on_task_terminate: on_task_terminate,
+        update_time_window: update_time_window
     };
 
 }(jQuery));

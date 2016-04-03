@@ -5,6 +5,7 @@
 {% end %}
 
 {% block container %}
+
   <div class="container-fluid">
     <div class="btn-group btn-group-justified">
         <a id="btn-active" class="btn btn-default btn-large" href="{{ reverse_url('tasks') }}?state=STARTED">Active: {{ sum(map(lambda x:x.get('active') or 0, workers.values() )) }}</a>
