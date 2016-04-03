@@ -487,8 +487,6 @@ var flower = (function () {
             credits: false
         });
 
-        console.log("generated graph: " + name)
-
         return graph.highcharts();
     }
 
@@ -503,19 +501,12 @@ var flower = (function () {
                 var now = (new Date()).getTime();
                 for (var name in data) {
                     if (data.hasOwnProperty(name) && graph.get(name)) {
-                        console.log("updating graph: " + url)
                         graph.get(name).addPoint([now, data[name]], false)
                     }
                 }
 
                 // maintain the time window if one is set
                 update_time_window()
-                /*
-                if ($("#time_window").val() != "") {
-                     var now = (new Date()).getTime();
-                    chart.xAxis[0].setExtremes(now-minRange*1000, null);
-                }
-                */
 
                 graph.redraw()
             },
