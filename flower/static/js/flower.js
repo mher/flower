@@ -557,10 +557,10 @@ var flower = (function () {
     };
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), ['/', '/dashboard']) !== -1) {
+        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/', url_prefix() + '/dashboard']) !== -1) {
             var host = $(location).attr('host'),
                 protocol = $(location).attr('protocol') === 'http:' ? 'ws://' : 'wss://',
-                ws = new WebSocket(protocol + host + "/update-dashboard");
+                ws = new WebSocket(protocol + host + url_prefix() + "/update-dashboard");
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
                 on_dashboard_update(update);
@@ -587,7 +587,7 @@ var flower = (function () {
             });
         });
 
-        if ($(location).attr('pathname') === '/monitor') {
+        if ($(location).attr('pathname') === url_prefix() + '/monitor') {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
                 tts = current_unix_time(),
@@ -599,7 +599,7 @@ var flower = (function () {
 
             $.ajax({
                 type: 'GET',
-                url: '/monitor/succeeded-tasks',
+                url: url_prefix() + '/monitor/succeeded-tasks',
                 data: {
                     lastquery: current_unix_time()
                 },
@@ -610,7 +610,7 @@ var flower = (function () {
                     succeeded_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(succeeded_graph,
-                            '/monitor/succeeded-tasks',
+                            url_prefix() + '/monitor/succeeded-tasks',
                             sts);
                         sts = current_unix_time();
                     }, updateinterval);
@@ -631,7 +631,7 @@ var flower = (function () {
                     time_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(time_graph,
-                            '/monitor/completion-time',
+                            url_prefix() + '/monitor/completion-time',
                             tts);
                         tts = current_unix_time();
                     }, updateinterval);
@@ -652,7 +652,7 @@ var flower = (function () {
                     failed_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(failed_graph,
-                            '/monitor/failed-tasks',
+                            url_prefix() + '/monitor/failed-tasks',
                             fts);
                         fts = current_unix_time();
                     }, updateinterval);
@@ -670,7 +670,7 @@ var flower = (function () {
                     broker_graph.series.setTimeInterval(updateinterval);
                     setInterval(function () {
                         update_graph(broker_graph,
-                            '/monitor/broker');
+                            url_prefix() + '/monitor/broker');
                     }, updateinterval);
 
                 },
@@ -681,7 +681,7 @@ var flower = (function () {
     });
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), ['/tasks', '/broker', '/monitor']) !== -1) {
+        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/tasks', url_prefix() + '/broker', url_prefix() + '/monitor']) !== -1) {
             return;
         }
 
@@ -742,7 +742,7 @@ var flower = (function () {
     });
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), ['/', '/dashboard', '/broker', '/monitor']) !== -1) {
+        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/', url_prefix() + '/dashboard', url_prefix() + '/broker', url_prefix() + '/monitor']) !== -1) {
             return;
         }
 
