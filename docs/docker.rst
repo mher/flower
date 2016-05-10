@@ -8,4 +8,4 @@ container and open http://localhost:49555 ::
     $ docker run -d -p=49555:5555 flower flower --port=5555
 
 For more information about running with Docker see
-http://docs.docker.io/en/latest/
+https://docs.docker.com/
