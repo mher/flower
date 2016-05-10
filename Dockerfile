@@ -1,15 +1,5 @@
-FROM ubuntu:12.04
+FROM python:3.4-alpine
 
-RUN apt-get update
-RUN apt-get install -y wget ca-certificates
+ENV FLOWER_VERSION 0.9.1
 
-# Install pip
-RUN cd /tmp; wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py;\
- python get-pip.py; rm get-pip.py;
-
-# Install pip via package-manager 
-RUN apt-get install -y python-pip
-
-# add flower
-RUN pip install redis flower
-
+RUN pip install redis flower==$FLOWER_VERSION
