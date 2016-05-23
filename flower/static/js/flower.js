@@ -397,9 +397,61 @@ var flower = (function () {
         $('a#btn-retried').text('Retried: ' + table.column(6).data().reduce(sum, 0));
     }
 
+    function update_row_data(rowdata, update){
+        var rowdata = rowdata;
+        rowdata.timestamp = update.timestamp
+        rowdata.worker = update.hostname
+        if (update.type == "task-succeeded") {
+            rowdata.state = "SUCCESS"
+        } else if (update.type == "task-failed"){
+            rowdata.state = "FAILURE"
+        } else if (update.type == "task-retried"){
+            rowdata.state = "RETRY"
+        } else {
+            rowdata.state = update.type.split('-')[1].toUpperCase()
+        }
+        if (update.hasOwnProperty('result')) {
+            rowdata.result = update.result;
+        }
+        if (update.hasOwnProperty('args')) {
+            rowdata.args = update.args;
+        }
+        if (update.hasOwnProperty('kwargs')) {
+            rowdata.kwargs = update.kwargs;
+        }
+        if (update.hasOwnProperty('runtime')) {
+            rowdata.runtime = update.runtime;
+        }
+        if (update.hasOwnProperty('name')) {
+            rowdata.name = update.name;
+        }
+        if (update.hasOwnProperty('eta')) {
+            rowdata.eta = update.eta;
+        }
+        if (update.hasOwnProperty('retries')) {
+            rowdata.retries = update.retries;
+        }
+        if (update.hasOwnProperty('routing_key')) {
+            rowdata.routing_key = update.routing_key;
+        }
+
+        return rowdata
+    }
+
     function on_tasks_update(update) {
         var table = $('#tasks-table').DataTable();
-        table.draw('page');
+        if ((update.type == 'task-received') && 
+             ((Date.now() - window.last_draw) > 10000 )) {
+            table.draw();
+            window.last_draw = Date.now();
+        } else {
+            var row = table.row('#'+update.uuid);
+            if (row.data()) {
+                var rowdata = row.data();    
+                rowdata = update_row_data(rowdata, update);     
+                row.data(rowdata);
+            }
+        }
     }
 
     function on_cancel_task_filter(event) {
@@ -751,7 +803,6 @@ var flower = (function () {
                 }
             }, ],
         });
-
     });
 
     $(document).ready(function () {
@@ -880,6 +931,7 @@ var flower = (function () {
                 visible: isColumnVisible('eta')
             }, ],
         });
+        window.last_draw = Date.now();
 
     });
 
