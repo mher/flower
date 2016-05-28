@@ -21,3 +21,7 @@ class BasicAuthTests(AsyncHTTPTestCase):
             self.assertEqual(200, r.code)
             r = self.fetch('/', auth_username='user1', auth_password='pswd2')
             self.assertEqual(401, r.code)
+
+    def test_logout(self):
+        r = self.get('/logout')
+        self.assertEqual(200, r.code)

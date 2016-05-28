@@ -81,7 +81,7 @@ handlers = [
      {"path": settings['static_path']}),
     # Auth
     (r"/login", auth.LoginHandler),
-    (r"/logout", auth.LogoutHandler),
+    url(r"/logout", auth.LogoutHandler, name='logout'),
 
     # Error
     (r".*", NotFoundErrorHandler),

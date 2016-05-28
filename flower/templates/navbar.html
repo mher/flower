@@ -15,6 +15,7 @@
             <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="{{ reverse_url('monitor') }}">Monitor</a></li>
         </ul>
         <ul class="nav pull-right">
+          <li><a href="{{ reverse_url('logout') }}">Logout</a></li>
           <li><a href="http://flower.readthedocs.org" target="_blank">Docs</a></li>
           <li><a href="https://github.com/mher/flower" target="_blank">Code</a></li>
         </ul>
