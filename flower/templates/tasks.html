@@ -51,8 +51,8 @@
             {{ task.exception }}
         {% end %}
       </td>
-      <td>{{ humanize(task.started, type=time) }}</td>
-      <td>{{ humanize(task.received, type=time) }}</td>
+      <td>{{ humanize(task.started, type='time') }}</td>
+      <td>{{ humanize(task.received, type='time') }}</td>
       <td>
         {% if task.timestamp and task.started %}
             {{ '%.2f' % humanize(task.timestamp - task.started) }} sec
