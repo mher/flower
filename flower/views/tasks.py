@@ -73,7 +73,10 @@ class TasksDataTable(BaseHandler):
         custom_format_task = self.application.options.format_task
 
         if custom_format_task:
-            task = custom_format_task(copy.copy(task))
+            try:
+                task = custom_format_task(copy.copy(task))
+            except:
+                logger.exception("Failed to format '%s' task", uuid)
         return uuid, task
 
 
