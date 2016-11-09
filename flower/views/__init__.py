@@ -33,6 +33,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 error_trace += line
 
             self.render('error.html',
+                        debug=self.application.options.debug,
                         status_code=status_code,
                         error_trace=error_trace,
                         bugreport=bugreport())
