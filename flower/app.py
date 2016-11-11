@@ -26,7 +26,8 @@ class Flower(tornado.web.Application):
 
     def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
-        kwargs.update(handlers=handlers)
+        if 'handlers' not in kwargs:
+            kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
         self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
