@@ -103,7 +103,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 'OAuth authentication error: %s' % str(response)))
             return
 
-        future.set_result(json.loads(response.body))
+        future.set_result(json.loads(response.body.decode('utf-8')))
 
     def get_auth_http_client(self):
         return httpclient.AsyncHTTPClient()
