@@ -57,10 +57,15 @@ def stringified_dict_contains_value(key, value, str_dict):
     key/value pair. This works faster, then creating actual dict
     from string since this operation is called for each task in case
     of kwargs search."""
+    if str_dict is None:
+       return False
     value = str(value)
     try:
         # + 3 for key right quote, one for colon and one for space
         key_index = str_dict.index(key) + len(key) + 3
+        if str_dict[key_index:].find("u'")==0:
+            # String value, should add 2 characters
+            key_index+=2
     except ValueError:
         return False
     try:

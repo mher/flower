@@ -46,9 +46,7 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
         if i == limit:
             break
 
-
-sort_keys = {'name': str, 'state': str, 'received': float, 'started': float}
-
+sort_keys = {'name': str, 'state': str, 'received': float, 'started': float, 'eta': str}
 
 def sort_tasks(tasks, sort_by):
     assert sort_by.lstrip('-') in sort_keys

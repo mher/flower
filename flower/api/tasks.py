@@ -21,7 +21,6 @@ from ..views import BaseHandler
 from ..utils.broker import Broker
 from ..api.control import ControlHandler
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -477,6 +476,8 @@ List tasks
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
+        search = self.get_argument('search', None)
+        sort = self.get_argument('sort', None)
 
         limit = limit and int(limit)
         worker = worker if worker != 'All' else None
@@ -485,7 +486,7 @@ List tasks
 
         result = []
         for task_id, task in tasks.iter_tasks(
-                app.events, limit=limit, type=type,
+                app.events, limit=limit, type=type, sort_by=sort, search=search,
                 worker=worker, state=state):
             task = tasks.as_dict(task)
             task.pop('worker', None)
@@ -598,6 +599,6 @@ Get a task info
             if name not in ['uuid', 'worker']:
                 response[name] = getattr(task, name, None)
         response['task-id'] = task.uuid
-        if task.worker is not None:
-            response['worker'] = task.worker.hostname
+	if task.worker is not None:
+        	response['worker'] = task.worker.hostname
         self.write(response)
