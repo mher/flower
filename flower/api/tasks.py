@@ -599,6 +599,6 @@ Get a task info
             if name not in ['uuid', 'worker']:
                 response[name] = getattr(task, name, None)
         response['task-id'] = task.uuid
-	if task.worker is not None:
-        	response['worker'] = task.worker.hostname
+        if task.worker is not None:
+                response['worker'] = task.worker.hostname
         self.write(response)
