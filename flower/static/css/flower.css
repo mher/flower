@@ -229,3 +229,12 @@
   width: 100%;
   display: inline-block;
 }
+
+#tasks-table .code-overflow {
+  overflow: auto;
+  max-height: 200px;
+}
+
+#tasks-table .code-overflow code {
+  display: block;
+}
