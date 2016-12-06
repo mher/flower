@@ -75,9 +75,21 @@ def get_task_by_id(events, task_id):
 
 
 def as_dict(task):
-    # as_dict is new in Celery 3.1.7
-    if hasattr(Task, 'as_dict'):
-        return task.as_dict()
-    # old version
+    result = dict()
+
+    if hasattr(Task, '_info_fields'):
+        for key in list(task._info_fields) + list(task._fields):
+            value = getattr(task, key, None)
+
+            # children is a WeakSet, if we don't do this
+            # then the resulting dict is not serializable
+            if key == 'children':
+                value = value.__repr__()
+
+            result[key] = value
+    elif hasattr(Task, 'as_dict'):
+        result = task.as_dict()
     else:
-        return task.info(fields=task._defaults.keys())
+        result = task.info(fields=task._defaults.keys())
+
+    return result
