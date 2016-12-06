@@ -193,6 +193,11 @@ Maximum number of workers to keep in memory (by default, `max_workers=5000`)
 
 .. _max_tasks:
 
+hide_offline_workers
+~~~~~~~~~~~~~~~~~~~
+
+Hides workers that are no longer available from the dashboard (by default, `False`)
+
 max_tasks
 ~~~~~~~~~
 
