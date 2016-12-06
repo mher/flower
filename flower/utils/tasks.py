@@ -77,6 +77,10 @@ def get_task_by_id(events, task_id):
 def as_dict(task):
     result = dict()
 
+    # for celery <3.8, we can use task._defaults, for celery
+    # 3.9 we use .as_dict(), and for later, we use task._info_fields
+    # we should be using .as_dict() for 4.0 as well, but it's broken
+
     if hasattr(Task, '_info_fields'):
         for key in list(task._info_fields) + list(task._fields):
             value = getattr(task, key, None)
