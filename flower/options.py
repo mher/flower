@@ -65,6 +65,8 @@ define("tasks_columns", type=str,
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
+define("hide_offline_workers", type=bool, default=False,
+       help="hide offline workers from the dashboard")
 
 # deprecated options
 define("inspect", default=False, help="inspect workers", type=bool)

@@ -40,10 +40,16 @@ class DashboardView(BaseHandler):
         for name, values in events.counter.items():
             if name not in events.workers:
                 continue
+
             worker = events.workers[name]
             info = dict(values)
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
+
+            if app.options.hide_offline_workers:
+                if not worker.alive:
+                    continue
+
             workers[name] = info
 
         self.render("dashboard.html", workers=workers, broker=broker)
@@ -125,6 +131,10 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
             active = started - succeeded - failed - retried
             if active < 0:
                 active = 'N/A'
+
+            if app.options.hide_offline_workers:
+                if not worker.alive:
+                    continue
 
             workers[name] = dict(
                 name=name,
