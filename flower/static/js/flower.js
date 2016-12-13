@@ -800,7 +800,20 @@ var flower = (function () {
             }, {
                 targets: 4,
                 data: 'kwargs',
-                visible: isColumnVisible('kwargs')
+                visible: isColumnVisible('kwargs'),
+                render: function (data) {
+                   var entityMap = {
+                      '&': '&amp;',
+                      '<': '&lt;',
+                      '>': '&gt;',
+                      '"': '&quot;',
+                      '\'': '&#39;',
+                      '/': '&#x2F;'
+                  };
+                  return data.replace(/[&<>"'\/]/g, function (s) {
+                      return entityMap[s];
+                  });
+                }
             }, {
                 targets: 5,
                 data: 'result',
