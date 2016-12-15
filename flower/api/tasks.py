@@ -594,11 +594,8 @@ Get a task info
         task = tasks.get_task_by_id(self.application.events, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
-        response = {}
-        for name in task._fields:
-            if name not in ['uuid', 'worker']:
-                response[name] = getattr(task, name, None)
-        response['task-id'] = task.uuid
-        if task.worker is not None:
-                response['worker'] = task.worker.hostname
+        # avoid to recode the serialization already done on the celery side
+        response = task.as_dict()
+        # special case for the Worker object
+        response['worker'] = task.worker.hostname
         self.write(response)
