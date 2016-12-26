@@ -3,9 +3,12 @@ from __future__ import absolute_import
 import datetime
 import time
 
-from .search import satisfies_search_terms, parse_search_terms
-
 from celery.events.state import Task
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import PythonTracebackLexer
+
+from .search import parse_search_terms, satisfies_search_terms
 
 
 def iter_tasks(events, limit=None, type=None, worker=None, state=None,
@@ -66,13 +69,22 @@ def sort_tasks(tasks, sort_by):
 
 def get_task_by_id(events, task_id):
     if hasattr(Task, '_fields'):  # Old version
-        return events.state.tasks.get(task_id)
+        task = events.state.tasks.get(task_id)
     else:
         _fields = Task._defaults.keys()
         task = events.state.tasks.get(task_id)
         if task is not None:
             task._fields = _fields
-        return task
+
+    task_has_traceback = task is not None and 'traceback' in task._fields
+    traceback_highlighted = getattr(task, 'traceback_highlighted', False)
+    if task_has_traceback and not traceback_highlighted:
+        task.traceback_highlighted = True
+        task.traceback = highlight(
+            task.traceback, PythonTracebackLexer(), HtmlFormatter()
+        )
+
+    return task
 
 
 def as_dict(task):

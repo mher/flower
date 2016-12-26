@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 
+{% block extra_styles %}
+    <style>
+        {{ pygments_styles('.highlight') }}
+    </style>
+{% end %}
+
 {% block navbar %}
   {% module Template("navbar.html", active_tab="tasks") %}
 {% end %}

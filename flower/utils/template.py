@@ -15,6 +15,8 @@ except ImportError:
 from humanize import naturaltime
 from pytz import timezone, utc
 
+from pygments.formatters import HtmlFormatter
+
 
 PY2 = sys.version_info[0] == 2
 if not PY2:
@@ -82,3 +84,7 @@ def sort_url(name, key, sort_by, params=None, class_name='sort'):
         class_name, extra_class, urlencode(new_params),
         title, name
     )
+
+
+def pygments_styles(css_name):
+    return HtmlFormatter().get_style_defs(css_name)

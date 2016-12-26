@@ -4,3 +4,5 @@ tornado>=5.0.0,<6.0.0; python_version<"3.5.2"
 tornado>=5.0.0,<7.0.0; python_version>="3.5.2"
 humanize==0.5.1
 pytz
+Pygments==2.3.1; python_version<"3.5"
+Pygments==2.6.1; python_version>="3.5"
