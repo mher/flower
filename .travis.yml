@@ -2,14 +2,12 @@ language: python
 os:
   - linux
 python:
-  - "2.6"
   - "2.7"
-  - "3.3"
   - "3.4"
+  - "3.5"
   - "pypy"
 install:
-  - travis_retry pip install -r requirements/dev.txt --use-mirrors
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2 ordereddict futures; fi
+  - travis_retry pip install -r requirements/dev.txt
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install futures; fi
   - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then pip install futures; fi
 script:
