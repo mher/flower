@@ -691,7 +691,7 @@ var flower = (function () {
             paginate: false,
             select: true,
             scrollX: true,
-            scrollY: 500,
+            scrollY: true,
             scrollCollapse: true,
             order: [
                 [1, "asc"]
