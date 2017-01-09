@@ -64,7 +64,10 @@ class FlowerCommand(Command):
         for env_var_name in env_options:
             name = env_var_name.replace(self.ENV_VAR_PREFIX, '', 1).lower()
             value = os.environ[env_var_name]
-            option = options._options[name]
+            try:
+                option = options._options[name]
+            except:
+                option = options._options[name.replace('_', '-')]
             if option.multiple:
                 value = [option.type(i) for i in value.split(',')]
             else:
