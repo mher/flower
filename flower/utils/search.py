@@ -1,5 +1,7 @@
 import re
 
+from kombu.utils.encoding import safe_str
+
 
 def parse_search_terms(raw_search_value):
     search_regexp = r'(?:[^\s,"]|"(?:\\.|[^"])*")+'  # splits by space, ignores space in quotes
@@ -42,7 +44,7 @@ def satisfies_search_terms(task, search_terms):
     terms = [
         state_search_terms and task.state in state_search_terms,
         any_value_search_term and any_value_search_term in '|'.join(
-            filter(None, [task.name, task.uuid, task.state, task.worker.hostname, task.args, task.kwargs, str(task.result)])),
+            filter(None, [task.name, task.uuid, task.state, task.worker.hostname, task.args, task.kwargs, safe_str(task.result)])),
         result_search_term and result_search_term in task.result,
         kwargs_search_terms and all(
             stringified_dict_contains_value(k, v, task.kwargs) for k, v in kwargs_search_terms.items()

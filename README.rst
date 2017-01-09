@@ -4,9 +4,6 @@ Celery Flower
 .. image:: https://img.shields.io/pypi/v/flower.svg
     :target: https://pypi.python.org/pypi/flower
 
-.. image:: https://img.shields.io/pypi/dm/flower.svg
-        :target: https://pypi.python.org/pypi/flower
-
 .. image:: https://travis-ci.org/mher/flower.svg?branch=master
         :target: https://travis-ci.org/mher/flower
 
