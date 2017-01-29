@@ -136,3 +136,6 @@ class DashboardUpdateHandler(websocket.WebSocketHandler):
                 retried=retried,
                 loadavg=getattr(worker, 'loadavg', None))
         return workers
+
+    def check_origin(self, origin):
+        return True
