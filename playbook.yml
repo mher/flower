@@ -31,6 +31,17 @@
     service: name=rabbitmq-server state=started
     sudo: yes
 
+  - name: install redis-server
+    apt: name=redis-server state=present
+    sudo: yes
+
+  - name: enable redis-server to survive reboot
+    service: name=redis-server enabled=yes
+
+  - name: ensure redis is running
+    service: name=redis-server state=started
+    sudo: yes
+
   - name: install pip
     apt: pkg=python-pip state=present update_cache=yes cache_valid_time=300
     sudo: yes
