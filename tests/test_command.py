@@ -1,4 +1,6 @@
+import os
 import sys
+import tempfile
 import unittest
 import subprocess
 
@@ -25,11 +27,45 @@ class TestFlowerCommand(AsyncHTTPTestCase):
             command.apply_options('flower', argv=['--address=foo'])
             self.assertEqual('foo', options.address)
 
-    def test_conf(self):
+
+class TestConfOption(AsyncHTTPTestCase):
+    def test_error_conf(self):
         with self.mock_option('conf', None):
             command = FlowerCommand()
             self.assertRaises(IOError, command.apply_options,
                               'flower', argv=['--conf=foo'])
+            self.assertRaises(IOError, command.apply_options,
+                              'flower', argv=['--conf=/tmp/flower/foo'])
+
+    def test_default_option(self):
+        command = FlowerCommand()
+        command.apply_options('flower', argv=[])
+        self.assertEqual('flowerconfig.py', options.conf)
+
+    def test_empty_conf(self):
+        with self.mock_option('conf', None):
+            command = FlowerCommand()
+            command.apply_options('flower', argv=['--conf=/dev/null'])
+            self.assertEqual('/dev/null', options.conf)
+
+    def test_conf_abs(self):
+        with tempfile.NamedTemporaryFile() as cf:
+            with self.mock_option('conf', cf.name), self.mock_option('debug', False):
+                cf.write('debug=True\n')
+                cf.flush()
+                command = FlowerCommand()
+                command.apply_options('flower', argv=['--conf=%s' % cf.name])
+                self.assertEqual(cf.name, options.conf)
+                self.assertTrue(options.debug)
+
+    def test_conf_relative(self):
+        with tempfile.NamedTemporaryFile(dir='.') as cf:
+            with self.mock_option('conf', cf.name), self.mock_option('debug', False):
+                cf.write('debug=True\n')
+                cf.flush()
+                command = FlowerCommand()
+                command.apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])
+                self.assertTrue(options.debug)
 
     @unittest.skipUnless(not sys.platform.startswith("win"), 'skip windows')
     @unittest.skipUnless(sys.version_info[:2] > (2, 6), 'skip python 2.6')
