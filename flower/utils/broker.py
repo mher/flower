@@ -59,7 +59,11 @@ class RabbitMQ(BrokerBase):
             http_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
                 self.username, self.password, self.host, self.vhost)
 
-        self.validate_http_api(http_api)
+        try:
+            self.validate_http_api(http_api)
+        except Exception as e:
+            logger.error("Invalid broker api url:%s", http_api)
+
         self.http_api = http_api
 
     @gen.coroutine
