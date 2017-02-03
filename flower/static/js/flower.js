@@ -563,7 +563,7 @@ var flower = (function () {
                 ws = new WebSocket(protocol + host + url_prefix() + "/update-dashboard");
             ws.onmessage = function (event) {
                 var update = $.parseJSON(event.data);
-                on_dashboard_update(update);
+                //on_dashboard_update(update);
             };
         }
 
@@ -693,12 +693,13 @@ var flower = (function () {
             scrollX: true,
             scrollY: true,
             scrollCollapse: true,
+            ajax: url_prefix() + '/dashboard?json=1',
             order: [
                 [1, "asc"]
             ],
             columnDefs: [{
                 targets: 0,
-                data: 'name',
+                data: 'hostname',
                 render: function (data, type, full, meta) {
                     return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
                 }
@@ -714,19 +715,24 @@ var flower = (function () {
                 }
             }, {
                 targets: 2,
-                data: 'active'
+                data: 'active',
+                defaultContent: 0
             }, {
                 targets: 3,
-                data: 'processed'
+                data: 'task-received',
+                defaultContent: 0
             }, {
                 targets: 4,
-                data: 'failed'
+                data: 'task-failed',
+                defaultContent: 0
             }, {
                 targets: 5,
-                data: 'succeeded'
+                data: 'task-succeeded',
+                defaultContent: 0
             }, {
                 targets: 6,
-                data: 'retried'
+                data: 'task-retried',
+                defaultContent: 0
             }, {
                 targets: 7,
                 data: 'loadavg',
@@ -738,6 +744,13 @@ var flower = (function () {
                 }
             }, ],
         });
+
+        var autorefresh = $.urlParam('autorefresh') || 1;
+        if (autorefresh !== 0) {
+            setInterval( function () {
+                $('#workers-table').DataTable().ajax.reload();
+            }, autorefresh * 1000);
+        }
 
     });
 
