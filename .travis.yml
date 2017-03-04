@@ -15,7 +15,8 @@ install:
 env:
   - CELERY_VERSION=4.0.2
   - CELERY_VERSION=3.1.24
+  - TEST_SUITE=unit
 before_script:
   - pip freeze
 script:
-  - python -m tests.__main__
+  - ./tests/run-unit-tests.sh

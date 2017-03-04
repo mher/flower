@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from celery.result import AsyncResult
 import celery.states as states
 
-from tests import AsyncHTTPTestCase
+from tests.unit import AsyncHTTPTestCase
 
 
 class ApplyTests(AsyncHTTPTestCase):

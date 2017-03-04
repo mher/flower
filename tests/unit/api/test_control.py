@@ -2,7 +2,7 @@ from mock import MagicMock
 
 from flower.api.control import ControlHandler
 
-from tests import AsyncHTTPTestCase
+from tests.unit import AsyncHTTPTestCase
 
 
 class UnknownWorkerControlTests(AsyncHTTPTestCase):

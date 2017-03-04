@@ -4,7 +4,7 @@ import mock
 
 from flower.api.control import ControlHandler
 
-from tests import AsyncHTTPTestCase
+from tests.unit import AsyncHTTPTestCase
 
 
 inspect_response = {

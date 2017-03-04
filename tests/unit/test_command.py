@@ -6,7 +6,7 @@ import subprocess
 
 from flower.command import FlowerCommand
 from tornado.options import options
-from tests import AsyncHTTPTestCase
+from tests.unit import AsyncHTTPTestCase
 
 
 # python 2.6 support
