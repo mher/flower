@@ -85,18 +85,18 @@ of `username:passworrd`. See :ref:`basic-auth` for more info.
 broker_api
 ~~~~~~~~~~
 
-Flower uses `RabbitMQ Managment Plugin`_ to get info about queues.
+Flower uses `RabbitMQ Management Plugin`_ to get info about queues.
 `broker_api` is a URL of RabbitMQ HTTP API including user credentials. ::
 
     $ flower -A proj --broker_api=http://username:password@rabbitmq-server-name:15672/api/
 
-.. Note:: By default the managment plugin is not enabled. To enable it run::
+.. Note:: By default the management plugin is not enabled. To enable it run::
 
     $ rabbitmq-plugins enable rabbitmq_management
 
 .. Note:: The port number for RabbitMQ versions prior to 3.0 is 55672.
 
-.. _`RabbitMQ Managment Plugin`: https://www.rabbitmq.com/management.html
+.. _`RabbitMQ Management Plugin`: https://www.rabbitmq.com/management.html
 
 .. _ca_certs:
 
