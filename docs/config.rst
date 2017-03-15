@@ -105,7 +105,7 @@ ca_certs
 
 A path to `ca_certs` file. The `ca_certs` file contains a set of concatenated “certification authority”
 certificates, which are used to validate certificates passed from the other end of the connection.
-For more info see :ref:`Python SSL`_
+For more info see `Python SSL`_
 
 .. _`Python SSL`: https://docs.python.org/3.4/library/ssl.html
 
