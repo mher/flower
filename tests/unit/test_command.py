@@ -6,7 +6,7 @@ import subprocess
 
 from flower.command import FlowerCommand
 from tornado.options import options
-from tests import AsyncHTTPTestCase
+from tests.unit import AsyncHTTPTestCase
 
 
 # python 2.6 support
@@ -51,7 +51,7 @@ class TestConfOption(AsyncHTTPTestCase):
     def test_conf_abs(self):
         with tempfile.NamedTemporaryFile() as cf:
             with self.mock_option('conf', cf.name), self.mock_option('debug', False):
-                cf.write('debug=True\n')
+                cf.write('debug=True\n'.encode('utf-8'))
                 cf.flush()
                 command = FlowerCommand()
                 command.apply_options('flower', argv=['--conf=%s' % cf.name])
@@ -61,7 +61,7 @@ class TestConfOption(AsyncHTTPTestCase):
     def test_conf_relative(self):
         with tempfile.NamedTemporaryFile(dir='.') as cf:
             with self.mock_option('conf', cf.name), self.mock_option('debug', False):
-                cf.write('debug=True\n')
+                cf.write('debug=True\n'.encode('utf-8'))
                 cf.flush()
                 command = FlowerCommand()
                 command.apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])

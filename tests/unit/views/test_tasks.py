@@ -4,8 +4,8 @@ import time
 from celery.events import Event
 
 from flower.events import EventsState
-from tests import AsyncHTTPTestCase
-from tests.utils import task_succeeded_events, task_failed_events
+from tests.unit import AsyncHTTPTestCase
+from tests.unit.utils import task_succeeded_events, task_failed_events
 
 
 class TaskTest(AsyncHTTPTestCase):

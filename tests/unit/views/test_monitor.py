@@ -1,6 +1,6 @@
 import time
 
-from tests import AsyncHTTPTestCase
+from tests.unit import AsyncHTTPTestCase
 
 
 class MonitorTest(AsyncHTTPTestCase):

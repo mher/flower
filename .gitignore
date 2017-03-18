@@ -23,3 +23,5 @@ Documentation/
 .idea
 .vagrant
 env
+venv
+*.retry

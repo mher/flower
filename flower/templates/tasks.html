@@ -51,8 +51,8 @@
             {{ task.exception }}
         {% end %}
       </td>
-      <td>{{ humanize(task.started, type='time') }}</td>
       <td>{{ humanize(task.received, type='time') }}</td>
+      <td>{{ humanize(task.started, type='time') }}</td>
       <td>
         {% if task.timestamp and task.started %}
             {{ '%.2f' % humanize(task.timestamp - task.started) }} sec
@@ -62,7 +62,7 @@
       <td>{{ task.exchange }}</td>
       <td>{{ task.routing_key }}</td>
       <td>{{ task.retries }}</td>
-      <td>{{ task.revoked }}</td>
+      <td>{{ humanize(task.revoked, type='time') }}</td>
       <td>{{ task.exception }}</td>
       <td>{{ task.expires }}</td>
       <td>{{ task.eta }}</td>

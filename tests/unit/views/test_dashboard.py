@@ -1,8 +1,8 @@
 import time
 
-from tests import AsyncHTTPTestCase
-from tests.utils import task_succeeded_events, task_failed_events
-from tests.utils import HtmlTableParser
+from tests.unit import AsyncHTTPTestCase
+from tests.unit.utils import task_succeeded_events, task_failed_events
+from tests.unit.utils import HtmlTableParser
 
 from celery.events import Event
 from celery.utils import uuid

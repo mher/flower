@@ -1,36 +1,6 @@
 ---
 - hosts: all
   tasks:
-  - name: add the official rabbitmq repository key
-    apt_key: url=https://www.rabbitmq.com/rabbitmq-signing-key-public.asc state=present
-    sudo: yes
-
-  - name: add the official rabbitmq repository
-    copy: content="deb http://www.rabbitmq.com/debian/ testing main"
-          dest=/etc/apt/sources.list.d/ backup=yes
-    register: aptrepo
-    sudo: yes
-
-  - name: update apt cache
-    apt: update_cache=yes
-    when: aptrepo.changed
-    sudo: yes
-
-  - name: install rabbitmq-server
-    apt: name=rabbitmq-server state=present
-    sudo: yes
-
-  - name: enable rabbitmq-server to survive reboot
-    service: name=rabbitmq-server enabled=yes
-
-  - name: enable rabbitmq management plugin
-    command: /usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
-    sudo: yes
-
-  - name: ensure rabbitmq is running
-    service: name=rabbitmq-server state=started
-    sudo: yes
-
   - name: install redis-server
     apt: name=redis-server state=present
     sudo: yes
@@ -50,7 +20,12 @@
     pip: name=celery
     sudo: yes
 
+  - name: install redis python client
+    pip: name=redis
+    sudo: yes
+
   - name: run celery worker
     shell: celery -A tasks multi restart 5 --pidfile=celery%n.pid
     environment:
       PYTHONPATH: /vagrant/examples
+      CELERY_BROKER: redis://
