@@ -397,6 +397,15 @@ var flower = (function () {
         $('a#btn-retried').text('Retried: ' + table.column(6).data().reduce(sum, 0));
     }
 
+    function update_dashboard_counters() {
+        var table = $('#workers-table').DataTable();
+        $('a#btn-active').text('Active: ' + table.column(2).data().reduce(sum, 0));
+        $('a#btn-processed').text('Processed: ' + table.column(3).data().reduce(sum, 0));
+        $('a#btn-failed').text('Failed: ' + table.column(4).data().reduce(sum, 0));
+        $('a#btn-succeeded').text('Succeeded: ' + table.column(5).data().reduce(sum, 0));
+        $('a#btn-retried').text('Retried: ' + table.column(6).data().reduce(sum, 0));
+    }
+
     function on_cancel_task_filter(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -749,6 +758,7 @@ var flower = (function () {
         if (autorefresh !== 0) {
             setInterval( function () {
                 $('#workers-table').DataTable().ajax.reload();
+                update_dashboard_counters();
             }, autorefresh * 1000);
         }
 
