@@ -25,3 +25,4 @@ Documentation/
 env
 venv
 *.retry
+.cache/

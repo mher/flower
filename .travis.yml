@@ -8,14 +8,8 @@ python:
   - "3.6"
   - "pypy"
 install:
-  - travis_retry pip install -q Celery==$CELERY_VERSION
-  - travis_retry pip install -q -r requirements/dev.txt
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install futures; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then pip install futures; fi
-env:
-  - TEST_SUITE=unit CELERY_VERSION=4.0.2
-  - TEST_SUITE=unit CELERY_VERSION=3.1.24
+  - pip install tox-travis
 before_script:
   - pip freeze
 script:
-  - ./tests/run-unit-tests.sh
+  - tox
