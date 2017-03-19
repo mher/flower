@@ -48,7 +48,7 @@ class DashboardView(BaseHandler):
             workers[name] = info
 
         if json:
-            self.write(dict(data=workers.values()))
+            self.write(dict(data=list(workers.values())))
         else:
             self.render("dashboard.html", workers=workers, broker=broker)
 
