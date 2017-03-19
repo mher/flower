@@ -756,7 +756,10 @@ var flower = (function () {
             }, {
                 targets: 3,
                 data: 'args',
-                visible: isColumnVisible('args')
+                visible: isColumnVisible('args'),
+                render: function ( data, type, row ) {
+                    return '<div class="code-overflow"><code>' + data + '</code></div>';
+                }
             }, {
                 targets: 4,
                 data: 'kwargs',
@@ -770,9 +773,9 @@ var flower = (function () {
                       '\'': '&#39;',
                       '/': '&#x2F;'
                   };
-                  return data.replace(/[&<>"'\/]/g, function (s) {
+                  return '<div class="code-overflow"><code>' + data.replace(/[&<>"'\/]/g, function (s) {
                       return entityMap[s];
-                  });
+                  }) + '</code></div>';
                 }
             }, {
                 targets: 5,
