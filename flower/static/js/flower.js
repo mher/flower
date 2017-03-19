@@ -22,13 +22,6 @@ var flower = (function () {
         $("#alert").show();
     }
 
-    function get_selected_workers() {
-        var table = $('#workers-table').DataTable();
-        return $.map(table.rows('.selected').data(), function (row) {
-            return row.name;
-        });
-    }
-
     function url_prefix() {
         var url_prefix = $('#url_prefix').val();
         if (url_prefix) {
@@ -37,106 +30,76 @@ var flower = (function () {
         return '';
     }
 
-    function shutdown_selected(event) {
-        var selected_workers = get_selected_workers();
-        if (selected_workers.length === 0) {
-            show_error_alert('Please select a worker');
-            return;
+    function active_page(name) {
+        var pathname = $(location).attr('pathname');
+        if (name === '/') {
+            return pathname === (url_prefix() + name);
         }
-
-        $.each(selected_workers, function (index, worker) {
-            $.ajax({
-                type: 'POST',
-                url: url_prefix() + '/api/worker/shutdown/' + worker,
-                dataType: 'json',
-                data: {
-                    workername: worker
-                },
-                success: function (data) {
-                    show_success_alert(data.message);
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
-        });
-    }
-
-    function restart_selected(event) {
-        var selected_workers = get_selected_workers();
-        if (selected_workers.length === 0) {
-            show_error_alert('Please select a worker');
-            return;
+        else {
+            return pathname.startsWith(url_prefix() + name);
         }
-
-        $.each(selected_workers, function (index, worker) {
-
-            $.ajax({
-                type: 'POST',
-                url: url_prefix() + '/api/worker/pool/restart/' + worker,
-                dataType: 'json',
-                data: {
-                    workername: worker
-                },
-                success: function (data) {
-                    show_success_alert(data.message);
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
-        });
-    }
-
-    function refresh_selected(event) {
-        var selected_workers = get_selected_workers();
-
-        if (!selected_workers.length) {
-            $.ajax({
-                type: 'GET',
-                url: url_prefix() + '/api/workers',
-                data: {
-                    refresh: 1
-                },
-                success: function (data) {
-                    show_success_alert('Refreshed');
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
-        }
-
-        $.each(selected_workers, function (index, worker) {
-            $.ajax({
-                type: 'GET',
-                url: url_prefix() + '/api/workers',
-                dataType: 'json',
-                data: {
-                    workername: unescape(worker),
-                    refresh: 1
-                },
-                success: function (data) {
-                    show_success_alert(data.message || 'Refreshed');
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
-        });
     }
 
     function on_worker_refresh(event) {
         event.preventDefault();
         event.stopPropagation();
 
+        var workername = $('#workername').text();
+
         $.ajax({
             type: 'GET',
-            url: window.location.pathname,
-            data: 'refresh=1',
+            url: url_prefix() + '/api/workers',
+            dataType: 'json',
+            data: {
+                workername: unescape(workername),
+                refresh: 1
+            },
             success: function (data) {
-                //show_success_alert('Refreshed');
-                window.location.reload();
+                show_success_alert(data.message || 'Refreshed');
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
+    function on_worker_pool_restart(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var workername = $('#workername').text();
+
+        $.ajax({
+            type: 'POST',
+            url: url_prefix() + '/api/worker/pool/restart/' + workername,
+            dataType: 'json',
+            data: {
+                workername: workername
+            },
+            success: function (data) {
+                show_success_alert(data.message);
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
+    function on_worker_shutdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var workername = $('#workername').text();
+
+        $.ajax({
+            type: 'POST',
+            url: url_prefix() + '/api/worker/shutdown/' + workername,
+            dataType: 'json',
+            data: {
+                workername: workername
+            },
+            success: function (data) {
+                show_success_alert(data.message);
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -566,16 +529,6 @@ var flower = (function () {
     };
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/', url_prefix() + '/dashboard']) !== -1) {
-            var host = $(location).attr('host'),
-                protocol = $(location).attr('protocol') === 'http:' ? 'ws://' : 'wss://',
-                ws = new WebSocket(protocol + host + url_prefix() + "/update-dashboard");
-            ws.onmessage = function (event) {
-                var update = $.parseJSON(event.data);
-                //on_dashboard_update(update);
-            };
-        }
-
         //https://github.com/twitter/bootstrap/issues/1768
         var shiftWindow = function () {
             scrollBy(0, -50);
@@ -596,7 +549,7 @@ var flower = (function () {
             });
         });
 
-        if ($(location).attr('pathname') === url_prefix() + '/monitor') {
+        if (active_page('/monitor')) {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
                 tts = current_unix_time(),
@@ -690,7 +643,7 @@ var flower = (function () {
     });
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/tasks', url_prefix() + '/broker', url_prefix() + '/monitor']) !== -1) {
+        if (!active_page('/') && !active_page('/dashboard')) {
             return;
         }
 
@@ -698,7 +651,7 @@ var flower = (function () {
             rowId: 'name',
             searching: true,
             paginate: false,
-            select: true,
+            select: false,
             scrollX: true,
             scrollY: true,
             scrollCollapse: true,
@@ -765,7 +718,7 @@ var flower = (function () {
     });
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/', url_prefix() + '/dashboard', url_prefix() + '/broker', url_prefix() + '/monitor']) !== -1) {
+        if (!active_page('/tasks')) {
             return;
         }
 
@@ -907,11 +860,10 @@ var flower = (function () {
     });
 
     return {
-        shutdown_selected: shutdown_selected,
-        restart_selected: restart_selected,
-        refresh_selected: refresh_selected,
         on_alert_close: on_alert_close,
         on_worker_refresh: on_worker_refresh,
+        on_worker_pool_restart: on_worker_pool_restart,
+        on_worker_shutdown: on_worker_shutdown,
         on_pool_grow: on_pool_grow,
         on_pool_shrink: on_pool_shrink,
         on_pool_autoscale: on_pool_autoscale,

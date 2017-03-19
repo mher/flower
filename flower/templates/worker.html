@@ -12,7 +12,18 @@
                 <small>Worker: </small><h1 id="workername">{{ worker['name'] }}</h1>
         </div>
 
-        <button class="btn pull-right" type="button" onclick="flower.on_worker_refresh(event)">Refresh</button>
+    <div class="btn-group pull-right">
+        <button class="btn" onclick="flower.on_worker_refresh(event);">Refresh</button>
+        <button class="btn dropdown-toggle" data-toggle="dropdown"><span
+          class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="#" onclick="flower.on_worker_shutdown(event);">Shut Down</a></li>
+          <li><a href="#" onclick="flower.on_worker_pool_restart(event);">Restart Pool</a></li>
+          <li><a href="#" onclick="flower.on_worker_refresh(event);">Refresh</a></li>
+        </ul>
+      </div>
+    </div>
+
         <div class="tabbable">
           <ul class="nav nav-tabs">
             <li class="active"><a href="#tab-pool" data-toggle="tab">Pool</a></li>
