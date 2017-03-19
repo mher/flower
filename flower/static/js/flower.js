@@ -809,7 +809,10 @@ var flower = (function () {
             }, {
                 targets: 9,
                 data: 'worker',
-                visible: isColumnVisible('worker')
+                visible: isColumnVisible('worker'),
+                render: function (data, type, full, meta) {
+                    return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
+                }
             }, {
                 targets: 10,
                 data: 'exchange',
