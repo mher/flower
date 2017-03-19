@@ -200,7 +200,6 @@
                   <tr>
                     <th>Name</th>
                     <th>UUID</th>
-                    <th>Start time</th>
                     <th>Ack</th>
                     <th>PID</th>
                     <th>args</th>
@@ -212,7 +211,6 @@
                     <tr>
                       <td>{{ task['name'] }}</td>
                       <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
-                      <td>{{ humanize(task['time_start'], type='time') }}</td>
                       <td>{{ task['acknowledged'] }}</td>
                       <td>{{ task['worker_pid'] }}</td>
                       <td>{{ task.get('args', 'N/A') }}</td>
