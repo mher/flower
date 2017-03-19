@@ -340,26 +340,6 @@ var flower = (function () {
         return parseInt(a, 10) + parseInt(b, 10);
     }
 
-    function on_dashboard_update(update) {
-        var table = $('#workers-table').DataTable();
-
-        $.each(update, function (name, info) {
-            var row = table.row('#' + name);
-            if (row) {
-                row.data(info);
-            } else {
-                table.row.add(info);
-            }
-        });
-        table.draw();
-
-        $('a#btn-active').text('Active: ' + table.column(2).data().reduce(sum, 0));
-        $('a#btn-processed').text('Processed: ' + table.column(3).data().reduce(sum, 0));
-        $('a#btn-failed').text('Failed: ' + table.column(4).data().reduce(sum, 0));
-        $('a#btn-succeeded').text('Succeeded: ' + table.column(5).data().reduce(sum, 0));
-        $('a#btn-retried').text('Retried: ' + table.column(6).data().reduce(sum, 0));
-    }
-
     function update_dashboard_counters() {
         var table = $('#workers-table').DataTable();
         $('a#btn-active').text('Active: ' + table.column(2).data().reduce(sum, 0));
