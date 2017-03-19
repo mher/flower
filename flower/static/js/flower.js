@@ -34,6 +34,13 @@ var flower = (function () {
         return '';
     }
 
+    //https://github.com/DataTables/DataTables/blob/1.10.11/media/js/jquery.dataTables.js#L14882
+    function htmlEscapeEntities(d) {
+        return typeof d === 'string' ?
+            d.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') :
+            d;
+    }
+
     function active_page(name) {
         var pathname = $(location).attr('pathname');
         if (name === '/') {
@@ -756,28 +763,18 @@ var flower = (function () {
             }, {
                 targets: 3,
                 data: 'args',
-                visible: isColumnVisible('args')
+                visible: isColumnVisible('args'),
+                render: htmlEscapeEntities
             }, {
                 targets: 4,
                 data: 'kwargs',
                 visible: isColumnVisible('kwargs'),
-                render: function (data) {
-                   var entityMap = {
-                      '&': '&amp;',
-                      '<': '&lt;',
-                      '>': '&gt;',
-                      '"': '&quot;',
-                      '\'': '&#39;',
-                      '/': '&#x2F;'
-                  };
-                  return data.replace(/[&<>"'\/]/g, function (s) {
-                      return entityMap[s];
-                  });
-                }
+                render: htmlEscapeEntities
             }, {
                 targets: 5,
                 data: 'result',
-                visible: isColumnVisible('result')
+                visible: isColumnVisible('result'),
+                render: htmlEscapeEntities
             }, {
                 targets: 6,
                 data: 'received',
