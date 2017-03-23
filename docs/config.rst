@@ -35,7 +35,7 @@ Standard Celery configuration settings can be overridden in the configuration
 file. See `Celery Configuration reference`_ for a complete listing of all
 the available settings, and their default values.
 
-.. _`Celery Configuration reference`: http://docs.celeryproject.org/en/latest/configuration.html#configuration
+.. _`Celery Configuration reference`: http://docs.celeryproject.org/en/latest/userguide/configuration.html
 
 Celery command line options also can be passed to Flower. For example
 the `--broker` sets the default broker URL: ::
