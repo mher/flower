@@ -24,3 +24,5 @@ Documentation/
 .vagrant
 env
 venv
+*.retry
+.cache/

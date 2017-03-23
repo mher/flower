@@ -22,121 +22,95 @@ var flower = (function () {
         $("#alert").show();
     }
 
-    function get_selected_workers() {
-        var table = $('#workers-table').DataTable();
-        return $.map(table.rows('.selected').data(), function (row) {
-            return row.name;
-        });
-    }
-
     function url_prefix() {
         var url_prefix = $('#url_prefix').val();
         if (url_prefix) {
-            return '/' + url_prefix;
+            if (url_prefix.startsWith('/')) {
+                return url_prefix;
+            } else {
+                return '/' + url_prefix;
+            }
         }
         return '';
     }
 
-    function shutdown_selected(event) {
-        var selected_workers = get_selected_workers();
-        if (selected_workers.length === 0) {
-            show_error_alert('Please select a worker');
-            return;
-        }
-
-        $.each(selected_workers, function (index, worker) {
-            $.ajax({
-                type: 'POST',
-                url: url_prefix() + '/api/worker/shutdown/' + worker,
-                dataType: 'json',
-                data: {
-                    workername: worker
-                },
-                success: function (data) {
-                    show_success_alert(data.message);
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
-        });
+    //https://github.com/DataTables/DataTables/blob/1.10.11/media/js/jquery.dataTables.js#L14882
+    function htmlEscapeEntities(d) {
+        return typeof d === 'string' ?
+            d.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') :
+            d;
     }
 
-    function restart_selected(event) {
-        var selected_workers = get_selected_workers();
-        if (selected_workers.length === 0) {
-            show_error_alert('Please select a worker');
-            return;
+    function active_page(name) {
+        var pathname = $(location).attr('pathname');
+        if (name === '/') {
+            return pathname === (url_prefix() + name);
         }
-
-        $.each(selected_workers, function (index, worker) {
-
-            $.ajax({
-                type: 'POST',
-                url: url_prefix() + '/api/worker/pool/restart/' + worker,
-                dataType: 'json',
-                data: {
-                    workername: worker
-                },
-                success: function (data) {
-                    show_success_alert(data.message);
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
-        });
-    }
-
-    function refresh_selected(event) {
-        var selected_workers = get_selected_workers();
-
-        if (!selected_workers.length) {
-            $.ajax({
-                type: 'GET',
-                url: url_prefix() + '/api/workers',
-                data: {
-                    refresh: 1
-                },
-                success: function (data) {
-                    show_success_alert('Refreshed');
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
+        else {
+            return pathname.startsWith(url_prefix() + name);
         }
-
-        $.each(selected_workers, function (index, worker) {
-            $.ajax({
-                type: 'GET',
-                url: url_prefix() + '/api/workers',
-                dataType: 'json',
-                data: {
-                    workername: unescape(worker),
-                    refresh: 1
-                },
-                success: function (data) {
-                    show_success_alert(data.message || 'Refreshed');
-                },
-                error: function (data) {
-                    show_error_alert(data.responseText);
-                }
-            });
-        });
     }
 
     function on_worker_refresh(event) {
         event.preventDefault();
         event.stopPropagation();
 
+        var workername = $('#workername').text();
+
         $.ajax({
             type: 'GET',
-            url: window.location.pathname,
-            data: 'refresh=1',
+            url: url_prefix() + '/api/workers',
+            dataType: 'json',
+            data: {
+                workername: unescape(workername),
+                refresh: 1
+            },
             success: function (data) {
-                //show_success_alert('Refreshed');
-                window.location.reload();
+                show_success_alert(data.message || 'Refreshed');
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
+    function on_worker_pool_restart(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var workername = $('#workername').text();
+
+        $.ajax({
+            type: 'POST',
+            url: url_prefix() + '/api/worker/pool/restart/' + workername,
+            dataType: 'json',
+            data: {
+                workername: workername
+            },
+            success: function (data) {
+                show_success_alert(data.message);
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
+    function on_worker_shutdown(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var workername = $('#workername').text();
+
+        $.ajax({
+            type: 'POST',
+            url: url_prefix() + '/api/worker/shutdown/' + workername,
+            dataType: 'json',
+            data: {
+                workername: workername
+            },
+            success: function (data) {
+                show_success_alert(data.message);
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -377,19 +351,8 @@ var flower = (function () {
         return parseInt(a, 10) + parseInt(b, 10);
     }
 
-    function on_dashboard_update(update) {
+    function update_dashboard_counters() {
         var table = $('#workers-table').DataTable();
-
-        $.each(update, function (name, info) {
-            var row = table.row('#' + name);
-            if (row) {
-                row.data(info);
-            } else {
-                table.row.add(info);
-            }
-        });
-        table.draw();
-
         $('a#btn-active').text('Active: ' + table.column(2).data().reduce(sum, 0));
         $('a#btn-processed').text('Processed: ' + table.column(3).data().reduce(sum, 0));
         $('a#btn-failed').text('Failed: ' + table.column(4).data().reduce(sum, 0));
@@ -557,16 +520,6 @@ var flower = (function () {
     };
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/', url_prefix() + '/dashboard']) !== -1) {
-            var host = $(location).attr('host'),
-                protocol = $(location).attr('protocol') === 'http:' ? 'ws://' : 'wss://',
-                ws = new WebSocket(protocol + host + url_prefix() + "/update-dashboard");
-            ws.onmessage = function (event) {
-                var update = $.parseJSON(event.data);
-                on_dashboard_update(update);
-            };
-        }
-
         //https://github.com/twitter/bootstrap/issues/1768
         var shiftWindow = function () {
             scrollBy(0, -50);
@@ -587,7 +540,7 @@ var flower = (function () {
             });
         });
 
-        if ($(location).attr('pathname') === url_prefix() + '/monitor') {
+        if (active_page('/monitor')) {
             var sts = current_unix_time(),
                 fts = current_unix_time(),
                 tts = current_unix_time(),
@@ -681,7 +634,7 @@ var flower = (function () {
     });
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/tasks', url_prefix() + '/broker', url_prefix() + '/monitor']) !== -1) {
+        if (!active_page('/') && !active_page('/dashboard')) {
             return;
         }
 
@@ -689,16 +642,17 @@ var flower = (function () {
             rowId: 'name',
             searching: true,
             paginate: false,
-            select: true,
+            select: false,
             scrollX: true,
             scrollY: true,
             scrollCollapse: true,
+            ajax: url_prefix() + '/dashboard?json=1',
             order: [
                 [1, "asc"]
             ],
             columnDefs: [{
                 targets: 0,
-                data: 'name',
+                data: 'hostname',
                 render: function (data, type, full, meta) {
                     return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
                 }
@@ -714,19 +668,24 @@ var flower = (function () {
                 }
             }, {
                 targets: 2,
-                data: 'active'
+                data: 'active',
+                defaultContent: 0
             }, {
                 targets: 3,
-                data: 'processed'
+                data: 'task-received',
+                defaultContent: 0
             }, {
                 targets: 4,
-                data: 'failed'
+                data: 'task-failed',
+                defaultContent: 0
             }, {
                 targets: 5,
-                data: 'succeeded'
+                data: 'task-succeeded',
+                defaultContent: 0
             }, {
                 targets: 6,
-                data: 'retried'
+                data: 'task-retried',
+                defaultContent: 0
             }, {
                 targets: 7,
                 data: 'loadavg',
@@ -739,10 +698,18 @@ var flower = (function () {
             }, ],
         });
 
+        var autorefresh = $.urlParam('autorefresh') || 1;
+        if (autorefresh !== 0) {
+            setInterval( function () {
+                $('#workers-table').DataTable().ajax.reload();
+                update_dashboard_counters();
+            }, autorefresh * 1000);
+        }
+
     });
 
     $(document).ready(function () {
-        if ($.inArray($(location).attr('pathname'), [url_prefix() + '/', url_prefix() + '/dashboard', url_prefix() + '/broker', url_prefix() + '/monitor']) !== -1) {
+        if (!active_page('/tasks')) {
             return;
         }
 
@@ -796,28 +763,18 @@ var flower = (function () {
             }, {
                 targets: 3,
                 data: 'args',
-                visible: isColumnVisible('args')
+                visible: isColumnVisible('args'),
+                render: htmlEscapeEntities
             }, {
                 targets: 4,
                 data: 'kwargs',
                 visible: isColumnVisible('kwargs'),
-                render: function (data) {
-                   var entityMap = {
-                      '&': '&amp;',
-                      '<': '&lt;',
-                      '>': '&gt;',
-                      '"': '&quot;',
-                      '\'': '&#39;',
-                      '/': '&#x2F;'
-                  };
-                  return data.replace(/[&<>"'\/]/g, function (s) {
-                      return entityMap[s];
-                  });
-                }
+                render: htmlEscapeEntities
             }, {
                 targets: 5,
                 data: 'result',
-                visible: isColumnVisible('result')
+                visible: isColumnVisible('result'),
+                render: htmlEscapeEntities
             }, {
                 targets: 6,
                 data: 'received',
@@ -849,7 +806,10 @@ var flower = (function () {
             }, {
                 targets: 9,
                 data: 'worker',
-                visible: isColumnVisible('worker')
+                visible: isColumnVisible('worker'),
+                render: function (data, type, full, meta) {
+                    return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
+                }
             }, {
                 targets: 10,
                 data: 'exchange',
@@ -884,11 +844,10 @@ var flower = (function () {
     });
 
     return {
-        shutdown_selected: shutdown_selected,
-        restart_selected: restart_selected,
-        refresh_selected: refresh_selected,
         on_alert_close: on_alert_close,
         on_worker_refresh: on_worker_refresh,
+        on_worker_pool_restart: on_worker_pool_restart,
+        on_worker_shutdown: on_worker_shutdown,
         on_pool_grow: on_pool_grow,
         on_pool_shrink: on_pool_shrink,
         on_pool_autoscale: on_pool_autoscale,

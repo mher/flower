@@ -25,6 +25,7 @@ class DashboardView(BaseHandler):
     @gen.coroutine
     def get(self):
         refresh = self.get_argument('refresh', default=False, type=bool)
+        json = self.get_argument('json', default=False, type=bool)
 
         app = self.application
         events = app.events.state
@@ -46,7 +47,10 @@ class DashboardView(BaseHandler):
             info.update(status=worker.alive)
             workers[name] = info
 
-        self.render("dashboard.html", workers=workers, broker=broker)
+        if json:
+            self.write(dict(data=list(workers.values())))
+        else:
+            self.render("dashboard.html", workers=workers, broker=broker)
 
     @classmethod
     def _as_dict(cls, worker):
