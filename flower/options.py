@@ -60,7 +60,7 @@ define("format_task", type=types.FunctionType, default=None,
 define("natural_time", type=bool, default=False,
        help="show time in relative format")
 define("tasks_columns", type=str,
-       default="name,uuid,state,args,kwargs,result,received,started,worker",
+       default="name,uuid,state,args,kwargs,result,received,started,runtime,worker",
        help="slugs of columns on /tasks/ page, delimited by comma")
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
