@@ -99,11 +99,9 @@ class RabbitMQ(BrokerBase):
             raise ValueError("Invalid http api schema: %s" % url.scheme)
 
 
-DEFAULT_REDIS_PRIORITY_STEPS = [0, 3, 6, 9]
-
-
 class Redis(BrokerBase):
-    sep = '\x06\x16'
+    SEP = '\x06\x16'
+    DEFAULT_PRIORITY_STEPS = [0, 3, 6, 9]
 
     def __init__(self, broker_url, *args, **kwargs):
         super(Redis, self).__init__(broker_url)
@@ -122,12 +120,12 @@ class Redis(BrokerBase):
         if broker_options and 'priority_steps' in broker_options:
             self.priority_steps = broker_options['priority_steps']
         else:
-            self.priority_steps = DEFAULT_REDIS_PRIORITY_STEPS
+            self.priority_steps = self.DEFAULT_PRIORITY_STEPS
 
     def _q_for_pri(self, queue, pri):
         if pri not in self.priority_steps:
             raise ValueError('Priority not in priority steps')
-        return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
+        return '{0}{1}{2}'.format(*((queue, self.SEP, pri) if pri else (queue, '', '')))
 
     @gen.coroutine
     def queues(self, names):
