@@ -80,8 +80,6 @@ class RabbitMQ(BrokerBase):
                 validate_cert=False)
         except (socket.error, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)
-            logger.error("Make sure RabbitMQ Management Plugin is enabled "
-                         "(rabbitmq-plugins enable rabbitmq_management)")
             raise gen.Return([])
         finally:
             http_client.close()
