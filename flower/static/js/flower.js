@@ -505,6 +505,8 @@ var flower = (function () {
 
     function isColumnVisible(name) {
         var columns = $('#columns').val();
+        if (columns === "all")
+            return true;
         if (columns) {
             columns = columns.split(',').map(function (e) {
                 return e.trim();
