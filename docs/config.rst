@@ -233,8 +233,11 @@ Enable support of `X-Real-Ip` and `X-Scheme` headers
 tasks_columns
 ~~~~~~~~~~~~~
 
-Specifies list of comma-delimited columns on `/tasks/` page.
-Columns on the page can be reordered using drag and drop.
+Specifies list of comma-delimited columns on `/tasks/` page. `all` value
+enables all columns. Columns on the page can be reordered using drag and drop.
+
+(by default, `tasks_columns="name,uuid,state,args,kwargs,result,received,started,runtime,worker"`)
+
 Available columns are:
 
   - `name`
