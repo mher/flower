@@ -6,9 +6,27 @@
 
 {% block container %}
 
-<div class="container">
+<div class="container dashboard">
     <div class="row">
-        <div class="span6 spacer">
+        <div class="offset8 span4"> 
+            <div class="pull-right">
+                Showing Time:
+                <select id="time_window" onchange="flower.update_time_window()">
+                    <option value="5">Last 5 secs</option>
+                    <option value="60">Last minute</option>
+                    <option value="900">Last 15 minutes</option>
+                    <option value="3600">Last hour</option>
+                    <option value="10800">Last 3 hours</option>
+                    <option value="21600">Last 6 hours</option>
+                    <option value="86400">Last day</option>
+                    <option value="259200">Last 3 days</option>
+                    <option value="" selected>All time</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="span6">
             <a name="succeeded"></a>
             <div class="graph content">
                 <a href="#succeeded"><h3>Succeeded tasks</h3></a>
@@ -20,7 +38,7 @@
             </div>
         </div>
 
-        <div class="span6 spacer">
+        <div class="span6">
             <a name="failed"></a>
             <div class="graph content">
                 <a href="#failed"><h3>Failed tasks</h3></a>
@@ -34,7 +52,7 @@
     </div>
 
     <div class="row">
-        <div class="span6 spacer">
+        <div class="span6">
             <a name="times"></a>
             <div class="graph content">
                 <a href="#times"><h3>Task times</h3></a>
@@ -46,7 +64,7 @@
             </div>
         </div>
 
-        <div class="span6 spacer">
+        <div class="span6">
             <a name="broker"></a>
             <div class="graph content">
                 <a href="#broker"><h3>Queued tasks</h3></a>
