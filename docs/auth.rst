@@ -71,4 +71,9 @@ environment variables.: ::
     $ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
     $ celery flower --auth_provider=flower.views.auth.GithubLoginHandler --auth=.*@example\.com
 
+You can set `--github_endpoint` option or set `FLOWER_GITHUB_ENDPOINT` environment variable
+if you want Flower to support GitHub Enterprise on your own servers.: ::
+
+    export FLOWER_GITHUB_ENDPOINT=https://git.example.com
+
 .. _GitHub OAuth API: https://developer.github.com/v3/oauth/
