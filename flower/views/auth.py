@@ -24,7 +24,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
     @tornado.web.asynchronous
     def get(self):
-        redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
+        redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri'] or self.request.full_url()
         if self.get_argument('code', False):
             self.get_authenticated_user(
                 redirect_uri=redirect_uri,
@@ -62,8 +62,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
         self.set_secure_cookie("user", str(email))
 
-        next = self.get_argument('next', '/')
-        self.redirect(next)
+        self.local_redirect(self.get_argument('next'))
 
 
 class LoginHandler(BaseHandler):
@@ -73,10 +72,14 @@ class LoginHandler(BaseHandler):
 
 class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
-    _OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
-    _OAUTH_ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token"
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
+
+    def __init__(self, *args, **kwargs):
+        BaseHandler.__init__(self, *args, **kwargs)
+
+        self._OAUTH_AUTHORIZE_URL = self.settings['github_oauth']['endpoint'] + "login/oauth/authorize"
+        self._OAUTH_ACCESS_TOKEN_URL = self.settings['github_oauth']['endpoint'] + "login/oauth/access_token"
 
     @tornado.auth._auth_return_future
     def get_authenticated_user(self, redirect_uri, code, callback):
@@ -110,7 +113,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
     @tornado.web.asynchronous
     def get(self):
-        redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
+        redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri'] or self.request.full_url()
         if self.get_argument('code', False):
             self.get_authenticated_user(
                 redirect_uri=redirect_uri,
@@ -133,13 +136,15 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         access_token = user['access_token']
 
         req = httpclient.HTTPRequest(
-            'https://api.github.com/user/emails',
+            self.settings['github_oauth']['api_endpoint'] + 'user/emails',
             headers={'Authorization': 'token ' + access_token,
                      'User-agent': 'Tornado auth'})
         response = httpclient.HTTPClient().fetch(req)
 
         emails = [email['email'].lower() for email in json.loads(response.body.decode('utf-8'))
-                  if email['verified'] and re.match(self.application.options.auth, email['email'])]
+                  # GitHub Enterprise does not require email verification.
+                  if (self.settings['github_oauth']['enterprise'] or email['verified'])
+                  and re.match(self.application.options.auth, email['email'])]
 
         if not emails:
             message = (
@@ -150,8 +155,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
         self.set_secure_cookie("user", str(emails.pop()))
 
-        next_ = self.get_argument('next', '/')
-        self.redirect(next_)
+        self.local_redirect(self.get_argument('next'))
 
 
 class LogoutHandler(BaseHandler):

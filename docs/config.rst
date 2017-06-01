@@ -308,3 +308,10 @@ Sets authentication provider
   - GitHub `flower.views.auth.GithubLoginHandler`
 
 See `Authentication` for usage examples
+
+.. github_endpoint:
+
+github_endpoint
+~~~~~~~~~~~~~~~
+
+Only required when your are using GitHub Enterprise.

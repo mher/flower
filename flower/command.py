@@ -111,6 +111,19 @@ class FlowerCommand(Command):
                 'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_AUTH2_REDIRECT_URI'),
             }
 
+            settings['github_oauth'] = {
+                'enterprise': False,
+                'endpoint': 'https://github.com/',
+                'api_endpoint': 'https://api.github.com/',
+            }
+            github_endpoint = options.github_endpoint or os.environ.get('FLOWER_GITHUB_ENDPOINT')
+            if github_endpoint:
+                settings['github_oauth']['enterprise'] = True
+                if not github_endpoint.startswith('http'):
+                    github_endpoint = 'http://' + github_endpoint
+                settings['github_oauth']['endpoint'] = github_endpoint.rstrip('/') + '/'
+                settings['github_oauth']['api_endpoint'] = settings['github_oauth']['endpoint'] + 'api/v3/'
+
         if options.certfile and options.keyfile:
             settings['ssl_options'] = dict(certfile=abs_path(options.certfile),
                                            keyfile=abs_path(options.keyfile))
