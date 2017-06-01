@@ -100,3 +100,8 @@ class BaseHandler(tornado.web.RequestHandler):
         prefix = self.application.options.url_prefix
         url = super(BaseHandler, self).reverse_url(*args)
         return prepend_url(url, prefix) if prefix else url
+
+    def local_redirect(self, url, *args, **kwargs):
+        if not url or not url.startswith('/'):
+            url = '/'
+        return self.redirect(url, *args, **kwargs)

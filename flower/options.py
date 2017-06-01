@@ -65,6 +65,8 @@ define("tasks_columns", type=str,
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
+define("github_endpoint", type=str, default=None,
+       help="the API endpoint of GitHub Enterprise")
 
 # deprecated options
 define("inspect", default=False, help="inspect workers", type=bool)
