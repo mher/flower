@@ -469,6 +469,10 @@ List tasks
 :query workername: filter task by workername
 :query taskname: filter tasks by taskname
 :query state: filter tasks by state
+:query search: filter tasks using github-style querying syntax
+:query args: filter tasks containing a given argument
+:query kwargs: filter tasks containing a given keyword argument (e.g. foo=bar)
+:query result: filter tasks containing a given string in result
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
@@ -478,6 +482,15 @@ List tasks
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
+        search = self.get_argument('search', None)
+
+        for key in ('args', 'kwargs', 'result'):
+            value = self.get_argument(key, None)
+            if value is not None:
+                if search is None:
+                    search = "%s:%s" % (key, value)
+                else:
+                    search += " %s:%s" % (key, value)
 
         limit = limit and int(limit)
         worker = worker if worker != 'All' else None
@@ -487,7 +500,7 @@ List tasks
         result = []
         for task_id, task in tasks.iter_tasks(
                 app.events, limit=limit, type=type,
-                worker=worker, state=state):
+                worker=worker, state=state, search=search):
             task = tasks.as_dict(task)
             task.pop('worker', None)
             result.append((task_id, task))
