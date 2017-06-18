@@ -59,7 +59,11 @@ class RabbitMQ(BrokerBase):
             http_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
                 self.username, self.password, self.host, self.vhost)
 
-        self.validate_http_api(http_api)
+        try:
+            self.validate_http_api(http_api)
+        except Exception as e:
+            logger.error("Invalid broker api url:%s", http_api)
+
         self.http_api = http_api
 
     @gen.coroutine
@@ -72,11 +76,10 @@ class RabbitMQ(BrokerBase):
         http_client = httpclient.AsyncHTTPClient()
         try:
             response = yield http_client.fetch(
-                url, auth_username=username, auth_password=password)
+                url, auth_username=username, auth_password=password,
+                validate_cert=False)
         except (socket.error, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)
-            logger.error("Make sure RabbitMQ Management Plugin is enabled "
-                         "(rabbitmq-plugins enable rabbitmq_management)")
             raise gen.Return([])
         finally:
             http_client.close()
@@ -92,15 +95,11 @@ class RabbitMQ(BrokerBase):
         url = urlparse(http_api)
         if url.scheme not in ('http', 'https'):
             raise ValueError("Invalid http api schema: %s" % url.scheme)
-        if not url.path.startswith('/api/'):
-            raise ValueError("Invalid http api path: %s" % url.path)
-
-
-DEFAULT_REDIS_PRIORITY_STEPS = [0, 3, 6, 9]
 
 
 class Redis(BrokerBase):
-    sep = '\x06\x16'
+    SEP = '\x06\x16'
+    DEFAULT_PRIORITY_STEPS = [0, 3, 6, 9]
 
     def __init__(self, broker_url, *args, **kwargs):
         super(Redis, self).__init__(broker_url)
@@ -119,12 +118,12 @@ class Redis(BrokerBase):
         if broker_options and 'priority_steps' in broker_options:
             self.priority_steps = broker_options['priority_steps']
         else:
-            self.priority_steps = DEFAULT_REDIS_PRIORITY_STEPS
+            self.priority_steps = self.DEFAULT_PRIORITY_STEPS
 
     def _q_for_pri(self, queue, pri):
         if pri not in self.priority_steps:
             raise ValueError('Priority not in priority steps')
-        return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
+        return '{0}{1}{2}'.format(*((queue, self.SEP, pri) if pri else (queue, '', '')))
 
     @gen.coroutine
     def queues(self, names):

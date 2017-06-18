@@ -2,15 +2,14 @@ language: python
 os:
   - linux
 python:
-  - "2.6"
   - "2.7"
-  - "3.3"
   - "3.4"
+  - "3.5"
+  - "3.6"
   - "pypy"
 install:
-  - travis_retry pip install -r requirements/dev.txt --use-mirrors
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2 ordereddict futures; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install futures; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then pip install futures; fi
+  - pip install tox-travis
+before_script:
+  - pip freeze
 script:
-  - python -m tests.__main__
+  - tox

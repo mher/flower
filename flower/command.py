@@ -64,7 +64,10 @@ class FlowerCommand(Command):
         for env_var_name in env_options:
             name = env_var_name.replace(self.ENV_VAR_PREFIX, '', 1).lower()
             value = os.environ[env_var_name]
-            option = options._options[name]
+            try:
+                option = options._options[name]
+            except:
+                option = options._options[name.replace('_', '-')]
             if option.multiple:
                 value = [option.type(i) for i in value.split(',')]
             else:
@@ -77,10 +80,10 @@ class FlowerCommand(Command):
         # parse the command line to get --conf option
         parse_command_line([prog_name] + argv)
         try:
-            parse_config_file(options.conf, final=False)
+            parse_config_file(os.path.abspath(options.conf), final=False)
             parse_command_line([prog_name] + argv)
         except IOError:
-            if options.conf != DEFAULT_CONFIG_FILE:
+            if os.path.basename(options.conf) != DEFAULT_CONFIG_FILE:
                 raise
 
     def setup_logging(self):

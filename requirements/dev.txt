@@ -1,2 +1,3 @@
 -r default.txt
 -r test.txt
+redis

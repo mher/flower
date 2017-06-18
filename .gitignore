@@ -22,3 +22,7 @@ Documentation/
 .pydevproject
 .idea
 .vagrant
+env
+venv
+*.retry
+.cache/

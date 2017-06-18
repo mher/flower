@@ -35,7 +35,7 @@ Standard Celery configuration settings can be overridden in the configuration
 file. See `Celery Configuration reference`_ for a complete listing of all
 the available settings, and their default values.
 
-.. _`Celery Configuration reference`: http://docs.celeryproject.org/en/latest/configuration.html#configuration
+.. _`Celery Configuration reference`: http://docs.celeryproject.org/en/latest/userguide/configuration.html
 
 Celery command line options also can be passed to Flower. For example
 the `--broker` sets the default broker URL: ::
@@ -85,18 +85,18 @@ of `username:passworrd`. See :ref:`basic-auth` for more info.
 broker_api
 ~~~~~~~~~~
 
-Flower uses `RabbitMQ Managment Plugin`_ to get info about queues.
+Flower uses `RabbitMQ Management Plugin`_ to get info about queues.
 `broker_api` is a URL of RabbitMQ HTTP API including user credentials. ::
 
     $ flower -A proj --broker_api=http://username:password@rabbitmq-server-name:15672/api/
 
-.. Note:: By default the managment plugin is not enabled. To enable it run::
+.. Note:: By default the management plugin is not enabled. To enable it run::
 
     $ rabbitmq-plugins enable rabbitmq_management
 
 .. Note:: The port number for RabbitMQ versions prior to 3.0 is 55672.
 
-.. _`RabbitMQ Managment Plugin`: https://www.rabbitmq.com/management.html
+.. _`RabbitMQ Management Plugin`: https://www.rabbitmq.com/management.html
 
 .. _ca_certs:
 
@@ -105,7 +105,7 @@ ca_certs
 
 A path to `ca_certs` file. The `ca_certs` file contains a set of concatenated “certification authority”
 certificates, which are used to validate certificates passed from the other end of the connection.
-For more info see :ref:`Python SSL`_
+For more info see `Python SSL`_
 
 .. _`Python SSL`: https://docs.python.org/3.4/library/ssl.html
 
@@ -233,8 +233,11 @@ Enable support of `X-Real-Ip` and `X-Scheme` headers
 tasks_columns
 ~~~~~~~~~~~~~
 
-Specifies list of comma-delimited columns on `/tasks/` page.
-Columns on the page can be reordered using drag and drop.
+Specifies list of comma-delimited columns on `/tasks/` page. `all` value
+enables all columns. Columns on the page can be reordered using drag and drop.
+
+(by default, `tasks_columns="name,uuid,state,args,kwargs,result,received,started,runtime,worker"`)
+
 Available columns are:
 
   - `name`

@@ -6,7 +6,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a class="brand" href="{{ reverse_url('main') }}">Celery Flower</a>
+      <a class="brand" href="{{ reverse_url('main') }}">Flower</a>
       <div class="nav-collapse collapse">
         <ul class="nav">
             <li {% if active_tab == "dashboard" %}class="active"{% end %}><a href="{{ reverse_url('dashboard') }}">Dashboard</a></li>
@@ -15,7 +15,8 @@
             <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="{{ reverse_url('monitor') }}">Monitor</a></li>
         </ul>
         <ul class="nav pull-right">
-          <li><a href="http://flower.readthedocs.org" target="_blank">Docs</a></li>
+          <li><a href="{{ reverse_url('logout') }}">Logout</a></li>
+          <li><a href="https://flower.readthedocs.io" target="_blank">Docs</a></li>
           <li><a href="https://github.com/mher/flower" target="_blank">Code</a></li>
         </ul>
       </div>

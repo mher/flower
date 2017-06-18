@@ -6,7 +6,7 @@ from glob import glob
 
 def all():
     test_modules = list(map(lambda x: x.rstrip('.py').replace('/', '.'),
-                            glob('tests/*.py') + glob('tests/**/*.py')))
+                            glob('tests/unit/*.py') + glob('tests/unit/**/*.py')))
     return unittest.defaultTestLoader.loadTestsFromNames(test_modules)
 
 

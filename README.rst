@@ -4,9 +4,6 @@ Celery Flower
 .. image:: https://img.shields.io/pypi/v/flower.svg
     :target: https://pypi.python.org/pypi/flower
 
-.. image:: https://img.shields.io/pypi/dm/flower.svg
-        :target: https://pypi.python.org/pypi/flower
-
 .. image:: https://travis-ci.org/mher/flower.svg?branch=master
         :target: https://travis-ci.org/mher/flower
 
@@ -71,7 +68,7 @@ Or receive task completion events in real-time:
 
 For more info checkout `API Reference`_ and `examples`_.
 
-.. _API Reference: http://flower.readthedocs.org/en/latest/api.html
+.. _API Reference: https://flower.readthedocs.io/en/latest/api.html
 .. _examples: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
 Installation
@@ -110,7 +107,7 @@ Documentation
 
 Documentation is available at `Read the Docs`_ and `IPython Notebook Viewer`_
 
-.. _Read the Docs: http://flower.readthedocs.org
+.. _Read the Docs: https://flower.readthedocs.io
 .. _IPython Notebook Viewer: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
 License

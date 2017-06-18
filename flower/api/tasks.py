@@ -379,7 +379,8 @@ class GetQueueLengths(BaseTaskHandler):
         queue_names = ControlHandler.get_active_queue_names()
 
         if not queue_names:
-            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE])
+            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
+                        set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
 
         queues = yield broker.queues(sorted(queue_names))
         self.write({'active_queues': queues})
@@ -598,5 +599,6 @@ Get a task info
             if name not in ['uuid', 'worker']:
                 response[name] = getattr(task, name, None)
         response['task-id'] = task.uuid
-        response['worker'] = task.worker.hostname
+        if task.worker is not None:
+            response['worker'] = task.worker.hostname
         self.write(response)
