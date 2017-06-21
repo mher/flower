@@ -342,7 +342,7 @@
             "description": "result"
           }
         },
-        "description": "List workers",
+        "description": "Clear flower workers cache",
         "parameters": [ ]
       }
     },
