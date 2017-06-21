@@ -23,6 +23,12 @@ class ControlHandler(BaseHandler):
         yield self.update_workers(workername=workername,
                                   app=self.application)
 
+    @gen.coroutine
+    def clear_workers_cache(self):
+        logger.debug("Clearing worker cache...")
+        self.worker_cache = {}
+        yield self.update_workers(app=self.application)
+
     @classmethod
     @gen.coroutine
     def update_workers(cls, app, workername=None):

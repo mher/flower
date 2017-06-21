@@ -185,3 +185,48 @@ List workers
             self.write({workername: self.worker_cache[workername]})
         else:
             self.write(self.worker_cache)
+
+
+class ClearWorkersCache(ControlHandler):
+    @web.authenticated
+    @gen.coroutine
+    def post(self):
+        """
+Clear workers in cache
+
+**Example request**:
+
+.. sourcecode:: http
+
+  POST /api/workers/clear-cache HTTP/1.1
+  Content-Length: 0
+  Host: localhost:5555
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 29
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "message": "Cleared workers in cache"
+  }
+
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+        """
+
+
+        logger.info("Clearing worker cache")
+
+        try:
+            yield self.clear_workers_cache()
+        except Exception as e:
+            msg = "Failed to clear cache: %s" % e
+            logger.error(msg)
+            raise web.HTTPError(503, msg)
+
+        self.write(dict(message="Cleared workers in cache"))
