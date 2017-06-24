@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import sys
+from functools import total_ordering
 import copy
 import logging
 
@@ -28,6 +28,26 @@ class TaskView(BaseHandler):
         self.render("task.html", task=task)
 
 
+@total_ordering
+class Comparable(object):
+    """
+    Compare two objects, one or more of which may be None.  If one of the
+    values is None, the other will be deemed greater.
+    """
+
+    def __init__(self, value):
+        self.value = value
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __lt__(self, other):
+        try:
+            return self.value < other.value
+        except TypeError:
+            return self.value is None
+
+
 class TasksDataTable(BaseHandler):
     @web.authenticated
     def get(self):
@@ -39,34 +59,29 @@ class TasksDataTable(BaseHandler):
 
         column = self.get_argument('order[0][column]', type=int)
         sort_by = self.get_argument('columns[%s][data]' % column, type=str)
-        sort_order = self.get_argument('order[0][dir]', type=str) == 'asc'
+        sort_order = self.get_argument('order[0][dir]', type=str) == 'desc'
 
         def key(item):
-            val = getattr(item[1], sort_by)
-            if sys.version_info[0] == 3:
-                val = str(val)
-            return val
+            return Comparable(getattr(item[1], sort_by))
 
-        tasks = sorted(iter_tasks(app.events, search=search),
-                       key=key, reverse=sort_order)
-        tasks = list(map(self.format_task, tasks))
+        sorted_tasks = sorted(
+            iter_tasks(app.events, search=search),
+            key=key,
+            reverse=sort_order
+        )
+
         filtered_tasks = []
-        i = 0
-        for _, task in tasks:
-            if i < start:
-                i += 1
-                continue
-            if i >= (start + length):
-                break
-            task = as_dict(task)
-            if task['worker']:
-                task['worker'] = task['worker'].hostname
-            filtered_tasks.append(task)
-            i += 1
+
+        for task in sorted_tasks[start:start + length]:
+            task_dict = as_dict(self.format_task(task)[1])
+            if task_dict.get('worker'):
+                task_dict['worker'] = task_dict['worker'].hostname
+
+            filtered_tasks.append(task_dict)
 
         self.write(dict(draw=draw, data=filtered_tasks,
-                        recordsTotal=len(tasks),
-                        recordsFiltered=len(tasks)))
+                        recordsTotal=len(sorted_tasks),
+                        recordsFiltered=len(sorted_tasks)))
 
     def format_task(self, args):
         uuid, task = args
