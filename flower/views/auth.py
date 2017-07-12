@@ -62,7 +62,10 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
         self.set_secure_cookie("user", str(email))
 
-        next = self.get_argument('next', '/')
+        next = self.get_argument('next', self.application.options.url_prefix or '/')
+        if self.application.options.url_prefix and next[0] != '/':
+            next = '/' + next
+
         self.redirect(next)
 
 
@@ -150,7 +153,9 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
         self.set_secure_cookie("user", str(emails.pop()))
 
-        next_ = self.get_argument('next', '/')
+        next_ = self.get_argument('next', self.application.options.url_prefix or '/')
+        if self.application.options.url_prefix and next_[0] != '/':
+            next_ = '/' + next_
         self.redirect(next_)
 
 
