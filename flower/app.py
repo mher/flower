@@ -32,6 +32,19 @@ class Flower(tornado.web.Application):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.ssl_options = kwargs.get('ssl_options', None)
 
+        extra_events_args = {}
+        if events is None and self.options.storage_driver == 'postgres':
+            from flower.utils import pg_storage
+            pg_storage.open_connection(
+                self.options.pg_user,
+                self.options.pg_pass,
+                self.options.pg_database,
+                self.options.pg_host,
+                self.options.pg_port,
+                self.options.pg_ssl,
+            )
+            extra_events_args['callback'] = pg_storage.event_callback
+
         self.capp = capp or celery.Celery()
         self.events = events or Events(
             self.capp, db=self.options.db,
@@ -39,7 +52,8 @@ class Flower(tornado.web.Application):
             enable_events=self.options.enable_events,
             io_loop=self.io_loop,
             max_workers_in_memory=self.options.max_workers,
-            max_tasks_in_memory=self.options.max_tasks)
+            max_tasks_in_memory=self.options.max_tasks,
+            **extra_events_args)
         self.started = False
 
     def start(self):
@@ -68,6 +82,10 @@ class Flower(tornado.web.Application):
             self.events.stop()
             self.pool.shutdown(wait=False)
             self.started = False
+
+            if self.options.storage_driver == 'postgres':
+                from flower.utils import pg_storage
+                pg_storage.close_connection()
 
     def delay(self, method, *args, **kwargs):
         return self.pool.submit(partial(method, *args, **kwargs))

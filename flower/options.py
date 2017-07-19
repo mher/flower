@@ -66,7 +66,7 @@ define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
 define("storage_driver", type=str, default="file",
-       help='Which driver to use for storing events ("file" or "postgre")')
+       help='Which driver to use for storing events ("file" or "postgres")')
 define("pg_user", type=str, help="Postgres user name")
 define("pg_pass", type=str, help="Postgres user password")
 define("pg_database", type=str, default="flower_events",
