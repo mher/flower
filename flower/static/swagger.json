@@ -182,7 +182,7 @@
             "description": "result"
           }
         },
-        "description": "Execute a task by name and wait results",
+        "description": "Get a task result",
         "parameters": [
           {
             "$ref": "#\/parameters\/taskid"
