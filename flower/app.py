@@ -53,6 +53,7 @@ class Flower(tornado.web.Application):
             io_loop=self.io_loop,
             max_workers_in_memory=self.options.max_workers,
             max_tasks_in_memory=self.options.max_tasks,
+            storage_driver=self.options.storage_driver,
             **extra_events_args)
         self.started = False
 

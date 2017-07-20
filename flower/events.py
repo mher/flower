@@ -35,17 +35,18 @@ class EventsState(State):
         super(EventsState, self).__init__(*args, **kwargs)
         self.counter = collections.defaultdict(Counter)
 
-    def event(self, event):
+    def event(self, event, websockets=True):
         worker_name = event['hostname']
         event_type = event['type']
 
         self.counter[worker_name][event_type] += 1
 
-        # Send event to api subscribers (via websockets)
-        classname = api.events.getClassName(event_type)
-        cls = getattr(api.events, classname, None)
-        if cls:
-            cls.send_message(event)
+        if websockets:
+            # Send event to api subscribers (via websockets)
+            classname = api.events.getClassName(event_type)
+            cls = getattr(api.events, classname, None)
+            if cls:
+                cls.send_message(event)
 
         # Save the event
         super(EventsState, self).event(event)
@@ -55,7 +56,8 @@ class Events(threading.Thread):
     events_enable_interval = 5000
 
     def __init__(self, capp, db=None, persistent=False,
-                 enable_events=True, io_loop=None, **kwargs):
+                 enable_events=True, io_loop=None, storage_driver=None,
+                 **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
@@ -73,11 +75,26 @@ class Events(threading.Thread):
             self.persistent = False
 
         if self.persistent:
-            logger.debug("Loading state from '%s'...", self.db)
-            state = shelve.open(self.db)
-            if state:
-                self.state = state['events']
-            state.close()
+            if storage_driver == 'file':
+                logger.debug("Loading state from '%s'...", self.db)
+                state = shelve.open(self.db)
+                if state:
+                    self.state = state['events']
+                state.close()
+
+            elif storage_driver == 'postgres':
+                self.state = EventsState(**kwargs)
+
+                from flower.utils import pg_storage
+
+                # When loading past events, do not call the event callback
+                callback = self.state.event_callback
+                self.state.event_callback = None
+                try:
+                    for event in pg_storage.get_all_events():
+                        self.state.event(event, websockets=False)
+                finally:
+                    self.state.event_callback = callback
 
         if not self.state:
             self.state = EventsState(**kwargs)
