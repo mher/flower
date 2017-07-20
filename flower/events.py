@@ -83,18 +83,21 @@ class Events(threading.Thread):
                 state.close()
 
             elif storage_driver == 'postgres':
-                self.state = EventsState(**kwargs)
-
                 from flower.utils import pg_storage
+                self.state = EventsState(
+                    callback=pg_storage.event_callback, **kwargs
+                )
 
                 # When loading past events, do not call the event callback
-                callback = self.state.event_callback
-                self.state.event_callback = None
+                # Need to do it like this instead of overriding the callable
+                # because the callable is cached in the closure of
+                # celery.events.state.State._create_dispatcher
+                pg_storage.skip_callback = True
                 try:
                     for event in pg_storage.get_all_events():
                         self.state.event(event, websockets=False)
                 finally:
-                    self.state.event_callback = callback
+                    pg_storage.skip_callback = False
 
         if not self.state:
             self.state = EventsState(**kwargs)

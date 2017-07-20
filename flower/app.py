@@ -32,7 +32,6 @@ class Flower(tornado.web.Application):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.ssl_options = kwargs.get('ssl_options', None)
 
-        extra_events_args = {}
         if events is None and self.options.storage_driver == 'postgres':
             from flower.utils import pg_storage
             pg_storage.open_connection(
@@ -43,7 +42,6 @@ class Flower(tornado.web.Application):
                 self.options.pg_port,
                 self.options.pg_ssl,
             )
-            extra_events_args['callback'] = pg_storage.event_callback
 
         self.capp = capp or celery.Celery()
         self.events = events or Events(
@@ -53,8 +51,7 @@ class Flower(tornado.web.Application):
             io_loop=self.io_loop,
             max_workers_in_memory=self.options.max_workers,
             max_tasks_in_memory=self.options.max_tasks,
-            storage_driver=self.options.storage_driver,
-            **extra_events_args)
+            storage_driver=self.options.storage_driver)
         self.started = False
 
     def start(self):
