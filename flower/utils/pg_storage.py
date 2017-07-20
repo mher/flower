@@ -40,6 +40,9 @@ def event_callback(state, event):
             json.dumps(event)
         ))
         connection.commit()
+    except:
+        connection.rollback()
+        raise
     finally:
         cursor.close()
 
@@ -60,6 +63,7 @@ def open_connection(user, password, database, host, port, use_ssl):
             logger.debug('Database empty, executing schema definition.')
             for statement in _schema:
                 cursor.execute(statement)
+            connection.commit()
     finally:
         cursor.close()
 
