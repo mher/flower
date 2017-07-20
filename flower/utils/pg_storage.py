@@ -6,28 +6,31 @@ import pg8000
 
 logger = logging.getLogger(__name__)
 connection = None
+skip_callback = False
 
 _all_tables = """
 SELECT * FROM information_schema.tables
 WHERE table_schema = 'public'
 """
 
-_schema = [
+_schema = (
     """CREATE TABLE events
     (
-        id TIMESTAMP PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
+        time TIMESTAMP,
         data JSONB NOT NULL
     )""",
-    """CREATE INDEX event_index ON events USING GIN (data)"""
-]
+    "CREATE INDEX event_index ON events USING GIN (data)",
+    "CREATE INDEX event_time_index ON events (time ASC)",
+)
 
-_add_event = """INSERT INTO events (id, data) VALUES (%s, %s)"""
+_add_event = """INSERT INTO events (time, data) VALUES (%s, %s)"""
 
-_all_events = """SELECT data FROM events ORDER BY id ASC"""
+_all_events = """SELECT data FROM events ORDER BY time ASC"""
 
 
 def event_callback(state, event):
-    if event['type'] == 'worker-heartbeat':
+    if skip_callback or event['type'] == 'worker-heartbeat':
         return
 
     cursor = connection.cursor()
