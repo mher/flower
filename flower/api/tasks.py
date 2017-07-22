@@ -600,11 +600,9 @@ Get a task info
         task = tasks.get_task_by_id(self.application.events, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
-        response = {}
-        for name in task._fields:
-            if name not in ['uuid', 'worker']:
-                response[name] = getattr(task, name, None)
-        response['task-id'] = task.uuid
+
+        response = task.as_dict()
         if task.worker is not None:
             response['worker'] = task.worker.hostname
+
         self.write(response)

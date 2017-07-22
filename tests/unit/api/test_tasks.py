@@ -1,4 +1,4 @@
-from mock import Mock
+from mock import Mock, patch
 from datetime import datetime, timedelta
 
 from celery.result import AsyncResult
@@ -82,3 +82,18 @@ class AsyncApplyTests(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
             args=[], kwargs={}, expires=tomorrow)
+
+
+class MockTasks:
+
+    @staticmethod
+    def get_task_by_id(events, task_id):
+        from celery.events.state import Task
+        return Task()
+
+
+class TaskTests(AsyncHTTPTestCase):
+
+    @patch('flower.api.tasks.tasks', new=MockTasks)
+    def test_task_info(self):
+        self.get('/api/task/info/123')
