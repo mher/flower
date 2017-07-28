@@ -308,3 +308,51 @@ Sets authentication provider
   - GitHub `flower.views.auth.GithubLoginHandler`
 
 See `Authentication` for usage examples
+
+
+storage_driver
+~~~~~~~~~~~~~~
+
+Relevant when persistent mode is enabled. Determines how the
+state will be stored.
+
+Available storage drivers are:
+
+  - `file` (configured using the `db`_ option)
+  - `postgres` (configured using the `pg_*` options)
+
+
+pg_user
+~~~~~~~
+
+The username to connect to the PostgreSQL server with.
+
+pg_pass
+~~~~~~~
+
+The user password to connect to the server with.
+
+pg_database
+~~~~~~~~~~~
+
+The name of the database instance to connect with.
+The default is ``flower_events``.
+
+pg_host
+~~~~~~~
+
+The hostname of the PostgreSQL server to connect with.
+The default is ``localhost``.
+
+pg_port
+~~~~~~~
+
+The TCP/IP port of the PostgreSQL server instance.  This parameter
+defaults to ``5432``, the registered common port of PostgreSQL TCP/IP
+servers.
+
+pg_ssl
+~~~~~~
+
+Use SSL encryption for TCP/IP sockets if ``True``.
+Defaults to ``False``.
