@@ -66,6 +66,7 @@ class Events(threading.Thread):
 
         self.db = db
         self.persistent = persistent
+        self.storage_driver = storage_driver
         self.enable_events = enable_events
         self.state = None
 
@@ -112,7 +113,7 @@ class Events(threading.Thread):
             self.timer.start()
 
     def stop(self):
-        if self.persistent:
+        if self.persistent and self.storage_driver == 'file':
             logger.debug("Saving state to '%s'...", self.db)
             state = shelve.open(self.db)
             state['events'] = self.state
