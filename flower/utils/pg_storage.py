@@ -28,9 +28,15 @@ _add_event = """INSERT INTO events (time, data) VALUES (%s, %s)"""
 
 _all_events = """SELECT data FROM events ORDER BY time ASC"""
 
+_ignored_events = {
+    'worker-offline',
+    'worker-online',
+    'worker-heartbeat',
+}
+
 
 def event_callback(state, event):
-    if skip_callback or event['type'] == 'worker-heartbeat':
+    if skip_callback or event['type'] in _ignored_events:
         return
 
     cursor = connection.cursor()
