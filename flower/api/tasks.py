@@ -469,6 +469,8 @@ List tasks
 :query workername: filter task by workername
 :query taskname: filter tasks by taskname
 :query state: filter tasks by state
+:query received_start: filter tasks by received date (must be greater than) format %Y-%m-%d %H:%M
+:query received_end: filter tasks by received date (must be less than) format %Y-%m-%d %H:%M
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
@@ -478,6 +480,8 @@ List tasks
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
+        received_start = self.get_argument('received_start', None)
+        received_end = self.get_argument('received_end', None)
 
         limit = limit and int(limit)
         worker = worker if worker != 'All' else None
@@ -487,7 +491,9 @@ List tasks
         result = []
         for task_id, task in tasks.iter_tasks(
                 app.events, limit=limit, type=type,
-                worker=worker, state=state):
+                worker=worker, state=state,
+                received_start=received_start,
+                received_end=received_end):
             task = tasks.as_dict(task)
             task.pop('worker', None)
             result.append((task_id, task))
@@ -594,11 +600,9 @@ Get a task info
         task = tasks.get_task_by_id(self.application.events, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
-        response = {}
-        for name in task._fields:
-            if name not in ['uuid', 'worker']:
-                response[name] = getattr(task, name, None)
-        response['task-id'] = task.uuid
+
+        response = task.as_dict()
         if task.worker is not None:
             response['worker'] = task.worker.hostname
+
         self.write(response)
