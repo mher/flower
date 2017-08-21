@@ -1,0 +1,523 @@
+{
+  "tags": [
+    
+  ],
+  "paths": {
+    "\/api\/tasks": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Result"
+          }
+        },
+        "description": "List tasks",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "the maximum number of tasks",
+            "required": false,
+            "format": "int32",
+            "type": "integer"
+          },
+          {
+            "name": "workername",
+            "in": "query",
+            "description": "filter task by workername",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "taskname",
+            "in": "query",
+            "description": "filter task by taskname",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "filter task by state",
+            "required": false,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/types": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "List (seen) task types"
+      }
+    },
+    "\/api\/queues\/length": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Get queue lengths"
+      }
+    },
+    "\/api\/task\/info\/{taskid}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Get task info",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskid"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/apply\/{taskname}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Execute a task by name and wait results",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskname"
+          },
+          {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "kwargs": {
+                  "type": "object"
+                },
+                "args": {
+                  "type": "array"
+                }
+              }
+            },
+            "name": "args",
+            "description": "the dictionary of args and kwargs",
+            "in": "body"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/async-apply\/{taskname}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Execute a task",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskname"
+          },
+          {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "kwargs": {
+                  "type": "object"
+                },
+                "args": {
+                  "type": "array"
+                },
+                "options": {
+                  "type": "object"
+                }
+              }
+            },
+            "name": "args",
+            "description": "the dictionary of args, kwargs, and apply-async options",
+            "in": "body"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/send-task\/{taskname}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Execute a task by name (Doesn't require a task source)",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskname"
+          },
+          {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "kwargs": {
+                  "type": "object"
+                },
+                "args": {
+                  "type": "array"
+                }
+              }
+            },
+            "name": "args",
+            "description": "the dictionary of args, and kwargs",
+            "in": "body"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/result\/{taskid}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Get a task result",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskid"
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "description": "how long to wait, in seconds, before the operation times out",
+            "required": false,
+            "format": "int32",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/abort\/{taskid}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Abort a running task",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskid"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/timeout\/{taskname}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Change soft and hard time limits for a task",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskname"
+          },
+          {
+            "name": "workername",
+            "in": "query",
+            "description": "the name of a worker",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "soft",
+            "in": "query",
+            "description": "the soft timeout limit",
+            "required": false,
+            "format": "int32",
+            "type": "integer"
+          },
+          {
+            "name": "hard",
+            "in": "query",
+            "description": "the hard timeout limit",
+            "required": false,
+            "format": "int32",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/rate-limit\/{taskname}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Change rate limit for a task",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskname"
+          },
+          {
+            "name": "workername",
+            "in": "query",
+            "description": "the name of a worker",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "rateLimit",
+            "in": "query",
+            "description": "the rate limit to apply",
+            "required": true,
+            "format": "int32",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "\/api\/task\/revoke\/{taskid}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Revoke a task",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/taskid"
+          },
+          {
+            "name": "terminate",
+            "in": "query",
+            "description": "terminate the task if it is running",
+            "required": false,
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    "\/api\/workers": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "List workers",
+        "parameters": [
+          {
+            "name": "refresh",
+            "in": "query",
+            "description": "run inspect to get updated list of workers",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "workername",
+            "in": "query",
+            "description": "get info for workername",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "description": "only get worker status info",
+            "in": "query",
+            "type": "boolean"
+          }
+        ]
+      }
+    },
+    "\/api\/worker\/shutdown\/{workername}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Shut down a worker",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/workername"
+          }
+        ]
+      }
+    },
+    "\/api\/worker\/pool\/restart\/{workername}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Restart a worker's pool",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/workername"
+          }
+        ]
+      }
+    },
+    "\/api\/worker\/pool\/grow\/{workername}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Grow a worker's pool",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/workername"
+          },
+          {
+            "name": "n",
+            "in": "query",
+            "description": "number of pool processes to grow, default is 1",
+            "required": false,
+            "format": "int32",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "\/api\/worker\/pool\/shrink\/{workername}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Shrink a worker's pool",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/workername"
+          },
+          {
+            "name": "n",
+            "in": "query",
+            "description": "number of pool processes to shrink, default is 1",
+            "required": false,
+            "format": "int32",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "\/api\/worker\/pool\/autoscale\/{workername}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Autoscale a worker pool",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/workername"
+          },
+          {
+            "name": "min",
+            "in": "query",
+            "description": "minimum number of pool processes",
+            "required": false,
+            "format": "int32",
+            "type": "integer"
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "description": "maximum number of pool processes",
+            "required": false,
+            "format": "int32",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    "\/api\/worker\/queue\/add-consumer\/{workername}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Start consuming from a queue",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/workername"
+          },
+          {
+            "name": "queue",
+            "in": "query",
+            "description": "the name of a queue",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "\/api\/worker\/queue\/cancel-consumer\/{workername}": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "result"
+          }
+        },
+        "description": "Stop consuming from a queue",
+        "parameters": [
+          {
+            "$ref": "#\/parameters\/workername"
+          },
+          {
+            "name": "queue",
+            "in": "query",
+            "description": "the name of a queue",
+            "required": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "parameters": {
+    "taskid": {
+      "type": "string",
+      "in": "path",
+      "description": "The task id",
+      "required": true,
+      "name": "taskid"
+    },
+    "workername": {
+      "type": "string",
+      "in": "path",
+      "description": "The worker name",
+      "required": true,
+      "name": "workername"
+    },
+    "taskname": {
+      "type": "string",
+      "in": "path",
+      "description": "The task name",
+      "required": true,
+      "name": "taskname"
+    }
+  },
+  "info": {
+    "description": "The flower API spec",
+    "version": "1.0.0-dev",
+    "title": "Flower"
+  },
+  "definitions": {
+    
+  },
+  "swagger": "2.0"
+}
+
