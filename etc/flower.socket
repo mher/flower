@@ -1,0 +1,8 @@
+[Unit]
+Description=Flower socket
+
+[Socket]
+ListenStream=0.0.0.0:5555
+
+[Install]
+WantedBy=sockets.target
