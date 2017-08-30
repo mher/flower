@@ -1,0 +1,14 @@
+[Unit]
+Description=flower daemon
+Requires=flower.socket
+After=network.target
+
+[Service]
+PIDFile=/run/flower
+WorkingDirectory=/example
+ExecStart=flower -A tasks:app -l DEBUG
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
