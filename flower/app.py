@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
 import logging
+import os
+import socket
 
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
@@ -19,6 +21,7 @@ from .options import default_options
 
 logger = logging.getLogger(__name__)
 
+SYSTEMD_SOCKET_FD = 3
 
 class Flower(tornado.web.Application):
     pool_executor_cls = ThreadPoolExecutor
@@ -46,15 +49,22 @@ class Flower(tornado.web.Application):
         self.pool = self.pool_executor_cls(max_workers=self.max_workers)
         self.events.start()
 
-        if not self.options.unix_socket:
+        if self.systemd:
+            server = HTTPServer(self)
+            family = socket.AF_INET6 if socket.has_ipv6 else socket.AF_INET
+            systemd_socket = socket.fromfd(SYSTEMD_SOCKET_FD,
+                                           family,
+                                           socket.SOCK_STREAM)
+            server.add_socket(systemd_socket)
+        elif not self.options.unix_socket:
             self.listen(self.options.port, address=self.options.address,
                         ssl_options=self.ssl_options,
                         xheaders=self.options.xheaders)
         else:
             from tornado.netutil import bind_unix_socket
             server = HTTPServer(self)
-            socket = bind_unix_socket(self.options.unix_socket)
-            server.add_socket(socket)
+            unix_socket = bind_unix_socket(self.options.unix_socket)
+            server.add_socket(unix_socket)
 
         self.io_loop.add_future(
             control.ControlHandler.update_workers(app=self),
@@ -76,3 +86,7 @@ class Flower(tornado.web.Application):
     def transport(self):
         return getattr(self.capp.connection().transport,
                        'driver_type', None)
+
+    @property
+    def systemd(self):
+        return os.environ.get('LISTEN_PID', None) == str(os.getpid())
