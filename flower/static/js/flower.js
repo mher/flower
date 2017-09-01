@@ -779,8 +779,8 @@ var flower = (function () {
                 render: htmlEscapeEntities
             }, {
                 targets: 6,
-                data: 'received',
-                visible: isColumnVisible('received'),
+                data: 'started',
+                visible: isColumnVisible('started'),
                 render: function (data, type, full, meta) {
                     if (data) {
                         return format_time(data);
@@ -790,8 +790,8 @@ var flower = (function () {
 
             }, {
                 targets: 7,
-                data: 'started',
-                visible: isColumnVisible('started'),
+                data: 'failed',
+                visible: isColumnVisible('failed'),
                 render: function (data, type, full, meta) {
                     if (data) {
                         return format_time(data);
@@ -800,10 +800,10 @@ var flower = (function () {
                 }
             }, {
                 targets: 8,
-                data: 'runtime',
-                visible: isColumnVisible('runtime'),
+                data: 'broker',
+                visible: isColumnVisible('broker'),
                 render: function (data, type, full, meta) {
-                    return data ? data.toFixed(3) : data;
+                    return data;
                 }
             }, {
                 targets: 9,
