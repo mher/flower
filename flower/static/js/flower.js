@@ -725,6 +725,7 @@ var flower = (function () {
             serverSide: true,
             colReorder: true,
             ajax: {
+                type: 'POST',
                 url: url_prefix() + '/tasks/datatable'
             },
             order: [
