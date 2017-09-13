@@ -85,37 +85,7 @@ class TasksDataTable(BaseHandler):
 
     @web.authenticated
     def post(self):
-        app = self.application
-        draw = self.get_argument('draw', type=int)
-        start = self.get_argument('start', type=int)
-        length = self.get_argument('length', type=int)
-        search = self.get_argument('search[value]', type=str)
-
-        column = self.get_argument('order[0][column]', type=int)
-        sort_by = self.get_argument('columns[%s][data]' % column, type=str)
-        sort_order = self.get_argument('order[0][dir]', type=str) == 'desc'
-
-        def key(item):
-            return Comparable(getattr(item[1], sort_by))
-
-        sorted_tasks = sorted(
-            iter_tasks(app.events, search=search),
-            key=key,
-            reverse=sort_order
-        )
-
-        filtered_tasks = []
-
-        for task in sorted_tasks[start:start + length]:
-            task_dict = as_dict(self.format_task(task)[1])
-            if task_dict.get('worker'):
-                task_dict['worker'] = task_dict['worker'].hostname
-
-            filtered_tasks.append(task_dict)
-
-        self.write(dict(draw=draw, data=filtered_tasks,
-                        recordsTotal=len(sorted_tasks),
-                        recordsFiltered=len(sorted_tasks)))
+        return self.get()
 
     def format_task(self, args):
         uuid, task = args
