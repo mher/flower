@@ -83,6 +83,10 @@ class TasksDataTable(BaseHandler):
                         recordsTotal=len(sorted_tasks),
                         recordsFiltered=len(sorted_tasks)))
 
+    @web.authenticated
+    def post(self):
+        return self.get()
+
     def format_task(self, args):
         uuid, task = args
         custom_format_task = self.application.options.format_task
