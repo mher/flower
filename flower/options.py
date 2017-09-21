@@ -65,6 +65,8 @@ define("tasks_columns", type=str,
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
+define("cache_ttl", type=int, default=1E10,
+       help="Time-to-live in seconds for elements of the cache for the workers listed on the dashboard.")
 
 # deprecated options
 define("inspect", default=False, help="inspect workers", type=bool)

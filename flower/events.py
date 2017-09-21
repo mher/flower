@@ -10,6 +10,7 @@ import collections
 from functools import partial
 
 import celery
+from cachetools import TTLCache
 
 from tornado.ioloop import PeriodicCallback
 from tornado.ioloop import IOLoop
@@ -27,13 +28,12 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 class EventsState(State):
     # EventsState object is created and accessed only from ioloop thread
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, cache_ttl=1E10, *args, **kwargs):
         super(EventsState, self).__init__(*args, **kwargs)
-        self.counter = collections.defaultdict(Counter)
+        self.counter = TTLCache(maxsize=kwargs.get('max_workers_in_memory', 5000), ttl=cache_ttl, missing=lambda x: Counter())
 
     def event(self, event):
         worker_name = event['hostname']

@@ -111,6 +111,16 @@ For more info see `Python SSL`_
 
 .. _certfile:
 
+
+cache_ttl
+~~~~~~~~
+
+This option can be used to remove workers that went offline from the dashboard.
+To precise, this parameter specifies the time-to-live in seconds for elements that have been added to the cache
+which is used to list the workers on the dashboard.
+(by default, `cache_ttl=1E10` in seconds)
+
+
 certfile
 ~~~~~~~~
 
