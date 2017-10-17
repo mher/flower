@@ -24,7 +24,7 @@ class TaskView(BaseHandler):
 
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
-
+        task = self.format_task(task)
         self.render("task.html", task=task)
 
 
