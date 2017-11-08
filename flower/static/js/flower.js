@@ -380,7 +380,7 @@ var flower = (function () {
 
         var name, seriesData = [],
             palette, graph, ticksTreatment, timeUnit, xAxis, yAxis, hoverDetail,
-            legend, shelving, order, highlighter;
+            legend, shelving, order, highlighter, slider;
         for (name in data) {
             if (data.hasOwnProperty(name)) {
                 seriesData.push({
@@ -462,6 +462,11 @@ var flower = (function () {
         highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
             graph: graph,
             legend: legend
+        });
+
+        slider = new Rickshaw.Graph.RangeSlider({
+            graph: graph,
+            element: document.getElementById('slider' + id)
         });
 
         legend.shelving = shelving;
