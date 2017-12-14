@@ -21,11 +21,14 @@ class TaskView(BaseHandler):
     @web.authenticated
     def get(self, task_id):
         task = get_task_by_id(self.application.events, task_id)
+        uuid_redirect = self.application.options.uuid_redirect
+        if uuid_redirect:
+            uuid_redirect.replace('{{ uuid }}',task.uuid)
 
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
 
-        self.render("task.html", task=task)
+        self.render("task.html", task=task, uuid_redirect=uuid_redirect)
 
 
 @total_ordering

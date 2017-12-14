@@ -308,3 +308,14 @@ Sets authentication provider
   - GitHub `flower.views.auth.GithubLoginHandler`
 
 See `Authentication` for usage examples
+
+.. _uuid_redirect:
+
+uuid_redirect
+~~~~~~~~~~~
+
+Add a redirection URL to UUID in the task page. For example, you can connect to logtrail using:
+
+.. code-block::
+
+    --uuid_redirect "http://subdomain.mycompany.com/kibana/app/logtrail#/?q=uuid%3A%20%22{{ uuid }}%22&t=Now"

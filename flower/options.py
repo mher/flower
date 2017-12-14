@@ -65,6 +65,7 @@ define("tasks_columns", type=str,
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
+define("uuid_redirect", type=str, help="url to redirect uuid links to")
 
 # deprecated options
 define("inspect", default=False, help="inspect workers", type=bool)

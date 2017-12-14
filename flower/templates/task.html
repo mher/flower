@@ -30,7 +30,13 @@
               </tr>
               <tr>
                 <td>UUID</td>
-                <td>{{ task.uuid }}</td>
+                <td>
+                  {%- if uuid_redirect -%}
+                    <a href="{{ uuid_redirect }}" target="_blank">{{ task.uuid }}</a>
+                  {%- else -%}
+                    {{ task.uuid }}
+                  {%- end -%}
+                </td>
               </tr>
               <tr>
                 <td>State</td>
