@@ -12,12 +12,19 @@ from tornado import ioloop
 from tornado.httpserver import HTTPServer
 
 from .api import control
-from .urls import handlers
+from .urls import handlers as default_handlers
 from .events import Events
 from .options import default_options
+from tornado.web import url
 
 
 logger = logging.getLogger(__name__)
+
+def rewrite_handler(handler, url_prefix):
+    if type(handler) is url:
+        return url("/{}{}".format(url_prefix.strip("/"), handler.regex.pattern),
+                handler.handler_class, handler.kwargs, handler.name)
+    return ("/{}{}".format(url_prefix.strip("/"), handler[0]), handler[1])
 
 
 class Flower(tornado.web.Application):
@@ -26,6 +33,9 @@ class Flower(tornado.web.Application):
 
     def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
+        handlers = default_handlers
+        if options is not None and "url_prefix" in options and options.url_prefix:
+            handlers = [rewrite_handler(h, options.url_prefix) for h in handlers]
         kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
         self.options = options or default_options

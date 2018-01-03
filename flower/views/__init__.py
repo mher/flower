@@ -95,8 +95,3 @@ class BaseHandler(tornado.web.RequestHandler):
     def capp(self):
         "return Celery application object"
         return self.application.capp
-
-    def reverse_url(self, *args):
-        prefix = self.application.options.url_prefix
-        url = super(BaseHandler, self).reverse_url(*args)
-        return prepend_url(url, prefix) if prefix else url
