@@ -14,6 +14,10 @@ from tornado import web
 from ..views import BaseHandler
 from ..utils.tasks import iter_tasks, get_task_by_id, as_dict
 
+from celery.result import AsyncResult
+from celery.events.state import Task
+from celery.backends.base import DisabledBackend
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,6 +25,27 @@ class TaskView(BaseHandler):
     @web.authenticated
     def get(self, task_id):
         task = get_task_by_id(self.application.events, task_id)
+
+        if task is None:
+            capp = self.application.capp
+
+            if capp.backend and not isinstance(capp.backend, DisabledBackend):
+                logger.debug('Task {} not found in events, checking backend'.format(task_id))
+
+                result = AsyncResult(task_id, backend=self.capp.backend)
+
+                if result.ready():
+                    task = Task(uuid=result.id,
+                                root_id=result.id,
+                                children=result.children,
+                                parent=result.parent,
+                                result=result.result,
+                                state=result.state,
+                                traceback=result.traceback,
+                                )
+                    if result.state == 'FAILURE':
+                        task.result = None
+                        task.exception = "Exception('{}'),".format(result.result)
 
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
