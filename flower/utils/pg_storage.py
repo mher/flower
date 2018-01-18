@@ -17,14 +17,15 @@ _schema = (
     """CREATE TABLE events
     (
         id SERIAL PRIMARY KEY,
-        time TIMESTAMP,
-        data JSONB NOT NULL
+        time TIMESTAMP NOT NULL,
+        data JSONB NOT NULL,
+        unique (time, data)
     )""",
     "CREATE INDEX event_index ON events USING GIN (data)",
     "CREATE INDEX event_time_index ON events (time ASC)",
 )
 
-_add_event = """INSERT INTO events (time, data) VALUES (%s, %s)"""
+_add_event = """INSERT INTO events (time, data) VALUES (%s, %s) ON CONFLICT DO NOTHING"""
 
 _all_events = """SELECT data FROM events ORDER BY time ASC"""
 
@@ -46,7 +47,7 @@ def event_callback(state, event):
             json.dumps(event)
         ))
         connection.commit()
-    except:
+    except Exception:
         connection.rollback()
         raise
     finally:
@@ -60,16 +61,29 @@ def open_connection(user, password, database, host, port, use_ssl):
         host=host, port=port, ssl=use_ssl
     )
 
-    # Create schema if database is empty
+    # Create schema if table is missing
     cursor = connection.cursor()
     try:
         cursor.execute(_all_tables)
-        tables = cursor.fetchone()
+        tables = cursor.fetchall()
         if tables is None:
             logger.debug('Database empty, executing schema definition.')
             for statement in _schema:
                 cursor.execute(statement)
             connection.commit()
+
+        table_match = False
+        for table in tables:
+            if 'events' in table[2]:
+                table_match = True
+                break
+
+        if not table_match:
+            logger.debug('Table events missing, executing schema definition.')
+            for statement in _schema:
+                cursor.execute(statement)
+            connection.commit()
+
     finally:
         cursor.close()
 
@@ -82,10 +96,12 @@ def close_connection():
 
 
 def get_all_events():
+    logger.debug('Events loading from postgresql persistence backend')
     cursor = connection.cursor()
     try:
         cursor.execute(_all_events)
         for row in cursor:
             yield row[0]
+        logger.debug('Events loaded from postgresql persistence backend')
     finally:
         cursor.close()
