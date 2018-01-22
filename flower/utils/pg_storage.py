@@ -66,19 +66,8 @@ def open_connection(user, password, database, host, port, use_ssl):
     try:
         cursor.execute(_all_tables)
         tables = cursor.fetchall()
-        if tables is None:
-            logger.debug('Database empty, executing schema definition.')
-            for statement in _schema:
-                cursor.execute(statement)
-            connection.commit()
 
-        table_match = False
-        for table in tables:
-            if 'events' in table[2]:
-                table_match = True
-                break
-
-        if not table_match:
+        if tables is None or not any(('events' in table[2]) for table in tables):
             logger.debug('Table events missing, executing schema definition.')
             for statement in _schema:
                 cursor.execute(statement)
