@@ -290,6 +290,13 @@ unix_socket
 
 Run flower using UNIX socket file
 
+.. _unix_socket_chmod:
+
+unix_socket_chmod
+~~~~~~~~~~~
+
+UNIX socket file access permissions
+
 .. _cookie_secret:
 
 cookie_secret
