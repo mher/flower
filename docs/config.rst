@@ -62,8 +62,16 @@ Run the http server on a given address
 auth
 ~~~~
 
-Enables Google OpenID authentication. `auth` is a regexp of emails
-to grant access. For more info see :ref:`google-openid`
+Enables Google OpenID or GitHub authentication.
+For Google `auth` is a regexp of emails allowed to access. ::
+
+    $ flower --auth_provider=flower.views.auth.GoogleAuth2LoginHandler --auth=".*@gmail.com"
+
+For GitHub `auth` is a JSON specifying email, teams or orgs allowed to access. ::
+
+    $ flower --auth_provider=flower.views.auth.GithubLoginHandler --auth='{"emails":".*@gmail\\.com", "teams":[1234,5678], "orgs":["MyOrg","MySecondOrg"]}'
+
+For more info see :ref:`authentication`
 
 .. _auto_refresh:
 
@@ -307,4 +315,4 @@ Sets authentication provider
   - Google `flower.views.auth.GoogleAuth2LoginHandler`
   - GitHub `flower.views.auth.GithubLoginHandler`
 
-See `Authentication` for usage examples
+See :ref:`authentication` for usage examples

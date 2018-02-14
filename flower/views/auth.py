@@ -124,7 +124,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
-                scope=['user:email'],
+                scope=['user:email','read:org'],
                 response_type='code',
                 extra_params={'approval_prompt': 'auto'}
             )
@@ -141,17 +141,55 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                      'User-agent': 'Tornado auth'})
         response = httpclient.HTTPClient().fetch(req)
 
-        emails = [email['email'].lower() for email in json.loads(response.body.decode('utf-8'))
-                  if email['verified'] and re.match(self.application.options.auth, email['email'])]
+        user_emails = json.loads(response.body.decode('utf-8'))
+        user_email = [email['email'] for email in user_emails if email['primary']][0]
 
-        if not emails:
+        auth_conf = json.loads(self.application.options.auth)
+
+        allowed_emails = auth_conf.get('emails')
+        matching_emails = None
+        if allowed_emails:
+            matching_emails = [email['email'].lower() for email in user_emails
+                    if email['verified'] and re.match(allowed_emails, email['email'])]
+
+        allowed_teams = auth_conf.get('teams')
+        matching_teams = None
+        if allowed_teams:         
+            if not isinstance(allowed_teams, list):
+                allowed_teams = [allowed_teams]
+
+            req = httpclient.HTTPRequest(
+                'https://api.github.com/user/teams',
+                headers={'Authorization': 'token ' + access_token,
+                        'User-agent': 'Tornado auth'})
+            response = httpclient.HTTPClient().fetch(req)
+
+            matching_teams = [team['id'] for team in json.loads(response.body.decode('utf-8'))
+                    if team['id'] in allowed_teams]
+        
+        allowed_orgs = auth_conf.get('orgs')
+        matching_orgs = None
+        if allowed_orgs:         
+            if not isinstance(allowed_orgs, list):
+                allowed_orgs = [allowed_orgs]
+
+            req = httpclient.HTTPRequest(
+                'https://api.github.com/user/orgs',
+                headers={'Authorization': 'token ' + access_token,
+                        'User-agent': 'Tornado auth'})
+            response = httpclient.HTTPClient().fetch(req)
+
+            matching_orgs = [org['login'] for org in json.loads(response.body.decode('utf-8'))
+                    if org['login'] in allowed_orgs]
+
+        if not any([matching_emails, matching_teams, matching_orgs]):
             message = (
                 "Access denied. Please use another account or "
-                "ask your admin to add your email to flower --auth."
+                "contact your admin."
             )
             raise tornado.web.HTTPError(403, message)
 
-        self.set_secure_cookie("user", str(emails.pop()))
+        self.set_secure_cookie("user", str(user_email))
 
         next_ = self.get_argument('next', self.application.options.url_prefix or '/')
         if self.application.options.url_prefix and next_[0] != '/':

@@ -70,8 +70,7 @@ class BaseHandler(tornado.web.RequestHandler):
         if user:
             if not isinstance(user, str):
                 user = user.decode()
-            if re.search(self.application.options.auth, user):
-                return user
+            return user
         return None
 
     def get_argument(self, name, default=[], strip=True, type=None):
