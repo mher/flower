@@ -148,3 +148,11 @@ class TaskControlTests(AsyncHTTPTestCase):
                                                       terminate=True,
                                                       signal='SIGTERM')
 
+    def test_terminate_signal(self):
+        celery = self._app.capp
+        celery.control.revoke = MagicMock()
+        r = self.post('/api/task/revoke/test', body={'terminate': True, 'signal': 'SIGUSR1'})
+        self.assertEqual(200, r.code)
+        celery.control.revoke.assert_called_once_with('test',
+                                                      terminate=True,
+                                                      signal='SIGUSR1')
