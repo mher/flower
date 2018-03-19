@@ -136,7 +136,8 @@ class TaskControlTests(AsyncHTTPTestCase):
         r = self.post('/api/task/revoke/test', body={})
         self.assertEqual(200, r.code)
         celery.control.revoke.assert_called_once_with('test',
-                                                      terminate=False)
+                                                      terminate=False,
+                                                      signal='SIGTERM')
 
     def test_terminate(self):
         celery = self._app.capp
@@ -144,4 +145,6 @@ class TaskControlTests(AsyncHTTPTestCase):
         r = self.post('/api/task/revoke/test', body={'terminate': True})
         self.assertEqual(200, r.code)
         celery.control.revoke.assert_called_once_with('test',
-                                                      terminate=True)
+                                                      terminate=True,
+                                                      signal='SIGTERM')
+
