@@ -11,6 +11,8 @@ from functools import partial
 
 import celery
 
+from pkg_resources import parse_version
+
 from tornado.ioloop import PeriodicCallback
 from tornado.ioloop import IOLoop
 
@@ -67,7 +69,7 @@ class Events(threading.Thread):
         self.enable_events = enable_events
         self.state = None
 
-        if self.persistent and tuple(map(int, celery.__version__.split('.'))) < (3, 0, 15):
+        if self.persistent and parse_version(celery.__version__) < parse_version("3.0.15"):
             logger.warning('Persistent mode is available with '
                            'Celery 3.0.15 and later')
             self.persistent = False
