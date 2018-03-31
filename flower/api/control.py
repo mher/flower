@@ -461,13 +461,15 @@ Revoke a task
   }
 
 :query terminate: terminate the task if it is running
+:query signal: name of signal to send to process if terminate (default: 'SIGTERM')
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
         """
         logger.info("Revoking task '%s'", taskid)
         terminate = self.get_argument('terminate', default=False, type=bool)
-        self.capp.control.revoke(taskid, terminate=terminate)
+        signal = self.get_argument('signal', default='SIGTERM', type=str)
+        self.capp.control.revoke(taskid, terminate=terminate, signal=signal)
         self.write(dict(message="Revoked '%s'" % taskid))
 
 
