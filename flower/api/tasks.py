@@ -378,7 +378,8 @@ class GetQueueLengths(BaseTaskHandler):
         queue_names = ControlHandler.get_active_queue_names()
 
         if not queue_names:
-            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE])
+            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
+                        set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
 
         queues = yield broker.queues(sorted(queue_names))
         self.write({'active_queues': queues})
@@ -467,6 +468,8 @@ List tasks
 :query workername: filter task by workername
 :query taskname: filter tasks by taskname
 :query state: filter tasks by state
+:query received_start: filter tasks by received date (must be greater than) format %Y-%m-%d %H:%M
+:query received_end: filter tasks by received date (must be less than) format %Y-%m-%d %H:%M
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
@@ -476,6 +479,8 @@ List tasks
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
+        received_start = self.get_argument('received_start', None)
+        received_end = self.get_argument('received_end', None)
         search = self.get_argument('search', None)
         sort = self.get_argument('sort', None)
 
@@ -487,7 +492,9 @@ List tasks
         result = []
         for task_id, task in tasks.iter_tasks(
                 app.events, limit=limit, type=type, sort_by=sort, search=search,
-                worker=worker, state=state):
+                worker=worker, state=state,
+                received_start=received_start,
+                received_end=received_end):
             task = tasks.as_dict(task)
             task.pop('worker', None)
             result.append((task_id, task))
@@ -594,8 +601,9 @@ Get a task info
         task = tasks.get_task_by_id(self.application.events, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
-        # avoid to recode the serialization already done on the celery side
+
         response = task.as_dict()
-        # special case for the Worker object
-        response['worker'] = task.worker.hostname
+        if task.worker is not None:
+            response['worker'] = task.worker.hostname
+
         self.write(response)

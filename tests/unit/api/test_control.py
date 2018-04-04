@@ -2,7 +2,7 @@ from mock import MagicMock
 
 from flower.api.control import ControlHandler
 
-from tests import AsyncHTTPTestCase
+from tests.unit import AsyncHTTPTestCase
 
 
 class UnknownWorkerControlTests(AsyncHTTPTestCase):
@@ -136,7 +136,8 @@ class TaskControlTests(AsyncHTTPTestCase):
         r = self.post('/api/task/revoke/test', body={})
         self.assertEqual(200, r.code)
         celery.control.revoke.assert_called_once_with('test',
-                                                      terminate=False)
+                                                      terminate=False,
+                                                      signal='SIGTERM')
 
     def test_terminate(self):
         celery = self._app.capp
@@ -144,4 +145,14 @@ class TaskControlTests(AsyncHTTPTestCase):
         r = self.post('/api/task/revoke/test', body={'terminate': True})
         self.assertEqual(200, r.code)
         celery.control.revoke.assert_called_once_with('test',
-                                                      terminate=True)
+                                                      terminate=True,
+                                                      signal='SIGTERM')
+
+    def test_terminate_signal(self):
+        celery = self._app.capp
+        celery.control.revoke = MagicMock()
+        r = self.post('/api/task/revoke/test', body={'terminate': True, 'signal': 'SIGUSR1'})
+        self.assertEqual(200, r.code)
+        celery.control.revoke.assert_called_once_with('test',
+                                                      terminate=True,
+                                                      signal='SIGUSR1')

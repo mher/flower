@@ -4,9 +4,6 @@ Celery Flower
 .. image:: https://img.shields.io/pypi/v/flower.svg
     :target: https://pypi.python.org/pypi/flower
 
-.. image:: https://img.shields.io/pypi/dm/flower.svg
-        :target: https://pypi.python.org/pypi/flower
-
 .. image:: https://travis-ci.org/mher/flower.svg?branch=master
         :target: https://travis-ci.org/mher/flower
 
@@ -131,7 +128,7 @@ Contributing
 ------------
 
 If you'd like to contribute, simply fork `the repository`_, commit your
-changes, run the tests (`python -m tests`) and send a pull request.
+changes, run the tests (`tox`) and send a pull request.
 Make sure you add yourself to CONTRIBUTORS_.
 
 If you are interested in maintaining the project please contact.

@@ -6,8 +6,8 @@ from celery import Celery
 
 
 app = Celery("tasks",
-             broker=os.environ.get('CELERY_BROKER_URL', 'amqp://'),
-             backend=os.environ.get('CELERY_RESULT_BACKEND', 'amqp'))
+             broker=os.environ.get('CELERY_BROKER_URL', 'redis://'),
+             backend=os.environ.get('CELERY_RESULT_BACKEND', 'redis'))
 app.conf.CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 
 
