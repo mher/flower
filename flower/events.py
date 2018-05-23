@@ -109,6 +109,7 @@ class Events(threading.Thread):
                 with self.capp.connection() as conn:
                     recv = EventReceiver(conn,
                                          handlers={"*": self.on_event},
+                                         routing_key="task.#",
                                          app=self.capp)
                     try_interval = 1
                     recv.capture(limit=None, timeout=None, wakeup=True)
