@@ -267,21 +267,8 @@ For example to access Flower on http://example.com/flower run it with: ::
 
     $ flower --url_prefix=flower
 
-And use the following `nginx` configuration:
+NOTE: The old `nginx` rewrite is no longer needed
 
-.. code-block:: nginx
-
-    server {
-        listen 80;
-        server_name example.com;
-
-        location /flower/ {
-            rewrite ^/flower/(.*)$ /$1 break;
-            proxy_pass http://example.com:5555;
-            proxy_set_header Host $host;
-        }
-
-    }
 
 .. _unix_socket:
 
