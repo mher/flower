@@ -648,6 +648,7 @@ var flower = (function () {
             scrollX: true,
             scrollY: true,
             scrollCollapse: true,
+            dom: '<"toolbar">frtip',
             ajax: url_prefix() + '/dashboard?json=1',
             order: [
                 [1, "asc"]
@@ -708,6 +709,22 @@ var flower = (function () {
             }, autorefresh * 1000);
         }
 
+        // Filter workers by status
+        $('div.toolbar').html(`
+        <div id="worker-status-radio" class="btn-group span6" data-toggle="buttons-radio">
+            <button class="btn active" class="toggle" value="">All</button>
+            <button class="btn" class="toggle" value="online">Online</button>
+            <button class="btn" class="toggle" value="offline">Offline</button>
+        </div>
+        `)
+
+        $("#worker-status-radio > button ").click(function () {
+            $('#workers-table')
+                .DataTable()
+                .column(1)
+                .search($(this).val())
+                .draw();
+        });
     });
 
     $(document).ready(function () {
