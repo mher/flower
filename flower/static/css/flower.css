@@ -229,3 +229,10 @@
   width: 100%;
   display: inline-block;
 }
+
+/* Modify bootstrap dropdown menu to have white font colour instead of
+ * gray (recall that the background is green) */
+.nav-collapse .nav > li > a,
+.nav-collapse .dropdown-menu a {
+  color: #ffffff;
+}
