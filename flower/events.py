@@ -3,7 +3,7 @@ import logging
 import shelve
 import threading
 import time
-from collections import Counter
+from collections import defaultdict, Counter
 from functools import partial
 
 from celery.events import EventReceiver
@@ -12,6 +12,17 @@ from prometheus_client import Counter as PrometheusCounter
 from prometheus_client import Gauge, Histogram
 from tornado.ioloop import PeriodicCallback
 from tornado.options import options
+
+
+try:
+    from elasticsearch import Elasticsearch
+    from elasticsearch_dsl import Search, MultiSearch
+    from elasticsearch_dsl.query import Term
+except ImportError:
+    Search = None
+    Elasticsearch = None
+    MultiSearch = None
+    Term = None
 
 logger = logging.getLogger(__name__)
 
@@ -69,10 +80,13 @@ class EventsState(State):
         worker_name = event['hostname']
         event_type = event['type']
 
-        self.counter[worker_name][event_type] += 1
+        if not self.counter[worker_name] and options.elasticsearch_dashboard is True:
+            event_type = self.elasticsearch_dashboard_data(worker_name, event_type)
+        else:
+            self.counter[worker_name][event_type] += 1
 
         if event_type.startswith('task-'):
-            task_id = event['uuid']
+            task_id = event.get('uuid')
             task = self.tasks.get(task_id)
             task_name = event.get('name', '')
             if not task_name and task_id in self.tasks:
@@ -108,6 +122,43 @@ class EventsState(State):
 
         if event_type == 'worker-offline':
             self.metrics.worker_online.labels(worker_name).set(0)
+
+    # pylint: disable=too-many-locals
+    def elasticsearch_dashboard_data(self, worker_name, event_type):
+        elasticsearch_url = options.elasticsearch_url
+        es = Elasticsearch([elasticsearch_url, ])
+
+        ms = MultiSearch(using=es, index="task")
+        s = Search(using=es, index='task')
+        ms = ms.add(s.filter(Term(state='RECEIVED') & Term(hostname=worker_name)).extra(size=0))  # pylint: disable=no-member
+        ms = ms.add(s.filter(Term(state='STARTED') & Term(hostname=worker_name)).extra(size=0)) # pylint: disable=no-member
+        ms = ms.add(s.filter(Term(state='SUCCESS') & Term(hostname=worker_name)).extra(size=0)) # pylint: disable=no-member
+        ms = ms.add(s.filter(Term(state='FAILED') & Term(hostname=worker_name)).extra(size=0))  # pylint: disable=no-member
+        ms = ms.add(s.filter(Term(state='RETRIED') & Term(hostname=worker_name)).extra(size=0))  # pylint: disable=no-member
+        responses = ms.execute()
+        task_event_keys = ["task-received", "task-started", "task-succeeded", "task-failed", "task-retried"]
+        tasks_info = defaultdict(int)
+        for event_type_item, resp in zip(task_event_keys, responses):
+            tasks_info[event_type_item] += resp.hits.total
+        processed = tasks_info["task-received"]
+        started = tasks_info["task-started"]
+        succeeded = tasks_info["task-succeeded"]
+        failed = tasks_info["task-failed"]
+        retried = tasks_info["task-retried"]
+        self.counter[worker_name]['task-received'] = processed + started + succeeded + failed + retried
+        self.counter[worker_name]['task-started'] = started
+        self.counter[worker_name]['task-succeeded'] = succeeded
+        self.counter[worker_name]['task-retried'] = retried
+        self.counter[worker_name]['task-failed'] = failed
+        if not event_type.startswith('task-'):
+            self.counter[worker_name][event_type] += 1
+        return event_type
+
+        # from .elasticsearch_history import send_to_elastic_search
+        # try:
+        #     send_to_elastic_search(self, event)
+        # except Exception as e:
+        #     print(e)
 
 
 class Events(threading.Thread):
