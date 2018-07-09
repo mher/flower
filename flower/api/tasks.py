@@ -14,6 +14,17 @@ from celery.result import AsyncResult
 from celery.contrib.abortable import AbortableAsyncResult
 from celery.backends.base import DisabledBackend
 
+try:
+    from flower.api.elasticsearch_history import AlternativeBackendError
+except ImportError:
+    AlternativeBackendError = None
+
+try:
+    from flower.api.elasticsearch_history import list_tasks_elastic_search
+except ImportError:
+    list_tasks_elastic_search = None
+
+from ..options import options
 from ..utils import tasks
 from ..views import BaseHandler
 from ..utils.broker import Broker
@@ -511,30 +522,44 @@ List tasks
 :statuscode 200: no error
 :statuscode 401: unauthorized request
         """
+        USE_ES = options.elasticsearch
+
         app = self.application
         limit = self.get_argument('limit', None)
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
+        use_es = self.get_argument('es', USE_ES)
         received_start = self.get_argument('received_start', None)
         received_end = self.get_argument('received_end', None)
+        started_start = self.get_argument('started_start', None)
+        started_end = self.get_argument('started_end', None)
+        root_id = self.get_argument('root_id', None)
+        parent_id = self.get_argument('parent_id', None)
 
         limit = limit and int(limit)
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
-
         result = []
-        for task_id, task in tasks.iter_tasks(
-                app.events, limit=limit, type=type,
-                worker=worker, state=state,
-                received_start=received_start,
-                received_end=received_end):
-            task = tasks.as_dict(task)
-            worker = task.pop('worker', None)
-            if worker is not None:
-              task['worker'] = worker.hostname
-            result.append((task_id, task))
+        if use_es:
+            try:
+                result = list_tasks_elastic_search(self)
+            except AlternativeBackendError:
+                use_es = False
+        if not use_es:
+            for task_id, task in tasks.iter_tasks(
+                    app.events, limit=limit, type=type,
+                    worker=worker, state=state,
+                    received_start=received_start,
+                    received_end=received_end,
+                    started_start=started_start, started_end=started_end,
+                    root_id=root_id, parent_id=parent_id):
+                task = tasks.as_dict(task)
+                worker = task.pop('worker', None)
+                if worker is not None:
+                    task['worker'] = worker.hostname
+                result.append((task_id, task))
         self.write(dict(result))
 
 

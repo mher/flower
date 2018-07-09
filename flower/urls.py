@@ -6,6 +6,7 @@ from .api import events
 from .api import control
 from .api import tasks
 from .api import workers
+from .api import elasticsearch_history
 from .views import auth
 from .views import monitor
 from .views.broker import BrokerView
@@ -68,6 +69,8 @@ handlers = [
     (r"/api/task/events/task-custom/(.*)", events.TaskCustom),
     # Metrics
     (r"/metrics", monitor.Metrics),
+    # Elastic search
+    (r"/api/es/refresh/(.*)", elasticsearch_history.ElasticSearchHistoryHandler),
     # Static
     (r"/static/(.*)", StaticFileHandler,
      {"path": settings['static_path']}),

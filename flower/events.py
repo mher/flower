@@ -17,7 +17,8 @@ from celery.events.state import State
 
 from . import api
 
-from collections import Counter
+from .options import options
+from collections import defaultdict, Counter
 from concurrent.futures import ThreadPoolExecutor
 
 from prometheus_client import Counter as PrometheusCounter, Histogram
@@ -42,10 +43,41 @@ class EventsState(State):
         worker_name = event['hostname']
         event_type = event['type']
 
-        self.counter[worker_name][event_type] += 1
+        if not self.counter[worker_name] and options.elasticsearch_dashboard is True:
+            from elasticsearch import Elasticsearch
+            ELASTICSEARCH_URL = options.elasticsearch_url
+            es = Elasticsearch([ELASTICSEARCH_URL, ])
+            from elasticsearch_dsl import Search, MultiSearch
+            from elasticsearch_dsl.query import Term
+            ms = MultiSearch(using=es, index="task")
+            s = Search(using=es, index='task')
+            ms = ms.add(s.filter(Term(state='RECEIVED') & Term(hostname=worker_name)).extra(size=0))
+            ms = ms.add(s.filter(Term(state='STARTED') & Term(hostname=worker_name)).extra(size=0))
+            ms = ms.add(s.filter(Term(state='SUCCESS') & Term(hostname=worker_name)).extra(size=0))
+            ms = ms.add(s.filter(Term(state='FAILED') & Term(hostname=worker_name)).extra(size=0))
+            ms = ms.add(s.filter(Term(state='RETRIED') & Term(hostname=worker_name)).extra(size=0))
+            responses = ms.execute()
+            task_event_keys = ["task-received", "task-started", "task-succeeded", "task-failed", "task-retried"]
+            tasks_info = defaultdict(int)
+            for event_type, resp in zip(task_event_keys, responses):
+                tasks_info[event_type] += resp.hits.total
+            processed = tasks_info["task-received"]
+            started = tasks_info["task-started"]
+            succeeded = tasks_info["task-succeeded"]
+            failed = tasks_info["task-failed"]
+            retried = tasks_info["task-retried"]
+            self.counter[worker_name]['task-received'] = processed + started + succeeded + failed + retried
+            self.counter[worker_name]['task-started'] = started
+            self.counter[worker_name]['task-succeeded'] = succeeded
+            self.counter[worker_name]['task-retried'] = retried
+            self.counter[worker_name]['task-failed'] = failed
+            if not event_type.startswith('task-'):
+                self.counter[worker_name][event_type] += 1
+        else:
+            self.counter[worker_name][event_type] += 1
 
         if event_type.startswith('task-'):
-            task_id = event['uuid']
+            task_id = event.get('uuid')
             task_name = event.get('name', '')
             if not task_name and task_id in self.tasks:
                 task_name = self.tasks[task_id].name or ''
@@ -63,6 +95,12 @@ class EventsState(State):
 
         # Save the event
         super(EventsState, self).event(event)
+
+        # from .elasticsearch_history import send_to_elastic_search
+        # try:
+        #     send_to_elastic_search(self, event)
+        # except Exception as e:
+        #     print(e)
 
 
 class Events(threading.Thread):

@@ -3,6 +3,7 @@ import sys
 import atexit
 import signal
 import logging
+import time
 
 from pprint import pformat
 
@@ -13,6 +14,7 @@ from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
 from celery.bin.base import Command
 
+from flower.indexer_app import IndexerApp
 from . import __version__
 from .app import Flower
 from .urls import settings
@@ -34,6 +36,9 @@ class FlowerCommand(Command):
         self.setup_logging()
 
         self.app.loader.import_default_modules()
+        if getattr(self.app.conf, 'timezone', None):
+            os.environ['TZ'] = self.app.conf.timezone
+            time.tzset()
         flower = Flower(capp=self.app, options=options, **settings)
         atexit.register(flower.stop)
 
@@ -90,7 +95,6 @@ class FlowerCommand(Command):
 
     def extract_settings(self):
         settings['debug'] = options.debug
-
         if options.cookie_secret:
             settings['cookie_secret'] = options.cookie_secret
 
@@ -145,3 +149,31 @@ class FlowerCommand(Command):
             pformat(sorted(self.app.tasks.keys()))
         )
         logger.debug('Settings: %s', pformat(settings))
+
+
+class IndexerCommand(FlowerCommand):
+    def run_from_argv(self, prog_name, argv=None, **_kwargs):
+        self.apply_env_options()
+        self.apply_options(prog_name, argv)
+
+        self.extract_settings()
+        self.setup_logging()
+
+        self.app.loader.import_default_modules()
+        if getattr(self.app.conf, 'timezone', None):
+            os.environ['TZ'] = self.app.conf.timezone
+            time.tzset()
+        i_a = IndexerApp(capp=self.app, options=options, **settings)
+        atexit.register(i_a.stop)
+
+        def sigterm_handler(signal, frame):
+            logger.info('SIGTERM detected, shutting down')
+            sys.exit(0)
+        signal.signal(signal.SIGTERM, sigterm_handler)
+
+        self.print_banner('ssl_options' in settings)
+
+        try:
+            i_a.start()
+        except (KeyboardInterrupt, SystemExit):
+            pass

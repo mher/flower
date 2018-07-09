@@ -65,6 +65,12 @@ define("tasks_columns", type=str,
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
+define("elasticsearch", type=bool, default=False)
+define("elasticsearch_index_bulk_size", type=int, default=200)
+define("elasticsearch_index_timeout", type=int, default=10)
+define("elasticsearch_day_retention", type=int, default=21)
+define("elasticsearch_url", type=str, default="http://localhost:9200/")
+define("elasticsearch_dashboard", type=bool, default=False)
 
 # deprecated options
 define("inspect", default=False, help="inspect workers", type=bool)

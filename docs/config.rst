@@ -305,3 +305,48 @@ purge_offline_workers
 Time (in seconds) after which offline workers are automatically removed from dashboard.
 
 If omitted, offline workers remain on the dashboard.
+
+.. _elasticsearch:
+
+elasticsearch
+~~~~~~~~~~~~~
+
+Signals the process that it should use elasticsearch for history
+
+
+.. _elasticsearch_index_bulk_size:
+
+elasticsearch_index_bulk_size
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+How many documents will the elasticsearch indexer allow in a single bulk index API call.
+
+.. _elasticsearch_index_timeout:
+
+elasticsearch_index_timeout
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+How long should the background thread wait for the queue to fill up to elasticsearch_index_bulk_size
+
+.. _elasticsearch_day_retention:
+
+elasticsearch_day_retention
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For projects that require data retention management, this will specify how many days can have indexes at once.
+
+So if the value is 21, then any indexes older than 21 days will be deleted. This happens at startup and on day change.
+
+.. _elasticsearch_url:
+
+elasticsearch_url
+~~~~~~~~~~~~~~~~~
+
+Which URL is elasticsearch at?
+
+.. _elasticsearch_dashboard:
+
+elasticsearch_dashboard
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Will the dashboard initially get its counter values from elasticsearch?
