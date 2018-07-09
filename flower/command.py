@@ -3,6 +3,7 @@ import logging
 import os
 import signal
 import sys
+import time
 from logging import NullHandler
 from pprint import pformat
 
@@ -11,6 +12,8 @@ from celery.bin.base import CeleryCommand
 from tornado.log import enable_pretty_logging
 from tornado.options import options, parse_command_line, parse_config_file
 
+from flower.indexer_app import IndexerApp
+from . import __version__
 from .app import Flower
 from .options import DEFAULT_CONFIG_FILE, default_options
 from .urls import settings
@@ -43,6 +46,13 @@ def flower(ctx, tornado_argv):
     setup_logging()
 
     app = ctx.obj.app
+    custom_es_setup = True
+    if custom_es_setup:
+        app.loader.import_default_modules()
+        if getattr(app.conf, 'timezone', None):
+            os.environ['TZ'] = app.conf.timezone
+            time.tzset()
+
     flower_app = Flower(capp=app, options=options, **settings)
 
     atexit.register(flower_app.stop)
@@ -107,6 +117,7 @@ def warn_about_celery_args_used_in_flower_command(ctx, flower_args):
             'Please specify them after celery command instead following this template: '
             'celery [celery args] flower [flower args].', incorrectly_used_args
         )
+        logger.debug('Settings: %s', pformat(settings))
 
 
 def setup_logging():
@@ -189,3 +200,33 @@ def print_banner(app, ssl, port=None):
         pformat(sorted(app.tasks.keys()))
     )
     logger.debug('Settings: %s', pformat(settings))
+
+
+@click.command(cls=CeleryCommand,
+               context_settings={
+                   'ignore_unknown_options': True
+               })
+@click.argument("tornado_argv", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def indexer(ctx, tornado_argv):
+    """Tool for alternative task indexing in a Celery cluster."""
+    warn_about_celery_args_used_in_flower_command(ctx, tornado_argv)
+    apply_env_options()
+    apply_options(sys.argv[0], tornado_argv)
+
+    extract_settings()
+    setup_logging()
+    app = ctx.obj.app
+
+    indexer_app = IndexerApp(capp=app, options=options, **settings)
+
+    atexit.register(indexer_app.stop)
+    signal.signal(signal.SIGTERM, sigterm_handler)
+
+    if not ctx.obj.quiet:
+        print_banner(app, 'ssl_options' in settings)
+
+    try:
+        indexer_app.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass

@@ -1,5 +1,8 @@
 import ast
+import datetime
 import heapq
+import re
+import time
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
@@ -203,12 +206,12 @@ def _parse_term(token):
         raise QuerySyntaxError("Negation with '-' is not supported", token.position)
     if not value:
         raise QuerySyntaxError('Search qualifier requires a value', token.position)
-    is_exact = field in EXACT_FIELDS or (field == 'kwargs' and '=' in value)
+    is_exact = (field in EXACT_FIELDS) or (field == 'kwargs' and '=' in value)
     if not is_exact and len(value.strip()) < MIN_SUBSTRING_LENGTH:
         raise QuerySyntaxError(
             f'Substring search terms must contain at least '
             f'{MIN_SUBSTRING_LENGTH} characters', token.position)
-    return Term(field, value)
+    return Term(field or '', value)
 
 
 def parse_query(raw_query):
@@ -365,8 +368,10 @@ class TaskSearchEngine:
 
     # pylint: disable=too-many-arguments,too-many-locals
     def search(self, tasks, query='', *, task_type=None, worker=None, state=None,
-               received_start=None, received_end=None, sort_by=None,
-               descending=False, offset=0, limit=None):
+               received_start=None, received_end=None, started_start=None,
+               started_end=None, sort_by=None, descending=False, offset=0,
+               limit=None, root_id=None, parent_id=None, runtime_lt=None,
+               runtime_gt=None):
         task_map = getattr(tasks, 'data', tasks)
         task_ids = set(self.documents)
         task_ids.intersection_update(task_map.keys())
@@ -380,12 +385,37 @@ class TaskSearchEngine:
         if state:
             task_ids.intersection_update(
                 self.exact_postings['state'].get(_normalize(state), ()))
+        if root_id:
+            task_ids = {tid for tid in task_ids
+                        if task_map.get(tid) and
+                        getattr(task_map[tid], 'root_id', None) == root_id}
+        if parent_id:
+            task_ids = {tid for tid in task_ids
+                        if task_map.get(tid) and
+                        getattr(task_map[tid], 'parent_id', None) == parent_id}
+        if runtime_lt is not None:
+            task_ids = {tid for tid in task_ids
+                        if task_map.get(tid) and
+                        getattr(task_map[tid], 'runtime', None) is not None and
+                        float(runtime_lt) > task_map[tid].runtime}
+        if runtime_gt is not None:
+            task_ids = {tid for tid in task_ids
+                        if task_map.get(tid) and
+                        getattr(task_map[tid], 'runtime', None) is not None and
+                        float(runtime_gt) < task_map[tid].runtime}
 
         if received_start is not None or received_end is not None:
             task_ids = {
                 task_id for task_id in task_ids
                 if _task_in_time_range(
                     task_map[task_id], received_start, received_end)
+            }
+        if started_start is not None or started_end is not None:
+            task_ids = {
+                task_id for task_id in task_ids
+                if _task_in_time_range(
+                    task_map[task_id], started_start, started_end,
+                    attr='started')
             }
 
         task_ids = self.matching_ids(query, task_ids)
@@ -395,20 +425,18 @@ class TaskSearchEngine:
         offset = max(offset, 0)
         end = None if limit is None else offset + max(limit, 0)
         if sort_by:
-            def key(task_id):
-                return _task_sort_key(task_map[task_id], sort_by, task_id)
+            sort_key_func = lambda task_id: _task_sort_key(task_map[task_id], sort_by, task_id)
         else:
-            def key(task_id):
-                return (
-                    getattr(task_map[task_id], 'timestamp', None) or 0,
-                    task_id)
+            sort_key_func = lambda task_id: (
+                getattr(task_map[task_id], 'timestamp', None) or 0,
+                task_id)
             descending = True
 
         if end is not None and end < filtered_count:
             select = heapq.nlargest if descending else heapq.nsmallest
-            ordered_ids = select(end, ordered_ids, key=key)
+            ordered_ids = select(end, ordered_ids, key=sort_key_func)
         else:
-            ordered_ids.sort(key=key, reverse=descending)
+            ordered_ids.sort(key=sort_key_func, reverse=descending)
         return SearchPage(
             ordered_ids[offset:end], filtered_count, len(task_map))
 
@@ -486,11 +514,11 @@ def _remove_posting(index, value, task_id):
         del index[value]
 
 
-def _task_in_time_range(task, received_start, received_end):
-    received = getattr(task, 'received', None)
-    if received_start is not None and received is not None and received < received_start:
+def _task_in_time_range(task, time_start, time_end, attr='received'):
+    value = getattr(task, attr, None)
+    if time_start is not None and value is not None and value < time_start:
         return False
-    return received_end is None or received is None or received <= received_end
+    return time_end is None or value is None or value <= time_end
 
 
 def _task_sort_key(task, sort_by, task_id):
@@ -505,3 +533,161 @@ def _task_sort_key(task, sort_by, task_id):
     else:
         value = _normalize(value)
     return True, value, task_id
+
+
+# Elasticsearch-specific search term parsing (from feature branch)
+# pylint: disable=too-many-branches,too-many-statements
+def parse_search_terms(raw_search_value, find_time_keys=False):
+    search_regexp = r'(?:[^\s,"]|"(?:\\.|[^"])*")+'  # splits by space, ignores space in quotes
+    if not raw_search_value:
+        return {}
+    parsed_search = {}
+    for query_part in re.findall(search_regexp, raw_search_value):
+        if not query_part:
+            continue
+        find_any = True
+        if query_part.startswith('result:'):
+            parsed_search['result'] = preprocess_search_value(query_part[len('result:'):])
+        elif query_part.startswith('args:'):
+            if 'args' not in parsed_search:
+                parsed_search['args'] = []
+            parsed_search['args'].append(preprocess_search_value(query_part[len('args:'):]))
+        elif query_part.startswith('taskname:'):
+            if 'taskname' not in parsed_search:
+                parsed_search['taskname'] = []
+            parsed_search['taskname'].append(preprocess_search_value(query_part[len('taskname:'):]))
+        elif query_part.startswith('kwargs:'):
+            if 'kwargs' not in parsed_search:
+                parsed_search['kwargs'] = {}
+            try:
+                key, value = [p.strip() for p in query_part[len('kwargs:'):].split('=')]
+            except ValueError:
+                continue
+            parsed_search['kwargs'][key] = preprocess_search_value(value)
+        elif query_part.startswith('state'):
+            if 'state' not in parsed_search:
+                parsed_search['state'] = []
+            parsed_search['state'].append(preprocess_search_value(query_part[len('state:'):]))
+        elif query_part.startswith('es:'):
+            parsed_search['es'] = preprocess_search_value(query_part[len('es:'):])
+        elif query_part.startswith('uuid:'):
+            parsed_search['uuid'] = preprocess_search_value(query_part[len('uuid:'):])
+        elif query_part.startswith('runtime_lt:'):
+            parsed_search['runtime_lt'] = preprocess_search_value(query_part[len('runtime_lt:'):])
+        elif query_part.startswith('runtime_gt:'):
+            parsed_search['runtime_gt'] = preprocess_search_value(query_part[len('runtime_gt:'):])
+        elif query_part.startswith('root_id:'):
+            parsed_search['root_id'] = preprocess_search_value(query_part[len('root_id:'):])
+        elif query_part.startswith('parent_id:'):
+            parsed_search['parent_id'] = preprocess_search_value(query_part[len('parent_id:'):])
+        if parsed_search:
+            find_any = False
+        if find_time_keys:
+            def convert(x):
+                try:
+                    if x.count(":") == 2:
+                        if x.count("."):
+                            # does not return fractional second information, but at least
+                            # we can "support" it being passed in, as opposed to ignoring it
+                            return time.mktime(
+                                datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f').timetuple()
+                            )
+
+                        return time.mktime(
+                            datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S').timetuple()
+                        )
+                    return time.mktime(
+                        datetime.datetime.strptime(x, '%Y-%m-%d %H:%M').timetuple()
+                    )
+                except ValueError:
+                    return ""
+            if query_part.startswith('received_start'):
+                received_start = preprocess_search_value(query_part[len('received_start:'):])
+                if received_start:
+                    parsed_search['received_start'] = convert(received_start)
+                    find_any = False
+            if query_part.startswith('received_end'):
+                received_end = preprocess_search_value(query_part[len('received_end:'):])
+                if received_end:
+                    parsed_search['received_end'] = convert(received_end)
+                    find_any = False
+            if query_part.startswith('started_start'):
+                started_start = preprocess_search_value(query_part[len('started_start:'):])
+                if started_start:
+                    parsed_search['started_start'] = convert(started_start)
+                    find_any = False
+            if query_part.startswith('started_end'):
+                started_end = preprocess_search_value(query_part[len('started_end:'):])
+                if started_end:
+                    parsed_search['started_end'] = convert(started_end)
+                    find_any = False
+        if find_any:
+            parsed_search['any'] = preprocess_search_value(query_part)
+    return parsed_search
+
+
+def satisfies_search_terms(task, search_terms):
+    any_value_search_term = search_terms.get('any')
+    result_search_term = search_terms.get('result')
+    task_name_search_term = search_terms.get('taskname')
+    args_search_terms = search_terms.get('args')
+    kwargs_search_terms = search_terms.get('kwargs')
+    state_search_terms = search_terms.get('state')
+    runtime_lt = search_terms.get("runtime_lt")
+    runtime_gt = search_terms.get("runtime_gt")
+
+    activated_terms = [
+        any_value_search_term, result_search_term,
+        task_name_search_term, args_search_terms,
+        kwargs_search_terms, state_search_terms,
+        runtime_lt, runtime_gt,
+    ]
+    if not any(activated_terms):
+        return True
+
+    terms = [
+        state_search_terms and task.state in state_search_terms,
+        any_value_search_term and any_value_search_term in '|'.join(
+            filter(None, [task.name, task.uuid, task.state,
+                          task.worker.hostname if task.worker else None,
+                          task.args, task.kwargs, safe_str(task.result)])),
+        result_search_term and task.result and result_search_term in task.result,
+        kwargs_search_terms and all(
+            stringified_dict_contains_value(k, v, task.kwargs) for k, v in kwargs_search_terms.items()
+        ),
+        args_search_terms and task_args_contains_search_args(task.args, args_search_terms),
+        runtime_lt is not None and task.runtime is not None and float(runtime_lt) > task.runtime,
+        runtime_gt is not None and task.runtime is not None and float(runtime_gt) < task.runtime,
+    ]
+    return any(terms)
+
+
+def stringified_dict_contains_value(key, value, str_dict):
+    """Checks if dict in for of string like "{'test': 5}" contains
+    key/value pair. This works faster, then creating actual dict
+    from string since this operation is called for each task in case
+    of kwargs search."""
+    if not str_dict:
+        return False
+    value = str(value)
+    try:
+        # + 3 for key right quote, one for colon and one for space
+        key_index = str_dict.index(key) + len(key) + 3
+    except ValueError:
+        return False
+    try:
+        comma_index = str_dict.index(',', key_index)
+    except ValueError:
+        # last value in dict
+        comma_index = str_dict.index('}', key_index)
+    return str(value) == str_dict[key_index:comma_index].strip('"\'')
+
+
+def preprocess_search_value(raw_value):
+    return raw_value.strip('" ') if raw_value else ''
+
+
+def task_args_contains_search_args(task_args, search_args):
+    if not task_args:
+        return False
+    return all(a in task_args for a in search_args)

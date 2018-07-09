@@ -18,6 +18,16 @@ from tornado.ioloop import PeriodicCallback
 from .options import options
 from .utils.search import TaskSearchEngine
 
+try:
+    from elasticsearch import Elasticsearch  # type: ignore[import-not-found]
+    from elasticsearch_dsl import Search, MultiSearch  # type: ignore[import-not-found]
+    from elasticsearch_dsl.query import Term  # type: ignore[import-not-found]
+except ImportError:  # pragma: no cover
+    Search = None  # type: ignore[assignment,misc]
+    Elasticsearch = None  # type: ignore[assignment,misc]
+    MultiSearch = None  # type: ignore[assignment,misc]
+    Term = None  # type: ignore[assignment,misc]
+
 logger = logging.getLogger(__name__)
 
 PROMETHEUS_METRICS = None
@@ -148,6 +158,40 @@ class EventsState(State):
         else:
             self.metrics.observe_worker(worker, event)
 
+    # pylint: disable=too-many-locals
+    def elasticsearch_dashboard_data(self, worker_name, event_type):
+        if not options.elasticsearch_dashboard or not Elasticsearch:
+            return event_type
+
+        elasticsearch_url = options.elasticsearch_url
+        es = Elasticsearch([elasticsearch_url])  # type: ignore[call-arg]
+
+        ms = MultiSearch(using=es, index="task")  # type: ignore[call-arg]
+        s = Search(using=es, index='task')  # type: ignore[call-arg]
+        ms = ms.add(s.filter(Term(state='RECEIVED') & Term(hostname=worker_name)).extra(size=0))  # type: ignore[union-attr]
+        ms = ms.add(s.filter(Term(state='STARTED') & Term(hostname=worker_name)).extra(size=0))  # type: ignore[union-attr]
+        ms = ms.add(s.filter(Term(state='SUCCESS') & Term(hostname=worker_name)).extra(size=0))  # type: ignore[union-attr]
+        ms = ms.add(s.filter(Term(state='FAILED') & Term(hostname=worker_name)).extra(size=0))  # type: ignore[union-attr]
+        ms = ms.add(s.filter(Term(state='RETRIED') & Term(hostname=worker_name)).extra(size=0))  # type: ignore[union-attr]
+        responses = ms.execute()  # type: ignore[union-attr]
+        task_event_keys = ["task-received", "task-started", "task-succeeded", "task-failed", "task-retried"]
+        tasks_info = collections.defaultdict(int)
+        for event_type_item, resp in zip(task_event_keys, responses):
+            tasks_info[event_type_item] += resp.hits.total  # type: ignore[union-attr]
+        processed = tasks_info["task-received"]
+        started = tasks_info["task-started"]
+        succeeded = tasks_info["task-succeeded"]
+        failed = tasks_info["task-failed"]
+        retried = tasks_info["task-retried"]
+        self.counter[worker_name]['task-received'] = processed + started + succeeded + failed + retried
+        self.counter[worker_name]['task-started'] = started
+        self.counter[worker_name]['task-succeeded'] = succeeded
+        self.counter[worker_name]['task-retried'] = retried
+        self.counter[worker_name]['task-failed'] = failed
+        if not event_type.startswith('task-'):
+            self.counter[worker_name][event_type] += 1
+        return event_type
+
 
 class Events(threading.Thread):
     events_enable_interval = 5000
@@ -234,7 +278,7 @@ class Events(threading.Thread):
     def load_state(self):
         logger.debug("Loading state from '%s'...", self.db)
         try:
-            with shelve.open(self.db) as state:
+            with shelve.open(self.db) as state:  # type: ignore[arg-type]
                 if not state:
                     return None
                 events = state['events']
@@ -254,7 +298,7 @@ class Events(threading.Thread):
         logger.debug("Saving state to '%s'...", self.db)
         started = time.monotonic()
         tmp = f'{self.db}.tmp'
-        with shelve.open(tmp, flag='n') as state:
+        with shelve.open(tmp, flag='n') as state:  # type: ignore[arg-type]
             state['events'] = self.state
             state['counter'] = dict(self.state.counter)
         # dbm backends may add suffixes like .db or .dat to the actual files
