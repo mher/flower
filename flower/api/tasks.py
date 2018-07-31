@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import json
 import logging
+import ast
 
 from datetime import datetime
 from threading import Thread
@@ -77,6 +78,21 @@ class BaseTaskHandler(BaseHandler):
         else:
             return result
 
+class RequeueTaskHandler(BaseTaskHandler):
+    def get_task_args(self):
+        try:
+            print self.request.body
+            body = self.request.body
+            options = ast.literal_eval(body) if body else {}
+        except ValueError as e:
+            raise HTTPError(400, str(e))
+        args = options.pop('args', [])
+        kwargs = options.pop('kwargs', {})
+
+        if not isinstance(args, (list, tuple)):
+            raise HTTPError(400, 'args must be an array')
+
+        return args, kwargs, options
 
 class TaskApply(BaseTaskHandler):
     @web.authenticated
@@ -154,7 +170,7 @@ Execute a task by name and wait results
         self.finish(response)
 
 
-class TaskAsyncApply(BaseTaskHandler):
+class TaskAsyncApply(RequeueTaskHandler):
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
     @web.authenticated
