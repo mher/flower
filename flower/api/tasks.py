@@ -81,7 +81,6 @@ class BaseTaskHandler(BaseHandler):
 class RequeueTaskHandler(BaseTaskHandler):
     def get_task_args(self):
         try:
-            print self.request.body
             body = self.request.body
             options = ast.literal_eval(body) if body else {}
         except ValueError as e:
