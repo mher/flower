@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import re
-import sys
 
 from setuptools import setup, find_packages
 
@@ -44,11 +43,6 @@ classes = """
 classifiers = [s.strip() for s in classes.split('\n') if s]
 
 
-install_requires = get_requirements('default.txt')
-if sys.version_info < (3, 0):
-    install_requires.append('futures')
-
-
 setup(
     name='flower',
     version=get_package_version(),
@@ -60,7 +54,7 @@ setup(
     license='BSD',
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
-    install_requires=install_requires,
+    install_requires=get_requirements('default.txt'),
     test_suite="tests",
     tests_require=get_requirements('test.txt'),
     package_data={'flower': ['templates/*', 'static/*.*',
