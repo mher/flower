@@ -9,6 +9,7 @@ import logging
 
 from pprint import pformat
 
+from celery.events import state
 from tornado.options import options
 from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
@@ -27,6 +28,14 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
+
+
+class Mytimetuple(state.timetuple):
+    def __new__(cls, clock, timestamp, id, obj=None):
+        return tuple.__new__(cls, (0, timestamp, id, obj))
+
+
+state.timetuple = Mytimetuple
 
 
 class FlowerCommand(Command):
