@@ -2,11 +2,8 @@ from __future__ import absolute_import
 
 import logging
 
+from collections import OrderedDict
 from functools import partial
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
 
 from tornado import web
 from tornado import gen

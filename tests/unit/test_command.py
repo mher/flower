@@ -9,11 +9,6 @@ from tornado.options import options
 from tests.unit import AsyncHTTPTestCase
 
 
-# python 2.6 support
-if not hasattr(unittest, 'skipUnless'):
-    import unittest2 as unittest
-
-
 class TestFlowerCommand(AsyncHTTPTestCase):
     def test_port(self):
         with self.mock_option('port', 5555):
@@ -68,7 +63,6 @@ class TestConfOption(AsyncHTTPTestCase):
                 self.assertTrue(options.debug)
 
     @unittest.skipUnless(not sys.platform.startswith("win"), 'skip windows')
-    @unittest.skipUnless(sys.version_info[:2] > (2, 6), 'skip python 2.6')
     def test_all_options_documented(self):
         def grep(patter, filename):
             return int(subprocess.check_output(
