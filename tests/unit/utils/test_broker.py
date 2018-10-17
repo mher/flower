@@ -3,7 +3,7 @@ import unittest
 from mock import MagicMock
 
 from flower.utils import broker
-from flower.utils.broker import RabbitMQ, Redis, Broker
+from flower.utils.broker import RabbitMQ, Redis, RedisSocket, Broker
 
 
 broker.requests = MagicMock()
@@ -69,6 +69,19 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(4444, b.port)
         self.assertEqual(5, b.vhost)
         self.assertEqual('pass', b.password)
+
+
+class TestRedisSocket(unittest.TestCase):
+    def test_init(self):
+        b = Broker('redis+socket:///path/to/socket')
+        self.assertFalse(isinstance(b, RabbitMQ))
+        self.assertTrue(isinstance(b, RedisSocket))
+
+    def test_url(self):
+        b = Broker('redis+socket:///path/to/socket')
+        self.assertEqual(None, b.host)
+        self.assertEqual(None, b.port)
+        self.assertEqual('path/to/socket', b.vhost)
 
 
 if __name__ == '__main__':
