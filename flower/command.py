@@ -9,6 +9,8 @@ import logging
 
 from pprint import pformat
 
+from logging import NullHandler
+
 from tornado.options import options
 from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
@@ -19,11 +21,6 @@ from .app import Flower
 from .urls import settings
 from .utils import abs_path, prepend_url
 from .options import DEFAULT_CONFIG_FILE, default_options
-
-try:
-    from logging import NullHandler
-except ImportError:
-    from .utils.backports import NullHandler
 
 
 logger = logging.getLogger(__name__)
