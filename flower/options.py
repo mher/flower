@@ -49,6 +49,8 @@ define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
 define("auto_refresh", default=True,
        help="refresh dashboards", type=bool)
+define("purge_offline_workers", default=False,
+       help="automatically purge offline workers from dashboard", type=bool)
 define("cookie_secret", type=str, default=None,
        help="secure cookie secret")
 define("conf", default=DEFAULT_CONFIG_FILE,

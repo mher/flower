@@ -46,7 +46,6 @@ class DashboardTests(AsyncHTTPTestCase):
         self.app.events.state = state
 
         r = self.get('/dashboard')
-
         table = HtmlTableParser()
         table.parse(str(r.body))
 
