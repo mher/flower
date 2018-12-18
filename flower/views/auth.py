@@ -82,7 +82,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     _OAUTH_SETTINGS_KEY = 'oauth'
 
     @tornado.gen.coroutine
-    def get_authenticated_user(self, redirect_uri, code, callback):
+    def get_authenticated_user(self, redirect_uri, code):
         body = urlencode({
             "redirect_uri": redirect_uri,
             "code": code,
