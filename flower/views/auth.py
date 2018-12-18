@@ -110,7 +110,12 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         if response.error:
             raise tornado.auth.AuthError(
                 'OAuth authenticator error: %s' % str(response))
-        self.write(json.loads(response.body.decode('utf-8')))
+
+        json_decode = json.loads(response.body.decode('utf-8'))
+
+        logger.debug(json_decode)
+
+        self.write(json_decode)
 
     @tornado.gen.coroutine
     def get(self):
@@ -120,6 +125,13 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 redirect_uri=redirect_uri,
                 code=self.get_argument('code'),
             )
+
+            logger = logging.getLogger()
+
+            logger.setLevel(logging.DEBUG)
+
+            logger.debug(user)
+
             yield self._on_auth(user)
         else:
             yield self.authorize_redirect(
@@ -132,6 +144,13 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
     @tornado.gen.coroutine
     def _on_auth(self, user):
+
+        logger = logging.getLogger()
+
+        logger.setLevel(logging.DEBUG)
+
+        logger.debug(user)
+
         if not user:
             raise tornado.web.HTTPError(500, 'OAuth authentication failed')
         access_token = user['access_token']
