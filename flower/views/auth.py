@@ -105,6 +105,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                      'Accept': 'application/json'}, body=body)
 
         logger.debug(response)
+        logger.debug(response.body)
 
         if response.error:
             raise tornado.auth.AuthError(
