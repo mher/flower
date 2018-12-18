@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import json
 import re
-import logging
 
 try:
     from urllib.parse import urlencode
@@ -92,30 +91,17 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             "grant_type": "authorization_code",
         })
 
-        logger = logging.getLogger()
-
-        logger.setLevel(logging.DEBUG)
-
-        logger.debug(body)
-
         response = yield self.get_auth_http_client().fetch(
             self._OAUTH_ACCESS_TOKEN_URL,
             method="POST",
             headers={'Content-Type': 'application/x-www-form-urlencoded',
                      'Accept': 'application/json'}, body=body)
 
-        logger.debug(response)
-        logger.debug(response.body)
-
         if response.error:
             raise tornado.auth.AuthError(
                 'OAuth authenticator error: %s' % str(response))
 
-        json_decode = json.loads(response.body.decode('utf-8'))
-
-        logger.debug(json_decode)
-
-        raise tornado.gen.Return(json_decode)
+        raise tornado.gen.Return(response.body.decode('utf-8'))
 
     @tornado.gen.coroutine
     def get(self):
@@ -125,12 +111,6 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 redirect_uri=redirect_uri,
                 code=self.get_argument('code'),
             )
-
-            logger = logging.getLogger()
-
-            logger.setLevel(logging.DEBUG)
-
-            logger.debug(user)
 
             yield self._on_auth(user)
         else:
@@ -144,13 +124,6 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
     @tornado.gen.coroutine
     def _on_auth(self, user):
-
-        logger = logging.getLogger()
-
-        logger.setLevel(logging.DEBUG)
-
-        logger.debug(user)
-
         if not user:
             raise tornado.web.HTTPError(500, 'OAuth authentication failed')
         access_token = user['access_token']
