@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import json
 import re
+import logging
 
 try:
     from urllib.parse import urlencode
@@ -91,11 +92,19 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             "grant_type": "authorization_code",
         })
 
+        logger = logging.getLogger()
+
+        logger.setLevel(logging.DEBUG)
+
+        logger.debug(body)
+
         response = yield self.get_auth_http_client().fetch(
             self._OAUTH_ACCESS_TOKEN_URL,
             method="POST",
             headers={'Content-Type': 'application/x-www-form-urlencoded',
                      'Accept': 'application/json'}, body=body)
+
+        logger.debug(response)
 
         if response.error:
             raise tornado.auth.AuthError(
