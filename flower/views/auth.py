@@ -115,7 +115,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
         logger.debug(json_decode)
 
-        self.write(json_decode)
+        return self.write(json_decode)
 
     @tornado.gen.coroutine
     def get(self):
