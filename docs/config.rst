@@ -78,7 +78,7 @@ basic_auth
 ~~~~~~~~~~
 
 Enables HTTP Basic authentication. `basic_auth` is a comma separated list
-of `username:passworrd`. See :ref:`basic-auth` for more info.
+of `username:password`. See :ref:`basic-auth` for more info.
 
 .. _broker_api:
 
