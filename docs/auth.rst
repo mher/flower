@@ -33,13 +33,13 @@ with a Google account. Google OAuth 2.0 authentication is enabled using the
 
 `--auth` is a regular expression, for granting access only to the specified email pattern.
 `--oauth2_key` and `--oauth2_secret` are your credentials from your `Google Developer Console`_.
-`--oauth2_redirect_uri` is there to specify what is the redirect_uri associated to you key and secret
+`--oauth2_redirect_uri` is there to specify what is the redirect_uri associated to your key and secret
 
 For instance, if you want to grant access to `me@gmail.com` and `you@gmail.com`: ::
 
     $ celery flower --auth="me@gmail.com|you@gmail.com" --oauth2_key=... --oauth2_secret=... --oauth2_redirect_uri=http://flower.example.com/login
 
-Alternatively you can set environment variables instead of command line arguments: ::
+Alternatively, you can set environment variables instead of command line arguments: ::
 
     $ export FLOWER_OAUTH2_KEY=...
     $ export FLOWER_OAUTH2_SECRET=...
@@ -47,7 +47,7 @@ Alternatively you can set environment variables instead of command line argument
     $ celery flower --auth=.*@example\.com
 
 NOTE: Enable Google Plus API in the Google Developers Console under `APIs & auth` -> `APIs` -> `Google+ API`
-    Otherwise you will get a `403 Forbidden` error despite correct OAuth configuration.
+    Otherwise, you will get a `403 Forbidden` error despite correct OAuth configuration.
 
 .. _Google Developer Console: https://console.developers.google.com
 
