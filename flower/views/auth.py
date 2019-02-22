@@ -47,12 +47,12 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
         try:
             response = yield self.get_auth_http_client().fetch(
-                'https://www.googleapis.com/plus/v1/people/me',
+                'https://www.googleapis.com/userinfo/v2/me',
                 headers={'Authorization': 'Bearer %s' % access_token})
         except Exception as e:
             raise tornado.web.HTTPError(403, 'Google auth failed: %s' % e)
 
-        email = json.loads(response.body.decode('utf-8'))['emails'][0]['value']
+        email = json.loads(response.body.decode('utf-8'))['email']
         if not re.match(self.application.options.auth, email):
             message = (
                 "Access denied to '{email}'. Please use another account or "
