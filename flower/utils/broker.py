@@ -97,21 +97,15 @@ class RabbitMQ(BrokerBase):
             raise ValueError("Invalid http api schema: %s" % url.scheme)
 
 
-class Redis(BrokerBase):
+class RedisBase(BrokerBase):
     SEP = '\x06\x16'
     DEFAULT_PRIORITY_STEPS = [0, 3, 6, 9]
 
     def __init__(self, broker_url, *args, **kwargs):
-        super(Redis, self).__init__(broker_url)
-        self.host = self.host or 'localhost'
-        self.port = self.port or 6379
-        self.vhost = self._prepare_virtual_host(self.vhost)
+        super(RedisBase, self).__init__(broker_url)
 
         if not redis:
             raise ImportError('redis library is required')
-
-        self.redis = redis.Redis(host=self.host, port=self.port,
-                                 db=self.vhost, password=self.password)
 
         broker_options = kwargs.get('broker_options')
 
@@ -136,6 +130,18 @@ class Redis(BrokerBase):
             })
         raise gen.Return(queue_stats)
 
+
+class Redis(RedisBase):
+
+    def __init__(self, broker_url, *args, **kwargs):
+        super(Redis, self).__init__(broker_url)
+        self.host = self.host or 'localhost'
+        self.port = self.port or 6379
+        self.vhost = self._prepare_virtual_host(self.vhost)
+
+        self.redis = redis.Redis(host=self.host, port=self.port,
+                                 db=self.vhost, password=self.password)
+
     def _prepare_virtual_host(self, vhost):
         if not isinstance(vhost, numbers.Integral):
             if not vhost or vhost == '/':
@@ -152,6 +158,14 @@ class Redis(BrokerBase):
         return vhost
 
 
+class RedisSocket(RedisBase):
+
+    def __init__(self, broker_url, *args, **kwargs):
+        super(RedisSocket, self).__init__(broker_url)
+        self.redis = redis.Redis(unix_socket_path='/' + self.vhost,
+                                 password=self.password)
+
+
 class Broker(object):
     def __new__(cls, broker_url, *args, **kwargs):
         scheme = urlparse(broker_url).scheme
@@ -159,6 +173,8 @@ class Broker(object):
             return RabbitMQ(broker_url, *args, **kwargs)
         elif scheme == 'redis':
             return Redis(broker_url, *args, **kwargs)
+        elif scheme == 'redis+socket':
+            return RedisSocket(broker_url, *args, **kwargs)
         else:
             raise NotImplementedError
 

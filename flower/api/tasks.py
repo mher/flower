@@ -4,10 +4,10 @@ import json
 import logging
 
 from datetime import datetime
-from threading import Thread
 
 from tornado import web
 from tornado import gen
+from tornado.ioloop import IOLoop
 from tornado.escape import json_decode
 from tornado.web import HTTPError
 
@@ -80,7 +80,7 @@ class BaseTaskHandler(BaseHandler):
 
 class TaskApply(BaseTaskHandler):
     @web.authenticated
-    @web.asynchronous
+    @gen.coroutine
     def post(self, taskname):
         """
 Execute a task by name and wait results
@@ -138,11 +138,9 @@ Execute a task by name and wait results
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
 
-        # In tornado for not blocking event loop we must return results
-        # from other thread by self.finish()
-        th = Thread(target=self.wait_results, args=(result, response, ))
-        th.start()
-        # So just exit
+        response = yield IOLoop.current().run_in_executor(
+            None, self.wait_results, result, response)
+        self.write(response)
 
     def wait_results(self, result, response):
         # Wait until task finished and do not raise anything
@@ -151,7 +149,7 @@ Execute a task by name and wait results
         self.update_response_result(response, result)
         if self.backend_configured(result):
             response.update(state=result.state)
-        self.finish(response)
+        return response
 
 
 class TaskAsyncApply(BaseTaskHandler):
@@ -366,6 +364,36 @@ class GetQueueLengths(BaseTaskHandler):
     @web.authenticated
     @gen.coroutine
     def get(self):
+        """
+Return length of all active queues
+
+**Example request**:
+
+.. sourcecode:: http
+
+  GET /api/queues/length
+  Host: localhost:5555
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 94
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "active_queues": [
+          {"name": "celery", "messages": 0},
+          {"name": "video-queue", "messages": 5}
+      ]
+  }
+
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 401: unauthorized request
+:statuscode 503: result backend is not configured
+        """
         app = self.application
         broker_options = self.capp.conf.BROKER_TRANSPORT_OPTIONS
 
@@ -469,6 +497,8 @@ List tasks
 :query workername: filter task by workername
 :query taskname: filter tasks by taskname
 :query state: filter tasks by state
+:query received_start: filter tasks by received date (must be greater than) format %Y-%m-%d %H:%M
+:query received_end: filter tasks by received date (must be less than) format %Y-%m-%d %H:%M
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
@@ -478,6 +508,8 @@ List tasks
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
+        received_start = self.get_argument('received_start', None)
+        received_end = self.get_argument('received_end', None)
 
         limit = limit and int(limit)
         worker = worker if worker != 'All' else None
@@ -487,7 +519,9 @@ List tasks
         result = []
         for task_id, task in tasks.iter_tasks(
                 app.events, limit=limit, type=type,
-                worker=worker, state=state):
+                worker=worker, state=state,
+                received_start=received_start,
+                received_end=received_end):
             task = tasks.as_dict(task)
             task.pop('worker', None)
             result.append((task_id, task))
@@ -594,11 +628,9 @@ Get a task info
         task = tasks.get_task_by_id(self.application.events, taskid)
         if not task:
             raise HTTPError(404, "Unknown task '%s'" % taskid)
-        response = {}
-        for name in task._fields:
-            if name not in ['uuid', 'worker']:
-                response[name] = getattr(task, name, None)
-        response['task-id'] = task.uuid
+
+        response = task.as_dict()
         if task.worker is not None:
             response['worker'] = task.worker.hostname
+
         self.write(response)
