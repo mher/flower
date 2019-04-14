@@ -9,7 +9,7 @@ class BugreportTests(unittest.TestCase):
         report = bugreport()
         self.assertFalse('Unknown Celery version' in report)
         self.assertTrue('tornado' in report)
-        self.assertTrue('babel' in report)
+        self.assertTrue('humanize' in report)
         self.assertTrue('celery' in report)
 
     def test_with_app(self):
@@ -17,5 +17,5 @@ class BugreportTests(unittest.TestCase):
         report = bugreport(app)
         self.assertFalse('Unknown Celery version' in report)
         self.assertTrue('tornado' in report)
-        self.assertTrue('babel' in report)
+        self.assertTrue('humanize' in report)
         self.assertTrue('celery' in report)

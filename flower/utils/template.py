@@ -12,7 +12,7 @@ try:
 except ImportError:
     from urllib.parse import urlencode
 
-from babel.dates import format_timedelta
+from humanize import naturaltime
 from pytz import timezone, utc
 
 
@@ -42,7 +42,7 @@ def humanize(obj, type=None, length=None):
         tz = timezone(tz) if tz else getattr(current_app, 'timezone', '') or utc
         delta = datetime.now(tz) - datetime.fromtimestamp(float(obj), tz)
         if delta < timedelta(days=1):
-            obj = format_timedelta(delta, locale='en_US') + ' ago'
+            obj = naturaltime(delta)
         else:
             obj = format_time(float(obj), tz) if obj else ''
     elif isinstance(obj, string_types) and not re.match(UUID_REGEX, obj):
