@@ -50,7 +50,7 @@ class RabbitMQ(BrokerBase):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
-        self.port = int(self.port or '15672')
+        self.port = self.port or 15672
         self.vhost = quote(self.vhost, '') or '/'
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
