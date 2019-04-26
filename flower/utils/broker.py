@@ -50,14 +50,16 @@ class RabbitMQ(BrokerBase):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
-        self.port = 15672
+        self.port = self.port or 15672
         self.vhost = quote(self.vhost, '') or '/'
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
         if not http_api:
-            http_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
-                self.username, self.password, self.host, self.vhost)
+            http_api = "http://{username}:{password}@{host}:{port}/api/{vhost}".format(
+                username=self.username, password=self.password,
+                host=self.host, port=self.port, vhost=self.vhost
+            )
 
         try:
             self.validate_http_api(http_api)
