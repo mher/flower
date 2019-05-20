@@ -36,9 +36,8 @@ class ControlHandler(BaseHandler):
         for method in cls.INSPECT_METHODS:
             futures.append(app.delay(getattr(inspect, method)))
 
-        results = yield futures
-
-        for i, result in enumerate(results):
+        for i, future in enumerate(futures):
+            result = future.result()
             if result is None:
                 logger.warning("'%s' inspect method failed",
                                cls.INSPECT_METHODS[i])
@@ -48,6 +47,7 @@ class ControlHandler(BaseHandler):
                     info = cls.worker_cache[worker]
                     info[cls.INSPECT_METHODS[i]] = response
                     info['timestamp'] = time.time()
+        return futures
 
     def is_worker(self, workername):
         return workername and workername in self.worker_cache
