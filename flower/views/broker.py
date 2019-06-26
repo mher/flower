@@ -48,3 +48,5 @@ class BrokerView(BaseHandler):
         self.render("broker.html",
                     broker_url=app.capp.connection().as_uri(),
                     queues=queues)
+
+

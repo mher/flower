@@ -64,6 +64,9 @@ define("natural_time", type=bool, default=False,
 define("tasks_columns", type=str,
        default="name,uuid,state,args,kwargs,result,received,started,runtime,worker",
        help="slugs of columns on /tasks/ page, delimited by comma")
+define("queued_columns", type=str,
+       default="name,uuid,parent_id,root_id,args,kwargs,delivery_info",
+       help="slugs of columns on /queued/ page, delimited by comma")
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")

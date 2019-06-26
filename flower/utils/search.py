@@ -3,6 +3,22 @@ import re
 from kombu.utils.encoding import safe_str
 
 
+def parse_queued_search_terms(raw_search_value):
+    search_regexp = r'(?:[^\s,"]|"(?:\\.|[^"])*")+'  # splits by space, ignores space in quotes
+    if not raw_search_value:
+        return {}
+
+    parsed_search = {}
+    for query_part in re.findall(search_regexp, raw_search_value):
+        if not query_part:
+            continue
+        if query_part.startswith('queue:'):
+            if "queue" not in parsed_search:
+                parsed_search["queue"] = []
+            parsed_search["queue"].append(preprocess_search_value(query_part[len("queue:"):]))
+    return parsed_search
+
+
 def parse_search_terms(raw_search_value):
     search_regexp = r'(?:[^\s,"]|"(?:\\.|[^"])*")+'  # splits by space, ignores space in quotes
     if not raw_search_value:

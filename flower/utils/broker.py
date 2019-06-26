@@ -92,6 +92,12 @@ class RabbitMQ(BrokerBase):
         else:
             response.rethrow()
 
+    @gen.coroutine
+    def tasks_on_queue(self, name, start=0, length=10):
+        # Probably would use this API but not sure it's what we want.
+        # /api/queues/vhost/name/get
+        raise gen.Return([])
+
     @classmethod
     def validate_http_api(cls, http_api):
         url = urlparse(http_api)
@@ -131,6 +137,11 @@ class RedisBase(BrokerBase):
                 'messages': sum([self.redis.llen(x) for x in priority_names])
             })
         raise gen.Return(queue_stats)
+
+    @gen.coroutine
+    def tasks_on_queue(self, name, start=0, length=10):
+        tasks_from_queue = [json.loads(item) for item in self.redis.lrange(name, start, start + length)]
+        raise gen.Return(tasks_from_queue)
 
 
 class Redis(RedisBase):

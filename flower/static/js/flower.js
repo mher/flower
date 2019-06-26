@@ -850,6 +850,99 @@ var flower = (function () {
         });
 
     });
+    $(document).ready(function () {
+        if (!active_page('/queued')) {
+            return;
+        }
+
+        $('#queued-table').DataTable({
+            rowId: 'uuid',
+            dom: 'Bfrtip',
+            buttons: [
+                'colvis'
+            ],
+            searching: true,
+            paginate: true,
+            scrollX: true,
+            scrollCollapse: true,
+            processing: true,
+            serverSide: true,
+            colReorder: true,
+            ajax: {
+                type: 'POST',
+                url: url_prefix() + '/queued/datatable'
+            },
+            order: [
+                [0, "asc"]
+            ],
+            oSearch: {
+                "sSearch": $.urlParam('queue') ? 'queue:' + $.urlParam('queue') : ''
+            },
+            columnDefs: [{
+                targets: 0,
+                data: 'name',
+                visible: isColumnVisible('name'),
+                render: function (data, type, full, meta) {
+                    return data;
+                }
+            }, {
+                targets: 1,
+                data: 'uuid',
+                visible: isColumnVisible('uuid'),
+                orderable: false,
+                render: function (data, type, full, meta) {
+                    return '<a href="' + url_prefix() + '/task/' + data + '">' + data + '</a>';
+                }
+            }, {
+                targets: 2,
+                data: 'parent_id',
+                visible: isColumnVisible('parent_id'),
+                render: function (data, type, full, meta) {
+                    if (data == "N/A") {
+                        return data;
+                    }
+                    return '<a href="' + url_prefix() + '/task/' + data + '">' + data + '</a>';
+                }
+            }, {
+                targets: 3,
+                data: 'root_id',
+                visible: isColumnVisible('root_id'),
+                render: function (data, type, full, meta) {
+                    return '<a href="' + url_prefix() + '/task/' + data + '">' + data + '</a>';
+                }
+            }, {
+                targets: 4,
+                data: 'args',
+                visible: isColumnVisible('args'),
+                render: function (data, type, full, meta) {
+                    return data
+                }
+            },  {
+                targets: 5,
+                data: 'kwargs',
+                visible: isColumnVisible('kwargs'),
+                render: function (data, type, full, meta) {
+                    return data
+                }
+            },  {
+                targets: 6,
+                data: 'delivery_info',
+                visible: isColumnVisible('delivery_info'),
+                render: function (data, type, full, meta) {
+                    return data
+                }
+            },  {
+                targets: 7,
+                data: 'body',
+                visible: isColumnVisible("Encoded Body"),
+                render: function (data, type, full, meta) {
+                    return data
+                }
+            }, ],
+        });
+
+    });
+
 
     return {
         on_alert_close: on_alert_close,

@@ -256,6 +256,27 @@ Available columns are:
   - `expires`
   - `eta`
 
+.. _queued_columns:
+
+queued_columns
+~~~~~~~~~~~~~
+
+Specifies list of comma-delimited columns on `/queued/` page. `all` value
+enables all columns. Columns on the page can be reordered using drag and drop.
+
+(by default, `queued_columns="name,uuid,parent_id,root_id,args,kwargs,delivery_info"`)
+
+Available columns are:
+
+  - `name`
+  - `uuid`
+  - `parent_id`
+  - `root_id`
+  - `args`
+  - `kwargs`
+  - `delivery_info`
+  - `body`
+
 .. _url_prefix:
 
 url_prefix

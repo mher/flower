@@ -11,6 +11,7 @@
         <ul class="nav">
             <li {% if active_tab == "dashboard" %}class="active"{% end %}><a href="{{ reverse_url('dashboard') }}">Dashboard</a></li>
             <li {% if active_tab == "tasks" %}class="active"{% end %}><a href="{{ reverse_url('tasks') }}">Tasks</a></li>
+            <li {% if active_tab == "queued" %}class="active"{% end %}><a href="{{ reverse_url('queued') }}">Queued</a></li>
             <li {% if active_tab == "broker" %}class="active"{% end %}><a href="{{ reverse_url('broker') }}">Broker</a></li>
             <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="{{ reverse_url('monitor') }}">Monitor</a></li>
         </ul>

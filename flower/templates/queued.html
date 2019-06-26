@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{% module Template("navbar.html", active_tab="queued") %}
+{% end %}
+
+{% block container %}
+  <input type="hidden" value="{{ columns }}" id='columns'>
+  <div class="container-fluid">
+
+  <table id="queued-table" class="table table-bordered table-striped">
+      <thead>
+        <tr>
+            <th>Name</th>
+            <th>UUID</th>
+            <th>parent_id</th>
+            <th>root_id</th>
+            <th>args</th>
+            <th>kwargs</th>
+            <th>delivery_info</th>
+            <th>body</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for task in tasks %}
+        <tr>
+            <td>{{ task['name'] }}</td>
+            <td>{{ task['uuid'] }}</td>
+            <td>{{ task['parent_id'] }}</td>
+            <td>{{ task['root_id'] }}</td>
+            <td>{{ task['task']['headers']['argsrepr'] }}</td>
+            <td>{{ task['task']['headers']['kwargsrepr'] }}</td>
+            <td>{{ task['properties']['delivery_info'] }}</td>
+            <td>{{ task['task']['body'] }}</td>
+        </tr>
+      {% end %}
+      </tbody>
+     </table>
+
+</div>
+{% end %}
