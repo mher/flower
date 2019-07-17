@@ -133,7 +133,7 @@ class FlowerCommand(Command):
         if not options.unix_socket:
             logger.info(
                 "Visit me at http%s://%s:%s", 's' if ssl else '',
-                options.address or 'localhost', options.port
+                options.address or '0.0.0.0', options.port
             )
         else:
             logger.info("Visit me via unix socket file: %s" % options.unix_socket)

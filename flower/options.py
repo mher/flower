@@ -11,7 +11,7 @@ DEFAULT_CONFIG_FILE = 'flowerconfig.py'
 
 define("port", default=5555,
        help="run on the given port", type=int)
-define("address", default='',
+define("address", default='localhost',
        help="run on the given address", type=str)
 define("unix_socket", default='',
        help="path to unix socket to bind", type=str)
