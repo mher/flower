@@ -1,8 +1,11 @@
 from __future__ import absolute_import
 
 from functools import total_ordering
+import ast
+import json
 import copy
 import logging
+
 
 try:
     from itertools import imap
@@ -25,6 +28,24 @@ class TaskView(BaseHandler):
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
 
+        try:
+            task.dump_kwargs = json.dumps(
+                ast.literal_eval(task.kwargs),
+                indent=2,
+                default=str,
+                ensure_ascii=False
+            )
+            task.dump_args = json.dumps(
+                ast.literal_eval(task.args),
+                indent=2,
+                default=str,
+                ensure_ascii=False
+            )
+        except Exception as e:
+            logger.exception(e)
+            task.dump_kwargs = task.kwargs
+            task.dump_args = task.args
+        
         self.render("task.html", task=task)
 
 
