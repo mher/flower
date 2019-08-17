@@ -63,7 +63,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
         self.set_secure_cookie("user", str(email))
 
         next_ = self.get_argument('next', self.application.options.url_prefix or '/')
-        if self.application.options.url_prefix and next[0] != '/':
+        if self.application.options.url_prefix and next_[0] != '/':
             next_ = '/' + next_
 
         self.redirect(next_)
