@@ -34,8 +34,9 @@ class EventsState(State):
     # EventsState object is created and accessed only from ioloop thread
 
     def __init__(self, *args, **kwargs):
+        args, extra_args = args[:10], args[10:]
+        self.counter = extra_args[0] if extra_args else collections.defaultdict(Counter)
         super(EventsState, self).__init__(*args, **kwargs)
-        self.counter = collections.defaultdict(Counter)
 
     def event(self, event):
         worker_name = event['hostname']
@@ -51,6 +52,10 @@ class EventsState(State):
 
         # Save the event
         super(EventsState, self).event(event)
+
+    def __reduce__(self):
+        classobj, args = super(EventsState, self).__reduce__()
+        return classobj, args + (self.counter, )
 
 
 class Events(threading.Thread):
