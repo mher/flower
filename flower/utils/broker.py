@@ -136,7 +136,7 @@ class RedisBase(BrokerBase):
 class Redis(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
-        super(Redis, self).__init__(broker_url)
+        super(Redis, self).__init__(broker_url, *args, **kwargs)
         self.host = self.host or 'localhost'
         self.port = self.port or 6379
         self.vhost = self._prepare_virtual_host(self.vhost)
@@ -163,7 +163,7 @@ class Redis(RedisBase):
 class RedisSocket(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
-        super(RedisSocket, self).__init__(broker_url)
+        super(RedisSocket, self).__init__(broker_url, *args, **kwargs)
         self.redis = redis.Redis(unix_socket_path='/' + self.vhost,
                                  password=self.password)
 
