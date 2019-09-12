@@ -3,7 +3,7 @@ import unittest
 from mock import MagicMock
 
 from flower.utils import broker
-from flower.utils.broker import RabbitMQ, Redis, RedisSocket, Broker
+from flower.utils.broker import RabbitMQ, Redis, RedisBase, RedisSocket, Broker
 
 
 broker.requests = MagicMock()
@@ -48,6 +48,15 @@ class TestRedis(unittest.TestCase):
         b = Broker('redis://localhost:6379/0')
         self.assertFalse(isinstance(b, RabbitMQ))
         self.assertTrue(isinstance(b, Redis))
+
+    def test_priority_steps(self):
+        custom_steps = list(range(10))
+        cases = [(RedisBase.DEFAULT_PRIORITY_STEPS, {}),
+                (custom_steps, {'priority_steps': custom_steps})]
+        for expected, options in cases:
+            b = Broker('redis://localhost:6379/0', broker_options=options)
+            self.assertEqual(expected, b.priority_steps)
+
 
     def test_url(self):
         b = Broker('redis://foo:7777/9')
