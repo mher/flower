@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [2.7, 3.3, 3.4, 3.5, 3.6, 3.7]
+        python-version: [2.7, 3.5, 3.6, 3.7]
         celery-version: [4.1, 4.2, 4.3]
         tornado-version: [5.0, 5.1]
 
