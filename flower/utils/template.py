@@ -17,6 +17,8 @@ from pytz import timezone, utc
 
 
 PY2 = sys.version_info[0] == 2
+if not PY2:
+    unicode = str
 string_types = (str, unicode) if PY2 else (str,)
 
 

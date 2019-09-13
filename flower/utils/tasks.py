@@ -15,9 +15,10 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
     tasks = events.state.tasks_by_timestamp()
     if sort_by is not None:
         tasks = sort_tasks(tasks, sort_by)
-    convert = lambda x: time.mktime(
-        datetime.datetime.strptime(x, '%Y-%m-%d %H:%M').timetuple()
-    )
+
+    def convert(x):
+        return time.mktime(datetime.datetime.strptime(x, '%Y-%m-%d %H:%M').timetuple())
+
     search_terms = parse_search_terms(search or {})
 
     for uuid, task in tasks:

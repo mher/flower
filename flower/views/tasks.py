@@ -94,7 +94,7 @@ class TasksDataTable(BaseHandler):
         if custom_format_task:
             try:
                 task = custom_format_task(copy.copy(task))
-            except:
+            except Exception:
                 logger.exception("Failed to format '%s' task", uuid)
         return uuid, task
 
