@@ -33,13 +33,21 @@ logger = logging.getLogger(__name__)
 class EventsState(State):
     # EventsState object is created and accessed only from ioloop thread
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, filter_workers=None, **kwargs):
         super(EventsState, self).__init__(*args, **kwargs)
         self.counter = collections.defaultdict(Counter)
+        self.filter_workers = None if not filter_workers else filter_workers.split(
+            ',')
 
     def event(self, event):
         worker_name = event['hostname']
         event_type = event['type']
+
+        if self.filter_workers:
+            worker_suffix = worker_name.split('@')[-1]
+
+            if any(x in worker_suffix for x in self.filter_workers):
+                return
 
         self.counter[worker_name][event_type] += 1
 
@@ -57,7 +65,8 @@ class Events(threading.Thread):
     events_enable_interval = 5000
 
     def __init__(self, capp, db=None, persistent=False,
-                 enable_events=True, io_loop=None, **kwargs):
+                 enable_events=True, io_loop=None, filter_workers=None,
+                 **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
@@ -82,7 +91,8 @@ class Events(threading.Thread):
             state.close()
 
         if not self.state:
-            self.state = EventsState(**kwargs)
+            self.state = EventsState(filter_workers=filter_workers,
+                                     **kwargs)
 
         self.timer = PeriodicCallback(self.on_enable_events,
                                       self.events_enable_interval)

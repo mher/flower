@@ -65,6 +65,10 @@ define("tasks_columns", type=str,
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
+define("filter_workers", type=str,
+       help="list of filters keywords(comma seperated) to ignore workers which names include these keywords",
+       default='')
+
 
 # deprecated options
 define("inspect", default=False, help="inspect workers", type=bool)
