@@ -63,7 +63,7 @@ class RabbitMQ(BrokerBase):
 
         try:
             self.validate_http_api(http_api)
-        except Exception as e:
+        except Exception:
             logger.error("Invalid broker api url:%s", http_api)
 
         self.http_api = http_api

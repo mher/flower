@@ -63,7 +63,7 @@ class FlowerCommand(Command):
             value = os.environ[env_var_name]
             try:
                 option = options._options[name]
-            except:
+            except KeyError:
                 option = options._options[name.replace('_', '-')]
             if option.multiple:
                 value = [option.type(i) for i in value.split(',')]
