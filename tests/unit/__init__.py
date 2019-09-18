@@ -15,7 +15,7 @@ from flower.app import Flower
 from flower.urls import handlers
 from flower.events import Events
 from flower.urls import settings
-from flower import command  # side effect - define options
+from flower import command  # noqa: F401 side effect - define options
 
 
 def app_delay(method, *args, **kwargs):

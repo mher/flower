@@ -71,5 +71,5 @@ class TestConfOption(AsyncHTTPTestCase):
         defined = grep('^define(', 'flower/options.py') - 4
         documented = grep('^~~', 'docs/config.rst')
         self.assertEqual(defined, documented,
-                msg='Missing option documentation. Make sure all options '
-                    'are documented in docs/config.rst')
+                         msg='Missing option documentation. Make sure all options '
+                             'are documented in docs/config.rst')
