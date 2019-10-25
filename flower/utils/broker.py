@@ -140,9 +140,7 @@ class Redis(RedisBase):
         self.host = self.host or 'localhost'
         self.port = self.port or 6379
         self.vhost = self._prepare_virtual_host(self.vhost)
-
-        self.redis = redis.Redis(host=self.host, port=self.port,
-                                 db=self.vhost, password=self.password)
+        self.redis = self._get_redis_client()
 
     def _prepare_virtual_host(self, vhost):
         if not isinstance(vhost, numbers.Integral):
@@ -159,6 +157,12 @@ class Redis(RedisBase):
                     ))
         return vhost
 
+    def _get_redis_client_args(self):
+        return {'host': self.host, 'port': self.port, 'db': self.vhost, 'password': self.password}
+
+    def _get_redis_client(self):
+        return redis.Redis(**self._get_redis_client_args())
+
 
 class RedisSocket(RedisBase):
 
@@ -168,6 +172,26 @@ class RedisSocket(RedisBase):
                                  password=self.password)
 
 
+class RedisSsl(Redis):
+    """
+    Redis SSL class offering connection to the broker over SSL.
+    This does not currently support SSL settings through the url, only through
+    the broker_use_ssl celery configuration.
+    """
+
+    def __init__(self, broker_url, *args, **kwargs):
+        if 'broker_use_ssl' not in kwargs:
+            raise ValueError('rediss broker requires broker_use_ssl')
+        self.ssl_cert_reqs = kwargs['broker_use_ssl']['ssl_cert_reqs']
+        super(RedisSsl, self).__init__(broker_url, *args, **kwargs)
+
+    def _get_redis_client_args(self):
+        client_args = super(RedisSsl, self)._get_redis_client_args()
+        client_args['ssl'] = True
+        client_args['ssl_cert_reqs'] = self.ssl_cert_reqs
+        return client_args
+
+
 class Broker(object):
     def __new__(cls, broker_url, *args, **kwargs):
         scheme = urlparse(broker_url).scheme
@@ -175,6 +199,8 @@ class Broker(object):
             return RabbitMQ(broker_url, *args, **kwargs)
         elif scheme == 'redis':
             return Redis(broker_url, *args, **kwargs)
+        elif scheme == 'rediss':
+            return RedisSsl(broker_url, *args, **kwargs)
         elif scheme == 'redis+socket':
             return RedisSocket(broker_url, *args, **kwargs)
         else:

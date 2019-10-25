@@ -57,7 +57,6 @@ class TestRedis(unittest.TestCase):
             b = Broker('redis://localhost:6379/0', broker_options=options)
             self.assertEqual(expected, b.priority_steps)
 
-
     def test_url(self):
         b = Broker('redis://foo:7777/9')
         self.assertEqual('foo', b.host)
@@ -78,6 +77,28 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(4444, b.port)
         self.assertEqual(5, b.vhost)
         self.assertEqual('pass', b.password)
+
+
+class TestRedisSsl(unittest.TestCase):
+
+    BROKER_OPTIONS_WITH_SSL = {'broker_use_ssl': {'ssl_cert_reqs': 0}}
+
+    def test_init_with_broker_use_ssl(self):
+        b = Broker('rediss://localhost:6379/0', **self.BROKER_OPTIONS_WITH_SSL)
+        self.assertFalse(isinstance(b, RabbitMQ))
+        self.assertTrue(isinstance(b, Redis))
+
+    def test_init_without_broker_use_ssl(self):
+        with self.assertRaises(ValueError):
+            Broker('rediss://localhost:6379/0')
+
+    def test_redis_client_args(self):
+        b = Broker('rediss://:pass@host:4444/5', **self.BROKER_OPTIONS_WITH_SSL)
+        self.assertEqual('host', b.host)
+        self.assertEqual(4444, b.port)
+        self.assertEqual(5, b.vhost)
+        self.assertEqual('pass', b.password)
+        self.assertEqual(0, b.ssl_cert_reqs)
 
 
 class TestRedisSocket(unittest.TestCase):
