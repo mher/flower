@@ -81,10 +81,14 @@ class TestRedis(unittest.TestCase):
 
 class TestRedisSsl(unittest.TestCase):
 
-    BROKER_OPTIONS_WITH_SSL = {'broker_use_ssl': {'ssl_cert_reqs': 0}}
+    BROKER_USE_SSL_OPTIONS = {
+        'ssl_cert_reqs': 0,
+        'ssl_certfile': '/path/to/ssl_cert_file',
+        'ssl_keyfile': '/path/to/ssl_key_file',
+    }
 
     def test_init_with_broker_use_ssl(self):
-        b = Broker('rediss://localhost:6379/0', **self.BROKER_OPTIONS_WITH_SSL)
+        b = Broker('rediss://localhost:6379/0', broker_use_ssl=self.BROKER_USE_SSL_OPTIONS)
         self.assertFalse(isinstance(b, RabbitMQ))
         self.assertTrue(isinstance(b, Redis))
 
@@ -93,12 +97,16 @@ class TestRedisSsl(unittest.TestCase):
             Broker('rediss://localhost:6379/0')
 
     def test_redis_client_args(self):
-        b = Broker('rediss://:pass@host:4444/5', **self.BROKER_OPTIONS_WITH_SSL)
+        b = Broker('rediss://:pass@host:4444/5', broker_use_ssl=self.BROKER_USE_SSL_OPTIONS)
         self.assertEqual('host', b.host)
         self.assertEqual(4444, b.port)
         self.assertEqual(5, b.vhost)
         self.assertEqual('pass', b.password)
-        self.assertEqual(0, b.ssl_cert_reqs)
+
+        redis_client_args = b._get_redis_client_args()
+        for ssl_key, ssl_val in self.BROKER_USE_SSL_OPTIONS.items():
+            self.assertIn(ssl_key, redis_client_args)
+            self.assertEqual(ssl_val, redis_client_args[ssl_key])
 
 
 class TestRedisSocket(unittest.TestCase):

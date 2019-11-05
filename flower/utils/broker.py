@@ -182,13 +182,13 @@ class RedisSsl(Redis):
     def __init__(self, broker_url, *args, **kwargs):
         if 'broker_use_ssl' not in kwargs:
             raise ValueError('rediss broker requires broker_use_ssl')
-        self.ssl_cert_reqs = kwargs['broker_use_ssl']['ssl_cert_reqs']
+        self.broker_use_ssl = kwargs.get('broker_use_ssl', {})
         super(RedisSsl, self).__init__(broker_url, *args, **kwargs)
 
     def _get_redis_client_args(self):
         client_args = super(RedisSsl, self)._get_redis_client_args()
         client_args['ssl'] = True
-        client_args['ssl_cert_reqs'] = self.ssl_cert_reqs
+        client_args.update(self.broker_use_ssl)
         return client_args
 
 
