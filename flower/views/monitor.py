@@ -92,8 +92,11 @@ class BrokerMonitor(BaseHandler):
         capp = app.capp
 
         try:
+            broker_use_ssl = None
+            if self.capp.conf.BROKER_USE_SSL:
+                broker_use_ssl = self.capp.conf.BROKER_USE_SSL
             broker = Broker(capp.connection().as_uri(include_password=True),
-                            http_api=app.options.broker_api)
+                            http_api=app.options.broker_api, broker_use_ssl=broker_use_ssl)
         except NotImplementedError:
             self.write({})
             return
