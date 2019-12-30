@@ -107,6 +107,7 @@ class Events(threading.Thread):
                 try_interval *= 2
 
                 with self.capp.connection() as conn:
+                    logger.debug("Capturing events...")
                     recv = EventReceiver(conn,
                                          handlers={"*": self.on_event},
                                          app=self.capp)

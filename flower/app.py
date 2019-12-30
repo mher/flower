@@ -56,10 +56,10 @@ class Flower(tornado.web.Application):
             socket = bind_unix_socket(self.options.unix_socket)
             server.add_socket(socket)
 
-        self.io_loop.add_future(
-            control.ControlHandler.update_workers(app=self),
-            callback=lambda x: logger.debug(
-                'Successfully updated worker cache'))
+        # self.io_loop.add_future(
+        #     control.ControlHandler.update_workers(app=self),
+        #     callback=lambda x: logger.debug(
+        #         'Successfully updated worker cache'))
         self.started = True
         self.io_loop.start()
 

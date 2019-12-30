@@ -53,7 +53,7 @@ define("cookie_secret", type=str, default=None,
        help="secure cookie secret")
 define("conf", default=DEFAULT_CONFIG_FILE,
        help="configuration file")
-define("enable_events", type=bool, default=True,
+define("enable_events", type=bool, default=False,
        help="periodically enable Celery events")
 define("format_task", type=types.FunctionType, default=None,
        help="use custom task formatter")
