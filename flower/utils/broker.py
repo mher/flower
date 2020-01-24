@@ -164,6 +164,32 @@ class Redis(RedisBase):
         return redis.Redis(**self._get_redis_client_args())
 
 
+class RedisSentinel(RedisBase):
+
+    def __init__(self, broker_url, *args, **kwargs):
+        super(RedisSentinel, self).__init__(broker_url, *args, **kwargs)
+        broker_options = kwargs.get('broker_options', {})
+        self.host = self.host or 'localhost'
+        self.port = self.port or 26379
+        self.master_name = self._prepare_master_name(broker_options)
+        self.redis = self._get_redis_client()
+
+    def _prepare_master_name(self, broker_options):
+        try:
+            master_name = broker_options['master_name']
+        except KeyError:
+            raise ValueError(
+                'master_name is required for Sentinel broker'
+                )
+        return master_name
+
+    def _get_redis_client(self):
+        # TODO: get all sentinel hosts from Celery App config
+        sentinel = redis.sentinel.Sentinel([(self.host, self.port)])
+        redis_client = sentinel.master_for(self.master_name)
+        return redis_client
+
+
 class RedisSocket(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
@@ -203,6 +229,8 @@ class Broker(object):
             return RedisSsl(broker_url, *args, **kwargs)
         elif scheme == 'redis+socket':
             return RedisSocket(broker_url, *args, **kwargs)
+        elif scheme == 'sentinel':
+            return RedisSentinel(broker_url, *args, **kwargs)
         else:
             raise NotImplementedError
 
