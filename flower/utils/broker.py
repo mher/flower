@@ -171,8 +171,24 @@ class RedisSentinel(RedisBase):
         broker_options = kwargs.get('broker_options', {})
         self.host = self.host or 'localhost'
         self.port = self.port or 26379
+        self.vhost = self._prepare_virtual_host(self.vhost)
         self.master_name = self._prepare_master_name(broker_options)
         self.redis = self._get_redis_client()
+
+    def _prepare_virtual_host(self, vhost):
+        if not isinstance(vhost, numbers.Integral):
+            if not vhost or vhost == '/':
+                vhost = 0
+            elif vhost.startswith('/'):
+                vhost = vhost[1:]
+            try:
+                vhost = int(vhost)
+            except ValueError:
+                raise ValueError(
+                    'Database is int between 0 and limit - 1, not {0}'.format(
+                        vhost,
+                    ))
+        return vhost
 
     def _prepare_master_name(self, broker_options):
         try:
