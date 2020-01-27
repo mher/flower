@@ -184,7 +184,7 @@ class RedisSentinel(RedisBase):
         return master_name
 
     def _get_redis_client(self):
-        # TODO: get all sentinel hosts from Celery App config
+        # TODO: get all sentinel hosts from Celery App config and use them to initialize Sentinel
         sentinel = redis.sentinel.Sentinel([(self.host, self.port)])
         redis_client = sentinel.master_for(self.master_name)
         return redis_client
