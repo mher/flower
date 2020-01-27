@@ -200,8 +200,9 @@ class RedisSentinel(RedisBase):
         return master_name
 
     def _get_redis_client(self):
+        connection_kwargs = {'password': self.password}
         # TODO: get all sentinel hosts from Celery App config and use them to initialize Sentinel
-        sentinel = redis.sentinel.Sentinel([(self.host, self.port)])
+        sentinel = redis.sentinel.Sentinel([(self.host, self.port)], **connection_kwargs)
         redis_client = sentinel.master_for(self.master_name)
         return redis_client
 
