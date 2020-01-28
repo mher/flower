@@ -25,6 +25,7 @@ var flower = (function () {
     function url_prefix() {
         var url_prefix = $('#url_prefix').val();
         if (url_prefix) {
+            url_prefix = url_prefix.replace(/\/+$/, '');
             if (url_prefix.startsWith('/')) {
                 return url_prefix;
             } else {
