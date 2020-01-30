@@ -3,7 +3,7 @@ import unittest
 from mock import MagicMock
 
 from flower.utils import broker
-from flower.utils.broker import RabbitMQ, Redis, RedisBase, RedisSocket, Broker
+from flower.utils.broker import RabbitMQ, Redis, RedisBase, RedisSocket, Broker, RedisSentinel
 
 
 broker.requests = MagicMock()
@@ -52,7 +52,7 @@ class TestRedis(unittest.TestCase):
     def test_priority_steps(self):
         custom_steps = list(range(10))
         cases = [(RedisBase.DEFAULT_PRIORITY_STEPS, {}),
-                (custom_steps, {'priority_steps': custom_steps})]
+                 (custom_steps, {'priority_steps': custom_steps})]
         for expected, options in cases:
             b = Broker('redis://localhost:6379/0', broker_options=options)
             self.assertEqual(expected, b.priority_steps)
@@ -73,6 +73,46 @@ class TestRedis(unittest.TestCase):
 
     def test_url_with_password(self):
         b = Broker('redis://:pass@host:4444/5')
+        self.assertEqual('host', b.host)
+        self.assertEqual(4444, b.port)
+        self.assertEqual(5, b.vhost)
+        self.assertEqual('pass', b.password)
+
+
+class TestRedisSentinel(unittest.TestCase):
+    def test_init(self):
+        options = {'master_name': 'my_redis_master'}
+        b = Broker('sentinel://localhost:26379/', broker_options=options)
+        self.assertFalse(isinstance(b, RabbitMQ))
+        self.assertTrue(isinstance(b, RedisSentinel))
+
+    def test_priority_steps(self):
+        custom_steps = list(range(10))
+        cases = [(RedisBase.DEFAULT_PRIORITY_STEPS, {'master_name': 'my_redis_master'}),
+                 (custom_steps, {'master_name': 'my_redis_master', 'priority_steps': custom_steps})]
+        for expected, options in cases:
+            b = Broker('sentinel://localhost:6379/0', broker_options=options)
+            self.assertEqual(expected, b.priority_steps)
+
+    def test_url(self):
+        options = {'master_name': 'my_redis_master'}
+        b = Broker('sentinel://foo:7777/9', broker_options=options)
+        self.assertEqual('foo', b.host)
+        self.assertEqual(7777, b.port)
+        self.assertEqual(9, b.vhost)
+
+    def test_url_defaults(self):
+        options = {'master_name': 'my_redis_master'}
+        b = Broker('sentinel://', broker_options=options)
+        self.assertEqual('localhost', b.host)
+        self.assertEqual(26379, b.port)
+        self.assertEqual(0, b.vhost)
+        self.assertIsNone(b.username)
+        self.assertIsNone(b.password)
+
+    def test_url_with_password(self):
+        options = {'master_name': 'my_redis_master'}
+        b = Broker('sentinel://:pass@host:4444/5', broker_options=options)
         self.assertEqual('host', b.host)
         self.assertEqual(4444, b.port)
         self.assertEqual(5, b.vhost)
