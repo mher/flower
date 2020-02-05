@@ -41,7 +41,7 @@
 
   <body>
     {% block navbar %}
-        {% module Template("navbar.html", active_tab="") %}
+        {% module Template("navbar.html", active_tab="", is_basic_auth=is_basic_auth) %}
     {% end %}
 
     <div class="container-fluid">

@@ -14,10 +14,13 @@ from ..utils import template, bugreport, prepend_url
 
 class BaseHandler(tornado.web.RequestHandler):
     def render(self, *args, **kwargs):
+        app_options = self.application.options
         functions = inspect.getmembers(template, inspect.isfunction)
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
-        kwargs.update(url_prefix=self.application.options.url_prefix)
+        kwargs.update(
+            url_prefix=app_options.url_prefix,
+            is_basic_auth=True if app_options.basic_auth else False)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
