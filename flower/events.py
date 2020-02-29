@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from __future__ import with_statement
-
 import time
 import shelve
 import logging
@@ -21,10 +18,7 @@ from celery.events.state import State
 
 from . import api
 
-try:
-    from collections import Counter
-except ImportError:
-    from .utils.backports.collections import Counter
+from collections import Counter
 
 from prometheus_client import Counter as PrometheusCounter, Histogram
 

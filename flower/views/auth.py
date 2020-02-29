@@ -1,15 +1,9 @@
-from __future__ import absolute_import
-
 import json
 import re
 import os
 import uuid
 
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
-
+from urllib.parse import urlencode
 import tornado.gen
 import tornado.web
 import tornado.auth
