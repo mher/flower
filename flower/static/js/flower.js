@@ -443,6 +443,9 @@ var flower = (function () {
                 } else {
                     return y.toFixed(2) + metric;
                 }
+            },
+            xFormatter: function (x) {
+                return moment(x * 1e3).format("YYYY-MM-DD HH:mm:ss");
             }
         });
 
