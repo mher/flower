@@ -106,6 +106,7 @@ class FlowerCommand(Command):
                 'key': options.oauth2_key or os.environ.get('FLOWER_OAUTH2_KEY'),
                 'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
                 'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_OAUTH2_REDIRECT_URI'),
+                'okta_base_url': options.oauth2_okta_base_url or os.environ.get('FLOWER_OAUTH2_OKTA_BASE_URL'),
             }
 
         if options.certfile and options.keyfile:
