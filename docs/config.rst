@@ -306,5 +306,18 @@ Sets authentication provider
 
   - Google `flower.views.auth.GoogleAuth2LoginHandler`
   - GitHub `flower.views.auth.GithubLoginHandler`
+  - Okta `flower.views.auth.OktaLoginHandler`
 
 See `Authentication` for usage examples
+
+.. _oauth2_okta_base_url:
+
+oauth2_okta_base_url
+~~~~~~~~~~~~~~~~~~~~
+
+The URL from which OAuth2 API URLs will be built. For example: ::
+
+    https://my-company.okta.com/oauth2
+
+This should only be used in conjunction with the Okta `auth_provider`_
+(ie.. `flower.views.auth.OktaLoginHandler`)
