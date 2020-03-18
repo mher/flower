@@ -198,7 +198,7 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     def get(self):
         redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
         if self.get_argument('code', False):
-            expected_state = self.get_secure_cookie('oauth_state').decode('utf-8')
+            expected_state = (self.get_secure_cookie('oauth_state') or b'').decode('utf-8')
             returned_state = self.get_argument('state')
 
             if returned_state is None or returned_state != expected_state:
@@ -247,6 +247,7 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             raise tornado.web.HTTPError(403, message)
 
         self.set_secure_cookie("user", str(email))
+        self.clear_cookie('oauth_state')
 
         next_ = self.get_argument('next', self.application.options.url_prefix or '/')
         if self.application.options.url_prefix and next_[0] != '/':
