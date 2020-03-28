@@ -414,7 +414,7 @@ var flower = (function () {
 
         timeUnit = new Rickshaw.Fixtures.Time.Local();
         timeUnit.formatTime = function (d) {
-            return moment(d).format("yyyy.mm.dd HH:mm:ss");
+            return moment(d).format("YYYY-MM-DD HH:mm:ss");
         };
         timeUnit.unit("minute");
 
@@ -443,6 +443,9 @@ var flower = (function () {
                 } else {
                     return y.toFixed(2) + metric;
                 }
+            },
+            xFormatter: function (x) {
+                return moment(x * 1e3).format("YYYY-MM-DD HH:mm:ss");
             }
         });
 
