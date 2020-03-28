@@ -63,7 +63,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
         self.set_secure_cookie("user", str(email))
 
         next_ = self.get_argument('next', self.application.options.url_prefix or '/')
-        if self.application.options.url_prefix and next[0] != '/':
+        if self.application.options.url_prefix and next_[0] != '/':
             next_ = '/' + next_
 
         self.redirect(next_)
@@ -131,7 +131,6 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             'https://api.github.com/user/emails',
             headers={'Authorization': 'token ' + access_token,
                      'User-agent': 'Tornado auth'})
-
 
         emails = [email['email'].lower() for email in json.loads(response.body.decode('utf-8'))
                   if email['verified'] and re.match(self.application.options.auth, email['email'])]

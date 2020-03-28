@@ -50,18 +50,20 @@ class RabbitMQ(BrokerBase):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
-        self.port = 15672
+        self.port = self.port or 15672
         self.vhost = quote(self.vhost, '') or '/'
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
         if not http_api:
-            http_api = "http://{0}:{1}@{2}:15672/api/{3}".format(
-                self.username, self.password, self.host, self.vhost)
+            http_api = "http://{username}:{password}@{host}:{port}/api/{vhost}".format(
+                username=self.username, password=self.password,
+                host=self.host, port=self.port, vhost=self.vhost
+            )
 
         try:
             self.validate_http_api(http_api)
-        except Exception as e:
+        except Exception:
             logger.error("Invalid broker api url:%s", http_api)
 
         self.http_api = http_api
@@ -134,13 +136,11 @@ class RedisBase(BrokerBase):
 class Redis(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
-        super(Redis, self).__init__(broker_url)
+        super(Redis, self).__init__(broker_url, *args, **kwargs)
         self.host = self.host or 'localhost'
         self.port = self.port or 6379
         self.vhost = self._prepare_virtual_host(self.vhost)
-
-        self.redis = redis.Redis(host=self.host, port=self.port,
-                                 db=self.vhost, password=self.password)
+        self.redis = self._get_redis_client()
 
     def _prepare_virtual_host(self, vhost):
         if not isinstance(vhost, numbers.Integral):
@@ -157,13 +157,82 @@ class Redis(RedisBase):
                     ))
         return vhost
 
+    def _get_redis_client_args(self):
+        return {'host': self.host, 'port': self.port, 'db': self.vhost, 'password': self.password}
+
+    def _get_redis_client(self):
+        return redis.Redis(**self._get_redis_client_args())
+
+
+class RedisSentinel(RedisBase):
+
+    def __init__(self, broker_url, *args, **kwargs):
+        super(RedisSentinel, self).__init__(broker_url, *args, **kwargs)
+        broker_options = kwargs.get('broker_options', {})
+        self.host = self.host or 'localhost'
+        self.port = self.port or 26379
+        self.vhost = self._prepare_virtual_host(self.vhost)
+        self.master_name = self._prepare_master_name(broker_options)
+        self.redis = self._get_redis_client()
+
+    def _prepare_virtual_host(self, vhost):
+        if not isinstance(vhost, numbers.Integral):
+            if not vhost or vhost == '/':
+                vhost = 0
+            elif vhost.startswith('/'):
+                vhost = vhost[1:]
+            try:
+                vhost = int(vhost)
+            except ValueError:
+                raise ValueError(
+                    'Database is int between 0 and limit - 1, not {0}'.format(
+                        vhost,
+                    ))
+        return vhost
+
+    def _prepare_master_name(self, broker_options):
+        try:
+            master_name = broker_options['master_name']
+        except KeyError:
+            raise ValueError(
+                'master_name is required for Sentinel broker'
+                )
+        return master_name
+
+    def _get_redis_client(self):
+        connection_kwargs = {'password': self.password}
+        # TODO: get all sentinel hosts from Celery App config and use them to initialize Sentinel
+        sentinel = redis.sentinel.Sentinel([(self.host, self.port)], **connection_kwargs)
+        redis_client = sentinel.master_for(self.master_name)
+        return redis_client
+
 
 class RedisSocket(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
-        super(RedisSocket, self).__init__(broker_url)
+        super(RedisSocket, self).__init__(broker_url, *args, **kwargs)
         self.redis = redis.Redis(unix_socket_path='/' + self.vhost,
                                  password=self.password)
+
+
+class RedisSsl(Redis):
+    """
+    Redis SSL class offering connection to the broker over SSL.
+    This does not currently support SSL settings through the url, only through
+    the broker_use_ssl celery configuration.
+    """
+
+    def __init__(self, broker_url, *args, **kwargs):
+        if 'broker_use_ssl' not in kwargs:
+            raise ValueError('rediss broker requires broker_use_ssl')
+        self.broker_use_ssl = kwargs.get('broker_use_ssl', {})
+        super(RedisSsl, self).__init__(broker_url, *args, **kwargs)
+
+    def _get_redis_client_args(self):
+        client_args = super(RedisSsl, self)._get_redis_client_args()
+        client_args['ssl'] = True
+        client_args.update(self.broker_use_ssl)
+        return client_args
 
 
 class Broker(object):
@@ -173,8 +242,12 @@ class Broker(object):
             return RabbitMQ(broker_url, *args, **kwargs)
         elif scheme == 'redis':
             return Redis(broker_url, *args, **kwargs)
+        elif scheme == 'rediss':
+            return RedisSsl(broker_url, *args, **kwargs)
         elif scheme == 'redis+socket':
             return RedisSocket(broker_url, *args, **kwargs)
+        elif scheme == 'sentinel':
+            return RedisSentinel(broker_url, *args, **kwargs)
         else:
             raise NotImplementedError
 

@@ -36,6 +36,7 @@ classes = """
     Programming Language :: Python :: 3.4
     Programming Language :: Python :: 3.5
     Programming Language :: Python :: 3.6
+    Programming Language :: Python :: 3.7
     Programming Language :: Python :: Implementation :: CPython
     Programming Language :: Python :: Implementation :: PyPy
     Operating System :: OS Independent
@@ -55,6 +56,7 @@ setup(
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=get_requirements('default.txt'),
+    extras_require={':python_version == "2.7"': ['futures']},
     test_suite="tests",
     tests_require=get_requirements('test.txt'),
     package_data={'flower': ['templates/*', 'static/*.*',

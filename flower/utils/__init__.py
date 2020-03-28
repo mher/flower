@@ -15,14 +15,14 @@ def bugreport(app=None):
     try:
         import celery
         import tornado
-        import babel
+        import humanize
 
         app = app or celery.Celery()
 
-        return 'flower   -> flower:%s tornado:%s babel:%s%s' % (
+        return 'flower   -> flower:%s tornado:%s humanize:%s%s' % (
             __version__,
             tornado.version,
-            babel.__version__,
+            humanize.VERSION,
             app.bugreport()
         )
     except (ImportError, AttributeError):
