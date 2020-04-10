@@ -622,7 +622,7 @@ a.badge:hover {
 }
 .label-important,
 .badge-important {
-  background-color: #b94a48;
+  background-color: #db120d;
 }
 .label-important[href],
 .badge-important[href] {
@@ -638,7 +638,7 @@ a.badge:hover {
 }
 .label-success,
 .badge-success {
-  background-color: #468847;
+  background-color: #2ec730;
 }
 .label-success[href],
 .badge-success[href] {
