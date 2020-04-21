@@ -36,7 +36,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['profile', 'email'],
                 response_type='code',
-                extra_params={'approval_prompt': 'auto'}
+                extra_params={'approval_prompt': None}
             )
 
     @tornado.gen.coroutine
@@ -118,7 +118,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['user:email'],
                 response_type='code',
-                extra_params={'approval_prompt': 'auto'}
+                extra_params={'approval_prompt': None}
             )
 
     @tornado.gen.coroutine
