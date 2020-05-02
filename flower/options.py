@@ -20,8 +20,6 @@ define("debug", default=False,
 define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
-       help="regexp of emails to grant access")
-define("auth", default='', type=str,
        help="Google/GitHub auth: regexp string of emails to grant access, GitLab auth: JSON config")
 define("basic_auth", type=str, default=None, multiple=True,
        help="enable http basic authentication")
