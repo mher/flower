@@ -107,6 +107,10 @@ class FlowerCommand(Command):
                 'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
                 'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_OAUTH2_REDIRECT_URI'),
             }
+            settings['gitlab_auth'] = {
+                'allowed_groups': options.gitlab_auth_allowed_groups or os.environ.get('FLOWER_GITLAB_AUTH_ALLOWED_GROUPS'),
+                'min_access_level': options.gitlab_auth_min_access_level or os.environ.get('FLOWER_GITLAB_MIN_ACCESS_LEVEL'),
+            }
 
         if options.certfile and options.keyfile:
             settings['ssl_options'] = dict(certfile=abs_path(options.certfile),

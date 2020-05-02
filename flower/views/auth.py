@@ -155,15 +155,14 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     _OAUTH_AUTHORIZE_URL = 'https://gitlab.com/oauth/authorize'
     _OAUTH_ACCESS_TOKEN_URL = 'https://gitlab.com/oauth/token'
     _OAUTH_NO_CALLBACKS = False
-    _OAUTH_SETTINGS_KEY = 'oauth'
 
     @tornado.gen.coroutine
     def get_authenticated_user(self, redirect_uri, code):
         body = urlencode({
             'redirect_uri': redirect_uri,
             'code': code,
-            'client_id': self.settings[self._OAUTH_SETTINGS_KEY]['key'],
-            'client_secret': self.settings[self._OAUTH_SETTINGS_KEY]['secret'],
+            'client_id': self.settings['oauth']['key'],
+            'client_secret': self.settings['oauth']['secret'],
             'grant_type': 'authorization_code',
         })
         response = yield self.get_auth_http_client().fetch(
@@ -179,7 +178,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
     @tornado.gen.coroutine
     def get(self):
-        redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
+        redirect_uri = self.settings['oauth']['redirect_uri']
         if self.get_argument('code', False):
             user = yield self.get_authenticated_user(
                 redirect_uri=redirect_uri,
@@ -189,7 +188,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         else:
             yield self.authorize_redirect(
                 redirect_uri=redirect_uri,
-                client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
+                client_id=self.settings['oauth']['key'],
                 scope=['read_api'],
                 response_type='code',
                 extra_params={'approval_prompt': ''},
@@ -200,11 +199,10 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         if not user:
             raise tornado.web.HTTPError(500, 'OAuth authentication failed')
         access_token = user['access_token']
-        auth_conf = json.loads(self.application.options.auth)
-        allowed_emails = auth_conf.get('emails')
-        allowed_groups = auth_conf.get('groups')
+        allowed_groups = self.settings['gitlab_auth']['allowed_groups'] or ''
+        allowed_groups = [group.strip() for group in allowed_groups.split(',') if group]
 
-        # Check user email address against list of allowed email addresses
+        # Check user email address against regexp
         try:
             response = yield self.get_auth_http_client().fetch(
                 'https://gitlab.com/api/v4/user',
@@ -215,15 +213,14 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             raise tornado.web.HTTPError(403, 'GitLab auth failed: %s' % e)
 
         user_email = json.loads(response.body.decode('utf-8'))['email']
-        email_allowed = allowed_emails and re.match(allowed_emails, user_email)
+        email_allowed = re.match(self.application.options.auth, user_email)
 
         # Check user's groups against list of allowed groups
-        group_allowed = False
+        matching_groups = []
         if allowed_groups:
-            if not isinstance(allowed_groups, list):
-                allowed_groups = [allowed_groups]
+            min_access_level = self.settings['gitlab_auth']['min_access_level'] or '20'
             response = yield self.get_auth_http_client().fetch(
-                'https://gitlab.com/api/v4/groups?min_access_level=20',
+                'https://gitlab.com/api/v4/groups?min_access_level=%s' % (min_access_level,),
                 headers={
                     'Authorization': 'Bearer ' + access_token,
                     'User-agent': 'Tornado auth'
@@ -234,13 +231,9 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 for group in json.loads(response.body.decode('utf-8'))
                 if group['full_path'] in allowed_groups
             ]
-            group_allowed = len(matching_groups) > 0
 
-        if not any([email_allowed, group_allowed]):
-            message = (
-                "Access denied. Please use another account or "
-                "contact your admin."
-            )
+        if not email_allowed or (allowed_groups and len(matching_groups) == 0):
+            message = 'Access denied. Please use another account or contact your admin.'
             raise tornado.web.HTTPError(403, message)
 
         self.set_secure_cookie('user', str(user_email))

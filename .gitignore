@@ -26,3 +26,4 @@ env
 venv
 *.retry
 .cache/
+.mypy_cache/

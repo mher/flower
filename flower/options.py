@@ -20,9 +20,13 @@ define("debug", default=False,
 define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
-       help="Google/GitHub auth: regexp string of emails to grant access, GitLab auth: JSON config")
+       help="regexp of emails to grant access")
 define("basic_auth", type=str, default=None, multiple=True,
        help="enable http basic authentication")
+define("gitlab_auth_allowed_groups", type=str, default='',
+       help="comma-separated list of allowed group paths when using GitLab auth")
+define("gitlab_auth_min_access_level", type=str, default='',
+       help="minimum required group access level when using GitLab auth with allowed groups")
 define("oauth2_key", type=str, default=None,
        help="OAuth2 key (requires --auth)")
 define("oauth2_secret", type=str, default=None,
