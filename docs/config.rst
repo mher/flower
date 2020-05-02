@@ -169,6 +169,24 @@ The example below shows how to filter arguments and limit display lengths:
         task.result = humanize(task.result, length=20)
         return task
 
+.. _gitlab_auth_allowed_groups:
+
+gitlab_auth_allowed_groups
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Comma-separated list of group paths (e.g. ``group1,group2/subgroup``) to
+grant access to when using GitLab auth.
+
+.. _gitlab_auth_allowed_groups:
+
+gitlab_auth_min_access_level
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Minimum required access level of a user in a group to be counted as membership
+for GitLab auth. See `Group and project members API`_ for details.
+
+.. _Group and project members API: https://docs.gitlab.com/ee/api/members.html
+
 .. _inspect_timeout:
 
 inspect_timeout
