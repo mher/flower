@@ -65,15 +65,14 @@ class BaseHandler(tornado.web.RequestHandler):
             except ValueError:
                 raise tornado.web.HTTPError(401)
 
-        # Google OpenID
+        # OAuth2
         if not self.application.options.auth:
             return True
         user = self.get_secure_cookie('user')
         if user:
             if not isinstance(user, str):
                 user = user.decode()
-            if re.search(self.application.options.auth, user):
-                return user
+            return user
         return None
 
     def get_argument(self, name, default=[], strip=True, type=None):

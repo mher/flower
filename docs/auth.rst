@@ -64,7 +64,7 @@ GitHub OAuth should be activated using `--auth_provider` option.
 The client id, secret and redirect uri should be provided using
 `--oauth2_key`, `--oauth2_secret` and `--oauth2_redirect_uri` options or using
 `FLOWER_OAUTH2_KEY`, `FLOWER_OAUTH2_SECRET` and `FLOWER_OAUTH2_REDIRECT_URI`
-environment variables.: ::
+environment variables. ::
 
     $ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
     $ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
@@ -72,3 +72,27 @@ environment variables.: ::
     $ celery flower --auth_provider=flower.views.auth.GithubLoginHandler --auth=.*@example\.com
 
 .. _GitHub OAuth API: https://developer.github.com/v3/oauth/
+
+.. _gitlab-oauth:
+
+GitLab OAuth
+------------
+
+Flower also supports GitLab OAuth. Flower should be registered in
+<https://gitlab.com/profile/applications> before getting started.
+See `GitLab OAuth2 API`_ docs for more info.
+
+GitLab OAuth should be activated using `--auth_provider` option.
+The client id, secret and redirect uri should be provided using
+`--oauth2_key`, `--oauth2_secret` and `--oauth2_redirect_uri` options or using
+`FLOWER_OAUTH2_KEY`, `FLOWER_OAUTH2_SECRET` and `FLOWER_OAUTH2_REDIRECT_URI`
+environment variables.
+
+`--auth` is a JSON string for granting access only to the specified email pattern or members of specified groups. ::
+
+    $ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
+    $ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
+    $ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
+    $ celery flower --auth_provider=flower.views.auth.GitLabLoginHandler --auth='{"emails": ".*@example\.com", "groups": ["group1", "group2/subgroup"]}'
+
+.. _GitLab OAuth2 API: https://docs.gitlab.com/ee/api/oauth2.html

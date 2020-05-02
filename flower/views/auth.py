@@ -150,6 +150,106 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         self.redirect(next_)
 
 
+class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
+
+    _OAUTH_AUTHORIZE_URL = 'https://gitlab.com/oauth/authorize'
+    _OAUTH_ACCESS_TOKEN_URL = 'https://gitlab.com/oauth/token'
+    _OAUTH_NO_CALLBACKS = False
+    _OAUTH_SETTINGS_KEY = 'oauth'
+
+    @tornado.gen.coroutine
+    def get_authenticated_user(self, redirect_uri, code):
+        body = urlencode({
+            'redirect_uri': redirect_uri,
+            'code': code,
+            'client_id': self.settings[self._OAUTH_SETTINGS_KEY]['key'],
+            'client_secret': self.settings[self._OAUTH_SETTINGS_KEY]['secret'],
+            'grant_type': 'authorization_code',
+        })
+        response = yield self.get_auth_http_client().fetch(
+            self._OAUTH_ACCESS_TOKEN_URL,
+            method='POST',
+            headers={'Content-Type': 'application/x-www-form-urlencoded',
+                     'Accept': 'application/json'},
+            body=body
+        )
+        if response.error:
+            raise tornado.auth.AuthError('OAuth authenticator error: %s' % str(response))
+        raise tornado.gen.Return(json.loads(response.body.decode('utf-8')))
+
+    @tornado.gen.coroutine
+    def get(self):
+        redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
+        if self.get_argument('code', False):
+            user = yield self.get_authenticated_user(
+                redirect_uri=redirect_uri,
+                code=self.get_argument('code'),
+            )
+            yield self._on_auth(user)
+        else:
+            yield self.authorize_redirect(
+                redirect_uri=redirect_uri,
+                client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
+                scope=['read_api'],
+                response_type='code',
+                extra_params={'approval_prompt': ''},
+            )
+
+    @tornado.gen.coroutine
+    def _on_auth(self, user):
+        if not user:
+            raise tornado.web.HTTPError(500, 'OAuth authentication failed')
+        access_token = user['access_token']
+        auth_conf = json.loads(self.application.options.auth)
+        allowed_emails = auth_conf.get('emails')
+        allowed_groups = auth_conf.get('groups')
+
+        # Check user email address against list of allowed email addresses
+        try:
+            response = yield self.get_auth_http_client().fetch(
+                'https://gitlab.com/api/v4/user',
+                headers={'Authorization': 'Bearer ' + access_token,
+                         'User-agent': 'Tornado auth'}
+            )
+        except Exception as e:
+            raise tornado.web.HTTPError(403, 'GitLab auth failed: %s' % e)
+
+        user_email = json.loads(response.body.decode('utf-8'))['email']
+        email_allowed = allowed_emails and re.match(allowed_emails, user_email)
+
+        # Check user's groups against list of allowed groups
+        group_allowed = False
+        if allowed_groups:
+            if not isinstance(allowed_groups, list):
+                allowed_groups = [allowed_groups]
+            response = yield self.get_auth_http_client().fetch(
+                'https://gitlab.com/api/v4/groups?min_access_level=20',
+                headers={
+                    'Authorization': 'Bearer ' + access_token,
+                    'User-agent': 'Tornado auth'
+                }
+            )
+            matching_groups = [
+                group['id']
+                for group in json.loads(response.body.decode('utf-8'))
+                if group['full_path'] in allowed_groups
+            ]
+            group_allowed = len(matching_groups) > 0
+
+        if not any([email_allowed, group_allowed]):
+            message = (
+                "Access denied. Please use another account or "
+                "contact your admin."
+            )
+            raise tornado.web.HTTPError(403, message)
+
+        self.set_secure_cookie('user', str(user_email))
+        next_ = self.get_argument('next', self.application.options.url_prefix or '/')
+        if self.application.options.url_prefix and next_[0] != '/':
+            next_ = '/' + next_
+        self.redirect(next_)
+
+
 class LogoutHandler(BaseHandler):
     def get(self):
         self.clear_cookie('user')
