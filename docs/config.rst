@@ -311,6 +311,6 @@ See `Authentication` for usage examples
 
 
 purge_offline_workers
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Remove offline workers from dashboard automatically (by default, purge_offline_workers=False)
