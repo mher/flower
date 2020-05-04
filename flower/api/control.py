@@ -499,7 +499,7 @@ Change soft and hard time limits for a task
     Content-Type: application/json; charset=UTF-8
 
     {
-        "message": "new rate limit set successfully"
+        "message": "time limits set successfully"
     }
 
 :query workername: worker name
@@ -559,7 +559,7 @@ Change rate limit for a task
   Content-Type: application/json; charset=UTF-8
 
   {
-      "message": "Revoked '1480b55c-b8b2-462c-985e-24af3e9158f9'"
+      "message": "new rate limit set successfully"
   }
 
 :query workername: worker name

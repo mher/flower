@@ -78,7 +78,7 @@ basic_auth
 ~~~~~~~~~~
 
 Enables HTTP Basic authentication. `basic_auth` is a comma separated list
-of `username:passworrd`. See :ref:`basic-auth` for more info.
+of `username:password`. See :ref:`basic-auth` for more info.
 
 .. _broker_api:
 
@@ -174,7 +174,7 @@ The example below shows how to filter arguments and limit display lengths:
 inspect_timeout
 ~~~~~~~~~~~~~~~
 
-Sets worker inspect timeout (by default, `inspect_timeout=10000`
+Sets worker inspect timeout (by default, `inspect_timeout=1000`
 in milliseconds)
 
 .. _keyfile:

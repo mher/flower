@@ -24,7 +24,7 @@ class TaskView(BaseHandler):
 
         if task is None:
             raise web.HTTPError(404, "Unknown task '%s'" % task_id)
-
+        task = self.format_task(task)
         self.render("task.html", task=task)
 
 
@@ -64,6 +64,8 @@ class TasksDataTable(BaseHandler):
         def key(item):
             return Comparable(getattr(item[1], sort_by))
 
+        self.maybe_normalize_for_sort(app.events.state.tasks_by_timestamp(), sort_by)
+
         sorted_tasks = sorted(
             iter_tasks(app.events, search=search),
             key=key,
@@ -83,6 +85,18 @@ class TasksDataTable(BaseHandler):
                         recordsTotal=len(sorted_tasks),
                         recordsFiltered=len(sorted_tasks)))
 
+    @classmethod
+    def maybe_normalize_for_sort(cls, tasks, sort_by):
+        sort_keys = {'name': str, 'state': str, 'received': float, 'started': float, 'runtime': float}
+        if sort_by in sort_keys:
+            for _, task in tasks:
+                attr_value = getattr(task, sort_by, None)
+                if attr_value:
+                    try:
+                        setattr(task, sort_by, sort_keys[sort_by](attr_value))
+                    except TypeError:
+                        pass
+
     @web.authenticated
     def post(self):
         return self.get()
@@ -94,7 +108,7 @@ class TasksDataTable(BaseHandler):
         if custom_format_task:
             try:
                 task = custom_format_task(copy.copy(task))
-            except:
+            except Exception:
                 logger.exception("Failed to format '%s' task", uuid)
         return uuid, task
 
