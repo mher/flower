@@ -89,6 +89,8 @@ class BrokerMonitor(BaseHandler):
     @gen.coroutine
     def get(self):
         app = self.application
+        broker_options = self.capp.conf.BROKER_TRANSPORT_OPTIONS
+
         capp = app.capp
 
         try:
@@ -96,7 +98,8 @@ class BrokerMonitor(BaseHandler):
             if self.capp.conf.BROKER_USE_SSL:
                 broker_use_ssl = self.capp.conf.BROKER_USE_SSL
             broker = Broker(capp.connection().as_uri(include_password=True),
-                            http_api=app.options.broker_api, broker_use_ssl=broker_use_ssl)
+                            http_api=app.options.broker_api, broker_use_ssl=broker_use_ssl,
+                            broker_options=broker_options)
         except NotImplementedError:
             self.write({})
             return
