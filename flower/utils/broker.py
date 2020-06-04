@@ -216,7 +216,7 @@ class RedisSocket(RedisBase):
         self.redis = redis.Redis(unix_socket_path='/' + self.vhost,
                                  password=self.password)
 
-        
+
 class RedisSsl(Redis):
     """
     Redis SSL class offering connection to the broker over SSL.
@@ -234,7 +234,7 @@ class RedisSsl(Redis):
         client_args = super(RedisSsl, self)._get_redis_client_args()
         client_args['ssl'] = True
         client_args.update(self.broker_use_ssl)
-        return client_args 
+        return client_args
 
 
 class Broker(object):
@@ -245,7 +245,7 @@ class Broker(object):
         elif scheme == 'redis':
             return Redis(broker_url, *args, **kwargs)
         elif scheme == 'rediss':
-            return RedisSsl(broker_url, *args, **kwargs) 
+            return RedisSsl(broker_url, *args, **kwargs)
         elif scheme == 'redis+socket':
             return RedisSocket(broker_url, *args, **kwargs)
         elif scheme == 'sentinel':
