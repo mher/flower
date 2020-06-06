@@ -660,6 +660,7 @@ var flower = (function () {
             columnDefs: [{
                 targets: 0,
                 data: 'hostname',
+                type: 'natural',
                 render: function (data, type, full, meta) {
                     return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
                 }
