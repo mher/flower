@@ -7,9 +7,9 @@ from tests.unit.utils import task_succeeded_events, task_failed_events
 from tests.unit.utils import HtmlTableParser
 
 if sys.version_info >= (2, 7):
-    from mock import patch, PropertyMock
+    from mock import patch
 else:
-    from unittest.mock import patch, PropertyMock
+    from unittest.mock import patch
 
 
 from celery.events import Event
@@ -74,7 +74,7 @@ class DashboardTests(AsyncHTTPTestCase):
         self.app.events.state = state
 
         with patch('flower.views.dashboard.options') as mock_options:
-            mock_options.purge_offline_workers = PropertyMock(return_value=True)
+            mock_options.purge_offline_workers = 0
             r = self.get('/dashboard')
 
         table = HtmlTableParser()

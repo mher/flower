@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import time
 
 from collections import OrderedDict
 from functools import partial
@@ -46,8 +47,18 @@ class DashboardView(BaseHandler):
             info.update(status=worker.alive)
             workers[name] = info
         
-        if options.purge_offline_workers:
-            offline_workers = [name for name, info in workers.items() if info.get('worker-offline', 0)]
+        if options.purge_offline_workers is not None:
+            timestamp = int(time.time())
+            offline_workers = []
+            for name, info in workers.items():
+                if info.get('status', True):
+                    continue
+
+                heartbeats = info.get('heartbeats', [])
+                last_heartbeat = int(max(heartbeats)) if heartbeats else None
+                if not last_heartbeat or timestamp - last_heartbeat > options.purge_offline_workers:
+                    offline_workers.append(name)
+
             for name in offline_workers:
                 workers.pop(name)
 
