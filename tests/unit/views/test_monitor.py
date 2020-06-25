@@ -47,6 +47,8 @@ class PrometheusTests(AsyncHTTPTestCase):
         self.app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
+        events = dict(re.findall('flower_events_total{task="task1",type="(task-.*)",worker="worker1"} (.*)', metrics))
 
-        m = re.findall('flower_events_total{task="task1",type="(task-.*)",worker="worker1"} (.*)', metrics)
-        self.assertListEqual(m, [('task-received', '1.0'), ('task-started', '1.0'), ('task-succeeded', '1.0')])
+        self.assertEqual(events['task-received'], '1.0')
+        self.assertEqual(events['task-started'], '1.0')
+        self.assertEqual(events['task-succeeded'], '1.0')
