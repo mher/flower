@@ -1,14 +1,22 @@
 import time
 import unittest
+import sys
 
 from tests.unit import AsyncHTTPTestCase
 from tests.unit.utils import task_succeeded_events, task_failed_events
 from tests.unit.utils import HtmlTableParser
 
+if sys.version_info >= (2, 7):
+    from mock import patch
+else:
+    from unittest.mock import patch
+
+
 from celery.events import Event
 from celery.utils import uuid
 
 from flower.events import EventsState
+from flower.options import options
 
 
 class DashboardTests(AsyncHTTPTestCase):
@@ -46,7 +54,6 @@ class DashboardTests(AsyncHTTPTestCase):
         self.app.events.state = state
 
         r = self.get('/dashboard')
-
         table = HtmlTableParser()
         table.parse(str(r.body))
 
@@ -56,6 +63,25 @@ class DashboardTests(AsyncHTTPTestCase):
         self.assertEqual(['worker1', 'False', '0', '0', '0', '0', '0', None],
                          table.get_row('worker1'))
         self.assertFalse(table.get_row('worker2'))
+
+    def test_purge_offline_workers(self):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        state.event(Event('worker-online', hostname='worker1',
+                          local_received=time.time()))
+        state.event(Event('worker-offline', hostname='worker1',
+                          local_received=time.time()))
+        self.app.events.state = state
+
+        with patch('flower.views.dashboard.options') as mock_options:
+            mock_options.purge_offline_workers = 0
+            r = self.get('/dashboard')
+
+        table = HtmlTableParser()
+        table.parse(str(r.body))
+
+        self.assertEqual(200, r.code)
+        self.assertEqual(0, len(table.rows()))
 
     def test_single_workers_online(self):
         state = EventsState()

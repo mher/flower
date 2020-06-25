@@ -5,6 +5,7 @@ from collections import defaultdict
 from tornado import web
 from tornado import gen
 from celery import states
+import prometheus_client
 
 from ..views import BaseHandler
 from ..utils.broker import Broker
@@ -89,6 +90,8 @@ class BrokerMonitor(BaseHandler):
     @gen.coroutine
     def get(self):
         app = self.application
+        broker_options = self.capp.conf.BROKER_TRANSPORT_OPTIONS
+
         capp = app.capp
 
         try:
@@ -96,7 +99,8 @@ class BrokerMonitor(BaseHandler):
             if self.capp.conf.BROKER_USE_SSL:
                 broker_use_ssl = self.capp.conf.BROKER_USE_SSL
             broker = Broker(capp.connection().as_uri(include_password=True),
-                            http_api=app.options.broker_api, broker_use_ssl=broker_use_ssl)
+                            http_api=app.options.broker_api, broker_use_ssl=broker_use_ssl,
+                            broker_options=broker_options)
         except NotImplementedError:
             self.write({})
             return
@@ -112,3 +116,9 @@ class BrokerMonitor(BaseHandler):
             data[queue['name']] = queue.get('messages', 0)
 
         self.write(data)
+
+class Metrics(BaseHandler):
+    @web.authenticated
+    @gen.coroutine
+    def get(self):
+        self.write(prometheus_client.generate_latest())

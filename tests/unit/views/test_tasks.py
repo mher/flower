@@ -98,9 +98,13 @@ class TasksTest(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         events = [Event('worker-online', hostname='worker1')]
         events += task_succeeded_events(worker='worker1', name='task1',
-                                        id='123', runtime=10.0)
+                                        id='2', runtime=10.0)
         events += task_succeeded_events(worker='worker1', name='task1',
-                                        id='456', runtime=2.0)
+                                        id='4', runtime=10000000.0)
+        events += task_succeeded_events(worker='worker1', name='task1',
+                                        id='3', runtime=20.0)
+        events += task_succeeded_events(worker='worker1', name='task1',
+                                        id='1', runtime=2.0)
         for i, e in enumerate(events):
             e['clock'] = i
             e['local_received'] = time.time()
@@ -118,22 +122,28 @@ class TasksTest(AsyncHTTPTestCase):
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
-        self.assertEqual(2, table['recordsTotal'])
-        self.assertEqual(2, table['recordsFiltered'])
+        self.assertEqual(4, table['recordsTotal'])
+        self.assertEqual(4, table['recordsFiltered'])
         tasks = table['data']
-        self.assertEqual(2, len(tasks))
+        self.assertEqual(4, len(tasks))
 
         self.assertEqual('SUCCESS', tasks[0]['state'])
         self.assertEqual('task1', tasks[0]['name'])
-        self.assertEqual('456', tasks[0]['uuid'])
+        self.assertEqual('1', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
         self.assertEqual(2.0, tasks[0]['runtime'])
 
         self.assertEqual('SUCCESS', tasks[1]['state'])
         self.assertEqual('task1', tasks[1]['name'])
-        self.assertEqual('123', tasks[1]['uuid'])
+        self.assertEqual('2', tasks[1]['uuid'])
         self.assertEqual('worker1', tasks[1]['worker'])
         self.assertEqual(10.0, tasks[1]['runtime'])
+
+        self.assertEqual('SUCCESS', tasks[3]['state'])
+        self.assertEqual('task1', tasks[3]['name'])
+        self.assertEqual('4', tasks[3]['uuid'])
+        self.assertEqual('worker1', tasks[3]['worker'])
+        self.assertEqual(10000000.0, tasks[3]['runtime'])
 
     def test_sort_incomparable(self):
         state = EventsState()

@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import re
 import inspect
 import traceback
+import copy
+import logging
 
 from distutils.util import strtobool
 from base64 import b64decode
@@ -10,6 +12,8 @@ from base64 import b64decode
 import tornado
 
 from ..utils import template, bugreport, prepend_url
+
+logger = logging.getLogger(__name__)
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -101,3 +105,13 @@ class BaseHandler(tornado.web.RequestHandler):
         prefix = self.application.options.url_prefix
         url = super(BaseHandler, self).reverse_url(*args)
         return prepend_url(url, prefix) if prefix else url
+
+    def format_task(self, task):
+        custom_format_task = self.application.options.format_task
+        if custom_format_task:
+            try:
+                task = custom_format_task(copy.copy(task))
+            except:
+                logger.exception("Failed to format '%s' task", task.uuid)
+        return task
+
