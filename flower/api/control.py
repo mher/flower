@@ -461,13 +461,15 @@ Revoke a task
   }
 
 :query terminate: terminate the task if it is running
+:query signal: name of signal to send to process if terminate (default: 'SIGTERM')
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
         """
         logger.info("Revoking task '%s'", taskid)
         terminate = self.get_argument('terminate', default=False, type=bool)
-        self.capp.control.revoke(taskid, terminate=terminate)
+        signal = self.get_argument('signal', default='SIGTERM', type=str)
+        self.capp.control.revoke(taskid, terminate=terminate, signal=signal)
         self.write(dict(message="Revoked '%s'" % taskid))
 
 
@@ -497,7 +499,7 @@ Change soft and hard time limits for a task
     Content-Type: application/json; charset=UTF-8
 
     {
-        "message": "new rate limit set successfully"
+        "message": "time limits set successfully"
     }
 
 :query workername: worker name
@@ -557,7 +559,7 @@ Change rate limit for a task
   Content-Type: application/json; charset=UTF-8
 
   {
-      "message": "Revoked '1480b55c-b8b2-462c-985e-24af3e9158f9'"
+      "message": "new rate limit set successfully"
   }
 
 :query workername: worker name

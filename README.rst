@@ -1,5 +1,8 @@
-Celery Flower
-=============
+Flower
+======
+
+.. image:: https://github.com/mher/flower/workflows/Build/badge.svg
+    :target: https://github.com/mher/flower/actions
 
 .. image:: https://img.shields.io/pypi/v/flower.svg
     :target: https://pypi.python.org/pypi/flower
@@ -38,6 +41,7 @@ Features
 
 - HTTP API
 - Basic Auth and Google OpenID authentication
+- Prometheus integration
 
 API
 ---

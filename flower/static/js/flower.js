@@ -25,6 +25,7 @@ var flower = (function () {
     function url_prefix() {
         var url_prefix = $('#url_prefix').val();
         if (url_prefix) {
+            url_prefix = url_prefix.replace(/\/+$/, '');
             if (url_prefix.startsWith('/')) {
                 return url_prefix;
             } else {
@@ -250,20 +251,21 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $('#workername').text(),
+        var post_data = {
+                'workername': $('#workername').text()
+            },
             taskname = $(event.target).closest("tr").children("td:eq(0)").text(),
+            type = $(event.target).text().toLowerCase(),
             timeout = $(event.target).siblings().closest("input").val();
 
         taskname = taskname.split(' ')[0]; // removes [rate_limit=xxx]
+        post_data[type] = timeout;
 
         $.ajax({
             type: 'POST',
             url: url_prefix() + '/api/task/timeout/' + taskname,
             dataType: 'json',
-            data: {
-                'workername': workername,
-                'type': timeout,
-            },
+            data: post_data,
             success: function (data) {
                 show_success_alert(data.message);
             },
@@ -412,7 +414,7 @@ var flower = (function () {
 
         timeUnit = new Rickshaw.Fixtures.Time.Local();
         timeUnit.formatTime = function (d) {
-            return moment(d).format("yyyy.mm.dd HH:mm:ss");
+            return moment(d).format("YYYY-MM-DD HH:mm:ss");
         };
         timeUnit.unit("minute");
 
@@ -441,6 +443,9 @@ var flower = (function () {
                 } else {
                     return y.toFixed(2) + metric;
                 }
+            },
+            xFormatter: function (x) {
+                return moment(x * 1e3).format("YYYY-MM-DD HH:mm:ss");
             }
         });
 
@@ -655,6 +660,7 @@ var flower = (function () {
             columnDefs: [{
                 targets: 0,
                 data: 'hostname',
+                type: 'natural',
                 render: function (data, type, full, meta) {
                     return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
                 }

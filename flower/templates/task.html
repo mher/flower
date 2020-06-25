@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="tasks") %}
+  {% module Template("navbar.html", active_tab="tasks", logout=logout) %}
 {% end %}
 
 {% block container %}
@@ -76,6 +76,9 @@
                         href="{{ reverse_url('worker', task.worker.hostname) }}">{{ task.worker.hostname }}</a>
                     {% elif name == 'traceback' %}
                     <pre>{{ getattr(task, name, None) }}</pre>
+                    {% elif name in ['parent_id', 'root_id'] %}
+                    <a
+                        href="{{ reverse_url('task', getattr(task, name, None)) }}">{{ getattr(task, name, None) }}</a>
                     {% else %}
                       {{ getattr(task, name, None) }}
                     {% end %}

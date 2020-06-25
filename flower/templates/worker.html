@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="workers") %}
+  {% module Template("navbar.html", active_tab="workers", logout=logout) %}
 {% end %}
 
 {% block container %}
@@ -328,7 +328,7 @@
                 {% for name,value in sorted(worker.get('conf', {}).items()) %}
                     {% if value is not None %}
                       <tr>
-                        <td><a href="http://docs.celeryproject.org/en/latest/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
+                        <td><a href="http://docs.celeryproject.org/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
                         <td>{{ value }}</td>
                       </tr>
                     {% end %}

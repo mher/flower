@@ -1,3 +1,3 @@
 -r default.txt
 -r test.txt
-redis
+redis<4.0.0

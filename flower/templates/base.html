@@ -41,7 +41,7 @@
 
   <body>
     {% block navbar %}
-        {% module Template("navbar.html", active_tab="") %}
+        {% module Template("navbar.html", active_tab="", logout=logout) %}
     {% end %}
 
     <div class="container-fluid">
@@ -64,6 +64,7 @@
     <script src="{{ static_url('js/jquery.dataTables.select.min.js') }}"></script>
     <script src="{{ static_url('js/jquery.dataTables.buttons.min.js') }}"></script>
     <script src="{{ static_url('js/jquery.dataTables.colReorder.min.js') }}"></script>
+    <script src="{{ static_url('js/jquery.dataTables.sorting.natural.js') }}"></script>
 
     <script src="{{ static_url('js/bootstrap-transition.js') }}"></script>
     <script src="{{ static_url('js/bootstrap-alert.js') }}"></script>

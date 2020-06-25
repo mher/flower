@@ -11,6 +11,8 @@ from functools import partial
 
 import celery
 
+from pkg_resources import parse_version
+
 from tornado.ioloop import PeriodicCallback
 from tornado.ioloop import IOLoop
 
@@ -24,8 +26,14 @@ try:
 except ImportError:
     from .utils.backports.collections import Counter
 
+from prometheus_client import Counter as PrometheusCounter, Histogram
 
 logger = logging.getLogger(__name__)
+
+
+class PrometheusMetrics(object):
+    events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
+    runtime = Histogram('flower_task_runtime_seconds', "Task runtime", ['worker', 'task'])
 
 
 class EventsState(State):
@@ -34,12 +42,24 @@ class EventsState(State):
     def __init__(self, *args, **kwargs):
         super(EventsState, self).__init__(*args, **kwargs)
         self.counter = collections.defaultdict(Counter)
+        self.metrics = PrometheusMetrics()
 
     def event(self, event):
         worker_name = event['hostname']
         event_type = event['type']
 
         self.counter[worker_name][event_type] += 1
+
+        if event_type.startswith('task-'):
+            task_id = event['uuid']
+            task_name = event.get('name', '')
+            if not task_name and task_id in self.tasks:
+                task_name = self.tasks[task_id].name or ''
+            self.metrics.events.labels(worker_name, event_type, task_name).inc()
+
+            runtime = event.get('runtime', 0)
+            if runtime:
+                self.metrics.runtime.labels(worker_name, task_name).observe(runtime)
 
         # Send event to api subscribers (via websockets)
         classname = api.events.getClassName(event_type)
@@ -67,7 +87,7 @@ class Events(threading.Thread):
         self.enable_events = enable_events
         self.state = None
 
-        if self.persistent and tuple(map(int, celery.__version__.split('.'))) < (3, 0, 15):
+        if self.persistent and parse_version(celery.__version__) < parse_version("3.0.15"):
             logger.warning('Persistent mode is available with '
                            'Celery 3.0.15 and later')
             self.persistent = False

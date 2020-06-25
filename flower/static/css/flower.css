@@ -229,3 +229,20 @@
   width: 100%;
   display: inline-block;
 }
+
+/* Modify the bootstrap defaults to better discern red and green */
+.label-important,
+.badge-important {
+    background-color: #db120d;
+}
+.label-success,
+.badge-success {
+    background-color: #2ec730;
+}
+
+/* Modify bootstrap dropdown menu to have white font colour instead of
+ * gray (recall that the background is green) */
+.nav-collapse .nav > li > a,
+.nav-collapse .dropdown-menu a {
+  color: #ffffff;
+}

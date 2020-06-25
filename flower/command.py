@@ -9,6 +9,8 @@ import logging
 
 from pprint import pformat
 
+from logging import NullHandler
+
 from tornado.options import options
 from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
@@ -19,11 +21,6 @@ from .app import Flower
 from .urls import settings
 from .utils import abs_path, prepend_url
 from .options import DEFAULT_CONFIG_FILE, default_options
-
-try:
-    from logging import NullHandler
-except ImportError:
-    from .utils.backports import NullHandler
 
 
 logger = logging.getLogger(__name__)
@@ -66,7 +63,7 @@ class FlowerCommand(Command):
             value = os.environ[env_var_name]
             try:
                 option = options._options[name]
-            except:
+            except KeyError:
                 option = options._options[name.replace('_', '-')]
             if option.multiple:
                 value = [option.type(i) for i in value.split(',')]
@@ -108,7 +105,7 @@ class FlowerCommand(Command):
             settings['oauth'] = {
                 'key': options.oauth2_key or os.environ.get('FLOWER_OAUTH2_KEY'),
                 'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
-                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_AUTH2_REDIRECT_URI'),
+                'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_OAUTH2_REDIRECT_URI'),
             }
 
         if options.certfile and options.keyfile:
