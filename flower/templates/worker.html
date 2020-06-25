@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="workers", is_basic_auth=is_basic_auth) %}
+  {% module Template("navbar.html", active_tab="workers", logout=logout) %}
 {% end %}
 
 {% block container %}

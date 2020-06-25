@@ -15,7 +15,7 @@
             <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="{{ reverse_url('monitor') }}">Monitor</a></li>
         </ul>
         <ul class="nav pull-right">
-          {% if not is_basic_auth %}
+          {% if logout %}
             <li><a href="{{ reverse_url('logout') }}">Logout</a></li>
           {% end %}
           <li><a href="https://flower.readthedocs.io" target="_blank">Docs</a></li>

@@ -24,7 +24,7 @@ class BaseHandler(tornado.web.RequestHandler):
         kwargs.update(functions)
         kwargs.update(
             url_prefix=app_options.url_prefix,
-            is_basic_auth=True if app_options.basic_auth else False)
+            logout=not app_options.basic_auth)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
