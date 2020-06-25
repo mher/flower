@@ -34,7 +34,7 @@ class Flower(tornado.web.Application):
     def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
         handlers = default_handlers
-        if options is not None and "url_prefix" in options and options.url_prefix:
+        if options is not None and options.url_prefix:
             handlers = [rewrite_handler(h, options.url_prefix) for h in handlers]
         kwargs.update(handlers=handlers)
         super(Flower, self).__init__(**kwargs)
