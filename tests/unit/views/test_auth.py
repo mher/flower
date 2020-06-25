@@ -25,3 +25,8 @@ class BasicAuthTests(AsyncHTTPTestCase):
     def test_logout(self):
         r = self.get('/logout')
         self.assertEqual(200, r.code)
+
+    def test_no_logout(self):
+        with self.mock_option('basic_auth', ['foo:bar']):
+            r = self.fetch('/', auth_username='foo', auth_password='bar')
+            self.assertNotIn('Logout', str(r.body))
