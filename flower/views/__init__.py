@@ -101,11 +101,6 @@ class BaseHandler(tornado.web.RequestHandler):
         "return Celery application object"
         return self.application.capp
 
-    def reverse_url(self, *args):
-        prefix = self.application.options.url_prefix
-        url = super(BaseHandler, self).reverse_url(*args)
-        return prepend_url(url, prefix) if prefix else url
-
     def format_task(self, task):
         custom_format_task = self.application.options.format_task
         if custom_format_task:
@@ -114,4 +109,3 @@ class BaseHandler(tornado.web.RequestHandler):
             except:
                 logger.exception("Failed to format '%s' task", task.uuid)
         return task
-
