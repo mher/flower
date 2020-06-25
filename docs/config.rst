@@ -308,3 +308,11 @@ Sets authentication provider
   - GitHub `flower.views.auth.GithubLoginHandler`
 
 See `Authentication` for usage examples
+
+
+purge_offline_workers
+~~~~~~~~~~~~~~~~~~~~~
+
+Time (in seconds) after which offline workers are automatically removed from dashboard.
+
+If omitted, offline workers remain on the dashboard.

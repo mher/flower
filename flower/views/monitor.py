@@ -5,6 +5,7 @@ from collections import defaultdict
 from tornado import web
 from tornado import gen
 from celery import states
+import prometheus_client
 
 from ..views import BaseHandler
 from ..utils.broker import Broker
@@ -115,3 +116,9 @@ class BrokerMonitor(BaseHandler):
             data[queue['name']] = queue.get('messages', 0)
 
         self.write(data)
+
+class Metrics(BaseHandler):
+    @web.authenticated
+    @gen.coroutine
+    def get(self):
+        self.write(prometheus_client.generate_latest())

@@ -98,13 +98,13 @@ class TasksTest(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         events = [Event('worker-online', hostname='worker1')]
         events += task_succeeded_events(worker='worker1', name='task1',
-                                        id='2', runtime='10.0')
+                                        id='2', runtime=10.0)
         events += task_succeeded_events(worker='worker1', name='task1',
-                                        id='4', runtime='10000000.0')
+                                        id='4', runtime=10000000.0)
         events += task_succeeded_events(worker='worker1', name='task1',
-                                        id='3', runtime='20.0')
+                                        id='3', runtime=20.0)
         events += task_succeeded_events(worker='worker1', name='task1',
-                                        id='1', runtime='2.0')
+                                        id='1', runtime=2.0)
         for i, e in enumerate(events):
             e['clock'] = i
             e['local_received'] = time.time()
