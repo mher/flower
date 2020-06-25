@@ -39,6 +39,7 @@ It has these features:
 
 - HTTP API
 - Basic Auth and Google OpenID authentication
+- Prometheus integration
 
 
 OPTIONS

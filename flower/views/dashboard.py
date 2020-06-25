@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import time
 
 from collections import OrderedDict
 from functools import partial
@@ -11,6 +12,7 @@ from tornado import websocket
 from tornado.ioloop import PeriodicCallback
 
 from ..views import BaseHandler
+from ..options import options
 from ..api.workers import ListWorkers
 
 
@@ -28,6 +30,7 @@ class DashboardView(BaseHandler):
         events = app.events.state
         broker = app.capp.connection().as_uri()
 
+
         if refresh:
             try:
                 yield ListWorkers.update_workers(app=app)
@@ -43,6 +46,21 @@ class DashboardView(BaseHandler):
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
             workers[name] = info
+        
+        if options.purge_offline_workers is not None:
+            timestamp = int(time.time())
+            offline_workers = []
+            for name, info in workers.items():
+                if info.get('status', True):
+                    continue
+
+                heartbeats = info.get('heartbeats', [])
+                last_heartbeat = int(max(heartbeats)) if heartbeats else None
+                if not last_heartbeat or timestamp - last_heartbeat > options.purge_offline_workers:
+                    offline_workers.append(name)
+
+            for name in offline_workers:
+                workers.pop(name)
 
         if json:
             self.write(dict(data=list(workers.values())))

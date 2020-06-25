@@ -27,4 +27,5 @@ Features
 
 - HTTP API
 - Basic Auth, GitHub OAuth2 and Google OpenID authentication
+- Prometheus integration
 
