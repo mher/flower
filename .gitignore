@@ -27,3 +27,5 @@ venv
 *.retry
 .cache/
 .mypy_cache/
+Pipfile*
+.vscode/
