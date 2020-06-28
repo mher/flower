@@ -40,7 +40,7 @@ class ControlHandler(BaseHandler):
 
         results = []
         try:
-            results = yield gen.with_timeout(datetime.timedelta(seconds=5), futures)
+            results = yield gen.with_timeout(datetime.timedelta(seconds=10*timeout), futures)
         except util.TimeoutError:
             logger.error("Inspect method timed out")
 
