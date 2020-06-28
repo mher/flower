@@ -297,6 +297,7 @@ Sets authentication provider
 
 See `Authentication` for usage examples
 
+.. _purge_offline_workers:
 
 purge_offline_workers
 ~~~~~~~~~~~~~~~~~~~~~
