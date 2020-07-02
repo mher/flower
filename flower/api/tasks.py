@@ -34,7 +34,7 @@ class BaseTaskHandler(BaseHandler):
             raise HTTPError(400, str(e))
 
         if not isinstance(options, dict):
-            raise HTTPError(400, str(e))
+            raise HTTPError(400, 'invalid options')
 
         args = options.pop('args', [])
         kwargs = options.pop('kwargs', {})
