@@ -1,0 +1,42 @@
+version: '3'
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+  worker:
+    build: ./
+    entrypoint: celery
+    command: -A tasks worker -l info -E
+    user: nobody
+    volumes:
+      - ./examples:/data
+    environment:
+      CELERY_BROKER_URL: redis://redis
+      CELERY_RESULT_BACKEND: redis://redis
+      PYTHONPATH: /data
+    depends_on:
+      - redis
+  flower:
+    build: ./
+    command: python -m flower -A tasks
+    volumes:
+      - ./examples:/data
+    working_dir: /data
+    ports:
+      - 5555:5555
+    environment:
+      CELERY_BROKER_URL: redis://redis
+      CELERY_RESULT_BACKEND: redis://redis
