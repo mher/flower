@@ -129,6 +129,7 @@ class Events(threading.Thread):
                                          handlers={"*": self.on_event},
                                          app=self.capp)
                     try_interval = 1
+                    logger.debug("Capturing events...")
                     recv.capture(limit=None, timeout=None, wakeup=True)
 
             except (KeyboardInterrupt, SystemExit):
@@ -148,6 +149,7 @@ class Events(threading.Thread):
         # Periodically enable events for workers
         # launched after flower
         try:
+            logger.debug("Enabling events...")
             self.capp.control.enable_events()
         except Exception as e:
             logger.debug("Failed to enable events: '%s'", e)
