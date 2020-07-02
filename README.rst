@@ -43,38 +43,6 @@ Features
 - Basic Auth, Google, Github, Gitlab and Okta OAuth
 - Prometheus integration
 
-API
----
-
-Flower API enables to manage the cluster via REST API, call tasks and
-receive task events in real-time via WebSockets.
-
-For example you can restart worker's pool by: ::
-
-    $ curl -X POST http://localhost:5555/api/worker/pool/restart/myworker
-
-Or call a task by: ::
-
-    $ curl -X POST -d '{"args":[1,2]}' http://localhost:5555/api/task/async-apply/tasks.add
-
-Or terminate executing task by: ::
-
-    $ curl -X POST -d 'terminate=True' http://localhost:5555/api/task/revoke/8a4da87b-e12b-4547-b89a-e92e4d1f8efd
-
-Or receive task completion events in real-time:
-
-```
-var ws = new WebSocket('ws://localhost:5555/api/task/events/task-succeeded/');
-ws.onmessage = function (event) {
-    console.log(event.data);
-}
-```
-
-For more info checkout `API Reference`_ and `examples`_.
-
-.. _API Reference: https://flower.readthedocs.io/en/latest/api.html
-.. _examples: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
-
 Installation
 ------------
 
@@ -108,6 +76,38 @@ Launch with unix socket file: ::
 Broker URL and other configuration options can be passed through the standard Celery options: ::
 
     $ celery flower -A proj --broker=amqp://guest:guest@localhost:5672//
+
+API
+---
+
+Flower API enables to manage the cluster via REST API, call tasks and
+receive task events in real-time via WebSockets.
+
+For example you can restart worker's pool by: ::
+
+    $ curl -X POST http://localhost:5555/api/worker/pool/restart/myworker
+
+Or call a task by: ::
+
+    $ curl -X POST -d '{"args":[1,2]}' http://localhost:5555/api/task/async-apply/tasks.add
+
+Or terminate executing task by: ::
+
+    $ curl -X POST -d 'terminate=True' http://localhost:5555/api/task/revoke/8a4da87b-e12b-4547-b89a-e92e4d1f8efd
+
+Or receive task completion events in real-time: ::
+
+```
+var ws = new WebSocket('ws://localhost:5555/api/task/events/task-succeeded/');
+ws.onmessage = function (event) {
+    console.log(event.data);
+}
+```
+
+For more info checkout `API Reference`_ and `examples`_.
+
+.. _API Reference: https://flower.readthedocs.io/en/latest/api.html
+.. _examples: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
 Documentation
 -------------
