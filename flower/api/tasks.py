@@ -32,6 +32,10 @@ class BaseTaskHandler(BaseHandler):
             options = json_decode(body) if body else {}
         except ValueError as e:
             raise HTTPError(400, str(e))
+
+        if not isinstance(options, dict):
+            raise HTTPError(400, str(e))
+
         args = options.pop('args', [])
         kwargs = options.pop('kwargs', {})
 
