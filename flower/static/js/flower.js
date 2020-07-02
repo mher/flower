@@ -660,6 +660,7 @@ var flower = (function () {
             columnDefs: [{
                 targets: 0,
                 data: 'hostname',
+                type: 'natural',
                 render: function (data, type, full, meta) {
                     return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
                 }
@@ -705,12 +706,12 @@ var flower = (function () {
             }, ],
         });
 
-        var autorefresh = $.urlParam('autorefresh') || 1;
+        var autorefresh_interval = $.urlParam('autorefresh') || 1;
         if (autorefresh !== 0) {
             setInterval( function () {
                 $('#workers-table').DataTable().ajax.reload();
                 update_dashboard_counters();
-            }, autorefresh * 1000);
+            }, autorefresh_interval * 1000);
         }
 
     });

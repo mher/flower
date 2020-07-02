@@ -62,8 +62,8 @@ Run the http server on a given address
 auth
 ~~~~
 
-Enables Google OpenID authentication. `auth` is a regexp of emails
-to grant access. For more info see :ref:`google-openid`
+Enables authentication. `auth` is a regexp of emails to grant access.
+For more info see :ref:`authentication`.
 
 .. _auto_refresh:
 
@@ -267,21 +267,8 @@ For example to access Flower on http://example.com/flower run it with: ::
 
     $ flower --url_prefix=flower
 
-And use the following `nginx` configuration:
+NOTE: The old `nginx` rewrite is no longer needed
 
-.. code-block:: nginx
-
-    server {
-        listen 80;
-        server_name example.com;
-
-        location /flower/ {
-            rewrite ^/flower/(.*)$ /$1 break;
-            proxy_pass http://example.com:5555;
-            proxy_set_header Host $host;
-        }
-
-    }
 
 .. _unix_socket:
 
@@ -306,5 +293,15 @@ Sets authentication provider
 
   - Google `flower.views.auth.GoogleAuth2LoginHandler`
   - GitHub `flower.views.auth.GithubLoginHandler`
+  - GitLab `flower.views.auth.GitLabLoginHandler`
 
 See `Authentication` for usage examples
+
+.. _purge_offline_workers:
+
+purge_offline_workers
+~~~~~~~~~~~~~~~~~~~~~
+
+Time (in seconds) after which offline workers are automatically removed from dashboard.
+
+If omitted, offline workers remain on the dashboard.

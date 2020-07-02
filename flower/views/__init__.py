@@ -17,16 +17,26 @@ logger = logging.getLogger(__name__)
 
 
 class BaseHandler(tornado.web.RequestHandler):
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', ' PUT, DELETE, OPTIONS')
+
+    def options(self):
+        self.set_status(204)
+        self.finish()
+        
     def render(self, *args, **kwargs):
+        app_options = self.application.options
         functions = inspect.getmembers(template, inspect.isfunction)
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
-        kwargs.update(url_prefix=self.application.options.url_prefix)
+        kwargs.update(url_prefix=app_options.url_prefix)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
         if status_code in (404, 403):
-            message = None
+            message = ''
             if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
                 message = kwargs['exc_info'][1].log_message
             self.render('404.html', message=message)
@@ -45,12 +55,13 @@ class BaseHandler(tornado.web.RequestHandler):
             self.set_header('WWW-Authenticate', 'Basic realm="flower"')
             self.finish('Access denied')
         else:
-            message = None
+            message = ''
             if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
                 message = kwargs['exc_info'][1].log_message
                 self.set_header('Content-Type', 'text/plain')
-                self.write(message)
+                self.write(str(message))
             self.set_status(status_code)
+            self.finish()
 
     def get_current_user(self):
         # Basic Auth
@@ -65,14 +76,14 @@ class BaseHandler(tornado.web.RequestHandler):
             except ValueError:
                 raise tornado.web.HTTPError(401)
 
-        # Google OpenID
+        # OAuth2
         if not self.application.options.auth:
             return True
         user = self.get_secure_cookie('user')
         if user:
             if not isinstance(user, str):
                 user = user.decode()
-            if re.search(self.application.options.auth, user):
+            if re.match(self.application.options.auth, user):
                 return user
         return None
 
@@ -98,11 +109,6 @@ class BaseHandler(tornado.web.RequestHandler):
         "return Celery application object"
         return self.application.capp
 
-    def reverse_url(self, *args):
-        prefix = self.application.options.url_prefix
-        url = super(BaseHandler, self).reverse_url(*args)
-        return prepend_url(url, prefix) if prefix else url
-
     def format_task(self, task):
         custom_format_task = self.application.options.format_task
         if custom_format_task:
@@ -111,4 +117,3 @@ class BaseHandler(tornado.web.RequestHandler):
             except:
                 logger.exception("Failed to format '%s' task", task.uuid)
         return task
-

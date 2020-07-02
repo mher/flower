@@ -5,6 +5,10 @@
 {% end %}
 
 {% block container %}
+
+  {% set other = {key: value for key, value in worker['stats'].items() if key not in
+                  'pool pid prefetch_count autoscaler consumer broker clock total rusage'.split()} %}
+
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span12">
@@ -33,6 +37,9 @@
             <li><a href="#tab-limits" data-toggle="tab">Limits</a></li>
             <li><a href="#tab-config" data-toggle="tab">Config</a></li>
             <li><a href="#tab-system" data-toggle="tab">System</a></li>
+            {% if other %}
+            <li><a href="#tab-other" data-toggle="tab">Other</a></li>
+            {% end %}
           </ul>
 
           <div class="tab-content">
@@ -43,7 +50,7 @@
                   <table class="table table-bordered table-striped">
                     <caption>Worker pool options</caption>
                     <tbody>
-                      {% for name,value in worker['stats']['pool'].items() %}
+                      {% for name,value in worker['stats'].get('pool', {}).items() %}
                         <tr>
                           <td>{{ humanize(name) }}</td>
                           <td>{{ humanize(value) }}</td>
@@ -355,6 +362,24 @@
               </table>
             </div>
           </div> <!-- end system tab -->
+
+          {% if other %}
+          <div class="tab-pane" id="tab-other">
+            <div class="span8">
+              <table class="table table-bordered table-striped">
+                <caption>Other statistics</caption>
+                <tbody>
+                {% for name, value in other.items() %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% end %}
+                </tbody>
+              </table>
+            </div>
+          </div> <!-- end other tab -->
+          {% end %}
 
          </div>
         </div>

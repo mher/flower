@@ -2,10 +2,12 @@ from __future__ import absolute_import
 
 import time
 import logging
+import datetime
 import collections
 
 from tornado import web
 from tornado import gen
+from tornado import util
 
 from ..views import BaseHandler
 
@@ -36,12 +38,15 @@ class ControlHandler(BaseHandler):
         for method in cls.INSPECT_METHODS:
             futures.append(app.delay(getattr(inspect, method)))
 
-        results = yield futures
+        results = []
+        try:
+            results = yield gen.with_timeout(datetime.timedelta(seconds=10*timeout), futures)
+        except util.TimeoutError:
+            logger.error("Inspect method timed out")
 
         for i, result in enumerate(results):
-            if result is None:
-                logger.warning("'%s' inspect method failed",
-                               cls.INSPECT_METHODS[i])
+            if result is None or 'error' in result:
+                logger.warning("'%s' inspect method failed", cls.INSPECT_METHODS[i])
                 continue
             for worker, response in result.items():
                 if response is not None:
