@@ -14,7 +14,18 @@ ENV PYTHONUNBUFFERED=1 PYTHONHASHSEED=random PYTHONDONTWRITEBYTECODE=1
 # Default port
 EXPOSE 5555
 
-# Run as a non-root user by default, run as user with least privileges.
-USER nobody
+ENV FLOWER_DATA_DIR /data
+ENV PYTHONPATH ${FLOWER_DATA_DIR}
+
+VOLUME $FLOWER_DATA_DIR
+WORKDIR $FLOWER_DATA_DIR
+
+# Add a user with an explicit UID/GID and create necessary directories
+RUN set -eux; \
+    addgroup -g 1000 flower; \
+    adduser -u 1000 -G flower flower -D; \
+    mkdir -p "$FLOWER_DATA_DIR"; \
+    chown flower:flower "$FLOWER_DATA_DIR"
+USER flower
 
 ENTRYPOINT ["flower"]
