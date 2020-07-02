@@ -97,12 +97,10 @@ Or terminate executing task by: ::
 
 Or receive task completion events in real-time: ::
 
- ```
     var ws = new WebSocket("ws://localhost:5555/api/task/events/task-succeeded/");
     ws.onmessage = function (event) {
         console.log(event.data);
     }
- ```
 
 For more info checkout `API Reference`_ and `examples`_.
 
