@@ -50,7 +50,7 @@
                   <table class="table table-bordered table-striped">
                     <caption>Worker pool options</caption>
                     <tbody>
-                      {% for name,value in worker['stats']['pool'].items() %}
+                      {% for name,value in worker['stats'].get('pool', {}).items() %}
                         <tr>
                           <td>{{ humanize(name) }}</td>
                           <td>{{ humanize(value) }}</td>
