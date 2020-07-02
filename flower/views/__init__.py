@@ -38,7 +38,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
         if status_code in (404, 403):
-            message = None
+            message = ''
             if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
                 message = kwargs['exc_info'][1].log_message
             self.render('404.html', message=message)
@@ -57,12 +57,13 @@ class BaseHandler(tornado.web.RequestHandler):
             self.set_header('WWW-Authenticate', 'Basic realm="flower"')
             self.finish('Access denied')
         else:
-            message = None
+            message = ''
             if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
                 message = kwargs['exc_info'][1].log_message
                 self.set_header('Content-Type', 'text/plain')
-                self.write(message)
+                self.write(str(message))
             self.set_status(status_code)
+            self.finish()
 
     def get_current_user(self):
         # Basic Auth
