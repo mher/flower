@@ -346,9 +346,3 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         if self.application.options.url_prefix and next_[0] != '/':
             next_ = '/' + next_
         self.redirect(next_)
-
-
-class LogoutHandler(BaseHandler):
-    def get(self):
-        self.clear_cookie('user')
-        self.render('404.html', message='Successfully logged out!')

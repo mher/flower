@@ -31,9 +31,7 @@ class BaseHandler(tornado.web.RequestHandler):
         functions = inspect.getmembers(template, inspect.isfunction)
         assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
         kwargs.update(functions)
-        kwargs.update(
-            url_prefix=app_options.url_prefix,
-            logout=not app_options.basic_auth)
+        kwargs.update(url_prefix=app_options.url_prefix)
         super(BaseHandler, self).render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
