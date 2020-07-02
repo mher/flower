@@ -40,7 +40,7 @@ Features
     - Queue length graphs
 
 - HTTP API
-- Basic Auth and Google OpenID authentication
+- Basic Auth, Google, Github, Gitlab and Okta OAuth
 - Prometheus integration
 
 API
@@ -63,12 +63,12 @@ Or terminate executing task by: ::
 
 Or receive task completion events in real-time:
 
-.. code-block:: javascript 
-
-    var ws = new WebSocket('ws://localhost:5555/api/task/events/task-succeeded/');
-    ws.onmessage = function (event) {
-        console.log(event.data);
-    }
+```
+var ws = new WebSocket('ws://localhost:5555/api/task/events/task-succeeded/');
+ws.onmessage = function (event) {
+    console.log(event.data);
+}
+```
 
 For more info checkout `API Reference`_ and `examples`_.
 
@@ -93,18 +93,21 @@ Launch the server and open http://localhost:5555: ::
 
     $ flower --port=5555
 
-Or launch from celery: ::
+Launch from celery: ::
 
     $ celery flower -A proj --address=127.0.0.1 --port=5555
+
+Launch using docker: ::
+
+    $ docker run -p 5555:5555 mher/flower
+
+Launch with unix socket file: ::
+
+    $ flower --unix-socket=/tmp/flower.sock
 
 Broker URL and other configuration options can be passed through the standard Celery options: ::
 
     $ celery flower -A proj --broker=amqp://guest:guest@localhost:5672//
-
-Or run with unix socket file: ::
-
-    $ flower --unix_socket=/tmp/flower.sock
-
 
 Documentation
 -------------
@@ -119,23 +122,3 @@ License
 
 Flower is licensed under BSD 3-Clause License. See the LICENSE file
 in the top distribution directory for the full license text.
-
-Getting help
-------------
-
-Please head over to #celery IRC channel on irc.freenode.net or
-`open an issue`_.
-
-.. _open an issue: https://github.com/mher/flower/issues
-
-Contributing
-------------
-
-If you'd like to contribute, simply fork `the repository`_, commit your
-changes, run the tests (`tox`) and send a pull request.
-Make sure you add yourself to CONTRIBUTORS_.
-
-If you are interested in maintaining the project please contact.
-
-.. _`the repository`: https://github.com/mher/flower
-.. _CONTRIBUTORS: https://github.com/mher/flower/blob/master/CONTRIBUTORS
