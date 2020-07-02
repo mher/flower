@@ -65,7 +65,8 @@ class DashboardView(BaseHandler):
         if json:
             self.write(dict(data=list(workers.values())))
         else:
-            self.render("dashboard.html", workers=workers, broker=broker)
+            self.render("dashboard.html", workers=workers, broker=broker,
+                        autorefresh=1 if app.options.auto_refresh else 0)
 
     @classmethod
     def _as_dict(cls, worker):

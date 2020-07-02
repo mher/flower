@@ -706,12 +706,12 @@ var flower = (function () {
             }, ],
         });
 
-        var autorefresh = $.urlParam('autorefresh') || 1;
+        var autorefresh_interval = $.urlParam('autorefresh') || 1;
         if (autorefresh !== 0) {
             setInterval( function () {
                 $('#workers-table').DataTable().ajax.reload();
                 update_dashboard_counters();
-            }, autorefresh * 1000);
+            }, autorefresh_interval * 1000);
         }
 
     });
