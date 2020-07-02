@@ -45,9 +45,8 @@ class ControlHandler(BaseHandler):
             logger.error("Inspect method timed out")
 
         for i, result in enumerate(results):
-            if result is None:
-                logger.warning("'%s' inspect method failed",
-                               cls.INSPECT_METHODS[i])
+            if result is None or 'error' in result:
+                logger.warning("'%s' inspect method failed", cls.INSPECT_METHODS[i])
                 continue
             for worker, response in result.items():
                 if response is not None:
