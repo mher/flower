@@ -1,8 +1,4 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import re
-import sys
 
 from celery import current_app
 from datetime import datetime
@@ -14,12 +10,6 @@ except ImportError:
 
 from humanize import naturaltime
 from pytz import timezone, utc
-
-
-PY2 = sys.version_info[0] == 2
-if not PY2:
-    unicode = str
-string_types = (str, unicode) if PY2 else (str,)
 
 
 KEYWORDS_UP = ('ssl', 'uri', 'url', 'uuid', 'eta')
@@ -47,14 +37,14 @@ def humanize(obj, type=None, length=None):
             obj = naturaltime(delta)
         else:
             obj = format_time(float(obj), tz) if obj else ''
-    elif isinstance(obj, string_types) and not re.match(UUID_REGEX, obj):
+    elif isinstance(obj, str) and not re.match(UUID_REGEX, obj):
         obj = obj.replace('-', ' ').replace('_', ' ')
         obj = re.sub('|'.join(KEYWORDS_UP),
                      lambda m: m.group(0).upper(), obj)
         if obj and obj not in KEYWORDS_DOWN:
             obj = obj[0].upper() + obj[1:]
     elif isinstance(obj, list):
-        if all(isinstance(x, (int, float) + string_types) for x in obj):
+        if all(isinstance(x, (int, float, str)) for x in obj):
             obj = ', '.join(map(str, obj))
     if length is not None and len(obj) > length:
         obj = obj[:length - 4] + ' ...'

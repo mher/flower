@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import sys
 import json
 import socket
@@ -11,11 +9,7 @@ from tornado import gen
 from tornado import httpclient
 
 
-try:
-    from urllib.parse import urlparse, urljoin, quote, unquote
-except ImportError:
-    from urlparse import urlparse, urljoin
-    from urllib import quote, unquote
+from urllib.parse import urlparse, urljoin, quote, unquote
 
 
 try:

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import types
 
 from tornado.options import define
