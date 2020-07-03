@@ -471,7 +471,8 @@ List tasks
           "succeeded": 1398505411.124802,
           "timestamp": 1398505411.124802,
           "traceback": null,
-          "uuid": "e42ceb2d-8730-47b5-8b4d-8e0d2a1ef7c9"
+          "uuid": "e42ceb2d-8730-47b5-8b4d-8e0d2a1ef7c9",
+          "worker": "celery@worker1"
       },
       "f67ea225-ae9e-42a8-90b0-5de0b24507e0": {
           "args": "[1, 2]",
@@ -497,7 +498,8 @@ List tasks
           "succeeded": 1398505395.341089,
           "timestamp": 1398505395.341089,
           "traceback": null,
-          "uuid": "f67ea225-ae9e-42a8-90b0-5de0b24507e0"
+          "uuid": "f67ea225-ae9e-42a8-90b0-5de0b24507e0",
+          "worker": "celery@worker1"
       }
   }
 
@@ -531,7 +533,9 @@ List tasks
                 received_start=received_start,
                 received_end=received_end):
             task = tasks.as_dict(task)
-            task.pop('worker', None)
+            worker = task.pop('worker', None)
+            if worker is not None:
+              task['worker'] = worker.hostname
             result.append((task_id, task))
         self.write(dict(result))
 
