@@ -66,12 +66,7 @@ handlers = [
     (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
     (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
     (r"/api/task/events/task-custom/(.*)", events.TaskCustom),
-    # Monitors
-    url(r"/monitor", monitor.Monitor, name='monitor'),
-    (r"/monitor/succeeded-tasks", monitor.SucceededTaskMonitor),
-    (r"/monitor/failed-tasks", monitor.FailedTaskMonitor),
-    (r"/monitor/completion-time", monitor.TimeToCompletionMonitor),
-    (r"/monitor/broker", monitor.BrokerMonitor),
+    # Metrics
     (r"/metrics", monitor.Metrics),
     # Static
     (r"/static/(.*)", StaticFileHandler,
