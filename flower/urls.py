@@ -12,7 +12,7 @@ from .views.broker import BrokerView
 from .views.workers import WorkerView
 from .views.tasks import TaskView, TasksView, TasksDataTable
 from .views.error import NotFoundErrorHandler
-from .views.dashboard import DashboardView, DashboardUpdateHandler
+from .views.dashboard import DashboardView
 from .utils import gen_cookie_secret
 
 
@@ -66,8 +66,6 @@ handlers = [
     (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
     (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
     (r"/api/task/events/task-custom/(.*)", events.TaskCustom),
-    # WebSocket Updates
-    (r"/update-dashboard", DashboardUpdateHandler),
     # Monitors
     url(r"/monitor", monitor.Monitor, name='monitor'),
     (r"/monitor/succeeded-tasks", monitor.SucceededTaskMonitor),
