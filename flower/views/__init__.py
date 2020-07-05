@@ -115,3 +115,10 @@ class BaseHandler(tornado.web.RequestHandler):
             except:
                 logger.exception("Failed to format '%s' task", task.uuid)
         return task
+
+    def get_active_queue_names(self):
+        queues = set([])
+        for _, info in self.application.workers.items():
+            for q in info.get('active_queues', []):
+                queues.add(q['name'])
+        return queues

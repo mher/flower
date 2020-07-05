@@ -14,46 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class ControlHandler(BaseHandler):
-    INSPECT_METHODS = ('stats', 'active_queues', 'registered', 'scheduled',
-                       'active', 'reserved', 'revoked', 'conf')
-    worker_cache = collections.defaultdict(dict)
-
-    @gen.coroutine
-    def update_cache(self, workername=None):
-        yield self.update_workers(workername=workername,
-                                  app=self.application)
-
-    @classmethod
-    @gen.coroutine
-    def update_workers(cls, app, workername=None):
-        logger.debug("Updating %s worker's cache...", workername or 'all')
-
-        futures = []
-        destination = [workername] if workername else None
-        timeout = app.options.inspect_timeout / 1000.0
-        inspect = app.capp.control.inspect(
-            timeout=timeout, destination=destination)
-        for method in cls.INSPECT_METHODS:
-            futures.append(app.delay(getattr(inspect, method)))
-
-        results = []
-        try:
-            results = yield gen.with_timeout(datetime.timedelta(seconds=10*timeout), futures)
-        except util.TimeoutError:
-            logger.error("Inspect method timed out")
-
-        for i, result in enumerate(results):
-            if result is None or 'error' in result:
-                logger.warning("'%s' inspect method failed", cls.INSPECT_METHODS[i])
-                continue
-            for worker, response in result.items():
-                if response is not None:
-                    info = cls.worker_cache[worker]
-                    info[cls.INSPECT_METHODS[i]] = response
-                    info['timestamp'] = time.time()
-
     def is_worker(self, workername):
-        return workername and workername in self.worker_cache
+        return workername and workername in self.application.workers
 
     def error_reason(self, workername, response):
         "extracts error message from response"
@@ -64,14 +26,6 @@ class ControlHandler(BaseHandler):
                 pass
         logger.error("Failed to extract error reason from '%s'", response)
         return 'Unknown reason'
-
-    @classmethod
-    def get_active_queue_names(cls):
-        queues = set([])
-        for worker, info in cls.worker_cache.items():
-            for q in info.get('active_queues', []):
-                queues.add(q['name'])
-        return queues
 
 
 class WorkerShutDown(ControlHandler):

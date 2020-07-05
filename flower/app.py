@@ -1,4 +1,6 @@
+import time
 import logging
+import collections
 
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
@@ -7,13 +9,15 @@ import celery
 import tornado.web
 
 from tornado import ioloop
+from tornado.concurrent import run_on_executor
 from tornado.httpserver import HTTPServer
+from tornado.web import url
 
 from .api import control
 from .urls import handlers as default_handlers
 from .events import Events
+from .inspector import Inspector
 from .options import default_options
-from tornado.web import url
 
 
 logger = logging.getLogger(__name__)
@@ -27,7 +31,7 @@ def rewrite_handler(handler, url_prefix):
 
 class Flower(tornado.web.Application):
     pool_executor_cls = ThreadPoolExecutor
-    max_workers = 4
+    max_workers = None
 
     def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
@@ -41,8 +45,14 @@ class Flower(tornado.web.Application):
         self.ssl_options = kwargs.get('ssl_options', None)
 
         self.capp = capp or celery.Celery()
+        self.executor = self.pool_executor_cls(max_workers=self.max_workers)
+        self.io_loop.set_default_executor(self.executor)
+
+        self.inspector = Inspector(self.io_loop, self.capp, self.options.inspect_timeout / 1000.0)
+
         self.events = events or Events(
-            self.capp, db=self.options.db,
+            self.capp,
+            db=self.options.db,
             persistent=self.options.persistent,
             enable_events=self.options.enable_events,
             io_loop=self.io_loop,
@@ -51,7 +61,6 @@ class Flower(tornado.web.Application):
         self.started = False
 
     def start(self):
-        self.pool = self.pool_executor_cls(max_workers=self.max_workers)
         self.events.start()
 
         if not self.options.unix_socket:
@@ -64,23 +73,26 @@ class Flower(tornado.web.Application):
             socket = bind_unix_socket(self.options.unix_socket, mode=0o777)
             server.add_socket(socket)
 
-        self.io_loop.add_future(
-            control.ControlHandler.update_workers(app=self),
-            callback=lambda x: logger.debug(
-                'Successfully updated worker cache'))
         self.started = True
+        self.update_workers()
         self.io_loop.start()
 
     def stop(self):
         if self.started:
             self.events.stop()
-            self.pool.shutdown(wait=False)
+            logging.debug("Stoppping executors...")
+            self.executor.shutdown(wait=False)
+            logging.debug("Stoppping event loop...")
+            self.io_loop.stop()
             self.started = False
-
-    def delay(self, method, *args, **kwargs):
-        return self.pool.submit(partial(method, *args, **kwargs))
 
     @property
     def transport(self):
-        return getattr(self.capp.connection().transport,
-                       'driver_type', None)
+        return getattr(self.capp.connection().transport, 'driver_type', None)
+
+    @property
+    def workers(self):
+        return self.inspector.workers
+
+    def update_workers(self, workername=None):
+        return self.inspector.inspect(workername)

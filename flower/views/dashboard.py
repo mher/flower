@@ -19,14 +19,11 @@ class DashboardView(BaseHandler):
         refresh = self.get_argument('refresh', default=False, type=bool)
         json = self.get_argument('json', default=False, type=bool)
 
-        app = self.application
-        events = app.events.state
-        broker = app.capp.connection().as_uri()
-
+        events = self.application.events.state
 
         if refresh:
             try:
-                yield ListWorkers.update_workers(app=app)
+                self.application.update_workers()
             except Exception as e:
                 logger.exception('Failed to update workers: %s', e)
 
@@ -58,8 +55,10 @@ class DashboardView(BaseHandler):
         if json:
             self.write(dict(data=list(workers.values())))
         else:
-            self.render("dashboard.html", workers=workers, broker=broker,
-                        autorefresh=1 if app.options.auto_refresh else 0)
+            self.render("dashboard.html",
+                        workers=workers,
+                        broker=self.application.capp.connection().as_uri(),
+                        autorefresh=1 if self.application.options.auto_refresh else 0)
 
     @classmethod
     def _as_dict(cls, worker):

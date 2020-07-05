@@ -410,7 +410,7 @@ Return length of all active queues
         broker = Broker(app.capp.connection().as_uri(include_password=True),
                         http_api=http_api, broker_options=broker_options, broker_use_ssl=broker_use_ssl)
 
-        queue_names = ControlHandler.get_active_queue_names()
+        queue_names = self.get_active_queue_names()
 
         if not queue_names:
             queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\

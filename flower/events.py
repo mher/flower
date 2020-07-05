@@ -8,8 +8,9 @@ from functools import partial
 
 import celery
 
-from tornado.ioloop import PeriodicCallback
 from tornado.ioloop import IOLoop
+from tornado.ioloop import PeriodicCallback
+from tornado.concurrent import run_on_executor
 
 from celery.events import EventReceiver
 from celery.events.state import State
@@ -17,6 +18,7 @@ from celery.events.state import State
 from . import api
 
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 
 from prometheus_client import Counter as PrometheusCounter, Histogram
 
@@ -95,9 +97,14 @@ class Events(threading.Thread):
     def start(self):
         threading.Thread.start(self)
         if self.enable_events:
+            logger.debug("Starting enable events timer...")
             self.timer.start()
 
     def stop(self):
+        if self.enable_events:
+            logger.debug("Stopping enable events timer...")
+            self.timer.stop()
+
         if self.persistent:
             logger.debug("Saving state to '%s'...", self.db)
             state = shelve.open(self.db)
@@ -117,7 +124,6 @@ class Events(threading.Thread):
                     try_interval = 1
                     logger.debug("Capturing events...")
                     recv.capture(limit=None, timeout=None, wakeup=True)
-
             except (KeyboardInterrupt, SystemExit):
                 try:
                     import _thread as thread
@@ -134,11 +140,7 @@ class Events(threading.Thread):
     def on_enable_events(self):
         # Periodically enable events for workers
         # launched after flower
-        try:
-            logger.debug("Enabling events...")
-            self.capp.control.enable_events()
-        except Exception as e:
-            logger.debug("Failed to enable events: '%s'", e)
+        self.io_loop.run_in_executor(None, self.capp.control.enable_events)
 
     def on_event(self, event):
         # Call EventsState.event in ioloop thread to avoid synchronization

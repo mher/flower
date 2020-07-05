@@ -34,7 +34,7 @@ class BrokerView(BaseHandler):
                 404, "'%s' broker is not supported" % app.transport)
 
         try:
-            queue_names = ControlHandler.get_active_queue_names()
+            queue_names = self.get_active_queue_names()
             if not queue_names:
                 queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
                         set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
