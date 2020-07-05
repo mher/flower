@@ -75,6 +75,26 @@ var flower = (function () {
         });
     }
 
+    function on_refresh_all(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        $.ajax({
+            type: 'GET',
+            url: url_prefix() + '/api/workers',
+            dataType: 'json',
+            data: {
+                refresh: 1
+            },
+            success: function (data) {
+                show_success_alert(data.message || 'Refreshed All Workers');
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
     function on_worker_pool_restart(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -641,6 +661,7 @@ var flower = (function () {
     return {
         on_alert_close: on_alert_close,
         on_worker_refresh: on_worker_refresh,
+        on_refresh_all: on_refresh_all,
         on_worker_pool_restart: on_worker_pool_restart,
         on_worker_shutdown: on_worker_shutdown,
         on_pool_grow: on_pool_grow,
