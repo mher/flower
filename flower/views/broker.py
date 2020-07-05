@@ -33,6 +33,7 @@ class BrokerView(BaseHandler):
             raise web.HTTPError(
                 404, "'%s' broker is not supported" % app.transport)
 
+        queues = {}
         try:
             queue_names = self.get_active_queue_names()
             if not queue_names:
@@ -41,7 +42,7 @@ class BrokerView(BaseHandler):
 
             queues = yield broker.queues(sorted(queue_names))
         except Exception as e:
-            raise web.HTTPError(404, "Unable to get queues: '%s'" % e)
+            logger.error("Unable to get queues: '%s'" % e)
 
         self.render("broker.html",
                     broker_url=app.capp.connection().as_uri(),
