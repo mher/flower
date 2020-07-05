@@ -8,8 +8,6 @@ from functools import partial
 
 import celery
 
-from pkg_resources import parse_version
-
 from tornado.ioloop import PeriodicCallback
 from tornado.ioloop import IOLoop
 
@@ -81,11 +79,6 @@ class Events(threading.Thread):
         self.enable_events = enable_events
         self.state = None
 
-        if self.persistent and parse_version(celery.__version__) < parse_version("3.0.15"):
-            logger.warning('Persistent mode is available with '
-                           'Celery 3.0.15 and later')
-            self.persistent = False
-
         if self.persistent:
             logger.debug("Loading state from '%s'...", self.db)
             state = shelve.open(self.db)
@@ -101,8 +94,7 @@ class Events(threading.Thread):
 
     def start(self):
         threading.Thread.start(self)
-        # Celery versions prior to 2 don't support enable_events
-        if self.enable_events and celery.VERSION[0] > 2:
+        if self.enable_events:
             self.timer.start()
 
     def stop(self):
