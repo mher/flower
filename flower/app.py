@@ -1,3 +1,4 @@
+import sys
 import time
 import logging
 import collections
@@ -21,6 +22,12 @@ from .options import default_options
 
 
 logger = logging.getLogger(__name__)
+
+
+if sys.version_info[0]==3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+    import asyncio
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 
 def rewrite_handler(handler, url_prefix):
     if type(handler) is url:
