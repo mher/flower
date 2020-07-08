@@ -502,6 +502,7 @@ List tasks
   }
 
 :query limit: maximum number of tasks
+:query offset: skip first n tasks
 :query workername: filter task by workername
 :query taskname: filter tasks by taskname
 :query state: filter tasks by state
@@ -513,6 +514,7 @@ List tasks
         """
         app = self.application
         limit = self.get_argument('limit', None)
+        offset = self.get_argument('offset', None)
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
@@ -520,13 +522,14 @@ List tasks
         received_end = self.get_argument('received_end', None)
 
         limit = limit and int(limit)
+        offset = offset and int(offset)
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
         result = []
         for task_id, task in tasks.iter_tasks(
-                app.events, limit=limit, type=type,
+                app.events, limit=limit, offset=offset, type=type,
                 worker=worker, state=state,
                 received_start=received_start,
                 received_end=received_end):
