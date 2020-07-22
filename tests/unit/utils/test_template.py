@@ -57,6 +57,11 @@ class TestHumanize(unittest.TestCase):
         self.assertEqual('URI prefix', humanize('uri_prefix'))
         self.assertEqual('Max concurrency', humanize('max-concurrency'))
 
+    def test_elapsed(self):
+        """Note that we use naturaldelta instead of precisedelta"""
+        self.assertEqual('15 seconds', humanize(15.01, type='elapsed'))
+        self.assertEqual('a minute', humanize(78.593, type='elapsed'))
+
 
 if __name__ == '__main__':
     unittest.main()
