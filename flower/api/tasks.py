@@ -522,7 +522,7 @@ List tasks
         received_end = self.get_argument('received_end', None)
 
         limit = limit and int(limit)
-        offset = offset and int(offset)
+        offset = offset and max(0, int(offset))
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
