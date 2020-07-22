@@ -520,6 +520,7 @@ List tasks
         state = self.get_argument('state', None)
         received_start = self.get_argument('received_start', None)
         received_end = self.get_argument('received_end', None)
+        sort_by = self.get_argument('sort_by', None)
 
         limit = limit and int(limit)
         offset = offset and max(0, int(offset))
@@ -529,7 +530,7 @@ List tasks
 
         result = []
         for task_id, task in tasks.iter_tasks(
-                app.events, limit=limit, offset=offset, type=type,
+                app.events, limit=limit, offset=offset, sort_by=sort_by, type=type,
                 worker=worker, state=state,
                 received_start=received_start,
                 received_end=received_end):

@@ -122,14 +122,18 @@ class TaskTests(AsyncHTTPTestCase):
                                         id='789')
         events += task_succeeded_events(worker='worker1', name='task4',
                                         id='666')
+                                        
+        # for i, e in enumerate(sorted(events, key=lambda event: event['uuid'])):
+        
         for i, e in enumerate(events):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
         self.app.events.state = state
+        print(self.app.events.state.tasks)
 
         # Test limit 4 and offset 0
-        params = dict(limit=4, offset=0)
+        params = dict(limit=4, offset=0, sort_by='name')
 
         r = self.get('/api/tasks?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
@@ -139,11 +143,11 @@ class TaskTests(AsyncHTTPTestCase):
         self.assertEqual(4, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
         lastFetchedTaskName =  table[list(table)[-1]]['name']
-        self.assertEqual("task4", firstFetchedTaskName)
-        self.assertEqual("task1", lastFetchedTaskName)
+        self.assertEqual("task1", firstFetchedTaskName)
+        self.assertEqual("task4", lastFetchedTaskName)
 
         # Test limit 4 and offset 1
-        params = dict(limit=4, offset=1)
+        params = dict(limit=4, offset=1, sort_by='name')
 
         r = self.get('/api/tasks?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
@@ -153,11 +157,11 @@ class TaskTests(AsyncHTTPTestCase):
         self.assertEqual(3, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
         lastFetchedTaskName =  table[list(table)[-1]]['name']
-        self.assertEqual("task3", firstFetchedTaskName)
-        self.assertEqual("task1", lastFetchedTaskName)
+        self.assertEqual("task2", firstFetchedTaskName)
+        self.assertEqual("task4", lastFetchedTaskName)
 
         # Test limit 4 and offset -1 (-1 should act as 0)
-        params = dict(limit=4, offset=-1)
+        params = dict(limit=4, offset=-1, sort_by="name")
 
         r = self.get('/api/tasks?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
@@ -167,11 +171,11 @@ class TaskTests(AsyncHTTPTestCase):
         self.assertEqual(4, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
         lastFetchedTaskName =  table[list(table)[-1]]['name']
-        self.assertEqual("task4", firstFetchedTaskName)
-        self.assertEqual("task1", lastFetchedTaskName)
+        self.assertEqual("task1", firstFetchedTaskName)
+        self.assertEqual("task4", lastFetchedTaskName)
 
         # Test limit 2 and offset 1
-        params = dict(limit=2, offset=1)
+        params = dict(limit=2, offset=1, sort_by='name')
 
         r = self.get('/api/tasks?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
@@ -181,6 +185,6 @@ class TaskTests(AsyncHTTPTestCase):
         self.assertEqual(2, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
         lastFetchedTaskName =  table[list(table)[-1]]['name']
-        self.assertEqual("task3", firstFetchedTaskName)
-        self.assertEqual("task2", lastFetchedTaskName)
+        self.assertEqual("task2", firstFetchedTaskName)
+        self.assertEqual("task3", lastFetchedTaskName)
 
