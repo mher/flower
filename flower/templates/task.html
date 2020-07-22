@@ -65,7 +65,7 @@
               <caption>Advanced task options</caption>
               <tbody>
               {% for name in task._fields %}
-                {% if name not in ['name', 'uuid', 'state', 'args', 'kwargs', 'result'] and getattr(task, name, None) is not None %}
+                {% if name not in ['name', 'uuid', 'state', 'args', 'kwargs', 'result', 'runtime'] and getattr(task, name, None) is not None %}
                 <tr>
                   <td>{{ humanize(name) }}</td>
                   <td>
@@ -85,6 +85,18 @@
                   </td>
                 </tr>
                 {% end %}
+              {% end %}
+              {% set runtime = getattr(task, 'runtime', None) %}
+              {% set started = getattr(task, 'started', None) %}
+              {% if started is not None %}
+                <tr>
+                  <td>Runtime</td>
+                    {% if runtime is None %}
+                    <td>{{ humanize(unix_now() - started, type='elapsed') }} and running</td>
+                    {% else %}
+                    <td>{{ humanize(runtime, type='elapsed') }}</td>
+                    {% end %}
+                </tr>
               {% end %}
               </tbody>
             </table>

@@ -1,4 +1,5 @@
 import re
+import time
 
 from celery import current_app
 from datetime import datetime
@@ -8,7 +9,7 @@ try:
 except ImportError:
     from urllib.parse import urlencode
 
-from humanize import naturaltime
+from humanize import naturaltime, naturaldelta
 from pytz import timezone, utc
 
 
@@ -20,6 +21,10 @@ UUID_REGEX = re.compile(r'^[\w]{8}(-[\w]{4}){3}-[\w]{12}$')
 def format_time(time, tz):
     dt = datetime.fromtimestamp(time, tz=tz)
     return dt.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
+
+
+def unix_now():
+    return time.time()
 
 
 def humanize(obj, type=None, length=None):
@@ -37,6 +42,8 @@ def humanize(obj, type=None, length=None):
             obj = naturaltime(delta)
         else:
             obj = format_time(float(obj), tz) if obj else ''
+    elif type == 'elapsed':
+        obj = naturaldelta(obj)
     elif isinstance(obj, str) and not re.match(UUID_REGEX, obj):
         obj = obj.replace('-', ' ').replace('_', ' ')
         obj = re.sub('|'.join(KEYWORDS_UP),
