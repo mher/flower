@@ -11,6 +11,7 @@ from celery.events import Event
 from tests.unit.utils import task_succeeded_events
 import json
 import time
+from collections import OrderedDict
 
 
 class ApplyTests(AsyncHTTPTestCase):
@@ -130,7 +131,6 @@ class TaskTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
         self.app.events.state = state
-        print(self.app.events.state.tasks)
 
         # Test limit 4 and offset 0
         params = dict(limit=4, offset=0, sort_by='name')
@@ -138,7 +138,8 @@ class TaskTests(AsyncHTTPTestCase):
         r = self.get('/api/tasks?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
 
-        table = json.loads(r.body.decode("utf-8"))
+        table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
+
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
@@ -152,7 +153,8 @@ class TaskTests(AsyncHTTPTestCase):
         r = self.get('/api/tasks?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
 
-        table = json.loads(r.body.decode("utf-8"))
+        table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
+
         self.assertEqual(200, r.code)
         self.assertEqual(3, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
@@ -166,7 +168,8 @@ class TaskTests(AsyncHTTPTestCase):
         r = self.get('/api/tasks?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
 
-        table = json.loads(r.body.decode("utf-8"))
+        table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
+
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
@@ -180,7 +183,8 @@ class TaskTests(AsyncHTTPTestCase):
         r = self.get('/api/tasks?' + '&'.join(
                         map(lambda x: '%s=%s' % x, params.items())))
 
-        table = json.loads(r.body.decode("utf-8"))
+        table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
+
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
