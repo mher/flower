@@ -18,6 +18,7 @@ from ..utils import tasks
 from ..views import BaseHandler
 from ..utils.broker import Broker
 from ..api.control import ControlHandler
+from collections import OrderedDict
 
 
 logger = logging.getLogger(__name__)
@@ -502,6 +503,8 @@ List tasks
   }
 
 :query limit: maximum number of tasks
+:query offset: skip first n tasks
+:query sort_by: sort tasks by attribute (name, state, received, started)
 :query workername: filter task by workername
 :query taskname: filter tasks by taskname
 :query state: filter tasks by state
@@ -513,20 +516,23 @@ List tasks
         """
         app = self.application
         limit = self.get_argument('limit', None)
+        offset = self.get_argument('offset', None)
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
         received_start = self.get_argument('received_start', None)
         received_end = self.get_argument('received_end', None)
+        sort_by = self.get_argument('sort_by', None)
 
         limit = limit and int(limit)
+        offset = offset and max(0, int(offset))
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
         result = []
         for task_id, task in tasks.iter_tasks(
-                app.events, limit=limit, type=type,
+                app.events, limit=limit, offset=offset, sort_by=sort_by, type=type,
                 worker=worker, state=state,
                 received_start=received_start,
                 received_end=received_end):
@@ -535,7 +541,7 @@ List tasks
             if worker is not None:
               task['worker'] = worker.hostname
             result.append((task_id, task))
-        self.write(dict(result))
+        self.write(OrderedDict(result))
 
 
 class ListTaskTypes(BaseTaskHandler):

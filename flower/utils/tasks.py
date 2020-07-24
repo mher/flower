@@ -6,7 +6,7 @@ from .search import satisfies_search_terms, parse_search_terms
 from celery.events.state import Task
 
 
-def iter_tasks(events, limit=None, type=None, worker=None, state=None,
+def iter_tasks(events, limit=None, offset=0, type=None, worker=None, state=None,
                sort_by=None, received_start=None, received_end=None,
                started_start=None, started_end=None, search=None):
     i = 0
@@ -40,10 +40,12 @@ def iter_tasks(events, limit=None, type=None, worker=None, state=None,
             continue
         if not satisfies_search_terms(task, search_terms):
             continue
-        yield uuid, task
+        if i >= offset:
+            yield uuid, task
         i += 1
-        if i == limit:
-            break
+        if limit != None:
+            if i == limit + offset:
+                break
 
 
 sort_keys = {'name': str, 'state': str, 'received': float, 'started': float}
