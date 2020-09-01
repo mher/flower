@@ -25,23 +25,6 @@ logger = logging.getLogger(__name__)
 ENV_VAR_PREFIX = 'FLOWER_'
 
 
-def print_banner(app, ssl):
-    if not options.unix_socket:
-        logger.info(
-            "Visit me at http%s://%s:%s", 's' if ssl else '',
-            options.address or 'localhost', options.port
-        )
-    else:
-        logger.info("Visit me via unix socket file: %s", options.unix_socket)
-
-    logger.info('Broker: %s', app.connection().as_uri())
-    logger.info(
-        'Registered tasks: \n%s',
-        pformat(sorted(app.tasks.keys()))
-    )
-    logger.debug('Settings: %s', pformat(settings))
-
-
 @click.command(cls=CeleryCommand,
                context_settings={'allow_extra_args': True})
 @click.argument("torando_argv", nargs=-1, type=click.UNPROCESSED)
@@ -133,17 +116,6 @@ def extract_settings():
             settings['ssl_options']['ca_certs'] = abs_path(options.ca_certs)
 
 
-def early_version(self, argv):
-    if '--version' in argv:
-        if '--debug' in argv:
-            from flower.utils import bugreport
-            print(bugreport(), file=self.stdout)
-
-        print(__version__, file=self.stdout)
-        super(FlowerCommand, self).early_version(argv)
-
-
-@staticmethod
 def is_flower_option(arg):
     name, _, _ = arg.lstrip('-').partition("=")
     name = name.replace('-', '_')
@@ -153,3 +125,20 @@ def is_flower_option(arg):
 def is_flower_envvar(name):
     return name.startswith(ENV_VAR_PREFIX) and\
            name[len(ENV_VAR_PREFIX):].lower() in default_options
+
+
+def print_banner(app, ssl):
+    if not options.unix_socket:
+        logger.info(
+            "Visit me at http%s://%s:%s", 's' if ssl else '',
+            options.address or 'localhost', options.port
+        )
+    else:
+        logger.info("Visit me via unix socket file: %s", options.unix_socket)
+
+    logger.info('Broker: %s', app.connection().as_uri())
+    logger.info(
+        'Registered tasks: \n%s',
+        pformat(sorted(app.tasks.keys()))
+    )
+    logger.debug('Settings: %s', pformat(settings))
