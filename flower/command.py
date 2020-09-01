@@ -20,13 +20,14 @@ from .urls import settings
 from .utils import abs_path, prepend_url
 from .options import DEFAULT_CONFIG_FILE, default_options
 
-
 logger = logging.getLogger(__name__)
 ENV_VAR_PREFIX = 'FLOWER_'
 
 
 @click.command(cls=CeleryCommand,
-               context_settings={'allow_extra_args': True})
+               context_settings={
+                   'ignore_unknown_options': True
+               })
 @click.argument("torando_argv", nargs=-1, type=click.UNPROCESSED)
 @click.pass_context
 def flower(ctx, torando_argv):
@@ -123,7 +124,7 @@ def is_flower_option(arg):
 
 
 def is_flower_envvar(name):
-    return name.startswith(ENV_VAR_PREFIX) and\
+    return name.startswith(ENV_VAR_PREFIX) and \
            name[len(ENV_VAR_PREFIX):].lower() in default_options
 
 
