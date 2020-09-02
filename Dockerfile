@@ -29,4 +29,6 @@ USER flower
 
 VOLUME $FLOWER_DATA_DIR
 
-ENTRYPOINT ["flower"]
+COPY entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]
