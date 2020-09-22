@@ -220,6 +220,15 @@ port
 
 Run the http server on a given port (by default, `port=5555`)
 
+.. _state_save_timeout:
+
+state_save_timeout
+~~~~~~~~~~~~~~~~~~
+
+Sets the timeout for saving state. state_save_timeout=0 means
+that periodic saving is disabled (by default, `state_save_timeout=0`
+in milliseconds)
+
 .. _xheaders:
 
 xheaders

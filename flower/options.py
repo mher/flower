@@ -35,6 +35,8 @@ define("db", type=str, default='flower',
        help="flower database file")
 define("persistent", type=bool, default=False,
        help="enable persistent mode")
+define("state_save_timeout", type=int, default=0,
+       help="state save timeout (in milliseconds)")
 define("broker_api", type=str, default=None,
        help="inspect broker e.g. http://guest:guest@localhost:15672/api/")
 define("ca_certs", type=str, default=None,
