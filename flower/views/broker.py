@@ -42,7 +42,7 @@ class BrokerView(BaseHandler):
 
             queues = yield broker.queues(sorted(queue_names))
         except Exception as e:
-            logger.error("Unable to get queues: '%s'" % e)
+            logger.error("Unable to get queues: '%s'", e)
 
         self.render("broker.html",
                     broker_url=app.capp.connection().as_uri(),
