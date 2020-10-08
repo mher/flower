@@ -11,3 +11,9 @@ class Metrics(BaseHandler):
     @gen.coroutine
     def get(self):
         self.write(prometheus_client.generate_latest())
+
+
+class Healthcheck(BaseHandler):
+    @gen.coroutine
+    def get(self):
+        self.write("OK")

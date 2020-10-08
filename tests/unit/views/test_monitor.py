@@ -32,3 +32,16 @@ class PrometheusTests(AsyncHTTPTestCase):
         self.assertTrue('task-received' in events)
         self.assertTrue('task-started' in events)
         self.assertTrue('task-succeeded' in events)
+
+
+class HealthcheckTests(AsyncHTTPTestCase):
+    def setUp(self):
+        self.app = super(HealthcheckTests, self).get_app()
+        super(HealthcheckTests, self).setUp()
+
+    def get_app(self):
+        return self.app
+
+    def test_healthcheck_route(self):
+        response = self.get('/healthcheck').body.decode('utf-8')
+        self.assertEquals(response, 'OK')
