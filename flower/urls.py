@@ -1,6 +1,8 @@
 import os
 
+import jinja2
 from tornado.web import StaticFileHandler, url
+from tornado_jinja2 import Jinja2Loader
 
 from .api import events
 from .api import control
@@ -15,9 +17,29 @@ from .views.error import NotFoundErrorHandler
 from .views.dashboard import DashboardView
 from .utils import gen_cookie_secret
 
+# Create a instance of Jinja2Loader
+jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader('./flower/templates'), autoescape=False)
+jinja2_loader = Jinja2Loader(jinja2_env)
+
+
+def accumulate(arr, attribute):
+    return sum(map(lambda x: x.get(attribute) or 0, arr.values()))
+
+
+def debug(text):
+    print(text)
+    return ''
+
+
+jinja2_env.filters['debug'] = debug
+jinja2_env.filters['accumulate'] = accumulate
+jinja2_env.filters['reverse_url'] = debug
+jinja2_env.globals['reverse_url'] = debug
+
 
 settings = dict(
-    template_path=os.path.join(os.path.dirname(__file__), "templates"),
+    template_loader=jinja2_loader,
+    # template_path=os.path.join(os.path.dirname(__file__), "templates"),
     static_path=os.path.join(os.path.dirname(__file__), "static"),
     cookie_secret=gen_cookie_secret(),
     static_url_prefix='/static/',
