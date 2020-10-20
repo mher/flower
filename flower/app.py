@@ -80,7 +80,8 @@ class Flower(tornado.web.Application):
             self.started = False
 
     def delay(self, method, *args, **kwargs):
-        return self.pool.submit(partial(method, *args, **kwargs))
+        return self.io_loop.run_in_executor(
+            self.pool, partial(method, *args, **kwargs))
 
     @property
     def transport(self):
