@@ -61,7 +61,7 @@ class Flower(tornado.web.Application):
             self.capp,
             db=self.options.db,
             persistent=self.options.persistent,
-            state_save_timeout=self.options.state_save_timeout,
+            state_save_interval=self.options.state_save_interval,
             enable_events=self.options.enable_events,
             io_loop=self.io_loop,
             max_workers_in_memory=self.options.max_workers,
