@@ -11,4 +11,10 @@ class Metrics(BaseHandler):
     @gen.coroutine
     def get(self):
         self.write(prometheus_client.generate_latest())
-        self.add_header("Content-Type", "text/plain")
+        self.set_header("Content-Type", "text/plain")
+
+class Healthcheck(BaseHandler):
+    @gen.coroutine
+    def get(self):
+        self.write("OK")
+        
