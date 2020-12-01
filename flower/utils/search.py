@@ -47,7 +47,7 @@ def satisfies_search_terms(task, search_terms):
             filter(None, [task.name, task.uuid, task.state,
                           task.worker.hostname if task.worker else None,
                           task.args, task.kwargs, safe_str(task.result)])),
-        result_search_term and result_search_term in task.result,
+        result_search_term and task.result and result_search_term in task.result,
         kwargs_search_terms and all(
             stringified_dict_contains_value(k, v, task.kwargs) for k, v in kwargs_search_terms.items()
         ),
