@@ -61,6 +61,8 @@ def stringified_dict_contains_value(key, value, str_dict):
     key/value pair. This works faster, then creating actual dict
     from string since this operation is called for each task in case
     of kwargs search."""
+    if not str_dict:
+        return False
     value = str(value)
     try:
         # + 3 for key right quote, one for colon and one for space
