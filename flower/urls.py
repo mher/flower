@@ -21,6 +21,7 @@ from .utils import gen_cookie_secret
 jinja2_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")),
     autoescape=False,
+    extensions=['jinja2.ext.loopcontrols']
 )
 jinja2_loader = Jinja2Loader(jinja2_env)
 

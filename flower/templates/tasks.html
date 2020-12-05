@@ -1,9 +1,9 @@
 {% extends "base.html" %}
+{% import 'navbar.html' as navbar_macro %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="tasks") %}
-{% end %}
-
+  {{ navbar_macro.navbar(active_tab="tasks") }}
+{% endblock %}
 
 {% block container %}
 <input type="hidden" value="{{ time }}" id='time'>
@@ -35,9 +35,9 @@
     </thead>
     <tbody>
     {% for uuid, task in tasks %}
-        {% if getattr(task, 'name', None) is None %}
+        {% if getattr(task, 'name', None) %}
             {% continue %}
-        {% end %}
+        {% endif %}
     <tr>
       <td>{{ task.name }}</td>
       <td>{{ task.uuid }}</td>
@@ -49,14 +49,14 @@
             {{ task.result }}
         {% elif task.state == "FAILURE" %}
             {{ task.exception }}
-        {% end %}
+        {% endif %}
       </td>
       <td>{{ humanize(task.received, type='time') }}</td>
       <td>{{ humanize(task.started, type='time') }}</td>
       <td>
         {% if task.timestamp and task.started %}
             {{ '%.2f' % humanize(task.timestamp - task.started) }} sec
-        {% end %}
+        {% endif %}
       </td>
       <td>{{ task.worker }}</td>
       <td>{{ task.exchange }}</td>
@@ -67,8 +67,8 @@
       <td>{{ task.expires }}</td>
       <td>{{ task.eta }}</td>
     </tr>
-      {% end %}
+      {% endfor %}
     </tbody>
   </table>
 </div>
-{% end %}
+{% endblock %}
