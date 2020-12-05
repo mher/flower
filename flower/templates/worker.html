@@ -3,9 +3,10 @@
 
 {% block container %}
 
+{#
   {% set other = {key: value for key, value in worker['stats'].items() if key not in
                   'pool pid prefetch_count autoscaler consumer broker clock total rusage'.split()} %}
-
+#}
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span12">
@@ -37,7 +38,7 @@
             <li><a href="#tab-system" data-toggle="tab">System</a></li>
             {% if other %}
             <li><a href="#tab-other" data-toggle="tab">Other</a></li>
-            {% end %}
+            {% endif %}
           </ul>
 
           <div class="tab-content">
@@ -53,7 +54,7 @@
                           <td>{{ humanize(name) }}</td>
                           <td>{{ humanize(value) }}</td>
                         </tr>
-                      {% end %}
+                      {% endfor %}
                         <tr>
                             <td>Worker PID</td>
                             <td>{{ worker['stats'].get('pid', 'N/A')}}</td>
@@ -113,12 +114,12 @@
                                 <td>{{ humanize(name) }}</td>
                                 <td>{{ humanize(value) }}</td>
                                 </tr>
-                            {% end %}
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
-              {% end %}
+              {% endif %}
 
             </div> <!-- end pool tab -->
 
@@ -132,7 +133,7 @@
                         <td>{{ humanize(name) }}</td>
                         <td>{{ value }}</td>
                       </tr>
-                    {% end %}
+                    {% endfor %}
                   </tbody>
                 </table>
               </div>
@@ -181,7 +182,7 @@
                       <td>{{ queue['auto_delete'] }}</td>
                       <td><button class="btn btn-danger" onclick="flower.on_cancel_consumer(event)">Cancel Consumer</button></td>
                   </tr>
-                {% end %}
+                {% endfor %}
               </tbody>
               </table>
             </div> <!-- end queues tab -->
@@ -195,7 +196,7 @@
                       <td>{{ name }}</td>
                       <td>{{ value }}</td>
                     </tr>
-                  {% end %}
+                  {% endfor %}
                   </tbody>
               </table>
 
@@ -221,7 +222,7 @@
                       <td>{{ task.get('args', 'N/A') }}</td>
                       <td>{{ task.get('kwargs', 'N/A') }}</td>
                     </tr>
-                  {% end %}
+                  {% endfor %}
                 </tbody>
               </table>
 
@@ -243,7 +244,7 @@
                       <td>{{ task['request']['args'] }}</td>
                       <td>{{ task['request']['kwargs'] }}</td>
                     </tr>
-                  {% end %}
+                  {% endfor %}
                   </tbody>
               </table>
 
@@ -265,7 +266,7 @@
                       <td>{{ task['args'] }}</td>
                       <td>{{ task['kwargs'] }}</td>
                     </tr>
-                  {% end %}
+                  {% endfor %}
                   </tbody>
               </table>
 
@@ -281,7 +282,7 @@
                     <tr>
                       <td><a href="{{ reverse_url('task', task) }}">{{ task }}</a></td>
                     </tr>
-                  {% end %}
+                  {% endfor %}
                 </tbody>
               </table>
             </div> <!-- end tasks tab -->
@@ -321,7 +322,7 @@
                       </div>
                     </td>
                   </tr>
-                {% end %}
+                {% endfor %}
               </table>
           </div> <!-- end limits tab -->
 
@@ -331,13 +332,13 @@
                 <caption>Configuration options</caption>
                 <tbody>
                 {% for name,value in sorted(worker.get('conf', {}).items()) %}
-                    {% if value is not None %}
+                    {% if value != None %}
                       <tr>
                         <td><a href="http://docs.celeryproject.org/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
                         <td>{{ value }}</td>
                       </tr>
-                    {% end %}
-                  {% end %}
+                    {% endif %}
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -354,8 +355,8 @@
                             <td>{{ name }}</td>
                             <td>{{ value }}</td>
                         </tr>
-                    {% end %}
-                {% end %}
+                    {% endfor %}
+                {% endif %}
                 </tbody>
               </table>
             </div>
@@ -372,16 +373,16 @@
                         <td>{{ name }}</td>
                         <td>{{ value }}</td>
                     </tr>
-                {% end %}
+                {% endfor %}
                 </tbody>
               </table>
             </div>
           </div> <!-- end other tab -->
-          {% end %}
+          {% endif %}
 
          </div>
         </div>
       </div>
   </div>
   </div>
-{% end %}
+{% endblock %}
