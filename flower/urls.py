@@ -36,7 +36,6 @@ def debug(text):
 
 jinja2_env.filters['debug'] = debug
 jinja2_env.filters['accumulate'] = accumulate
-jinja2_env.globals['reverse_url'] = debug
 
 
 settings = dict(

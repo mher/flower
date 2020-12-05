@@ -46,6 +46,10 @@ class Flower(tornado.web.Application):
         if options is not None and options.url_prefix:
             handlers = [rewrite_handler(h, options.url_prefix) for h in handlers]
         kwargs.update(handlers=handlers)
+
+        loader = kwargs["template_loader"]
+        loader.jinja2_environment.globals["reverse_url"] = self.reverse_url
+
         super(Flower, self).__init__(**kwargs)
         self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
