@@ -1,8 +1,10 @@
 {% extends "base.html" %}
+{% import 'navbar.html' as navbar_macro %}
 
 {% block navbar %}
-  {% module Template("navbar.html", active_tab="tasks") %}
-{% end %}
+  {{ navbar_macro.navbar(active_tab="tasks") }}
+{% endblock %}
+
 
 {% block container %}
   <div id='task-page' class="container-fluid">
