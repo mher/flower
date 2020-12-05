@@ -18,7 +18,10 @@ from .views.dashboard import DashboardView
 from .utils import gen_cookie_secret
 
 # Create a instance of Jinja2Loader
-jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader('./flower/templates'), autoescape=False)
+jinja2_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")),
+    autoescape=False,
+)
 jinja2_loader = Jinja2Loader(jinja2_env)
 
 
@@ -33,13 +36,11 @@ def debug(text):
 
 jinja2_env.filters['debug'] = debug
 jinja2_env.filters['accumulate'] = accumulate
-jinja2_env.filters['reverse_url'] = debug
 jinja2_env.globals['reverse_url'] = debug
 
 
 settings = dict(
     template_loader=jinja2_loader,
-    # template_path=os.path.join(os.path.dirname(__file__), "templates"),
     static_path=os.path.join(os.path.dirname(__file__), "static"),
     cookie_secret=gen_cookie_secret(),
     static_url_prefix='/static/',
