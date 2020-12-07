@@ -331,7 +331,7 @@
               <table class="table table-bordered table-striped">
                 <caption>Configuration options</caption>
                 <tbody>
-                {% for name,value in sorted(worker.get('conf', {}).items()) %}
+                {% for name,value in worker.get('conf', {}).items()|sort %}
                     {% if value != None %}
                       <tr>
                         <td><a href="http://docs.celeryproject.org/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
@@ -349,7 +349,7 @@
               <table class="table table-bordered table-striped">
                 <caption>System usage statistics</caption>
                 <tbody>
-                {% if isinstance(worker['stats'].get('rusage', None), dict) %}
+                {% if worker['stats'].get('rusage', None) is mapping %}
                     {% for name, value in worker['stats']['rusage'].items() %}
                         <tr>
                             <td>{{ name }}</td>
