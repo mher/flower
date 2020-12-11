@@ -5,3 +5,5 @@ tornado>=5.0.0,<7.0.0; python_version>="3.5.2"
 prometheus_client==0.8.0
 humanize
 pytz
+jinja2
+tornado-jinja2==0.2.4
