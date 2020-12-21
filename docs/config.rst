@@ -55,7 +55,9 @@ For a full list of options see: ::
 address
 ~~~~~~~
 
-Run the http server on a given address
+Run the http server on a given address. Address may be either an IP address or hostname.
+If it’s a hostname, the server will listen on all IP addresses associated with the name.
+Address may be an empty string or None to listen on all available interfaces.
 
 .. _auth:
 
