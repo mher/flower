@@ -57,6 +57,14 @@ class TestRedis(unittest.TestCase):
             b = Broker('redis://localhost:6379/0', broker_options=options)
             self.assertEqual(expected, b.priority_steps)
 
+    def test_custom_sep(self):
+        custom_sep = '.'
+        cases = [(RedisBase.DEFAULT_SEP, {}),
+                 (custom_sep, {'sep': custom_sep})]
+        for expected, options in cases:
+            b = Broker('redis://localhost:6379/0', broker_options=options)
+            self.assertEqual(expected, b.sep)
+
     def test_url(self):
         b = Broker('redis://foo:7777/9')
         self.assertEqual('foo', b.host)

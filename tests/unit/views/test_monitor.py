@@ -7,26 +7,6 @@ from tests.unit.utils import task_succeeded_events
 from tests.unit import AsyncHTTPTestCase
 
 
-class MonitorTest(AsyncHTTPTestCase):
-    def test_monitor_page(self):
-        r = self.get('/monitor')
-        self.assertEqual(200, r.code)
-        self.assertTrue('Succeeded tasks' in str(r.body))
-        self.assertTrue('Failed tasks' in str(r.body))
-
-    def test_monitor_succeeded_tasks(self):
-        r = self.get('/monitor/succeeded-tasks?lastquery=%s' % time.time())
-        self.assertEqual(200, r.code)
-
-    def test_monitor_completion_time(self):
-        r = self.get('/monitor/completion-time?lastquery=%s' % time.time())
-        self.assertEqual(200, r.code)
-
-    def test_monitor_failed_tasks(self):
-        r = self.get('/monitor/failed-tasks?lastquery=%s' % time.time())
-        self.assertEqual(200, r.code)
-
-
 class PrometheusTests(AsyncHTTPTestCase):
     def setUp(self):
         self.app = super(PrometheusTests, self).get_app()
@@ -52,3 +32,16 @@ class PrometheusTests(AsyncHTTPTestCase):
         self.assertTrue('task-received' in events)
         self.assertTrue('task-started' in events)
         self.assertTrue('task-succeeded' in events)
+
+
+class HealthcheckTests(AsyncHTTPTestCase):
+    def setUp(self):
+        self.app = super(HealthcheckTests, self).get_app()
+        super(HealthcheckTests, self).setUp()
+
+    def get_app(self):
+        return self.app
+
+    def test_healthcheck_route(self):
+        response = self.get('/healthcheck').body.decode('utf-8')
+        self.assertEquals(response, 'OK')

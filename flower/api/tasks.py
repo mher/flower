@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import json
 import logging
 
@@ -20,6 +18,7 @@ from ..utils import tasks
 from ..views import BaseHandler
 from ..utils.broker import Broker
 from ..api.control import ControlHandler
+from collections import OrderedDict
 
 
 logger = logging.getLogger(__name__)
@@ -32,6 +31,10 @@ class BaseTaskHandler(BaseHandler):
             options = json_decode(body) if body else {}
         except ValueError as e:
             raise HTTPError(400, str(e))
+
+        if not isinstance(options, dict):
+            raise HTTPError(400, 'invalid options')
+
         args = options.pop('args', [])
         kwargs = options.pop('kwargs', {})
 
@@ -408,7 +411,7 @@ Return length of all active queues
         broker = Broker(app.capp.connection().as_uri(include_password=True),
                         http_api=http_api, broker_options=broker_options, broker_use_ssl=broker_use_ssl)
 
-        queue_names = ControlHandler.get_active_queue_names()
+        queue_names = self.get_active_queue_names()
 
         if not queue_names:
             queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
@@ -467,7 +470,8 @@ List tasks
           "succeeded": 1398505411.124802,
           "timestamp": 1398505411.124802,
           "traceback": null,
-          "uuid": "e42ceb2d-8730-47b5-8b4d-8e0d2a1ef7c9"
+          "uuid": "e42ceb2d-8730-47b5-8b4d-8e0d2a1ef7c9",
+          "worker": "celery@worker1"
       },
       "f67ea225-ae9e-42a8-90b0-5de0b24507e0": {
           "args": "[1, 2]",
@@ -493,11 +497,14 @@ List tasks
           "succeeded": 1398505395.341089,
           "timestamp": 1398505395.341089,
           "traceback": null,
-          "uuid": "f67ea225-ae9e-42a8-90b0-5de0b24507e0"
+          "uuid": "f67ea225-ae9e-42a8-90b0-5de0b24507e0",
+          "worker": "celery@worker1"
       }
   }
 
 :query limit: maximum number of tasks
+:query offset: skip first n tasks
+:query sort_by: sort tasks by attribute (name, state, received, started)
 :query workername: filter task by workername
 :query taskname: filter tasks by taskname
 :query state: filter tasks by state
@@ -509,27 +516,32 @@ List tasks
         """
         app = self.application
         limit = self.get_argument('limit', None)
+        offset = self.get_argument('offset', None)
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
         received_start = self.get_argument('received_start', None)
         received_end = self.get_argument('received_end', None)
+        sort_by = self.get_argument('sort_by', None)
 
         limit = limit and int(limit)
+        offset = offset and max(0, int(offset))
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
         result = []
         for task_id, task in tasks.iter_tasks(
-                app.events, limit=limit, type=type,
+                app.events, limit=limit, offset=offset, sort_by=sort_by, type=type,
                 worker=worker, state=state,
                 received_start=received_start,
                 received_end=received_end):
             task = tasks.as_dict(task)
-            task.pop('worker', None)
+            worker = task.pop('worker', None)
+            if worker is not None:
+              task['worker'] = worker.hostname
             result.append((task_id, task))
-        self.write(dict(result))
+        self.write(OrderedDict(result))
 
 
 class ListTaskTypes(BaseTaskHandler):

@@ -1,13 +1,7 @@
-from __future__ import absolute_import
-
 from functools import total_ordering
 import copy
 import logging
 
-try:
-    from itertools import imap
-except ImportError:
-    imap = map
 
 from tornado import web
 

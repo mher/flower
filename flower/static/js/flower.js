@@ -2,7 +2,7 @@ var flower = (function () {
     "use strict";
     /*jslint browser: true */
     /*jslint unparam: true, node: true */
-    /*global $, WebSocket, jQuery, Rickshaw */
+    /*global $, WebSocket, jQuery */
 
     function on_alert_close(event) {
         event.preventDefault();
@@ -68,6 +68,26 @@ var flower = (function () {
             },
             success: function (data) {
                 show_success_alert(data.message || 'Refreshed');
+            },
+            error: function (data) {
+                show_error_alert(data.responseText);
+            }
+        });
+    }
+
+    function on_refresh_all(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        $.ajax({
+            type: 'GET',
+            url: url_prefix() + '/api/workers',
+            dataType: 'json',
+            data: {
+                refresh: 1
+            },
+            success: function (data) {
+                show_success_alert(data.message || 'Refreshed All Workers');
             },
             error: function (data) {
                 show_error_alert(data.responseText);
@@ -374,129 +394,6 @@ var flower = (function () {
         $('#task-filter-form').submit();
     }
 
-    function create_graph(data, id, width, height, metric) {
-        id = id || '';
-        width = width || 500;
-        height = height || 300;
-        metric = metric || '';
-
-        var name, seriesData = [],
-            palette, graph, ticksTreatment, timeUnit, xAxis, yAxis, hoverDetail,
-            legend, shelving, order, highlighter;
-        for (name in data) {
-            if (data.hasOwnProperty(name)) {
-                seriesData.push({
-                    name: name
-                });
-            }
-        }
-
-        palette = new Rickshaw.Color.Palette({
-            scheme: 'colorwheel'
-        });
-
-        graph = new Rickshaw.Graph({
-            element: document.getElementById("chart" + id),
-            width: width,
-            height: height,
-            renderer: 'stack',
-            series: new Rickshaw.Series(seriesData, palette),
-            maxDataPoints: 10000,
-            padding: {
-                top: 0.1,
-                left: 0.01,
-                right: 0.01,
-                bottom: 0.01
-            },
-        });
-
-        ticksTreatment = 'glow';
-
-        timeUnit = new Rickshaw.Fixtures.Time.Local();
-        timeUnit.formatTime = function (d) {
-            return moment(d).format("YYYY-MM-DD HH:mm:ss");
-        };
-        timeUnit.unit("minute");
-
-        xAxis = new Rickshaw.Graph.Axis.Time({
-            graph: graph,
-            timeFixture: new Rickshaw.Fixtures.Time.Local(),
-            ticksTreatment: ticksTreatment,
-            timeUnit: timeUnit
-        });
-
-        xAxis.render();
-
-        yAxis = new Rickshaw.Graph.Axis.Y({
-            graph: graph,
-            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-            ticksTreatment: ticksTreatment,
-        });
-
-        yAxis.render();
-
-        hoverDetail = new Rickshaw.Graph.HoverDetail({
-            graph: graph,
-            yFormatter: function (y) {
-                if (y % 1 === 0) {
-                    return y + metric;
-                } else {
-                    return y.toFixed(2) + metric;
-                }
-            },
-            xFormatter: function (x) {
-                return moment(x * 1e3).format("YYYY-MM-DD HH:mm:ss");
-            }
-        });
-
-        legend = new Rickshaw.Graph.Legend({
-            graph: graph,
-            element: document.getElementById('legend' + id)
-        });
-
-        shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
-            graph: graph,
-            legend: legend
-        });
-
-        order = new Rickshaw.Graph.Behavior.Series.Order({
-            graph: graph,
-            legend: legend
-        });
-
-        highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
-            graph: graph,
-            legend: legend
-        });
-
-        legend.shelving = shelving;
-        graph.series.legend = legend;
-
-        graph.render();
-        return graph;
-    }
-
-    function update_graph(graph, url, lastquery) {
-        $.ajax({
-            type: 'GET',
-            url: url,
-            data: {
-                lastquery: lastquery
-            },
-            success: function (data) {
-                graph.series.addData(data);
-                graph.update();
-            },
-        });
-    }
-
-    function current_unix_time() {
-        var now = new Date();
-        return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(),
-            now.getUTCDate(), now.getUTCHours(),
-            now.getUTCMinutes(), now.getUTCSeconds()) / 1000;
-    }
-
     function format_time(timestamp) {
         var time = $('#time').val(),
             prefix = time.startsWith('natural-time') ? 'natural-time' : 'time',
@@ -546,97 +443,6 @@ var flower = (function () {
                 location.hash = $(e.target).attr('href').substr(1);
             });
         });
-
-        if (active_page('/monitor')) {
-            var sts = current_unix_time(),
-                fts = current_unix_time(),
-                tts = current_unix_time(),
-                updateinterval = parseInt($.urlParam('updateInterval'), 10) || 3000,
-                succeeded_graph = null,
-                failed_graph = null,
-                time_graph = null,
-                broker_graph = null;
-
-            $.ajax({
-                type: 'GET',
-                url: url_prefix() + '/monitor/succeeded-tasks',
-                data: {
-                    lastquery: current_unix_time()
-                },
-                success: function (data) {
-                    succeeded_graph = create_graph(data, '-succeeded');
-                    succeeded_graph.update();
-
-                    succeeded_graph.series.setTimeInterval(updateinterval);
-                    setInterval(function () {
-                        update_graph(succeeded_graph,
-                            url_prefix() + '/monitor/succeeded-tasks',
-                            sts);
-                        sts = current_unix_time();
-                    }, updateinterval);
-
-                },
-            });
-
-            $.ajax({
-                type: 'GET',
-                url: url_prefix() + '/monitor/completion-time',
-                data: {
-                    lastquery: current_unix_time()
-                },
-                success: function (data) {
-                    time_graph = create_graph(data, '-time', null, null, 's');
-                    time_graph.update();
-
-                    time_graph.series.setTimeInterval(updateinterval);
-                    setInterval(function () {
-                        update_graph(time_graph,
-                            url_prefix() + '/monitor/completion-time',
-                            tts);
-                        tts = current_unix_time();
-                    }, updateinterval);
-
-                },
-            });
-
-            $.ajax({
-                type: 'GET',
-                url: url_prefix() + '/monitor/failed-tasks',
-                data: {
-                    lastquery: current_unix_time()
-                },
-                success: function (data) {
-                    failed_graph = create_graph(data, '-failed');
-                    failed_graph.update();
-
-                    failed_graph.series.setTimeInterval(updateinterval);
-                    setInterval(function () {
-                        update_graph(failed_graph,
-                            url_prefix() + '/monitor/failed-tasks',
-                            fts);
-                        fts = current_unix_time();
-                    }, updateinterval);
-
-                },
-            });
-
-            $.ajax({
-                type: 'GET',
-                url: url_prefix() + '/monitor/broker',
-                success: function (data) {
-                    broker_graph = create_graph(data, '-broker');
-                    broker_graph.update();
-
-                    broker_graph.series.setTimeInterval(updateinterval);
-                    setInterval(function () {
-                        update_graph(broker_graph,
-                            url_prefix() + '/monitor/broker');
-                    }, updateinterval);
-
-                },
-            });
-
-        }
 
     });
 
@@ -855,6 +661,7 @@ var flower = (function () {
     return {
         on_alert_close: on_alert_close,
         on_worker_refresh: on_worker_refresh,
+        on_refresh_all: on_refresh_all,
         on_worker_pool_restart: on_worker_pool_restart,
         on_worker_shutdown: on_worker_shutdown,
         on_pool_grow: on_pool_grow,

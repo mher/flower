@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
 import os
 import sys
 import atexit
@@ -140,7 +137,7 @@ class FlowerCommand(Command):
                 options.address or 'localhost', options.port
             )
         else:
-            logger.info("Visit me via unix socket file: %s" % options.unix_socket)
+            logger.info("Visit me via unix socket file: %s", options.unix_socket)
 
         logger.info('Broker: %s', self.app.connection().as_uri())
         logger.info(

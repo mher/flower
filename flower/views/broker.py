@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import logging
 
 from tornado import web
@@ -35,15 +33,16 @@ class BrokerView(BaseHandler):
             raise web.HTTPError(
                 404, "'%s' broker is not supported" % app.transport)
 
+        queues = {}
         try:
-            queue_names = ControlHandler.get_active_queue_names()
+            queue_names = self.get_active_queue_names()
             if not queue_names:
                 queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
                         set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
 
             queues = yield broker.queues(sorted(queue_names))
         except Exception as e:
-            raise web.HTTPError(404, "Unable to get queues: '%s'" % e)
+            logger.error("Unable to get queues: '%s'", e)
 
         self.render("broker.html",
                     broker_url=app.capp.connection().as_uri(),

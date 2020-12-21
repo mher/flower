@@ -27,6 +27,16 @@ class TestSearchParser(unittest.TestCase):
             parse_search_terms('kwargs:some_kwarg1=some_value1 kwargs:some_kwarg2=some_value2')
         )
 
+    def test_partial_kwargs(self):
+        self.assertEqual(
+            {'kwargs': {}},
+            parse_search_terms('kwargs:some_kwarg')
+        )
+        self.assertEqual(
+            {'kwargs': {'some_kwarg': ''}},
+            parse_search_terms('kwargs:some_kwarg=')
+        )
+
     def test_args(self):
         self.assertEqual(
             {'args': ['some_value']},
@@ -65,6 +75,13 @@ class TestStringfiedDictChecker(unittest.TestCase):
             stringified_dict_contains_value('test', 5, "{'test': 5}")
         )
 
+    def test_works_for_no_kwargs(self):
+        self.assertEqual(
+            False,
+            stringified_dict_contains_value('foo', 'bar', None)
+        )
+
+
     def test_works_for_nonexisting_kwargs(self):
         self.assertEqual(
             False,
@@ -89,6 +106,7 @@ class TestTaskFiltering(unittest.TestCase):
         self.task = self._create_task(
             args=['arg1'],
             kwargs="{'kwarg1': 1, 'kwarg2': 22, 'kwarg3': '345'}",
+            result=None,
         )
 
     def test_kwarg_search_works(self):
@@ -121,6 +139,13 @@ class TestTaskFiltering(unittest.TestCase):
         self.assertEqual(
             False,
             satisfies_search_terms(self.task, dict(args=['arg']))
+        )
+
+
+    def test_result_search_handles_none(self):
+        self.assertEqual(
+            False,
+            satisfies_search_terms(self.task, dict(result=['result1']))
         )
 
 

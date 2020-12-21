@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 
 from tornado.web import StaticFileHandler, url
@@ -14,7 +12,7 @@ from .views.broker import BrokerView
 from .views.workers import WorkerView
 from .views.tasks import TaskView, TasksView, TasksDataTable
 from .views.error import NotFoundErrorHandler
-from .views.dashboard import DashboardView, DashboardUpdateHandler
+from .views.dashboard import DashboardView
 from .utils import gen_cookie_secret
 
 
@@ -68,15 +66,9 @@ handlers = [
     (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
     (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
     (r"/api/task/events/task-custom/(.*)", events.TaskCustom),
-    # WebSocket Updates
-    (r"/update-dashboard", DashboardUpdateHandler),
-    # Monitors
-    url(r"/monitor", monitor.Monitor, name='monitor'),
-    (r"/monitor/succeeded-tasks", monitor.SucceededTaskMonitor),
-    (r"/monitor/failed-tasks", monitor.FailedTaskMonitor),
-    (r"/monitor/completion-time", monitor.TimeToCompletionMonitor),
-    (r"/monitor/broker", monitor.BrokerMonitor),
+    # Metrics
     (r"/metrics", monitor.Metrics),
+    (r"/healthcheck", monitor.Healthcheck),
     # Static
     (r"/static/(.*)", StaticFileHandler,
      {"path": settings['static_path']}),

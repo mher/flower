@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import logging
 
 from tornado import web
@@ -165,14 +163,14 @@ List workers
             self.write(info)
             return
 
-        if self.worker_cache and not refresh and\
-                workername in self.worker_cache:
-            self.write({workername: self.worker_cache[workername]})
+        if self.application.workers and not refresh and\
+                workername in self.application.workers:
+            self.write({workername: self.application.workers[workername]})
             return
 
         if refresh:
             try:
-                yield self.update_cache(workername=workername)
+                yield self.application.update_workers(workername=workername)
             except Exception as e:
                 msg = "Failed to update workers: %s" % e
                 logger.error(msg)
@@ -182,6 +180,6 @@ List workers
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
         if workername:
-            self.write({workername: self.worker_cache[workername]})
+            self.write({workername: self.application.workers[workername]})
         else:
-            self.write(self.worker_cache)
+            self.write(self.application.workers)

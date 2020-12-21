@@ -17,7 +17,6 @@ EXPOSE 5555
 ENV FLOWER_DATA_DIR /data
 ENV PYTHONPATH ${FLOWER_DATA_DIR}
 
-VOLUME $FLOWER_DATA_DIR
 WORKDIR $FLOWER_DATA_DIR
 
 # Add a user with an explicit UID/GID and create necessary directories
@@ -27,5 +26,7 @@ RUN set -eux; \
     mkdir -p "$FLOWER_DATA_DIR"; \
     chown flower:flower "$FLOWER_DATA_DIR"
 USER flower
+
+VOLUME $FLOWER_DATA_DIR
 
 ENTRYPOINT ["flower"]

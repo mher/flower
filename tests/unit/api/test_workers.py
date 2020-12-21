@@ -3,6 +3,7 @@ import json
 import mock
 
 from flower.api.control import ControlHandler
+from flower.inspector import Inspector
 
 from tests.unit import AsyncHTTPTestCase
 
@@ -19,7 +20,7 @@ empty_inspect_response = {
 }
 
 
-@mock.patch.object(ControlHandler, 'INSPECT_METHODS',
+@mock.patch.object(Inspector, 'methods',
                    new_callable=mock.PropertyMock,
                    return_value=['inspect_method'])
 class ListWorkersTest(AsyncHTTPTestCase):
@@ -45,7 +46,7 @@ class ListWorkersTest(AsyncHTTPTestCase):
         self.assertIn('timestamp', body['celery@worker1'])
         self.assertEqual(
             inspect_response['celery@worker1'],
-            ControlHandler.worker_cache['celery@worker1']['inspect_method']
+            self._app.workers['celery@worker1']['inspect_method']
         )
 
     def test_refresh_cache_with_empty_response(self, m_inspect):
@@ -70,5 +71,5 @@ class ListWorkersTest(AsyncHTTPTestCase):
         self.assertIn('timestamp', body['celery@worker1'])
         self.assertEqual(
             [],
-            ControlHandler.worker_cache['celery@worker1']['inspect_method']
+            self._app.workers['celery@worker1']['inspect_method']
         )

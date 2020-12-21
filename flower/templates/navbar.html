@@ -12,7 +12,6 @@
             <li {% if active_tab == "dashboard" %}class="active"{% end %}><a href="{{ reverse_url('dashboard') }}">Dashboard</a></li>
             <li {% if active_tab == "tasks" %}class="active"{% end %}><a href="{{ reverse_url('tasks') }}">Tasks</a></li>
             <li {% if active_tab == "broker" %}class="active"{% end %}><a href="{{ reverse_url('broker') }}">Broker</a></li>
-            <li {% if active_tab == "monitor" %}class="active"{% end %}><a href="{{ reverse_url('monitor') }}">Monitor</a></li>
         </ul>
         <ul class="nav pull-right">
           <li><a href="https://flower.readthedocs.io" target="_blank">Docs</a></li>

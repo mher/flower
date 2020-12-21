@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
 from flower.command import FlowerCommand
 from flower.utils import bugreport
 
