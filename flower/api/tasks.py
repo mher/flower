@@ -525,6 +525,7 @@ List tasks
         sort_by = self.get_argument('sort_by', None)
 
         limit = limit and int(limit)
+        offset = max(offset, 0)
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
