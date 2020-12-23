@@ -226,7 +226,8 @@ class RedisSsl(Redis):
     def _get_redis_client_args(self):
         client_args = super(RedisSsl, self)._get_redis_client_args()
         client_args['ssl'] = True
-        client_args.update(self.broker_use_ssl)
+        if isinstance(self.broker_use_ssl, dict):
+            client_args.update(self.broker_use_ssl)
         return client_args
 
 
