@@ -415,7 +415,7 @@ Return length of all active queues
 
         if not queue_names:
             queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
-                        set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
+                set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
 
         queues = yield broker.queues(sorted(queue_names))
         self.write({'active_queues': queues})
@@ -516,7 +516,7 @@ List tasks
         """
         app = self.application
         limit = self.get_argument('limit', None)
-        offset = self.get_argument('offset', None)
+        offset = self.get_argument('offset', default=0, type=int)
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
@@ -525,7 +525,6 @@ List tasks
         sort_by = self.get_argument('sort_by', None)
 
         limit = limit and int(limit)
-        offset = offset and max(0, int(offset))
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
@@ -539,7 +538,7 @@ List tasks
             task = tasks.as_dict(task)
             worker = task.pop('worker', None)
             if worker is not None:
-              task['worker'] = worker.hostname
+                task['worker'] = worker.hostname
             result.append((task_id, task))
         self.write(OrderedDict(result))
 
