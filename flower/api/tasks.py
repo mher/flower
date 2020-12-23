@@ -25,6 +25,8 @@ logger = logging.getLogger(__name__)
 
 
 class BaseTaskHandler(BaseHandler):
+    DATE_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
+
     def get_task_args(self):
         try:
             body = self.request.body
@@ -156,7 +158,6 @@ Execute a task by name and wait results
 
 
 class TaskAsyncApply(BaseTaskHandler):
-    DATE_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
     @web.authenticated
     def post(self, taskname):

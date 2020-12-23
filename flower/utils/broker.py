@@ -99,12 +99,14 @@ class RedisBase(BrokerBase):
 
     def __init__(self, broker_url, *args, **kwargs):
         super(RedisBase, self).__init__(broker_url)
+        self.redis = None
 
         if not redis:
             raise ImportError('redis library is required')
 
         broker_options = kwargs.get('broker_options', {})
-        self.priority_steps = broker_options.get('priority_steps', self.DEFAULT_PRIORITY_STEPS)
+        self.priority_steps = broker_options.get(
+            'priority_steps', self.DEFAULT_PRIORITY_STEPS)
         self.sep = broker_options.get('sep', self.DEFAULT_SEP)
 
     def _q_for_pri(self, queue, pri):
@@ -116,7 +118,8 @@ class RedisBase(BrokerBase):
     def queues(self, names):
         queue_stats = []
         for name in names:
-            priority_names = [self._q_for_pri(name, pri) for pri in self.priority_steps]
+            priority_names = [self._q_for_pri(
+                name, pri) for pri in self.priority_steps]
             queue_stats.append({
                 'name': name,
                 'messages': sum([self.redis.llen(x) for x in priority_names])
@@ -187,13 +190,14 @@ class RedisSentinel(RedisBase):
         except KeyError:
             raise ValueError(
                 'master_name is required for Sentinel broker'
-                )
+            )
         return master_name
 
     def _get_redis_client(self):
         connection_kwargs = {'password': self.password}
         # TODO: get all sentinel hosts from Celery App config and use them to initialize Sentinel
-        sentinel = redis.sentinel.Sentinel([(self.host, self.port)], **connection_kwargs)
+        sentinel = redis.sentinel.Sentinel(
+            [(self.host, self.port)], **connection_kwargs)
         redis_client = sentinel.master_for(self.master_name)
         return redis_client
 
@@ -241,6 +245,9 @@ class Broker(object):
             return RedisSentinel(broker_url, *args, **kwargs)
         else:
             raise NotImplementedError
+
+    def queues(self, names):
+        raise NotImplementedError
 
 
 @gen.coroutine
