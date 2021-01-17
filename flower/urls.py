@@ -68,6 +68,7 @@ handlers = [
     (r"/api/task/events/task-custom/(.*)", events.TaskCustom),
     # Metrics
     (r"/metrics", monitor.Metrics),
+    (r"/healthcheck", monitor.Healthcheck),
     # Static
     (r"/static/(.*)", StaticFileHandler,
      {"path": settings['static_path']}),

@@ -18,12 +18,13 @@ class BaseHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', ' PUT, DELETE, OPTIONS')
+        self.set_header('Access-Control-Allow-Methods',
+                        ' PUT, DELETE, OPTIONS')
 
     def options(self):
         self.set_status(204)
         self.finish()
-        
+
     def render(self, *args, **kwargs):
         app_options = self.application.options
         functions = inspect.getmembers(template, inspect.isfunction)
@@ -87,6 +88,8 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def get_argument(self, name, default=[], strip=True, type=None):
         arg = super(BaseHandler, self).get_argument(name, default, strip)
+        if arg and isinstance(arg, str):
+            arg = tornado.escape.xhtml_escape(arg)
         if type is not None:
             try:
                 if type is bool:

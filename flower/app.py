@@ -61,6 +61,7 @@ class Flower(tornado.web.Application):
             self.capp,
             db=self.options.db,
             persistent=self.options.persistent,
+            state_save_interval=self.options.state_save_interval,
             enable_events=self.options.enable_events,
             io_loop=self.io_loop,
             max_workers_in_memory=self.options.max_workers,
@@ -87,9 +88,9 @@ class Flower(tornado.web.Application):
     def stop(self):
         if self.started:
             self.events.stop()
-            logging.debug("Stoppping executors...")
+            logging.debug("Stopping executors...")
             self.executor.shutdown(wait=False)
-            logging.debug("Stoppping event loop...")
+            logging.debug("Stopping event loop...")
             self.io_loop.stop()
             self.started = False
 

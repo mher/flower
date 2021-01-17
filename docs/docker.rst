@@ -14,5 +14,5 @@ container and open http://localhost:49555 ::
     $ docker run -d -p=49555:5555 --rm --name flower -e CELERY_BROKER_URL=redis://0.0.0.0:6379/0 flower flower --port=5555
 
 For more information about running with Docker see
-http://docs.docker.io/en/latest/
+https://docs.docker.com/
 
