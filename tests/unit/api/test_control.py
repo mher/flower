@@ -128,6 +128,18 @@ class WorkerControlTests(AsyncHTTPTestCase):
         celery.control.rate_limit.assert_called_once_with(
             'celery.map', '11/m', destination=['foo'], reply=True)
 
+    def test_param_escape(self):
+        app = self._app.capp
+        app.control.broadcast = MagicMock(
+            return_value=[{'test': {'ok': ''}}])
+        r = self.post('/api/worker/queue/add-consumer/test',
+                      body={'queue': 'foo&bar'})
+        self.assertEqual(200, r.code)
+        app.control.broadcast.assert_called_once_with(
+            'add_consumer',
+            reply=True, destination=['test'],
+            arguments={'queue': 'foo&amp;bar'})
+
 
 class TaskControlTests(AsyncHTTPTestCase):
     def test_revoke(self):
@@ -151,7 +163,8 @@ class TaskControlTests(AsyncHTTPTestCase):
     def test_terminate_signal(self):
         celery = self._app.capp
         celery.control.revoke = MagicMock()
-        r = self.post('/api/task/revoke/test', body={'terminate': True, 'signal': 'SIGUSR1'})
+        r = self.post('/api/task/revoke/test',
+                      body={'terminate': True, 'signal': 'SIGUSR1'})
         self.assertEqual(200, r.code)
         celery.control.revoke.assert_called_once_with('test',
                                                       terminate=True,

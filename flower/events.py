@@ -69,7 +69,8 @@ class Events(threading.Thread):
     events_enable_interval = 5000
 
     def __init__(self, capp, db=None, persistent=False,
-                 enable_events=True, io_loop=None, **kwargs):
+                 enable_events=True, io_loop=None, state_save_interval=0,
+                 **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
@@ -80,6 +81,7 @@ class Events(threading.Thread):
         self.persistent = persistent
         self.enable_events = enable_events
         self.state = None
+        self.state_save_timer = None
 
         if self.persistent:
             logger.debug("Loading state from '%s'...", self.db)
@@ -87,6 +89,10 @@ class Events(threading.Thread):
             if state:
                 self.state = state['events']
             state.close()
+
+            if state_save_interval:
+                self.state_save_timer = PeriodicCallback(self.save_state,
+                                                         state_save_interval)
 
         if not self.state:
             self.state = EventsState(**kwargs)
@@ -100,16 +106,21 @@ class Events(threading.Thread):
             logger.debug("Starting enable events timer...")
             self.timer.start()
 
+        if self.state_save_timer:
+            logger.debug("Starting state save timer...")
+            self.state_save_timer.start()
+
     def stop(self):
         if self.enable_events:
             logger.debug("Stopping enable events timer...")
             self.timer.stop()
 
+        if self.state_save_timer:
+            logger.debug("Stopping state save timer...")
+            self.state_save_timer.stop()
+
         if self.persistent:
-            logger.debug("Saving state to '%s'...", self.db)
-            state = shelve.open(self.db)
-            state['events'] = self.state
-            state.close()
+            self.save_state()
 
     def run(self):
         try_interval = 1
@@ -136,6 +147,12 @@ class Events(threading.Thread):
                              e, try_interval)
                 logger.debug(e, exc_info=True)
                 time.sleep(try_interval)
+
+    def save_state(self):
+        logger.debug("Saving state to '%s'...", self.db)
+        state = shelve.open(self.db)
+        state['events'] = self.state
+        state.close()
 
     def on_enable_events(self):
         # Periodically enable events for workers

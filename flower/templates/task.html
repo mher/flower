@@ -69,7 +69,7 @@
                 <tr>
                   <td>{{ humanize(name) }}</td>
                   <td>
-                    {% if name in ['sent', 'received', 'started', 'succeeded', 'retried', 'timestamp', 'failed'] %}
+                    {% if name in ['sent', 'received', 'started', 'succeeded', 'retried', 'timestamp', 'failed', 'revoked'] %}
                     {{ humanize(getattr(task, name, None), type='time') }}
                     {% elif name == 'worker' %}
                     <a
