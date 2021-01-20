@@ -7,7 +7,6 @@ from ..views import BaseHandler
 
 
 class Metrics(BaseHandler):
-    @web.authenticated
     @gen.coroutine
     def get(self):
         self.write(prometheus_client.generate_latest())
