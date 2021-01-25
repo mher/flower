@@ -28,11 +28,11 @@ ENV_VAR_PREFIX = 'FLOWER_'
                context_settings={
                    'ignore_unknown_options': True
                })
-@click.argument("torando_argv", nargs=-1, type=click.UNPROCESSED)
+@click.argument("tornado_argv", nargs=-1, type=click.UNPROCESSED)
 @click.pass_context
-def flower(ctx, torando_argv):
+def flower(ctx, tornado_argv):
     apply_env_options()
-    apply_options(sys.argv[0], torando_argv)
+    apply_options(sys.argv[0], tornado_argv)
 
     extract_settings()
     setup_logging()
