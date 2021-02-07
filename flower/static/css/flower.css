@@ -90,6 +90,9 @@
 .panel>.table, .panel>.table-responsive>.table {
       margin-bottom: 0;
 }
+.progress {
+  margin-bottom: 5px; !important
+}
 
 .filter-column {
   width: 50%;

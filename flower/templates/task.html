@@ -56,6 +56,15 @@
                 <td>Result</td>
                 <td>{{ getattr(task, 'result', '') }}</td>
               </tr>
+              <tr id="task-progress-bar-container" class="hidden">
+                <td>Progress</td>
+                <td>
+                  <div class="progress progress-striped active">
+                    <div id="task-progress-bar" class="bar" style="width: 0%;"></div>
+                  </div>
+                  <div id="task-progress-bar-label" class="pagination-centered"></div>
+                </td>
+              </tr>
               </tbody>
             </table>
           </div>

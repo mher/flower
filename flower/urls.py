@@ -66,6 +66,7 @@ handlers = [
     (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
     (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
     (r"/api/task/events/task-custom/(.*)", events.TaskCustom),
+    (r"/api/task/events/task-progress/(.*)", events.TaskProgress),
     # Metrics
     (r"/metrics", monitor.Metrics),
     (r"/healthcheck", monitor.Healthcheck),

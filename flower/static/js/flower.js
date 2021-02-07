@@ -658,6 +658,39 @@ var flower = (function () {
 
     });
 
+    $(document).ready(function () {
+        if (!active_page('/task/')) {
+            return;
+        }
+
+        var taskid = $('#taskid').text();
+
+        var location = window.location;
+        var api_uri;
+
+        if (location.protocol === 'https:') {
+            api_uri = 'wss:';
+        } else {
+            api_uri = 'ws:';
+        }
+
+        api_uri += '//' + location.host + '/';
+        api_uri += 'api/task/events/task-progress/' + taskid;
+
+        var ws = new WebSocket(api_uri);
+        ws.onmessage = function(event) {
+            var data = JSON.parse(event.data);
+
+            var current = data.current;
+            var total = data.total;
+
+            $('#task-progress-bar').width(Math.round(current / total * 100).toString() + '%');
+            $('#task-progress-bar-label').text(current.toString() + '/' + total.toString());
+            $('#task-progress-bar-container').removeClass('hidden');
+        }
+
+    });
+
     return {
         on_alert_close: on_alert_close,
         on_worker_refresh: on_worker_refresh,
