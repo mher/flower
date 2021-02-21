@@ -69,6 +69,8 @@ Launch using docker: ::
 
     $ docker run -p 5555:5555 mher/flower
 
+To skip Docker health check add `-e FLOWER_SKIP_BROKER_READY=1` to set environment variable. To let start without checking nodes add `-e FLOWER_SKIP_NODE_CHECK=1`.
+
 Launch with unix socket file: ::
 
     $ flower --unix-socket=/tmp/flower.sock

@@ -19,14 +19,16 @@ ENV PYTHONPATH ${FLOWER_DATA_DIR}
 
 WORKDIR $FLOWER_DATA_DIR
 
+COPY ./wait-for-broker.sh .
+
 # Add a user with an explicit UID/GID and create necessary directories
 RUN set -eux; \
     addgroup -g 1000 flower; \
     adduser -u 1000 -G flower flower -D; \
     mkdir -p "$FLOWER_DATA_DIR"; \
-    chown flower:flower "$FLOWER_DATA_DIR"
+    chown -R flower:flower "$FLOWER_DATA_DIR"
 USER flower
 
 VOLUME $FLOWER_DATA_DIR
 
-ENTRYPOINT ["flower"]
+ENTRYPOINT ["sh", "./wait-for-broker.sh", "flower"]
