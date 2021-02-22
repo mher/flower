@@ -16,3 +16,4 @@ container and open http://localhost:49555 ::
 For more information about running with Docker see
 https://docs.docker.com/
 
+Flower starts after checking broker and nodes (workers) availability. If you want Flower to start after the broker is ready and don't want to check nodes, add `-e FLOWER_SKIP_NODE_CHECK=1` environment variable. If you want to completely skip checks add `-e FLOWER_SKIP_BROKER_READY=1`.
