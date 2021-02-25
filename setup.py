@@ -62,5 +62,8 @@ setup(
         'console_scripts': [
             'flower = flower.__main__:main',
         ],
+        'celery.commands': [
+            'flower = flower.command:flower',
+        ],
     },
 )

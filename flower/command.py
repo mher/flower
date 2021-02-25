@@ -31,6 +31,7 @@ ENV_VAR_PREFIX = 'FLOWER_'
 @click.argument("tornado_argv", nargs=-1, type=click.UNPROCESSED)
 @click.pass_context
 def flower(ctx, tornado_argv):
+    """Web based tool for monitoring and administrating Celery clusters."""
     apply_env_options()
     apply_options(sys.argv[0], tornado_argv)
 
