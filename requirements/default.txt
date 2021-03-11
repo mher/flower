@@ -1,6 +1,6 @@
 celery>=4.3.0,<5.0.0; python_version>="3.7"
 vine==1.3.0
 tornado>=5.0.0,<7.0.0
-prometheus_client==0.8.0
+prometheus_client>=0.8.0
 humanize
 pytz
