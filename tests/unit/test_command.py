@@ -4,7 +4,7 @@ import tempfile
 import unittest
 import subprocess
 
-from flower.command import FlowerCommand
+from flower.command import apply_options
 from tornado.options import options
 from tests.unit import AsyncHTTPTestCase
 
@@ -12,35 +12,30 @@ from tests.unit import AsyncHTTPTestCase
 class TestFlowerCommand(AsyncHTTPTestCase):
     def test_port(self):
         with self.mock_option('port', 5555):
-            command = FlowerCommand()
-            command.apply_options('flower', argv=['--port=123'])
+            apply_options('flower', argv=['--port=123'])
             self.assertEqual(123, options.port)
 
     def test_address(self):
         with self.mock_option('address', '127.0.0.1'):
-            command = FlowerCommand()
-            command.apply_options('flower', argv=['--address=foo'])
+            apply_options('flower', argv=['--address=foo'])
             self.assertEqual('foo', options.address)
 
 
 class TestConfOption(AsyncHTTPTestCase):
     def test_error_conf(self):
         with self.mock_option('conf', None):
-            command = FlowerCommand()
-            self.assertRaises(IOError, command.apply_options,
+            self.assertRaises(IOError, apply_options,
                               'flower', argv=['--conf=foo'])
-            self.assertRaises(IOError, command.apply_options,
+            self.assertRaises(IOError, apply_options,
                               'flower', argv=['--conf=/tmp/flower/foo'])
 
     def test_default_option(self):
-        command = FlowerCommand()
-        command.apply_options('flower', argv=[])
+        apply_options('flower', argv=[])
         self.assertEqual('flowerconfig.py', options.conf)
 
     def test_empty_conf(self):
         with self.mock_option('conf', None):
-            command = FlowerCommand()
-            command.apply_options('flower', argv=['--conf=/dev/null'])
+            apply_options('flower', argv=['--conf=/dev/null'])
             self.assertEqual('/dev/null', options.conf)
 
     def test_conf_abs(self):
@@ -48,8 +43,7 @@ class TestConfOption(AsyncHTTPTestCase):
             with self.mock_option('conf', cf.name), self.mock_option('debug', False):
                 cf.write('debug=True\n'.encode('utf-8'))
                 cf.flush()
-                command = FlowerCommand()
-                command.apply_options('flower', argv=['--conf=%s' % cf.name])
+                apply_options('flower', argv=['--conf=%s' % cf.name])
                 self.assertEqual(cf.name, options.conf)
                 self.assertTrue(options.debug)
 
@@ -58,8 +52,7 @@ class TestConfOption(AsyncHTTPTestCase):
             with self.mock_option('conf', cf.name), self.mock_option('debug', False):
                 cf.write('debug=True\n'.encode('utf-8'))
                 cf.flush()
-                command = FlowerCommand()
-                command.apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])
+                apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])
                 self.assertTrue(options.debug)
 
     @unittest.skipUnless(not sys.platform.startswith("win"), 'skip windows')

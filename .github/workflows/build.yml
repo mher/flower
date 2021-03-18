@@ -9,19 +9,11 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
-        celery-version: [4.1, 4.2, 4.3, 4.4]
+        celery-version: [5.0]
         tornado-version: [5.0, 5.1, 6.0]
         exclude:
-          - python-version: 3.7
-            celery-version: 4.1
-          - python-version: 3.7
-            celery-version: 4.2
-          - python-version: 3.8
-            celery-version: 4.1
-          - python-version: 3.8
-            celery-version: 4.2
-          - python-version: 3.8
-            celery-version: 4.3
+          - celery-version: 5.0
+            python-version: 3.9
 
     steps:
     - uses: actions/checkout@v1

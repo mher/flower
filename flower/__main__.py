@@ -1,15 +1,11 @@
-from flower.command import FlowerCommand
-from flower.utils import bugreport
+import sys
 
 
 def main():
-    try:
-        flower = FlowerCommand()
-        flower.execute_from_commandline()
-    except Exception:
-        import sys
-        print(bugreport(app=flower.app), file=sys.stderr)
-        raise
+    from celery.bin.celery import main as _main, celery
+    from flower.command import flower
+    celery.add_command(flower)
+    sys.exit(_main())
 
 
 if __name__ == "__main__":

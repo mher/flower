@@ -63,7 +63,7 @@ setup(
             'flower = flower.__main__:main',
         ],
         'celery.commands': [
-            'flower = flower.command:FlowerCommand',
+            'flower = flower.command:flower',
         ],
     },
 )
