@@ -24,6 +24,14 @@ class TestRabbitMQ(unittest.TestCase):
         self.assertEqual('user', b.username)
         self.assertEqual('pass', b.password)
 
+    def test_url_vhost_slash(self):
+        b = RabbitMQ('amqp://user:pass@host:10000//', '')
+        self.assertEqual('host', b.host)
+        self.assertEqual(10000, b.port)
+        self.assertEqual('/', b.vhost)
+        self.assertEqual('user', b.username)
+        self.assertEqual('pass', b.password)
+
     def test_url_defaults_rabbitmq(self):
         for url in ['amqp://', 'amqp://localhost']:
             b = RabbitMQ(url, '')
