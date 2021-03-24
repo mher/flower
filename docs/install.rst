@@ -18,9 +18,9 @@ Launch the server and open http://localhost:5555 ::
 
 Or, launch from Celery ::
 
-    $ celery flower -A proj --address=127.0.0.1 --port=5555
+    $ celery -A proj flower --address=127.0.0.1 --port=5555
 
 Broker URL and other configuration options can be passed through the standard Celery options ::
 
-    $ celery flower -A proj --broker=amqp://guest:guest@localhost:5672//
+    $ celery -A proj flower --broker=amqp://guest:guest@localhost:5672// --broker_api=http://guest:guest@localhost:15672/api/
 
