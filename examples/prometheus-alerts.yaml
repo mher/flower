@@ -19,7 +19,7 @@
     description: Average task failure ratio for task {{ $labels.task }} is {{ $value }}.
 
 - alert: TaskQueuingTimeTooHigh
-  expr: sum(avg_over_time(flower_task_queuing_time_seconds[15m])) by (task, worker) > 1
+  expr: sum(avg_over_time(flower_task_queuing_time_at_worker_seconds[15m])) by (task, worker) > 1
   for: 5m
   labels:
     severity: critical

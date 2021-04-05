@@ -166,7 +166,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(avg_over_time(flower_task_queuing_time_seconds[15m])) by (task, worker)",
+          "expr": "sum(avg_over_time(flower_task_queuing_time_at_worker_seconds[15m])) by (task, worker)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"

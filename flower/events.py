@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class PrometheusMetrics(object):
     events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
     runtime = Histogram('flower_task_runtime_seconds', "Task runtime", ['worker', 'task'])
-    queuing_time = Gauge('flower_task_queuing_time_seconds', "Task queueing time", ['worker', 'task'])
+    queuing_time = Gauge('flower_task_queuing_time_at_worker_seconds', "Task queueing time at celery worker", ['worker', 'task'])
     worker_online = Gauge('flower_worker_online', "Worker online status", ['worker'])
 
 
