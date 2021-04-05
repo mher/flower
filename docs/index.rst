@@ -23,6 +23,7 @@ Contents
    auth
    reverse-proxy
    docker
+   prometheus-integration
 
 Flower is Open Source and licensed under the `BSD License`_.
 

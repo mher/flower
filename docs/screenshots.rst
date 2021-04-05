@@ -21,6 +21,10 @@ Graphs:
 .. image:: screenshots/monitor.png
    :width: 100%
 
+Grafana dashboard for celery:
+.. image:: screenshots/grafana-dashboard.png
+   :width: 100%
+
 Worker info:
 
 .. image:: screenshots/pool.png

@@ -6,11 +6,8 @@ import collections
 
 from functools import partial
 
-import celery
-
 from tornado.ioloop import IOLoop
 from tornado.ioloop import PeriodicCallback
-from tornado.concurrent import run_on_executor
 
 from celery.events import EventReceiver
 from celery.events.state import State
@@ -18,9 +15,8 @@ from celery.events.state import State
 from . import api
 
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor
 
-from prometheus_client import Counter as PrometheusCounter, Histogram
+from prometheus_client import Counter as PrometheusCounter, Histogram, Gauge
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +24,8 @@ logger = logging.getLogger(__name__)
 class PrometheusMetrics(object):
     events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
     runtime = Histogram('flower_task_runtime_seconds', "Task runtime", ['worker', 'task'])
+    queuing_time = Gauge('flower_task_queuing_time_at_worker_seconds', "Task queueing time at celery worker", ['worker', 'task'])
+    worker_online = Gauge('flower_worker_online', "Worker online status", ['worker'])
 
 
 class EventsState(State):
@@ -39,6 +37,9 @@ class EventsState(State):
         self.metrics = PrometheusMetrics()
 
     def event(self, event):
+        # Save the event
+        super(EventsState, self).event(event)
+
         worker_name = event['hostname']
         event_type = event['type']
 
@@ -46,23 +47,35 @@ class EventsState(State):
 
         if event_type.startswith('task-'):
             task_id = event['uuid']
+            task = self.tasks.get(task_id)
             task_name = event.get('name', '')
             if not task_name and task_id in self.tasks:
-                task_name = self.tasks[task_id].name or ''
+                task_name = task.name or ''
             self.metrics.events.labels(worker_name, event_type, task_name).inc()
 
             runtime = event.get('runtime', 0)
             if runtime:
                 self.metrics.runtime.labels(worker_name, task_name).observe(runtime)
 
+            task_started = task.started
+            task_received = task.received
+            if event_type == 'task-started' and task_started and task_received:
+                self.metrics.queuing_time.labels(worker_name, task_name).set(task_started - task_received)
+
+        if event_type == 'worker-online':
+            self.metrics.worker_online.labels(worker_name).set(1)
+
+        if event_type == 'worker-heartbeat':
+            self.metrics.worker_online.labels(worker_name).set(1)
+
+        if event_type == 'worker-offline':
+            self.metrics.worker_online.labels(worker_name).set(0)
+
         # Send event to api subscribers (via websockets)
         classname = api.events.getClassName(event_type)
         cls = getattr(api.events, classname, None)
         if cls:
             cls.send_message(event)
-
-        # Save the event
-        super(EventsState, self).event(event)
 
 
 class Events(threading.Thread):
