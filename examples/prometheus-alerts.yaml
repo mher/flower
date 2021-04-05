@@ -1,0 +1,29 @@
+- alert: CeleryWorkerOffline
+  expr: flower_worker_online == 0
+  for: 2m
+  labels:
+    severity: critical
+    context: celery-worker
+  annotations:
+    summary: Celery worker offline
+    description: Celery worker {{ $labels.worker }} has been offline for more than 2 minutes.
+
+- alert: TaskFailureRatioTooHigh
+  expr: count(flower_events_total{type="task-failed"}) by (task) / (count(flower_events_total{type="task-succeeded"}) by (task) + count(flower_events_total{type="task-failed"}) by (task)) * 100
+  for: 5m
+  labels:
+    severity: critical
+    context: celery-task
+  annotations:
+    summary: Task Failure Ratio Too High.
+    description: Task failure ratio for task {{ $labels.task }} is {{ $value }}.
+
+- alert: TaskQueuingTimeTooHigh
+  expr: avg_over_time(flower_task_queuing_time_seconds[15m]) > 1
+  for: 5m
+  labels:
+    severity: critical
+    context: celery-task
+  annotations:
+    summary: Average Task Queuing Time Too High.
+    description: Average task queuing time at worker for task {{ $labels.task }} and worker {{ $labels.worker }} over last 15m is {{ $value }}.
