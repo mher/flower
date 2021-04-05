@@ -73,3 +73,14 @@ We have the following labels available:
 * **type** - task event type, i.e. ``task-started``, ``task-succeeded``. Note that worker related events **will not be counted**.
   For more info on task event types see: `task events in celery <https://docs.celeryproject.org/en/stable/userguide/monitoring.html#task-events>`_.
 * **worker** - celery worker name, i.e ``celery@<your computer name>``.
+
+Example Prometheus Alerts
+-------------------------
+
+See example `Prometheus alerts <https://github.com/mher/flower/tree/master/examples/prometheus-alerts.yaml>`_.
+
+
+Example Grafana Dashboard
+-------------------------
+
+See example `Grafana dashboard <https://github.com/mher/flower/tree/master/examples/celery-monitoring-grafana-dashboard.json>`_.
