@@ -36,7 +36,7 @@ class PrometheusTests(AsyncHTTPTestCase):
         self.assertTrue('task-succeeded' in events)
 
         self.assertTrue(f'flower_worker_online{{worker="{worker_name}"}} 1.0' in metrics)
-        self.assertTrue(f'flower_task_queuing_time_seconds{{task="{task_name}",worker="{worker_name}"}} ' in metrics)
+        self.assertTrue(f'flower_task_queuing_time_at_worker_seconds{{task="{task_name}",worker="{worker_name}"}} ' in metrics)
 
     def test_worker_online_metric_worker_is_offline(self):
         state = EventsState()
