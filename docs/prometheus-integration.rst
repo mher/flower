@@ -41,7 +41,7 @@ and alter the ``scrape_configs`` definition to be:
         static_configs:
           - targets: ['localhost:5555']
 
-You can also just point Prometheus at the example ``prometheus.yml`` file in the root of the `Flower repository <https://github.com/mher/flower>`
+You can also just point Prometheus at the example ``prometheus.yml`` file in the root of the `Flower repository <https://github.com/mher/flower/prometheus.yml>`
 when you start it from the command line (note that you would have to set ``flower`` to point at ``localhost`` in your ``etc/hosts`` config for the DNS to resolve correctly)::
 
     ./prometheus --config.file=prometheus.yml
