@@ -78,9 +78,13 @@ Example Prometheus Alerts
 -------------------------
 
 See example `Prometheus alerts <https://github.com/mher/flower/tree/master/examples/prometheus-alerts.yaml>`_.
+Add the rules to your ``alertmanager.yml`` config as in the `alert manager's documentation <https://prometheus.io/docs/alerting/latest/configuration/>`_.
 
 
 Example Grafana Dashboard
 -------------------------
 
 See example `Grafana dashboard <https://github.com/mher/flower/tree/master/examples/celery-monitoring-grafana-dashboard.json>`_.
+You can import it easily in Grafana.
+Hover over the + button in the side bar menu -> Import -> Upload JSON file.
+The dashboard should give you a nice starting point for monitoring of your celery cluster.
