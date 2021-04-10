@@ -24,8 +24,15 @@ logger = logging.getLogger(__name__)
 class PrometheusMetrics(object):
     events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
     runtime = Histogram('flower_task_runtime_seconds', "Task runtime", ['worker', 'task'])
-    queuing_time = Gauge('flower_task_queuing_time_at_worker_seconds', "Task queueing time at celery worker", ['worker', 'task'])
+    queuing_time = Gauge(
+        'flower_task_queuing_time_at_worker_seconds', "Task queueing time at celery worker", ['worker', 'task']
+    )
     worker_online = Gauge('flower_worker_online', "Worker online status", ['worker'])
+    worker_number_of_currently_executing_tasks = Gauge(
+        'flower_worker_number_of_currently_executing_tasks',
+        "Number of tasks currently executing at this worker",
+        ['worker']
+    )
 
 
 class EventsState(State):
@@ -67,6 +74,7 @@ class EventsState(State):
 
         if event_type == 'worker-heartbeat':
             self.metrics.worker_online.labels(worker_name).set(1)
+            self.metrics.worker_number_of_currently_executing_tasks.labels(worker_name).set(event['active'])
 
         if event_type == 'worker-offline':
             self.metrics.worker_online.labels(worker_name).set(0)
