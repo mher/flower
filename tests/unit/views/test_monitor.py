@@ -21,7 +21,7 @@ class PrometheusTests(AsyncHTTPTestCase):
         worker_name = 'worker1'
         task_name = 'task1'
         state.get_or_create_worker(worker_name)
-        events = [Event('worker-online', hostname=worker_name)]
+        events = [Event('worker-online', hostname=worker_name), Event('worker-heartbeat', hostname=worker_name, active=1)]
         events += task_succeeded_events(worker=worker_name, name=task_name, id='123')
 
         task_received = time.time()
@@ -42,11 +42,12 @@ class PrometheusTests(AsyncHTTPTestCase):
         self.assertTrue('task-received' in events)
         self.assertTrue('task-started' in events)
         self.assertTrue('task-succeeded' in events)
-
-        self.assertTrue(f'flower_worker_online{{worker="{worker_name}"}} 1.0' in metrics)
         self.assertTrue(
             f'flower_task_queuing_time_at_worker_seconds{{task="{task_name}",worker="{worker_name}"}} 3.0' in metrics
         )
+
+        self.assertTrue(f'flower_worker_online{{worker="{worker_name}"}} 1.0' in metrics)
+        self.assertTrue(f'flower_worker_number_of_currently_executing_tasks{{worker="{worker_name}"}} 1.0' in metrics)
 
     def test_does_not_compute_queuing_time_if_task_has_eta(self):
         state = EventsState()
