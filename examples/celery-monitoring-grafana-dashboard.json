@@ -25,7 +25,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
-      "description": "This panel shows status of celery workers.",
+      "description": "This panel shows status of celery workers. 1 = online, 0 = offline.",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -33,8 +33,8 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 10,
-        "w": 24,
+        "h": 8,
+        "w": 12,
         "x": 0,
         "y": 0
       },
@@ -95,7 +95,7 @@
         {
           "$$hashKey": "object:150",
           "format": "short",
-          "label": "Celery Worker Status",
+          "label": "",
           "logBase": 1,
           "max": "1",
           "min": "0",
@@ -104,6 +104,104 @@
         {
           "$$hashKey": "object:151",
           "decimals": null,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "description": "This panel shows number of tasks currently executing at worker.",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 9,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.5.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "flower_worker_number_of_currently_executing_tasks",
+          "interval": "",
+          "legendFormat": "{{worker}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Number of Tasks Currently Executing at Worker",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:79",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:80",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -134,7 +232,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 6,
@@ -194,7 +292,7 @@
         {
           "$$hashKey": "object:337",
           "format": "s",
-          "label": "Average Task Queuing Time at Worker",
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -229,10 +327,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 9,
-        "w": 24,
+        "h": 7,
+        "w": 12,
         "x": 0,
-        "y": 19
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 2,
@@ -327,10 +425,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 9,
-        "w": 24,
-        "x": 0,
-        "y": 28
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 17
       },
       "hiddenSeries": false,
       "id": 7,
@@ -431,5 +529,5 @@
   "timezone": "",
   "title": "Celery Monitoring",
   "uid": "3OBI1flGz",
-  "version": 2
+  "version": 6
 }
