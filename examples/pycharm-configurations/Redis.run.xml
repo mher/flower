@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Redis" type="docker-deploy" factoryName="docker-image" server-name="Docker">
+    <deployment type="docker-image">
+      <settings>
+        <option name="imageTag" value="redis" />
+        <option name="command" value="" />
+        <option name="containerName" value="redis" />
+        <option name="entrypoint" value="" />
+        <option name="commandLineOptions" value="-d -p 6379:6379" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>

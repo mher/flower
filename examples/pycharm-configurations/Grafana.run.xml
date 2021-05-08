@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Grafana" type="docker-deploy" factoryName="docker-image" server-name="Docker">
+    <deployment type="docker-image">
+      <settings>
+        <option name="imageTag" value="grafana/grafana" />
+        <option name="command" value="" />
+        <option name="containerName" value="Grafana" />
+        <option name="entrypoint" value="" />
+        <option name="commandLineOptions" value="-d -p 3000:3000 --network=host -v grafana-storage:/var/lib/grafana" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>
