@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Prometheus" type="docker-deploy" factoryName="docker-image" server-name="Docker">
+    <deployment type="docker-image">
+      <settings>
+        <option name="imageTag" value="prom/prometheus" />
+        <option name="command" value="" />
+        <option name="containerName" value="Prometheus" />
+        <option name="entrypoint" value="" />
+        <option name="commandLineOptions" value="-p 9090:9090 -v $PROJECT_DIR$/prometheus.yml:/etc/prometheus/prometheus.yml --network=host" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>
