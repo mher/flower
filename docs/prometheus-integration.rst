@@ -177,7 +177,7 @@ Now go to `localhost:9090` and check that Prometheus is running.
 If everything so far was set up and started correctly, you should be able to see metrics provided by Flower in your
 Prometheus's GUI. Go to `Graph` tab and start typing `flower` - the autocomplete should show you all available metrics.
 
-.. image:: docs/screenshots/flower-metrics-in-prometheus.png
+.. image:: screenshots/flower-metrics-in-prometheus.png
    :width: 100%
 
 Start Grafana
@@ -198,24 +198,24 @@ Add Prometheus As a Data Source In Grafana
 
 Click `Configuration` (settings icon) in the left side-bar. Then the blue `Add data source` button.
 
-.. image:: docs/screenshots/grafana-add-data-source.png
+.. image:: screenshots/grafana-add-data-source.png
    :width: 100%
 
 Search for Prometheus data source and click it (it should be at the top).
 
-.. image:: docs/screenshots/grafana-add-prometheus-data-source.png
+.. image:: screenshots/grafana-add-prometheus-data-source.png
    :width: 100%
 
 Once in Prometheus data source configuration, use all defaults and enter the HTTP/URL parameter as below (which is the placeholder by the way)::
 
     http://localhost:9090
 
-.. image:: docs/screenshots/grafana-configure-prometheus-data-source.png
+.. image:: screenshots/grafana-configure-prometheus-data-source.png
    :width: 100%
 
 Scroll down and click `Save & Test`, if all is good a green banner will pop up saying `Data source is working`
 
-.. image:: docs/screenshots/grafana-test-prometheus-data-source.png
+.. image:: screenshots/grafana-test-prometheus-data-source.png
    :width: 100%
 
 
@@ -226,17 +226,17 @@ Download `Grafana dashboard <https://github.com/mher/flower/tree/master/examples
 
 Hover over the `+` icon in the left side-bar and click `Import` button.
 
-.. image:: docs/screenshots/grafana-import-dashboard.png
+.. image:: screenshots/grafana-import-dashboard.png
    :width: 30%
 
 Click `Upload JSON file` button and select the `celery-monitoring-grafana-dashboard.json` you have just downloaded.
 
-.. image:: docs/screenshots/grafana-import-celery-monitoring-dashboard.png
+.. image:: screenshots/grafana-import-celery-monitoring-dashboard.png
    :width: 100%
 
 Click `Import` to finish the process.
 
 You should see a dashboard as on the image below. Congratulations!
 
-.. image:: docs/screenshots/grafana-dashboard.png
+.. image:: screenshots/grafana-dashboard.png
    :width: 100%
