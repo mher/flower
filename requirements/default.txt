@@ -1,4 +1,4 @@
-celery>=5.0.0
+celery>=5.0.5
 tornado>=5.0.0,<7.0.0
 prometheus_client>=0.8.0
 humanize
