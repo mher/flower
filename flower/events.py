@@ -74,7 +74,10 @@ class EventsState(State):
 
         if event_type == 'worker-heartbeat':
             self.metrics.worker_online.labels(worker_name).set(1)
-            self.metrics.worker_number_of_currently_executing_tasks.labels(worker_name).set(event['active'])
+
+            num_executing_tasks = event.get('active')
+            if num_executing_tasks is not None:
+                self.metrics.worker_number_of_currently_executing_tasks.labels(worker_name).set(num_executing_tasks)
 
         if event_type == 'worker-offline':
             self.metrics.worker_online.labels(worker_name).set(0)
