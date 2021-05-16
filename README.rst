@@ -57,13 +57,33 @@ Development version: ::
 Usage
 -----
 
-Launch the server and open http://localhost:5555: ::
+**Important** Please note that from version 1.0.1 Flower supports Celery 5.
+This is a non-backwards compatible change, same as Celery 5 is not backwards compatible with the previous way of using
+their commands.
 
-    $ flower --port=5555
+With this comes the new way of launching
+`celery command with a subcommand <https://docs.celeryproject.org/en/stable/reference/cli.html#celery>`_
 
-Launch from celery: ::
+The key takeaway here is that the Celery app's arguments have to be specified after the `celery` command and Flower's
+arguments have to be specified after the `flower` sub-command.
 
-    $ celery flower -A proj --address=127.0.0.1 --port=5555
+This is the template to follow::
+
+    celery [OPTIONS] COMMAND [ARGS]
+
+Core Celery args that you may want to set::
+
+    -A, --app
+    -b, --broker
+    --result-backend
+
+Launch the flower server at specified port other than default 5555 (open http://localhost:5566): ::
+
+    $ celery flower --port=5566
+
+Specify address and port for Flower: ::
+
+    $ celery -A proj flower  --address=127.0.0.1 --port=5555
 
 Launch using docker: ::
 
@@ -71,11 +91,11 @@ Launch using docker: ::
 
 Launch with unix socket file: ::
 
-    $ flower --unix-socket=/tmp/flower.sock
+    $ celery flower --unix-socket=/tmp/flower.sock
 
-Broker URL and other configuration options can be passed through the standard Celery options: ::
+Broker URL and other configuration options can be passed through the standard Celery options (notice that they are after celery command and before flower sub-command: ::
 
-    $ celery flower -A proj --broker=amqp://guest:guest@localhost:5672//
+    $ celery -A proj --broker=amqp://guest:guest@localhost:5672// flower
 
 API
 ---
