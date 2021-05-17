@@ -52,6 +52,8 @@ class Flower(tornado.web.Application):
         self.ssl_options = kwargs.get('ssl_options', None)
 
         self.capp = capp or celery.Celery()
+        self.capp.loader.import_default_modules()
+
         self.executor = self.pool_executor_cls(max_workers=self.max_workers)
         self.io_loop.set_default_executor(self.executor)
 

@@ -39,7 +39,6 @@ def flower(ctx, tornado_argv):
     setup_logging()
 
     app = ctx.obj.app
-    app.loader.import_default_modules()
     flower = Flower(capp=app, options=options, **settings)
 
     atexit.register(flower.stop)

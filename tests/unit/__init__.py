@@ -16,8 +16,13 @@ from flower import command  # noqa: F401 side effect - define options
 
 
 class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
-    def get_app(self):
-        capp = celery.Celery()
+
+    def _get_celery_app(self):
+        return celery.Celery()
+
+    def get_app(self, capp=None):
+        if not capp:
+            capp = self._get_celery_app()
         events = Events(capp)
         app = Flower(capp=capp, events=events,
                      options=options, handlers=handlers, **settings)
