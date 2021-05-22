@@ -46,13 +46,13 @@ Features
 Installation
 ------------
 
-PyPI version: ::
+Installing `flower` with `pip <http://www.pip-installer.org/>`_ is simple ::
 
     $ pip install flower
 
-Development version: ::
+Development version can be installed with ::
 
-    $ pip install https://github.com/mher/flower/zipball/master
+    $ pip install https://github.com/mher/flower/zipball/master#egg=flower
 
 Usage
 -----
