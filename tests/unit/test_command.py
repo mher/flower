@@ -54,7 +54,7 @@ class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
         )
 
         mock_warning.assert_called_once_with(
-            "You have incorrectly specified the following celery args after flower command: "
+            "You have incorrectly specified the following celery arguments after flower command: "
             "[\'--app\', \'-b\']. Please specify them after celery command instead following"
             " this template: celery [celery args] flower [flower args]."
         )
