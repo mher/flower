@@ -41,7 +41,7 @@ Launch the Flower server at specified port other than default 5555 (open the UI 
 
 Specify Celery application path with address and port for Flower: ::
 
-    $ celery -A 'tasks' flower  --address=127.0.0.6 --port=5566
+    $ celery -A proj flower  --address=127.0.0.6 --port=5566
 
 Launch using docker: ::
 
