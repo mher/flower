@@ -86,20 +86,21 @@ def apply_options(prog_name, argv):
 
 
 def warn_about_celery_args_used_in_flower_command(ctx, flower_args):
-    celery_args = [option for param in ctx.parent.command.params for option in param.opts]
+    celery_options = [option for param in ctx.parent.command.params for option in param.opts]
 
     incorrectly_used_args = []
     for arg in flower_args:
         arg_name, _, _ = arg.partition("=")
-        if arg_name in celery_args:
+        if arg_name in celery_options:
             incorrectly_used_args.append(arg_name)
 
-    logger.warning(
-        f'You have incorrectly specified the following celery arguments after flower command:'
-        f' {incorrectly_used_args}. '
-        f'Please specify them after celery command instead following this template: '
-        f'celery [celery args] flower [flower args].'
-    )
+    if incorrectly_used_args:
+        logger.warning(
+            f'You have incorrectly specified the following celery arguments after flower command:'
+            f' {incorrectly_used_args}. '
+            f'Please specify them after celery command instead following this template: '
+            f'celery [celery args] flower [flower args].'
+        )
 
 
 def setup_logging():
