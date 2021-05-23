@@ -59,9 +59,6 @@ setup(
     package_data={'flower': ['templates/*', 'static/*.*',
                              'static/**/*.*', 'static/**/**/*.*']},
     entry_points={
-        'console_scripts': [
-            'flower = flower.__main__:main',
-        ],
         'celery.commands': [
             'flower = flower.command:flower',
         ],
