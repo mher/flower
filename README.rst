@@ -86,7 +86,7 @@ Launch the Flower server at specified port other than default 5555 (open the UI 
 
 Specify Celery application path with address and port for Flower: ::
 
-    $ celery -A 'tasks' flower  --address=127.0.0.6 --port=5566
+    $ celery -A proj flower --address=127.0.0.6 --port=5566
 
 Launch using docker: ::
 
@@ -99,7 +99,7 @@ Launch with unix socket file: ::
 Broker URL and other configuration options can be passed through the standard Celery options (notice that they are after
 Celery command and before Flower sub-command): ::
 
-    $ celery --broker=amqp://guest:guest@localhost:5672// flower
+    $ celery -A proj --broker=amqp://guest:guest@localhost:5672// flower
 
 API
 ---
