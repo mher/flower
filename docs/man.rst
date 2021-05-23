@@ -47,24 +47,38 @@ OPTIONS
 
   --address                        run on the given address
   --auth                           regexp  of emails to grant access
+  --auth_provider                  sets authentication provider class
+  --auto_refresh                   refresh dashboard automatically (default *True*)
   --basic_auth                     colon separated user-password to enable
                                    basic auth
   --broker_api                     inspect broker e.g.
                                    http://guest:guest@localhost:15672/api/
+  --ca_certs                       path to SSL certificate authority (CA) file
   --certfile                       path to SSL certificate file
+  --conf                           flower configuration file path (default *flowerconfig.py*)
+  --cookie_secret                  secure cookie secret
   --db                             flower database file (default *flower.db*)
   --debug                          run in debug mode (default *False*)
+  --enable_events                  periodically enable Celery events (default *True*)
+  --format_task                    use custom task formatter
   --help                           show this help information
   --inspect                        inspect workers (default *True*)
   --inspect_timeout                inspect timeout (in milliseconds) (default
                                    *1000*)
   --keyfile                        path to SSL key file
-  --max_workrs                     maximum number of workers to keep in memory
+  --max_workers                     maximum number of workers to keep in memory
                                    (default *5000*)
   --max_tasks                      maximum number of tasks to keep in memory
                                    (default *10000*)
+  --natural_time                   show time in relative format (default *False*)
   --persistent                     enable persistent mode (default *False*)
   --port                           run on the given port (default *5555*)
+  --purge_offline_workers          time (in seconds) after which offline workers are purged
+                                   from dashboard
+  --state_save_interval            state save interval (in milliseconds) (default *0*)
+  --tasks_columns                  slugs of columns on /tasks/ page, delimited by comma
+                                   (default *name,uuid,state,args,kwargs,result,received,started,runtime,worker*)
+  --unix_socket                    path to unix socket to bind flower server to
   --url_prefix                     base url prefix
   --xheaders                       enable support for the 'X-Real-Ip' and
                                    'X-Scheme' headers. (default *False*)
@@ -91,14 +105,15 @@ TORNADO OPTIONS
 USAGE
 =====
 
-Launch the server and open http://localhost:5555: ::
+Launch the Flower server at specified port other than default 5555 (open the UI at http://localhost:5566): ::
 
-    $ flower -A proj --port=5555
+    $ celery flower --port=5566
 
-Or, launch from Celery: ::
+Specify Celery application path with address and port for Flower: ::
 
-    $ celery flower -A proj --address=127.0.0.1 --port=5555
+    $ celery -A proj flower --address=127.0.0.6 --port=5566
 
-Broker URL and other configuration options can be passed through the standard Celery options: ::
+Broker URL and other configuration options can be passed through the standard Celery options (notice that they are after
+Celery command and before Flower sub-command): ::
 
-    $ celery flower -A proj --broker=amqp://guest:guest@localhost:5672//
+    $ celery -A proj --broker=amqp://guest:guest@localhost:5672// flower
