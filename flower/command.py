@@ -14,7 +14,6 @@ from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
 from celery.bin.base import CeleryCommand
 
-from . import __version__
 from .app import Flower
 from .urls import settings
 from .utils import abs_path, prepend_url
@@ -32,6 +31,7 @@ ENV_VAR_PREFIX = 'FLOWER_'
 @click.pass_context
 def flower(ctx, tornado_argv):
     """Web based tool for monitoring and administrating Celery clusters."""
+    warn_about_celery_args_used_in_flower_command(ctx, tornado_argv)
     apply_env_options()
     apply_options(sys.argv[0], tornado_argv)
 
@@ -83,6 +83,23 @@ def apply_options(prog_name, argv):
     except IOError:
         if os.path.basename(options.conf) != DEFAULT_CONFIG_FILE:
             raise
+
+
+def warn_about_celery_args_used_in_flower_command(ctx, flower_args):
+    celery_args = [option for param in ctx.parent.command.params for option in param.opts]
+
+    incorrectly_used_args = []
+    for arg in flower_args:
+        arg_name, _, _ = arg.partition("=")
+        if arg_name in celery_args:
+            incorrectly_used_args.append(arg_name)
+
+    logger.warning(
+        f'You have incorrectly specified the following celery arguments after flower command:'
+        f' {incorrectly_used_args}. '
+        f'Please specify them after celery command instead following this template: '
+        f'celery [celery args] flower [flower args].'
+    )
 
 
 def setup_logging():
