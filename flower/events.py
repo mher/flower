@@ -174,7 +174,7 @@ class Events(threading.Thread):
 
     def save_state(self):
         logger.debug("Saving state to '%s'...", self.db)
-        state = shelve.open(self.db)
+        state = shelve.open(self.db, flag='n')
         state['events'] = self.state
         state.close()
 
