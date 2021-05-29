@@ -5,7 +5,7 @@ Configuration
 
 Flower can be configured from the command line: ::
 
-    $ flower --auto_refresh=False
+    $ celery flower --auto_refresh=False
 
 Using :file:`flowerconfig.py` configuration file:
 
@@ -26,7 +26,7 @@ Options passed through the command line have precedence over the options
 defined in the configuration file. The configuration file name and path
 can be changed with `conf`_ option. ::
 
-    $ flower --conf=celeryconfig.py
+    $ celery flower --conf=celeryconfig.py
 
 Options
 -------
@@ -40,7 +40,7 @@ the available settings, and their default values.
 Celery command line options also can be passed to Flower. For example
 the `--broker` sets the default broker URL: ::
 
-    $ flower -A proj --broker=amqp://guest:guest@localhost:5672//
+    $ celery -A proj --broker=amqp://guest:guest@localhost:5672// flower
 
 For a full list of options see: ::
 
@@ -90,7 +90,7 @@ broker_api
 Flower uses `RabbitMQ Management Plugin`_ to get info about queues.
 `broker_api` is a URL of RabbitMQ HTTP API including user credentials. ::
 
-    $ flower -A proj --broker_api=http://username:password@rabbitmq-server-name:15672/api/
+    $ celery -A proj flower --broker_api=http://username:password@rabbitmq-server-name:15672/api/
 
 .. Note:: By default the management plugin is not enabled. To enable it run::
 
@@ -276,7 +276,7 @@ Enables deploying Flower on non-root URL
 
 For example to access Flower on http://example.com/flower run it with: ::
 
-    $ flower --url_prefix=flower
+    $ celery flower --url_prefix=flower
 
 NOTE: The old `nginx` rewrite is no longer needed
 
