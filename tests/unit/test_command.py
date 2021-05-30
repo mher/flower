@@ -5,6 +5,8 @@ import unittest
 import subprocess
 from unittest.mock import Mock, patch
 
+import mock
+
 from flower.command import apply_options, warn_about_celery_args_used_in_flower_command
 from tornado.options import options
 from tests.unit import AsyncHTTPTestCase
@@ -20,6 +22,21 @@ class TestFlowerCommand(AsyncHTTPTestCase):
         with self.mock_option('address', '127.0.0.1'):
             apply_options('flower', argv=['--address=foo'])
             self.assertEqual('foo', options.address)
+
+    def test_autodiscovery(self):
+        """
+        Simulate basic Django setup:
+        - creating celery app
+        - run app.autodiscover_tasks()
+        - create flower command
+        """
+        celery_app = self._get_celery_app()
+        with mock.patch.object(celery_app, '_autodiscover_tasks') as autodiscover:
+            celery_app.autodiscover_tasks()
+
+            self.get_app(capp=celery_app)
+
+            self.assertTrue(autodiscover.called)
 
 
 class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
