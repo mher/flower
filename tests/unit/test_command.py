@@ -3,10 +3,11 @@ import sys
 import tempfile
 import unittest
 import subprocess
+from unittest.mock import Mock, patch
 
 import mock
 
-from flower.command import apply_options
+from flower.command import apply_options, warn_about_celery_args_used_in_flower_command
 from tornado.options import options
 from tests.unit import AsyncHTTPTestCase
 
@@ -36,6 +37,44 @@ class TestFlowerCommand(AsyncHTTPTestCase):
             self.get_app(capp=celery_app)
 
             self.assertTrue(autodiscover.called)
+
+
+class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
+    @patch('flower.command.logger.warning')
+    def test_does_not_log_warning(self, mock_warning):
+        mock_app_param = Mock(name='app_param', opts=('-A', '--app'))
+        mock_broker_param = Mock(name='broker_param', opts=('-b', '--broker'))
+
+        class FakeContext:
+            parent = Mock(command=Mock(params=[mock_app_param, mock_broker_param]))
+
+        ctx = FakeContext()
+
+        warn_about_celery_args_used_in_flower_command(
+            ctx=ctx, flower_args=('--port=5678', '--address=0.0.0.0')
+        )
+
+        mock_warning.assert_not_called()
+
+    @patch('flower.command.logger.warning')
+    def test_logs_warning(self, mock_warning):
+        mock_app_param = Mock(name='app_param', opts=('-A', '--app'))
+        mock_broker_param = Mock(name='broker_param', opts=('-b', '--broker'))
+
+        class FakeContext:
+            parent = Mock(command=Mock(params=[mock_app_param, mock_broker_param]))
+
+        ctx = FakeContext()
+
+        warn_about_celery_args_used_in_flower_command(
+            ctx=ctx, flower_args=('--app=proj', '-b', 'redis://localhost:6379/0')
+        )
+
+        mock_warning.assert_called_once_with(
+            "You have incorrectly specified the following celery arguments after flower command: "
+            "[\'--app\', \'-b\']. Please specify them after celery command instead following"
+            " this template: celery [celery args] flower [flower args]."
+        )
 
 
 class TestConfOption(AsyncHTTPTestCase):
