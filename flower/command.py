@@ -9,6 +9,8 @@ from pprint import pformat
 from logging import NullHandler
 
 import click
+from celery.utils.time import humanize_seconds
+from kombu.exceptions import OperationalError
 from tornado.options import options
 from tornado.options import parse_command_line, parse_config_file
 from tornado.log import enable_pretty_logging
@@ -48,7 +50,12 @@ def flower(ctx, tornado_argv):
         sys.exit(0)
 
     signal.signal(signal.SIGTERM, sigterm_handler)
+
+    if not is_broker_connected(celery_app=app):
+        return
+
     print_banner(app, 'ssl_options' in settings)
+
     try:
         flower.start()
     except (KeyboardInterrupt, SystemExit):
@@ -101,6 +108,33 @@ def warn_about_celery_args_used_in_flower_command(ctx, flower_args):
             f'Please specify them after celery command instead following this template: '
             f'celery [celery args] flower [flower args].'
         )
+
+
+def is_broker_connected(celery_app):
+    is_connected = False
+    max_retries = celery_app.conf.broker_connection_max_retries
+
+    if not celery_app.conf.broker_connection_retry:
+        max_retries = 0
+
+    with celery_app.connection() as conn:
+        broker_url = conn.as_uri()
+
+        def _error_handler(exc, interval):
+            next_step = f"Trying again {humanize_seconds(interval, 'in', ' ')}... ({int(interval / 2)}/{max_retries})"
+            logger.error(f'Cannot connect to broker: {broker_url}. Error: {exc}. {next_step}')
+
+        try:
+            conn.ensure_connection(errback=_error_handler, max_retries=max_retries)
+            logger.info(f'Established connection to broker: {broker_url}. Starting Flower...')
+            is_connected = True
+        except OperationalError as e:
+            logger.error(
+                f'Unable to establish connection to broker: : {broker_url}. Error: {e}. '
+                f'Please make sure the broker is running when using Flower. Aborting Flower...'
+            )
+
+    return is_connected
 
 
 def setup_logging():
