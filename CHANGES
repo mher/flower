@@ -6,7 +6,7 @@ Here you can see the full list of changes between each release.
 Version TBD
 -----------
 
-Release on TBD
+Released on TBD
 
 - Flower now supports Celery 5.
 - Documentation updated to reflect this.
