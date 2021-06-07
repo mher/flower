@@ -3,6 +3,20 @@ Celery Flower
 
 Here you can see the full list of changes between each release.
 
+Version TBD
+-----------
+
+Release on TBD
+
+- Flower now supports Celery 5.
+- Documentation updated to reflect this.
+- New prometheus metrics added.
+- Flower waits now for the broker before it starts.
+- Flower warns user if command line arguments for Celery were used for Flower.
+- Docker image updated.
+- Docker compose file updated.
+
+
 Version 0.9
 -----------
 
