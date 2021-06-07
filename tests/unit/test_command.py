@@ -97,7 +97,7 @@ class TestIsBrokerConnected(AsyncHTTPTestCase):
         assert is_broker_connected(celery_app=mock_celery_app)
 
         mock_connection.ensure_connection.assert_called_once()
-        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0].kwargs
+        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0][1]
         assert '_error_handler' in str(ensure_connection_kwargs['errback'])
         assert ensure_connection_kwargs['max_retries'] == broker_connection_max_retries
 
@@ -122,7 +122,7 @@ class TestIsBrokerConnected(AsyncHTTPTestCase):
         assert not is_broker_connected(celery_app=mock_celery_app)
 
         mock_connection.ensure_connection.assert_called_once()
-        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0].kwargs
+        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0][1]
         assert '_error_handler' in str(ensure_connection_kwargs['errback'])
         assert ensure_connection_kwargs['max_retries'] == broker_connection_max_retries
 
@@ -148,7 +148,7 @@ class TestIsBrokerConnected(AsyncHTTPTestCase):
         assert is_broker_connected(celery_app=mock_celery_app)
 
         mock_connection.ensure_connection.assert_called_once()
-        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0].kwargs
+        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0][1]
         assert '_error_handler' in str(ensure_connection_kwargs['errback'])
         assert ensure_connection_kwargs['max_retries'] == 0
 
