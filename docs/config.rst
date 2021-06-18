@@ -222,6 +222,13 @@ port
 
 Run the http server on a given port (by default, `port=5555`)
 
+.. _purge_offline_workers:
+
+purge_offline_workers
+~~~~~~~~~~~~~~~~~~~~~
+
+Time (in seconds) after which offline workers are purged from dashboard
+
 .. _state_save_interval:
 
 state_save_interval
