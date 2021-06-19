@@ -117,7 +117,7 @@ def is_broker_connected(celery_app):
     if not celery_app.conf.broker_connection_retry:
         max_retries = 0
 
-    with celery_app.connection() as conn:
+    with celery_app.connection_or_acquire() as conn:
         broker_url = conn.as_uri()
 
         def _error_handler(exc, interval):
