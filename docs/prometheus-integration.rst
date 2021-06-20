@@ -60,6 +60,8 @@ Below you will find a table of available Prometheus metrics exposed by Flower.
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
 | flower_task_queuing_time_at_worker_seconds        | The time the task spent waiting at the celery worker to be executed. | task, worker       | gauge           |
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
+| flower_number_of_tasks_queuing_at_worker          | Number of tasks of given type queuing at worker                      | task, worker       | gauge           |
++---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
 | flower_task_runtime_seconds                       | The time it took to run the task.                                    | task, worker       | histogram       |
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
 | flower_worker_online                              | Shows celery worker's online status.                                 | worker             | gauge           |
