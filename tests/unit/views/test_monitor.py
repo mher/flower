@@ -99,7 +99,7 @@ class PrometheusTests(AsyncHTTPTestCase):
         worker_name = 'worker1'
         task_name = 'task1'
         state.get_or_create_worker(worker_name)
-        events = task_failed_events(worker=worker_name, name=task_name, id='123')[:-1]
+        events = task_failed_events(worker=worker_name, name=task_name, id='123')
 
         task_received = time.time()
         task_started = task_received + 3
@@ -157,7 +157,7 @@ class PrometheusTests(AsyncHTTPTestCase):
 
     def test_number_of_tasks_queuing_at_worker_metric(self):
         state = EventsState()
-        worker_name = 'worker1'
+        worker_name = 'worker2'
         task_name = 'task1'
         task_id = uuid()
         state.get_or_create_worker(worker_name)
