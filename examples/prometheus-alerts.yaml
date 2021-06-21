@@ -18,12 +18,12 @@
     summary: Task Failure Ratio Too High.
     description: Average task failure ratio for task {{ $labels.task }} is {{ $value }}.
 
-- alert: TaskQueuingTimeTooHigh
-  expr: sum(avg_over_time(flower_task_queuing_time_at_worker_seconds[15m])) by (task, worker) > 1
+- alert: TaskPrefetchTimeTooHigh
+  expr: sum(avg_over_time(flower_task_prefetch_time_seconds[15m])) by (task, worker) > 1
   for: 5m
   labels:
     severity: critical
     context: celery-task
   annotations:
-    summary: Average Task Queuing Time Too High.
-    description: Average task queuing time at worker for task {{ $labels.task }} and worker {{ $labels.worker }} is {{ $value }}.
+    summary: Average Task Prefetch Time Too High.
+    description: Average task prefetch time at worker for task {{ $labels.task }} and worker {{ $labels.worker }} is {{ $value }}.
