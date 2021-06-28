@@ -73,6 +73,7 @@ class RabbitMQ(BrokerBase):
         try:
             response = yield http_client.fetch(
                 url, auth_username=username, auth_password=password,
+                connect_timeout=1.0, request_timeout=2.0,
                 validate_cert=False)
         except (socket.error, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)

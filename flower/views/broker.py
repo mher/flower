@@ -27,7 +27,7 @@ class BrokerView(BaseHandler):
             broker_use_ssl = self.capp.conf.BROKER_USE_SSL
 
         try:
-            broker = Broker(app.capp.connection().as_uri(include_password=True),
+            broker = Broker(app.capp.connection(connect_timeout=1.0).as_uri(include_password=True),
                             http_api=http_api, broker_options=broker_options, broker_use_ssl=broker_use_ssl)
         except NotImplementedError:
             raise web.HTTPError(

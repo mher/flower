@@ -58,13 +58,15 @@ Below you will find a table of available Prometheus metrics exposed by Flower.
 +===================================================+======================================================================+====================+=================+
 | flower_events_total                               | Number of times a celery task event was registered by Flower.        | task, type, worker | counter         |
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
-| flower_task_queuing_time_at_worker_seconds        | The time the task spent waiting at the celery worker to be executed. | task, worker       | gauge           |
+| flower_task_prefetch_time_seconds                 | The time the task spent waiting at the celery worker to be executed. | task, worker       | gauge           |
++---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
+| flower_worker_prefetched_tasks                    | Number of tasks of given type prefetched at a worker.                | task, worker       | gauge           |
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
 | flower_task_runtime_seconds                       | The time it took to run the task.                                    | task, worker       | histogram       |
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
 | flower_worker_online                              | Shows celery worker's online status.                                 | worker             | gauge           |
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
-| flower_worker_number_of_currently_executing_tasks | Number of tasks currently executing at this worker                   | worker             | gauge           |
+| flower_worker_number_of_currently_executing_tasks | Number of tasks currently executing at this worker.                  | worker             | gauge           |
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
 
 Using Metric Labels
@@ -232,6 +234,11 @@ Hover over the `+` icon in the left side-bar and click `Import` button.
 Click `Upload JSON file` button and select the `celery-monitoring-grafana-dashboard.json` you have just downloaded.
 
 .. image:: screenshots/grafana-import-celery-monitoring-dashboard.png
+   :width: 100%
+
+Click on the `Prometheus` field and select a Prometheus data source.
+
+.. image:: screenshots/grafana-configure-imported-dashboard.png
    :width: 100%
 
 Click `Import` to finish the process.

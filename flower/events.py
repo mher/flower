@@ -24,13 +24,20 @@ logger = logging.getLogger(__name__)
 class PrometheusMetrics(object):
     events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
     runtime = Histogram('flower_task_runtime_seconds', "Task runtime", ['worker', 'task'])
-    queuing_time = Gauge(
-        'flower_task_queuing_time_at_worker_seconds', "Task queueing time at celery worker", ['worker', 'task']
+    prefetch_time = Gauge(
+        'flower_task_prefetch_time_seconds',
+        "The time the task spent waiting at the celery worker to be executed.",
+        ['worker', 'task']
+    )
+    number_of_prefetched_tasks = Gauge(
+        'flower_worker_prefetched_tasks',
+        'Number of tasks of given type prefetched at a worker',
+        ['worker', 'task']
     )
     worker_online = Gauge('flower_worker_online', "Worker online status", ['worker'])
     worker_number_of_currently_executing_tasks = Gauge(
         'flower_worker_number_of_currently_executing_tasks',
-        "Number of tasks currently executing at this worker",
+        "Number of tasks currently executing at a worker",
         ['worker']
     )
 
@@ -66,8 +73,16 @@ class EventsState(State):
 
             task_started = task.started
             task_received = task.received
+
+            if event_type == 'task-received' and not task.eta and task_received:
+                self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).inc()
+
             if event_type == 'task-started' and not task.eta and task_started and task_received:
-                self.metrics.queuing_time.labels(worker_name, task_name).set(task_started - task_received)
+                self.metrics.prefetch_time.labels(worker_name, task_name).set(task_started - task_received)
+                self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).dec()
+
+            if event_type in ['task-succeeded', 'task-failed'] and not task.eta and task_started and task_received:
+                self.metrics.prefetch_time.labels(worker_name, task_name).set(0)
 
         if event_type == 'worker-online':
             self.metrics.worker_online.labels(worker_name).set(1)
