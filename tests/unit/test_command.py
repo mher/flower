@@ -3,11 +3,13 @@ import sys
 import tempfile
 import unittest
 import subprocess
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, create_autospec, MagicMock
 
 import mock
+from celery import Celery
+from kombu.exceptions import OperationalError
 
-from flower.command import apply_options, warn_about_celery_args_used_in_flower_command
+from flower.command import apply_options, warn_about_celery_args_used_in_flower_command, is_broker_connected
 from tornado.options import options
 from tests.unit import AsyncHTTPTestCase
 
@@ -75,6 +77,79 @@ class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
             "[\'--app\', \'-b\']. Please specify them after celery command instead following"
             " this template: celery [celery args] flower [flower args]."
         )
+
+
+class TestIsBrokerConnected(AsyncHTTPTestCase):
+    @patch('flower.command.logger.info')
+    def test_returns_true_and_logs_if_connection_to_broker_established(self, mock_info):
+        broker_url = 'broker_url'
+        broker_connection_max_retries = 2
+
+        mock_conf = Mock(broker_connection_retry=True, broker_connection_max_retries=broker_connection_max_retries)
+
+        mock_connection = MagicMock(name='mock connection')
+        mock_connection.as_uri.return_value = broker_url
+        mock_connection.__enter__.return_value = mock_connection
+
+        mock_celery_app = create_autospec(Celery, conf=mock_conf)
+        mock_celery_app.connection_or_acquire.return_value = mock_connection
+
+        assert is_broker_connected(celery_app=mock_celery_app)
+
+        mock_connection.ensure_connection.assert_called_once()
+        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0][1]
+        assert '_error_handler' in str(ensure_connection_kwargs['errback'])
+        assert ensure_connection_kwargs['max_retries'] == broker_connection_max_retries
+
+        mock_info.assert_called_once_with(f'Established connection to broker: {broker_url}. Starting Flower...')
+
+    @patch('flower.command.logger.error')
+    def test_returns_false_and_logs_error_if_connection_to_broker_cannot_be_established(self, mock_error):
+        broker_url = 'broker_url'
+        broker_connection_max_retries = 2
+
+        mock_conf = Mock(broker_connection_retry=True, broker_connection_max_retries=broker_connection_max_retries)
+
+        mock_connection = MagicMock(name='mock connection')
+        mock_connection.as_uri.return_value = broker_url
+        error = OperationalError('test error')
+        mock_connection.ensure_connection.side_effect = error
+        mock_connection.__enter__.return_value = mock_connection
+
+        mock_celery_app = create_autospec(Celery, conf=mock_conf)
+        mock_celery_app.connection_or_acquire.return_value = mock_connection
+
+        assert not is_broker_connected(celery_app=mock_celery_app)
+
+        mock_connection.ensure_connection.assert_called_once()
+        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0][1]
+        assert '_error_handler' in str(ensure_connection_kwargs['errback'])
+        assert ensure_connection_kwargs['max_retries'] == broker_connection_max_retries
+
+        mock_error.assert_called_once_with(
+            f'Unable to establish connection to broker: : {broker_url}. Error: {error}. '
+            f'Please make sure the broker is running when using Flower. Aborting Flower...'
+        )
+
+    def test_disabled_broker_connection_retry_sets_max_retries_to_zero(self):
+        broker_url = 'broker_url'
+        broker_connection_max_retries = 2
+
+        mock_conf = Mock(broker_connection_retry=False, broker_connection_max_retries=broker_connection_max_retries)
+
+        mock_connection = MagicMock(name='mock connection')
+        mock_connection.as_uri.return_value = broker_url
+        mock_connection.__enter__.return_value = mock_connection
+
+        mock_celery_app = create_autospec(Celery, conf=mock_conf)
+        mock_celery_app.connection_or_acquire.return_value = mock_connection
+
+        assert is_broker_connected(celery_app=mock_celery_app)
+
+        mock_connection.ensure_connection.assert_called_once()
+        ensure_connection_kwargs = mock_connection.ensure_connection.call_args_list[0][1]
+        assert '_error_handler' in str(ensure_connection_kwargs['errback'])
+        assert ensure_connection_kwargs['max_retries'] == 0
 
 
 class TestConfOption(AsyncHTTPTestCase):

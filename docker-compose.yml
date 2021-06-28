@@ -31,7 +31,7 @@ services:
       - redis
   flower:
     build: ./
-    command: python -m flower -A tasks
+    command: celery -A tasks flower
     volumes:
       - ./examples:/data
     working_dir: /data
@@ -40,3 +40,6 @@ services:
     environment:
       CELERY_BROKER_URL: redis://redis
       CELERY_RESULT_BACKEND: redis://redis
+    depends_on:
+      - worker
+      - redis

@@ -144,7 +144,7 @@ Start Flower Monitoring
 
 In your Celery application folder run this command (Flower needs to be installed)::
 
-    celery flower -A tasks --broker=redis://localhost:6379/0
+    celery -A tasks --broker=redis://localhost:6379/0 flower
 
 Configure and Start Prometheus
 ------------------------------
