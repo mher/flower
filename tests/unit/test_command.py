@@ -92,7 +92,7 @@ class TestIsBrokerConnected(AsyncHTTPTestCase):
         mock_connection.__enter__.return_value = mock_connection
 
         mock_celery_app = create_autospec(Celery, conf=mock_conf)
-        mock_celery_app.connection.return_value = mock_connection
+        mock_celery_app.connection_or_acquire.return_value = mock_connection
 
         assert is_broker_connected(celery_app=mock_celery_app)
 
@@ -117,7 +117,7 @@ class TestIsBrokerConnected(AsyncHTTPTestCase):
         mock_connection.__enter__.return_value = mock_connection
 
         mock_celery_app = create_autospec(Celery, conf=mock_conf)
-        mock_celery_app.connection.return_value = mock_connection
+        mock_celery_app.connection_or_acquire.return_value = mock_connection
 
         assert not is_broker_connected(celery_app=mock_celery_app)
 
@@ -131,8 +131,7 @@ class TestIsBrokerConnected(AsyncHTTPTestCase):
             f'Please make sure the broker is running when using Flower. Aborting Flower...'
         )
 
-    @patch('flower.command.logger.error')
-    def test_disabled_broker_connection_retry_sets_max_retries_to_zero(self, mock_error):
+    def test_disabled_broker_connection_retry_sets_max_retries_to_zero(self):
         broker_url = 'broker_url'
         broker_connection_max_retries = 2
 
@@ -143,7 +142,7 @@ class TestIsBrokerConnected(AsyncHTTPTestCase):
         mock_connection.__enter__.return_value = mock_connection
 
         mock_celery_app = create_autospec(Celery, conf=mock_conf)
-        mock_celery_app.connection.return_value = mock_connection
+        mock_celery_app.connection_or_acquire.return_value = mock_connection
 
         assert is_broker_connected(celery_app=mock_celery_app)
 
