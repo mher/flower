@@ -1,34 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Features &mdash; Flower 0.7.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Features &#8212; Flower 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flower 0.7.0 documentation" href="index.html" />
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Screenshots" href="screenshots.html" />
     <link rel="prev" title="Flower - Celery monitoring tool" href="index.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -37,14 +25,15 @@
         <li class="right" >
           <a href="index.html" title="Flower - Celery monitoring tool"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Features</a></li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
 <div class="deck">
 
@@ -52,103 +41,76 @@
     <div class="section" id="features">
 <h1>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h1>
 <ul>
-<li><p class="first">Real-time monitoring using Celery Events</p>
+<li><p>Real-time monitoring using Celery Events</p>
 <blockquote>
 <div><ul class="simple">
-<li>Task progress and history</li>
-<li>Ability to show task details (arguments, start time, runtime, and more)</li>
-<li>Graphs and statistics</li>
+<li><p>Task progress and history</p></li>
+<li><p>Ability to show task details (arguments, start time, runtime, and more)</p></li>
+<li><p>Graphs and statistics</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Remote Control</p>
+<li><p>Remote Control</p>
 <blockquote>
 <div><ul class="simple">
-<li>View worker status and statistics</li>
-<li>Shutdown and restart worker instances</li>
-<li>Control worker pool size and autoscale settings</li>
-<li>View and modify the queues a worker instance consumes from</li>
-<li>View currently running tasks</li>
-<li>View scheduled tasks (ETA/countdown)</li>
-<li>View reserved and revoked tasks</li>
-<li>Apply time and rate limits</li>
-<li>Configuration viewer</li>
-<li>Revoke or terminate tasks</li>
+<li><p>View worker status and statistics</p></li>
+<li><p>Shutdown and restart worker instances</p></li>
+<li><p>Control worker pool size and autoscale settings</p></li>
+<li><p>View and modify the queues a worker instance consumes from</p></li>
+<li><p>View currently running tasks</p></li>
+<li><p>View scheduled tasks (ETA/countdown)</p></li>
+<li><p>View reserved and revoked tasks</p></li>
+<li><p>Apply time and rate limits</p></li>
+<li><p>Configuration viewer</p></li>
+<li><p>Revoke or terminate tasks</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Broker monitoring</p>
+<li><p>Broker monitoring</p>
 <blockquote>
 <div><ul class="simple">
-<li>View statistics for all Celery queues</li>
-<li>Queue length graphs</li>
+<li><p>View statistics for all Celery queues</p></li>
+<li><p>Queue length graphs</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">HTTP API</p>
-</li>
-<li><p class="first">Basic Auth and Google OpenID authentication</p>
-</li>
+<li><p>HTTP API</p></li>
+<li><p>Basic Auth, GitHub OAuth2 and Google OpenID authentication</p></li>
+<li><p>Prometheus integration</p></li>
 </ul>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p>
   <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
     allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#google-openid">Google OpenID</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
-</ul>
-
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Flower - Celery monitoring tool</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="screenshots.html"
                         title="next chapter">Screenshots</a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -157,11 +119,12 @@
         <li class="right" >
           <a href="index.html" title="Flower - Celery monitoring tool"
              >previous</a> |</li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Features</a></li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2014, Mher Movsisyan.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mher Movsisyan.
     </div>
   </body>
 </html>

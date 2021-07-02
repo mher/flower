@@ -1,34 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Running behind reverse proxy &mdash; Flower 0.7.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Running behind reverse proxy &#8212; Flower 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flower 0.7.0 documentation" href="index.html" />
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Docker Usage" href="docker.html" />
     <link rel="prev" title="Authentication" href="auth.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -37,14 +25,15 @@
         <li class="right" >
           <a href="auth.html" title="Authentication"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Running behind reverse proxy</a></li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
 <div class="deck">
 
@@ -54,7 +43,7 @@
 <p>To run <cite>Flower</cite> behind a reverse proxy, remember to set the correct <cite>Host</cite>
 header to the request to make sure Flower can generate correct URLs.
 The following is a minimal <cite>nginx</cite> configuration:</p>
-<div class="highlight-nginx"><div class="highlight"><pre><span class="k">server</span> <span class="p">{</span>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="k">server</span> <span class="p">{</span>
     <span class="kn">listen</span> <span class="mi">80</span><span class="p">;</span>
     <span class="kn">server_name</span> <span class="s">flower.example.com</span><span class="p">;</span>
     <span class="kn">charset</span> <span class="s">utf-8</span><span class="p">;</span>
@@ -62,6 +51,10 @@ The following is a minimal <cite>nginx</cite> configuration:</p>
     <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
         <span class="kn">proxy_pass</span> <span class="s">http://localhost:5555</span><span class="p">;</span>
         <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+        <span class="kn">proxy_redirect</span> <span class="no">off</span><span class="p">;</span>
+        <span class="kn">proxy_http_version</span> <span class="mi">1</span><span class="s">.1</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span> <span class="s">Upgrade</span> <span class="nv">$http_upgrade</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span> <span class="s">Connection</span> <span class="s">&quot;upgrade&quot;</span><span class="p">;</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -70,69 +63,43 @@ The following is a minimal <cite>nginx</cite> configuration:</p>
 any sort of authentication! If you have a <cite>htpasswd</cite> file with user
 credentials you can make <cite>nginx</cite> use this file by adding the following
 lines to the location block:</p>
-<div class="highlight-nginx"><div class="highlight"><pre><span class="k">auth_basic</span> <span class="s">&quot;Restricted&quot;</span><span class="p">;</span>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="k">auth_basic</span> <span class="s">&quot;Restricted&quot;</span><span class="p">;</span>
 <span class="k">auth_basic_user_file</span> <span class="s">htpasswd</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p>
   <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
     allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#google-openid">Google OpenID</a></li>
-</ul>
-</li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Running behind reverse proxy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
-</ul>
-
   <h4>Previous topic</h4>
   <p class="topless"><a href="auth.html"
                         title="previous chapter">Authentication</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="docker.html"
                         title="next chapter">Docker Usage</a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -141,11 +108,12 @@ lines to the location block:</p>
         <li class="right" >
           <a href="auth.html" title="Authentication"
              >previous</a> |</li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Running behind reverse proxy</a></li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2014, Mher Movsisyan.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mher Movsisyan.
     </div>
   </body>
 </html>

@@ -1,125 +1,106 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Docker Usage &mdash; Flower 0.7.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Docker Usage &#8212; Flower 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flower 0.7.0 documentation" href="index.html" />
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Prometheus Integration" href="prometheus-integration.html" />
     <link rel="prev" title="Running behind reverse proxy" href="reverse-proxy.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
+          <a href="prometheus-integration.html" title="Prometheus Integration"
+             accesskey="N">next</a></li>
+        <li class="right" >
           <a href="reverse-proxy.html" title="Running behind reverse proxy"
-             accesskey="P">previous</a></li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Docker Usage</a></li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
 <div class="deck">
 
 </div>
     <div class="section" id="docker-usage">
 <h1>Docker Usage<a class="headerlink" href="#docker-usage" title="Permalink to this headline">¶</a></h1>
-<p>Clone this repository, build flower from the Dockerfile, start the
+<p>To run Flower via Docker, you’ll need a broker running.  If you don’t
+have one, you can fire up a simple Redis instance with Docker from the
+official Redis image.</p>
+<blockquote>
+<div><p>$ docker run –name localredis -p 6379:6379 –rm -d redis</p>
+</div></blockquote>
+<p>Now, clone this repository, build flower from the Dockerfile, start the
 container and open <a class="reference external" href="http://localhost:49555">http://localhost:49555</a></p>
-<div class="highlight-python"><pre>$ docker build -t "flower" .
-$ docker run -d -p=49555:5555 flower flower --port=5555</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ docker build -t &quot;flower&quot; .
+$ docker run -d -p=49555:5555 --rm --name flower -e CELERY_BROKER_URL=redis://0.0.0.0:6379/0 flower flower --port=5555
+</pre></div>
 </div>
 <p>For more information about running with Docker see
-<a class="reference external" href="http://docs.docker.io/en/latest/">http://docs.docker.io/en/latest/</a></p>
+<a class="reference external" href="https://docs.docker.com/">https://docs.docker.com/</a></p>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p>
   <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
     allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#google-openid">Google OpenID</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Docker Usage</a></li>
-</ul>
-
   <h4>Previous topic</h4>
   <p class="topless"><a href="reverse-proxy.html"
                         title="previous chapter">Running behind reverse proxy</a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="prometheus-integration.html"
+                        title="next chapter">Prometheus Integration</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
+          <a href="prometheus-integration.html" title="Prometheus Integration"
+             >next</a></li>
+        <li class="right" >
           <a href="reverse-proxy.html" title="Running behind reverse proxy"
-             >previous</a></li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Docker Usage</a></li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2014, Mher Movsisyan.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mher Movsisyan.
     </div>
   </body>
 </html>

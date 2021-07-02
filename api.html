@@ -1,50 +1,39 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>API Reference &mdash; Flower 0.7.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Reference &#8212; Flower 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flower 0.7.0 documentation" href="index.html" />
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Authentication" href="auth.html" />
-    <link rel="prev" title="Configuration" href="config.html" /> 
-  </head>
-  <body>
-    <div class="related">
+    <link rel="prev" title="Tasks filtering" href="tasks_filter.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="auth.html" title="Authentication"
              accesskey="N">next</a></li>
         <li class="right" >
-          <a href="config.html" title="Configuration"
+          <a href="tasks_filter.html" title="Tasks filtering"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">API Reference</a></li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
 <div class="deck">
 
@@ -52,75 +41,170 @@
     <div class="section" id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
 </div>
-<dl class="get">
+<dl class="http get">
 <dt id="get--api-workers">
-<tt class="descname">GET </tt><tt class="descname">/api/workers</tt><a class="headerlink" href="#get--api-workers" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GET</span> </code><code class="sig-name descname"><span class="pre">/api/workers</span></code><a class="headerlink" href="#get--api-workers" title="Permalink to this definition">¶</a></dt>
 <dd><p>List workers</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span> <span class="nn">/api/workers</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/api/workers</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
-<span class="na">Content-Length</span><span class="o">:</span> <span class="l">119</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">1526</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
+<span class="na">Date</span><span class="o">:</span> <span class="l">Tue, 28 Jul 2015 01:32:38 GMT</span>
+<span class="na">Etag</span><span class="o">:</span> <span class="l">&quot;fcdd75d85a82b4052275e28871d199aac1ece21c&quot;</span>
+<span class="na">Server</span><span class="o">:</span> <span class="l">TornadoServer/4.0.2</span>
 
 <span class="p">{</span>
     <span class="nt">&quot;celery@worker1&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;completed_tasks&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="nt">&quot;concurrency&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="nt">&quot;queues&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;celery&quot;</span>
+        <span class="nt">&quot;active_queues&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;alias&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                <span class="nt">&quot;auto_delete&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;binding_arguments&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                <span class="nt">&quot;bindings&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="nt">&quot;durable&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;exchange&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;arguments&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                    <span class="nt">&quot;auto_delete&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                    <span class="nt">&quot;delivery_mode&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="nt">&quot;durable&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;celery&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;passive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;direct&quot;</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;exclusive&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;celery&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;no_ack&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;queue_arguments&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                <span class="nt">&quot;routing_key&quot;</span><span class="p">:</span> <span class="s2">&quot;celery&quot;</span>
+            <span class="p">}</span>
         <span class="p">],</span>
-        <span class="nt">&quot;running_tasks&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="kc">true</span>
-    <span class="p">},</span>
-    <span class="nt">&quot;celery@worker2&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;completed_tasks&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="nt">&quot;concurrency&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="nt">&quot;queues&quot;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="nt">&quot;running_tasks&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="kc">false</span>
+        <span class="nt">&quot;conf&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;CELERYBEAT_SCHEDULE&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="nt">&quot;CELERY_INCLUDE&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;celery.app.builtins&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;__main__&quot;</span>
+            <span class="p">],</span>
+            <span class="nt">&quot;CELERY_SEND_TASK_SENT_EVENT&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="nt">&quot;CELERY_TIMEZONE&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span>
+        <span class="p">},</span>
+        <span class="nt">&quot;registered&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;tasks.add&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tasks.echo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tasks.error&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tasks.retry&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tasks.sleep&quot;</span>
+        <span class="p">],</span>
+        <span class="nt">&quot;stats&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;broker&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;alternates&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="nt">&quot;connect_timeout&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="nt">&quot;heartbeat&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                <span class="nt">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;insist&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;login_method&quot;</span><span class="p">:</span> <span class="s2">&quot;AMQPLAIN&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;port&quot;</span><span class="p">:</span> <span class="mi">5672</span><span class="p">,</span>
+                <span class="nt">&quot;ssl&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;transport&quot;</span><span class="p">:</span> <span class="s2">&quot;amqp&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;transport_options&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="nt">&quot;uri_prefix&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                <span class="nt">&quot;userid&quot;</span><span class="p">:</span> <span class="s2">&quot;guest&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;virtual_host&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;clock&quot;</span><span class="p">:</span> <span class="s2">&quot;918&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;pid&quot;</span><span class="p">:</span> <span class="mi">90494</span><span class="p">,</span>
+            <span class="nt">&quot;pool&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;max-concurrency&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="nt">&quot;max-tasks-per-child&quot;</span><span class="p">:</span> <span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;processes&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="mi">90499</span><span class="p">,</span>
+                    <span class="mi">90500</span><span class="p">,</span>
+                    <span class="mi">90501</span><span class="p">,</span>
+                    <span class="mi">90502</span>
+                <span class="p">],</span>
+                <span class="nt">&quot;put-guarded-by-semaphore&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;timeouts&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="mi">0</span><span class="p">,</span>
+                    <span class="mi">0</span>
+                <span class="p">],</span>
+                <span class="nt">&quot;writes&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;all&quot;</span><span class="p">:</span> <span class="s2">&quot;100.00%&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;avg&quot;</span><span class="p">:</span> <span class="s2">&quot;100.00%&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;inqueues&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="nt">&quot;total&quot;</span><span class="p">:</span> <span class="mi">4</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;raw&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;total&quot;</span><span class="p">:</span> <span class="mi">1</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;prefetch_count&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="nt">&quot;rusage&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;idrss&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="nt">&quot;inblock&quot;</span><span class="p">:</span> <span class="mi">211</span><span class="p">,</span>
+                <span class="nt">&quot;isrss&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="nt">&quot;ixrss&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="nt">&quot;majflt&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+                <span class="nt">&quot;maxrss&quot;</span><span class="p">:</span> <span class="mi">26996736</span><span class="p">,</span>
+                <span class="nt">&quot;minflt&quot;</span><span class="p">:</span> <span class="mi">11450</span><span class="p">,</span>
+                <span class="nt">&quot;msgrcv&quot;</span><span class="p">:</span> <span class="mi">4968</span><span class="p">,</span>
+                <span class="nt">&quot;msgsnd&quot;</span><span class="p">:</span> <span class="mi">1227</span><span class="p">,</span>
+                <span class="nt">&quot;nivcsw&quot;</span><span class="p">:</span> <span class="mi">1367</span><span class="p">,</span>
+                <span class="nt">&quot;nsignals&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="nt">&quot;nswap&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="nt">&quot;nvcsw&quot;</span><span class="p">:</span> <span class="mi">1855</span><span class="p">,</span>
+                <span class="nt">&quot;oublock&quot;</span><span class="p">:</span> <span class="mi">93</span><span class="p">,</span>
+                <span class="nt">&quot;stime&quot;</span><span class="p">:</span> <span class="mf">0.414564</span><span class="p">,</span>
+                <span class="nt">&quot;utime&quot;</span><span class="p">:</span> <span class="mf">0.975726</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;total&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;tasks.add&quot;</span><span class="p">:</span> <span class="mi">1</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="mf">1438049312.073402</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>refresh</strong> – run inspect to get updated list of workers</p></li>
+<li><p><strong>workername</strong> – get info for workername</p></li>
+<li><p><strong>status</strong> – only get worker status info</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-worker-shutdown-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/worker/shutdown/(.+)</tt><a class="headerlink" href="#post--api-worker-shutdown-(.+)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/worker/shutdown/(.+)</span></code><a class="headerlink" href="#post--api-worker-shutdown-(.+)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shut down a worker</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/worker/shutdown/celery@worker2</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/worker/shutdown/celery@worker2</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">29</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -129,39 +213,34 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+<dl class="field-list simple">
+<dt class="field-odd">Request Headers</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>404</strong> &#8211; unknown worker</li>
+</dd>
+<dt class="field-even">Status Codes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-worker-pool-restart-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/worker/pool/restart/(.+)</tt><a class="headerlink" href="#post--api-worker-pool-restart-(.+)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Restart worker&#8217;s pool</p>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/worker/pool/restart/(.+)</span></code><a class="headerlink" href="#post--api-worker-pool-restart-(.+)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restart worker’s pool</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/worker/pool/restart/celery@worker2</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/worker/pool/restart/celery@worker2</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">56</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -170,40 +249,35 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+<dl class="field-list simple">
+<dt class="field-odd">Request Headers</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>403</strong> &#8211; pool restart is not enabled (see CELERYD_POOL_RESTARTS)</li>
-<li><strong>404</strong> &#8211; unknown worker</li>
+</dd>
+<dt class="field-even">Status Codes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.4">403 Forbidden</a> – pool restart is not enabled (see CELERYD_POOL_RESTARTS)</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-worker-pool-grow-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/worker/pool/grow/(.+)</tt><a class="headerlink" href="#post--api-worker-pool-grow-(.+)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Grow worker&#8217;s pool</p>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/worker/pool/grow/(.+)</span></code><a class="headerlink" href="#post--api-worker-pool-grow-(.+)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grow worker’s pool</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/worker/pool/grow/celery@worker2?n=3</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/worker/pool/grow/celery@worker2?n=3</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">58</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -212,46 +286,40 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> &#8211; number of pool processes to grow, default is 1</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – number of pool processes to grow, default is 1</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>403</strong> &#8211; failed to grow</li>
-<li><strong>404</strong> &#8211; unknown worker</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.4">403 Forbidden</a> – failed to grow</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-worker-pool-shrink-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/worker/pool/shrink/(.+)</tt><a class="headerlink" href="#post--api-worker-pool-shrink-(.+)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shrink worker&#8217;s pool</p>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/worker/pool/shrink/(.+)</span></code><a class="headerlink" href="#post--api-worker-pool-shrink-(.+)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shrink worker’s pool</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/worker/pool/shrink/celery@worker2</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/worker/pool/shrink/celery@worker2</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">60</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -260,47 +328,41 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> &#8211; number of pool processes to shrink, default is 1</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – number of pool processes to shrink, default is 1</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>403</strong> &#8211; failed to shrink</li>
-<li><strong>404</strong> &#8211; unknown worker</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.4">403 Forbidden</a> – failed to shrink</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-worker-pool-autoscale-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/worker/pool/autoscale/(.+)</tt><a class="headerlink" href="#post--api-worker-pool-autoscale-(.+)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/worker/pool/autoscale/(.+)</span></code><a class="headerlink" href="#post--api-worker-pool-autoscale-(.+)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Autoscale worker pool</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/worker/pool/autoscale/celery@worker2?min=3&amp;max=10</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/worker/pool/autoscale/celery@worker2?min=3&amp;max=10</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded; charset=utf-8</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">66</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -309,48 +371,42 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>min</strong> &#8211; minimum number of pool processes</li>
-<li><strong>max</strong> &#8211; maximum number of pool processes</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min</strong> – minimum number of pool processes</p></li>
+<li><p><strong>max</strong> – maximum number of pool processes</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>403</strong> &#8211; autoscaling is not enabled (see CELERYD_AUTOSCALER)</li>
-<li><strong>404</strong> &#8211; unknown worker</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.4">403 Forbidden</a> – autoscaling is not enabled (see CELERYD_AUTOSCALER)</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-worker-queue-add-consumer-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/worker/queue/add-consumer/(.+)</tt><a class="headerlink" href="#post--api-worker-queue-add-consumer-(.+)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/worker/queue/add-consumer/(.+)</span></code><a class="headerlink" href="#post--api-worker-queue-add-consumer-(.+)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start consuming from a queue</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/worker/queue/add-consumer/celery@worker2?queue=sample-queue</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-<span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
-<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded; charset=utf-8</span>
-<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span>POST /api/worker/queue/add-consumer/celery@worker2?queue=sample-queue
+Content-Length: 0
+Content-Type: application/x-www-form-urlencoded; charset=utf-8
+Host: localhost:5555
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">40</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -359,47 +415,41 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>queue</strong> &#8211; the name of a new queue</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>queue</strong> – the name of a new queue</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>403</strong> &#8211; failed to add consumer</li>
-<li><strong>404</strong> &#8211; unknown worker</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.4">403 Forbidden</a> – failed to add consumer</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-worker-queue-cancel-consumer-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/worker/queue/cancel-consumer/(.+)</tt><a class="headerlink" href="#post--api-worker-queue-cancel-consumer-(.+)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/worker/queue/cancel-consumer/(.+)</span></code><a class="headerlink" href="#post--api-worker-queue-cancel-consumer-(.+)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stop consuming from a queue</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/worker/queue/cancel-consumer/celery@worker2?queue=sample-queue</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-<span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
-<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded; charset=utf-8</span>
-<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span>POST /api/worker/queue/cancel-consumer/celery@worker2?queue=sample-queue
+Content-Length: 0
+Content-Type: application/x-www-form-urlencoded; charset=utf-8
+Host: localhost:5555
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">52</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -408,88 +458,272 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>queue</strong> &#8211; the name of queue</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>queue</strong> – the name of queue</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>403</strong> &#8211; failed to cancel consumer</li>
-<li><strong>404</strong> &#8211; unknown worker</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.4">403 Forbidden</a> – failed to cancel consumer</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="get">
+<dl class="http get">
+<dt id="get--api-tasks">
+<code class="sig-name descname"><span class="pre">GET</span> </code><code class="sig-name descname"><span class="pre">/api/tasks</span></code><a class="headerlink" href="#get--api-tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>List tasks</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/api/tasks</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">HTTPie/0.8.0</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">1109</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
+<span class="na">Etag</span><span class="o">:</span> <span class="l">&quot;b2478118015c8b825f7b88ce6b660e5449746c37&quot;</span>
+<span class="na">Server</span><span class="o">:</span> <span class="l">TornadoServer/3.1.1</span>
+
+<span class="p">{</span>
+    <span class="nt">&quot;e42ceb2d-8730-47b5-8b4d-8e0d2a1ef7c9&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="s2">&quot;[3, 4]&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;client&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;clock&quot;</span><span class="p">:</span> <span class="mi">1079</span><span class="p">,</span>
+        <span class="nt">&quot;eta&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;exception&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;exchange&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;expires&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;kwargs&quot;</span><span class="p">:</span> <span class="s2">&quot;{}&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;tasks.add&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;received&quot;</span><span class="p">:</span> <span class="mf">1398505411.107885</span><span class="p">,</span>
+        <span class="nt">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;&#39;7&#39;&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;retried&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;retries&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nt">&quot;revoked&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;routing_key&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;runtime&quot;</span><span class="p">:</span> <span class="mf">0.01610181899741292</span><span class="p">,</span>
+        <span class="nt">&quot;sent&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;started&quot;</span><span class="p">:</span> <span class="mf">1398505411.108985</span><span class="p">,</span>
+        <span class="nt">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;SUCCESS&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;succeeded&quot;</span><span class="p">:</span> <span class="mf">1398505411.124802</span><span class="p">,</span>
+        <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="mf">1398505411.124802</span><span class="p">,</span>
+        <span class="nt">&quot;traceback&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;e42ceb2d-8730-47b5-8b4d-8e0d2a1ef7c9&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;worker&quot;</span><span class="p">:</span> <span class="s2">&quot;celery@worker1&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;f67ea225-ae9e-42a8-90b0-5de0b24507e0&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="s2">&quot;[1, 2]&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;client&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;clock&quot;</span><span class="p">:</span> <span class="mi">1042</span><span class="p">,</span>
+        <span class="nt">&quot;eta&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;exception&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;exchange&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;expires&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;kwargs&quot;</span><span class="p">:</span> <span class="s2">&quot;{}&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;tasks.add&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;received&quot;</span><span class="p">:</span> <span class="mf">1398505395.327208</span><span class="p">,</span>
+        <span class="nt">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;&#39;3&#39;&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;retried&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;retries&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nt">&quot;revoked&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;routing_key&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;runtime&quot;</span><span class="p">:</span> <span class="mf">0.012884548006695695</span><span class="p">,</span>
+        <span class="nt">&quot;sent&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;started&quot;</span><span class="p">:</span> <span class="mf">1398505395.3289</span><span class="p">,</span>
+        <span class="nt">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;SUCCESS&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;succeeded&quot;</span><span class="p">:</span> <span class="mf">1398505395.341089</span><span class="p">,</span>
+        <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="mf">1398505395.341089</span><span class="p">,</span>
+        <span class="nt">&quot;traceback&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;f67ea225-ae9e-42a8-90b0-5de0b24507e0&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;worker&quot;</span><span class="p">:</span> <span class="s2">&quot;celery@worker1&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>limit</strong> – maximum number of tasks</p></li>
+<li><p><strong>offset</strong> – skip first n tasks</p></li>
+<li><p><strong>sort_by</strong> – sort tasks by attribute (name, state, received, started)</p></li>
+<li><p><strong>workername</strong> – filter task by workername</p></li>
+<li><p><strong>taskname</strong> – filter tasks by taskname</p></li>
+<li><p><strong>state</strong> – filter tasks by state</p></li>
+<li><p><strong>received_start</strong> – filter tasks by received date (must be greater than) format %Y-%m-%d %H:%M</p></li>
+<li><p><strong>received_end</strong> – filter tasks by received date (must be less than) format %Y-%m-%d %H:%M</p></li>
+</ul>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="http get">
+<dt id="get--api-task-types">
+<code class="sig-name descname"><span class="pre">GET</span> </code><code class="sig-name descname"><span class="pre">/api/task/types</span></code><a class="headerlink" href="#get--api-task-types" title="Permalink to this definition">¶</a></dt>
+<dd><p>List (seen) task types</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/api/task/types</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">44</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
+
+<span class="p">{</span>
+    <span class="nt">&quot;task-types&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;tasks.add&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tasks.sleep&quot;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Request Headers</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Status Codes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="http get">
+<dt id="get--api-queues-length">
+<code class="sig-name descname"><span class="pre">GET</span> </code><code class="sig-name descname"><span class="pre">/api/queues/length</span></code><a class="headerlink" href="#get--api-queues-length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return length of all active queues</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span>GET /api/queues/length
+Host: localhost:5555
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">94</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
+
+<span class="p">{</span>
+    <span class="nt">&quot;active_queues&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;celery&quot;</span><span class="p">,</span> <span class="nt">&quot;messages&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;video-queue&quot;</span><span class="p">,</span> <span class="nt">&quot;messages&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Request Headers</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Status Codes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4">503 Service Unavailable</a> – result backend is not configured</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="http get">
 <dt id="get--api-task-info-(.*)">
-<tt class="descname">GET </tt><tt class="descname">/api/task/info/(.*)</tt><a class="headerlink" href="#get--api-task-info-(.*)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GET</span> </code><code class="sig-name descname"><span class="pre">/api/task/info/(.*)</span></code><a class="headerlink" href="#get--api-task-info-(.*)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a task info</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span> <span class="nn">/api/task/info/c60be250-fe52-48df-befb-ac66174076e6</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/api/task/info/91396550-c228-4111-9da4-9d88cfd5ddc6</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Accept</span><span class="o">:</span> <span class="l">*/*</span>
 <span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate, compress</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
-<span class="na">Content-Length</span><span class="o">:</span> <span class="l">171</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">575</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
 <span class="p">{</span>
-    <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="s2">&quot;[1, 2]&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="s2">&quot;[2, 2]&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;client&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;clock&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+    <span class="nt">&quot;eta&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;exception&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;exchange&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;expires&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;failed&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
     <span class="nt">&quot;kwargs&quot;</span><span class="p">:</span> <span class="s2">&quot;{}&quot;</span><span class="p">,</span>
     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;tasks.add&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;&#39;3&#39;&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;received&quot;</span><span class="p">:</span> <span class="mf">1400806241.970742</span><span class="p">,</span>
+    <span class="nt">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;&#39;4&#39;&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;retried&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;retries&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;revoked&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;routing_key&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;runtime&quot;</span><span class="p">:</span> <span class="mf">2.0037889280356467</span><span class="p">,</span>
+    <span class="nt">&quot;sent&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nt">&quot;started&quot;</span><span class="p">:</span> <span class="mf">1400806241.972624</span><span class="p">,</span>
     <span class="nt">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;SUCCESS&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;task-id&quot;</span><span class="p">:</span> <span class="s2">&quot;c60be250-fe52-48df-befb-ac66174076e6&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;succeeded&quot;</span><span class="p">:</span> <span class="mf">1400806243.975336</span><span class="p">,</span>
+    <span class="nt">&quot;task-id&quot;</span><span class="p">:</span> <span class="s2">&quot;91396550-c228-4111-9da4-9d88cfd5ddc6&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="mf">1400806243.975336</span><span class="p">,</span>
+    <span class="nt">&quot;traceback&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
     <span class="nt">&quot;worker&quot;</span><span class="p">:</span> <span class="s2">&quot;celery@worker1&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+<dl class="field-list simple">
+<dt class="field-odd">Request Headers</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>404</strong> &#8211; unknown task</li>
+</dd>
+<dt class="field-even">Status Codes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown task</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
-<dt id="post--api-task-async-apply-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/task/async-apply/(.+)</tt><a class="headerlink" href="#post--api-task-async-apply-(.+)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute a task</p>
+<dl class="http post">
+<dt id="post--api-task-apply-(.+)">
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/task/apply/(.+)</span></code><a class="headerlink" href="#post--api-task-apply-(.+)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a task by name and wait results</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/task/async-apply/tasks.add</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/task/apply/tasks.add</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
 <span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate, compress</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">16</span>
@@ -502,7 +736,58 @@
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">71</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
+
+<span class="p">{</span>
+    <span class="nt">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;SUCCESS&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;task-id&quot;</span><span class="p">:</span> <span class="s2">&quot;c60be250-fe52-48df-befb-ac66174076e6&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;result&quot;</span><span class="p">:</span> <span class="mi">3</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – a list of arguments</p></li>
+<li><p><strong>kwargs</strong> – a dictionary of arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown task</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="http post">
+<dt id="post--api-task-async-apply-(.+)">
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/task/async-apply/(.+)</span></code><a class="headerlink" href="#post--api-task-async-apply-(.+)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a task</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/task/async-apply/tasks.add</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate, compress</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">16</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=utf-8</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
+
+<span class="p">{</span>
+    <span class="nt">&quot;args&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">71</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 <span class="na">Date</span><span class="o">:</span> <span class="l">Sun, 13 Apr 2014 15:55:00 GMT</span>
@@ -513,40 +798,35 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>args</strong> &#8211; a list of arguments</li>
-<li><strong>kwargs</strong> &#8211; a dictionary of arguments</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – a list of arguments</p></li>
+<li><p><strong>kwargs</strong> – a dictionary of arguments</p></li>
+<li><p><strong>options</strong> – a dictionary of <cite>apply_async</cite> keyword arguments</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>404</strong> &#8211; unknown task</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown task</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-task-send-task-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/task/send-task/(.+)</tt><a class="headerlink" href="#post--api-task-send-task-(.+)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute a task by name (doesn&#8217;t require task sources)</p>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/task/send-task/(.+)</span></code><a class="headerlink" href="#post--api-task-send-task-(.+)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a task by name (doesn’t require task sources)</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/task/send-task/tasks.add</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/task/send-task/tasks.add</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
 <span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate, compress</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">16</span>
@@ -559,7 +839,7 @@
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">71</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -569,45 +849,39 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>args</strong> &#8211; a list of arguments</li>
-<li><strong>kwargs</strong> &#8211; a dictionary of arguments</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – a list of arguments</p></li>
+<li><p><strong>kwargs</strong> – a dictionary of arguments</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>404</strong> &#8211; unknown task</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown task</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="get">
+<dl class="http get">
 <dt id="get--api-task-result-(.+)">
-<tt class="descname">GET </tt><tt class="descname">/api/task/result/(.+)</tt><a class="headerlink" href="#get--api-task-result-(.+)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">GET</span> </code><code class="sig-name descname"><span class="pre">/api/task/result/(.+)</span></code><a class="headerlink" href="#get--api-task-result-(.+)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a task result</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span> <span class="nn">/api/task/result/c60be250-fe52-48df-befb-ac66174076e6</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/api/task/result/c60be250-fe52-48df-befb-ac66174076e6</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">84</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -618,33 +892,68 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> – how long to wait, in seconds, before the operation times out</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>503</strong> &#8211; result backend is not configured</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4">503 Service Unavailable</a> – result backend is not configured</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
+<dt id="post--api-task-abort-(.+)">
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/task/abort/(.+)</span></code><a class="headerlink" href="#post--api-task-abort-(.+)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abort a running task</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/task/abort/c60be250-fe52-48df-befb-ac66174076e6</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">61</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
+
+<span class="p">{</span>
+    <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Aborted &#39;1480b55c-b8b2-462c-985e-24af3e9158f9&#39;&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Request Headers</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Status Codes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4">503 Service Unavailable</a> – result backend is not configured</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="http post">
 <dt id="post--api-task-timeout-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/task/timeout/(.+)</tt><a class="headerlink" href="#post--api-task-timeout-(.+)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/task/timeout/(.+)</span></code><a class="headerlink" href="#post--api-task-timeout-(.+)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change soft and hard time limits for a task</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/task/timeout/tasks.sleep</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/task/timeout/tasks.sleep</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">44</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded; charset=utf-8</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
@@ -653,48 +962,42 @@ soft=30&amp;hard=100&amp;workername=celery%40worker1
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">46</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
 <span class="p">{</span>
-    <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;new rate limit set successfully&quot;</span>
+    <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;time limits set successfully&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>workername</strong> &#8211; worker name</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>workername</strong> – worker name</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>404</strong> &#8211; unknown task/worker</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown task/worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-task-rate-limit-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/task/rate-limit/(.+)</tt><a class="headerlink" href="#post--api-task-rate-limit-(.+)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/task/rate-limit/(.+)</span></code><a class="headerlink" href="#post--api-task-rate-limit-(.+)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change rate limit for a task</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/task/rate-limit/tasks.sleep</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/task/rate-limit/tasks.sleep</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">41</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded; charset=utf-8</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
@@ -703,55 +1006,49 @@ ratelimit=200&amp;workername=celery%40worker1
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">61</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
 <span class="p">{</span>
-    <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Revoked &#39;1480b55c-b8b2-462c-985e-24af3e9158f9&#39;&quot;</span>
+    <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;new rate limit set successfully&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>terminate</strong> &#8211; terminate the task if it is running</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>workername</strong> – worker name</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
-<li><strong>404</strong> &#8211; unknown task/worker</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – unknown task/worker</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="post">
+<dl class="http post">
 <dt id="post--api-task-revoke-(.+)">
-<tt class="descname">POST </tt><tt class="descname">/api/task/revoke/(.+)</tt><a class="headerlink" href="#post--api-task-revoke-(.+)" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">POST</span> </code><code class="sig-name descname"><span class="pre">/api/task/revoke/(.+)</span></code><a class="headerlink" href="#post--api-task-revoke-(.+)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Revoke a task</p>
 <p><strong>Example request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">POST</span> <span class="nn">/api/task/revoke/1480b55c-b8b2-462c-985e-24af3e9158f9?terminate=true</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-<span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
-<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded; charset=utf-8</span>
-<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5555</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span>POST /api/task/revoke/1480b55c-b8b2-462c-985e-24af3e9158f9?terminate=true
+Content-Length: 0
+Content-Type: application/x-www-form-urlencoded; charset=utf-8
+Host: localhost:5555
 </pre></div>
 </div>
 <p><strong>Example response</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Length</span><span class="o">:</span> <span class="l">61</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json; charset=UTF-8</span>
 
@@ -760,104 +1057,74 @@ ratelimit=200&amp;workername=celery%40worker1
 <span class="p">}</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>terminate</strong> &#8211; terminate the task if it is running</li>
+<dl class="field-list simple">
+<dt class="field-odd">Query Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>terminate</strong> – terminate the task if it is running</p></li>
+<li><p><strong>signal</strong> – name of signal to send to process if terminate (default: ‘SIGTERM’)</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Request Headers:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><ul class="first simple">
-<li><strong>Authorization</strong> &#8211; optional OAuth token to authenticate</li>
+</dd>
+<dt class="field-even">Request Headers</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://tools.ietf.org/html/rfc7235#section-4.2">Authorization</a> – optional OAuth token to authenticate</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
-<li><strong>200</strong> &#8211; no error</li>
-<li><strong>401</strong> &#8211; unauthorized request</li>
+</dd>
+<dt class="field-odd">Status Codes</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – no error</p></li>
+<li><p><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">401 Unauthorized</a> – unauthorized request</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p>
   <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
     allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
-</ul>
-</li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">API Reference</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#google-openid">Google OpenID</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
-</ul>
-
   <h4>Previous topic</h4>
-  <p class="topless"><a href="config.html"
-                        title="previous chapter">Configuration</a></p>
+  <p class="topless"><a href="tasks_filter.html"
+                        title="previous chapter">Tasks filtering</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="auth.html"
                         title="next chapter">Authentication</a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="auth.html" title="Authentication"
              >next</a></li>
         <li class="right" >
-          <a href="config.html" title="Configuration"
+          <a href="tasks_filter.html" title="Tasks filtering"
              >previous</a> |</li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">API Reference</a></li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2014, Mher Movsisyan.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mher Movsisyan.
     </div>
   </body>
 </html>

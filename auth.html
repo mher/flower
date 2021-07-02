@@ -1,34 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Authentication &mdash; Flower 0.7.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentication &#8212; Flower 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flower 0.7.0 documentation" href="index.html" />
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Running behind reverse proxy" href="reverse-proxy.html" />
     <link rel="prev" title="API Reference" href="api.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -37,55 +25,129 @@
         <li class="right" >
           <a href="api.html" title="API Reference"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Authentication</a></li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
 <div class="deck">
 
 </div>
-    <div class="section" id="authentication">
-<h1>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h1>
+    <div class="section" id="id1">
+<h1>Authentication<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <p>Protecting your Flower instance from unwarranted access is important
 if it runs in an untrusted environment. Below, we outline the various
 forms of authentication supported by Flower.</p>
 <div class="section" id="http-basic-authentication">
 <span id="basic-auth"></span><h2>HTTP Basic Authentication<a class="headerlink" href="#http-basic-authentication" title="Permalink to this headline">¶</a></h2>
 <p>Securing Flower with Basic Authentication is easy.</p>
-<p>The <cite>&#8211;basic_auth</cite> option accepts <cite>user:password</cite> pairs separated by
-semicolons. If configured, any client trying to access this
+<p>The <cite>–basic_auth</cite> option accepts <cite>user:password</cite> pairs separated by
+a comma. If configured, any client trying to access this
 Flower instance will be prompted to provide the credentials specified in
 this argument:</p>
-<div class="highlight-python"><pre>$ celery flower --basic_auth=user1:password1,user2:password2</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery flower --basic_auth=user1:password1,user2:password2
+</pre></div>
 </div>
-<p>See also <a class="reference internal" href="reverse-proxy.html#reverse-proxy"><em>Running behind reverse proxy</em></a></p>
+<p>See also <a class="reference internal" href="reverse-proxy.html#reverse-proxy"><span class="std std-ref">Running behind reverse proxy</span></a></p>
 </div>
-<div class="section" id="google-openid">
-<span id="id1"></span><h2>Google OpenID<a class="headerlink" href="#google-openid" title="Permalink to this headline">¶</a></h2>
-<p>Flower also supports Google OpenID. This way you can authenticate any user
-with a Google account. Google OpenID authentication is enabled using the
-&#8211;auth option, which accepts a group of emails in the form of a regular
-expression.</p>
-<p>Grant access to Google accounts with email <cite>me&#64;gmail.com</cite> and
-<cite>you&#64;gmail.com</cite>:</p>
-<div class="highlight-python"><pre>$ celery flower --auth="me@gmail.com|you@gmail.com"</pre>
+<div class="section" id="google-oauth-2-0">
+<span id="google-oauth"></span><h2>Google OAuth 2.0<a class="headerlink" href="#google-oauth-2-0" title="Permalink to this headline">¶</a></h2>
+<p>Flower supports Google OAuth 2.0. This way you can authenticate any user
+with a Google account. Google OAuth 2.0 authentication is enabled using the
+<cite>–auth</cite>, <cite>–oauth2_key</cite>, <cite>–oauth2_secret</cite> and <cite>–oauth2_redirect_uri</cite> options.</p>
+<p><cite>–auth</cite> is a regular expression, for granting access only to the specified email pattern.
+<cite>–oauth2_key</cite> and <cite>–oauth2_secret</cite> are your credentials from your <a class="reference external" href="https://console.developers.google.com">Google Developer Console</a>.
+<cite>–oauth2_redirect_uri</cite> is there to specify what is the redirect_uri associated to your key and secret</p>
+<p>For instance, if you want to grant access to <cite>me&#64;gmail.com</cite> and <cite>you&#64;gmail.com</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery flower --auth=&quot;me@gmail.com|you@gmail.com&quot; --oauth2_key=... --oauth2_secret=... --oauth2_redirect_uri=http://flower.example.com/login
+</pre></div>
 </div>
-<p>Grant access to all Google accounts having a domain of <cite>example.com</cite>:</p>
-<div class="highlight-python"><pre>$ celery flower --auth=.*@example\.com</pre>
+<p>Alternatively, you can set environment variables instead of command line arguments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export FLOWER_OAUTH2_KEY=...
+$ export FLOWER_OAUTH2_SECRET=...
+$ export FLOWER_OAUTH2_REDIRECT_URI=http://flower.example.com/login
+$ celery flower --auth=.*@example\.com
+</pre></div>
 </div>
+</div>
+<div class="section" id="okta-oauth">
+<span id="github-oauth"></span><h2>Okta OAuth<a class="headerlink" href="#okta-oauth" title="Permalink to this headline">¶</a></h2>
+<p>Flower also supports Okta OAuth. Flower should be registered in
+&lt;<a class="reference external" href="https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/register-app-in-okta/">https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/register-app-in-okta/</a>&gt;
+before getting started. See <a class="reference external" href="https://developer.okta.com/docs/reference/api/oidc/">Okta OAuth API</a> docs for more info.</p>
+<p>Okta OAuth should be activated using <cite>–auth_provider</cite> option.
+The client id, secret and redirect uri should be provided using
+<cite>–oauth2_key</cite>, <cite>–oauth2_secret</cite>, <cite>–oauth2_redirect_uri</cite> options or using
+<cite>FLOWER_OAUTH2_KEY</cite>, <cite>FLOWER_OAUTH2_SECRET</cite>, <cite>FLOWER_OAUTH2_REDIRECT_URI</cite> environment variables.</p>
+<blockquote>
+<div><dl>
+<dt>The URL from which OAuth2 API URLs will be built should be set using <cite>FLOWER_OAUTH2_OKTA_BASE_URL</cite></dt><dd><p>environment variable:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
+$ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
+$ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
+$ export FLOWER_OAUTH2_OKTA_BASE_URL=https://my-company.okta.com/oauth2
+$ celery flower --auth_provider=flower.views.auth.OktaLoginHandler --auth=.*@example\.com
+</pre></div>
+</div>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="id2">
+<h2>GitHub OAuth<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>Flower also supports GitHub OAuth. Flower should be registered in
+&lt;<a class="reference external" href="https://github.com/settings/applications/new">https://github.com/settings/applications/new</a>&gt; before getting started.
+See <a class="reference external" href="https://developer.github.com/v3/oauth/">GitHub OAuth API</a> docs for more info.</p>
+<p>GitHub OAuth should be activated using <cite>–auth_provider</cite> option.
+The client id, secret and redirect uri should be provided using
+<cite>–oauth2_key</cite>, <cite>–oauth2_secret</cite> and <cite>–oauth2_redirect_uri</cite> options or using
+<cite>FLOWER_OAUTH2_KEY</cite>, <cite>FLOWER_OAUTH2_SECRET</cite> and <cite>FLOWER_OAUTH2_REDIRECT_URI</cite>
+environment variables.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
+$ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
+$ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
+$ celery flower --auth_provider=flower.views.auth.GithubLoginHandler --auth=.*@example\.com
+</pre></div>
+</div>
+</div>
+<div class="section" id="gitlab-oauth">
+<span id="id3"></span><h2>GitLab OAuth<a class="headerlink" href="#gitlab-oauth" title="Permalink to this headline">¶</a></h2>
+<p>Flower also supports GitLab OAuth. Flower should be registered in
+&lt;<a class="reference external" href="https://gitlab.com/profile/applications">https://gitlab.com/profile/applications</a>&gt; before getting started.
+See <a class="reference external" href="https://docs.gitlab.com/ee/api/oauth2.html">GitLab OAuth2 API</a> docs for more info.</p>
+<p>GitLab OAuth should be activated using <cite>–auth_provider</cite> option.
+The client id, secret and redirect uri should be provided using
+<cite>–oauth2_key</cite>, <cite>–oauth2_secret</cite> and <cite>–oauth2_redirect_uri</cite> options or using
+<cite>FLOWER_OAUTH2_KEY</cite>, <cite>FLOWER_OAUTH2_SECRET</cite> and <cite>FLOWER_OAUTH2_REDIRECT_URI</cite>
+environment variables.</p>
+<dl class="simple">
+<dt>A list of allowed GitLab groups can be specified using the</dt><dd><p><cite>FLOWER_GITLAB_AUTH_ALLOWED_GROUPS</cite> environment variable (e.g. <code class="docutils literal notranslate"><span class="pre">group1,group2/subgroup</span></code>).</p>
+</dd>
+</dl>
+<p>The default minimum required group access level can be changes by
+<cite>FLOWER_GITLAB_MIN_ACCESS_LEVEL</cite> environment variable.
+See <a class="reference external" href="https://docs.gitlab.com/ee/api/members.html">Group and project members API</a> for details.</p>
+<blockquote>
+<div><p>$ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
+$ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
+$ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
+$ export FLOWER_GITLAB_AUTH_ALLOWED_GROUPS=group1,group2/subgroup
+$ celery flower –auth_provider=flower.views.auth.GitLabLoginHandler –auth=.*&#64;example.com</p>
+</div></blockquote>
 </div>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p>
   <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
     allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
@@ -96,22 +158,48 @@ expression.</p>
 <li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage-examples">Usage Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tasks_filter.html">Tasks filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tasks_filter.html#task-filter-syntax">Task filter syntax</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Authentication</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Authentication</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#http-basic-authentication">HTTP Basic Authentication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#google-openid">Google OpenID</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#google-oauth-2-0">Google OAuth 2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#okta-oauth">Okta OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">GitHub OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gitlab-oauth">GitLab OAuth</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus-integration.html">Prometheus Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#configure-prometheus-to-scrape-flower-metrics">Configure Prometheus to scrape Flower metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#available-metrics">Available Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#using-metric-labels">Using Metric Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#example-prometheus-alerts">Example Prometheus Alerts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#example-grafana-dashboard">Example Grafana Dashboard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus-integration.html#celery-flower-prometheus-grafana-integration-guide">Celery -&gt; Flower -&gt; Prometheus -&gt; Grafana Integration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-celery-broker">Start Celery Broker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#set-up-your-celery-application">Set Up Your Celery Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-flower-monitoring">Start Flower Monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#configure-and-start-prometheus">Configure and Start Prometheus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-grafana">Start Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#add-prometheus-as-a-data-source-in-grafana">Add Prometheus As a Data Source In Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#import-the-celery-monitoring-dashboard-in-grafana">Import The Celery Monitoring Dashboard In Grafana</a></li>
+</ul>
+</li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -120,24 +208,21 @@ expression.</p>
   <h4>Next topic</h4>
   <p class="topless"><a href="reverse-proxy.html"
                         title="next chapter">Running behind reverse proxy</a></p>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -146,11 +231,12 @@ expression.</p>
         <li class="right" >
           <a href="api.html" title="API Reference"
              >previous</a> |</li>
-        <li><a href="index.html">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Authentication</a></li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2014, Mher Movsisyan.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mher Movsisyan.
     </div>
   </body>
 </html>

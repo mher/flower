@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Installation &#8212; Flower 1.0.0 documentation</title>
+    <title>Tasks filtering &#8212; Flower 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/celery.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -13,20 +13,20 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Configuration" href="config.html" />
-    <link rel="prev" title="Screenshots" href="screenshots.html" /> 
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Configuration" href="config.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="config.html" title="Configuration"
+          <a href="api.html" title="API Reference"
              accesskey="N">next</a></li>
         <li class="right" >
-          <a href="screenshots.html" title="Screenshots"
+          <a href="config.html" title="Configuration"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Installation</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Tasks filtering</a></li> 
       </ul>
     </div>  
 
@@ -38,58 +38,24 @@
 <div class="deck">
 
 </div>
-    <div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>Installing <cite>flower</cite> with <a class="reference external" href="http://www.pip-installer.org/">pip</a> is simple</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install flower
-</pre></div>
-</div>
-<p>Development version can be installed with</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install https://github.com/mher/flower/zipball/master#egg=flower
-</pre></div>
-</div>
-<div class="section" id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p><strong>Important</strong> Please note that from version 1.0.1 Flower uses Celery 5 and has to be invoked in the same style as celery
-commands do.</p>
-<p>The key takeaway here is that the Celery app’s arguments have to be specified after the <cite>celery</cite> command and Flower’s
-arguments have to be specified after the <cite>flower</cite> sub-command.</p>
-<p>This is the template to follow:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">celery</span> <span class="p">[</span><span class="n">celery</span> <span class="n">args</span><span class="p">]</span> <span class="n">flower</span> <span class="p">[</span><span class="n">flower</span> <span class="n">args</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>Core Celery args that you may want to set:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">A</span><span class="p">,</span> <span class="o">--</span><span class="n">app</span>
-<span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="o">--</span><span class="n">broker</span>
-<span class="o">--</span><span class="n">result</span><span class="o">-</span><span class="n">backend</span>
-</pre></div>
-</div>
-<p>More info on available <a class="reference external" href="https://docs.celeryproject.org/en/stable/reference/cli.html#celery">Celery command args</a>.</p>
-<p>For Flower command args <a class="reference external" href="https://flower.readthedocs.io/en/latest/config.html#options">see here</a>.</p>
-</div>
-<div class="section" id="usage-examples">
-<h2>Usage Examples<a class="headerlink" href="#usage-examples" title="Permalink to this headline">¶</a></h2>
-<p>Launch the Flower server at specified port other than default 5555 (open the UI at <a class="reference external" href="http://localhost:5566">http://localhost:5566</a>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery flower --port=5566
-</pre></div>
-</div>
-<p>Specify Celery application path with address and port for Flower:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery -A proj flower  --address=127.0.0.6 --port=5566
-</pre></div>
-</div>
-<p>Launch using docker:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ docker run -p 5555:5555 mher/flower
-</pre></div>
-</div>
-<p>Launch with unix socket file:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery flower --unix-socket=/tmp/flower.sock
-</pre></div>
-</div>
-<p>Broker URL and other configuration options can be passed through the standard Celery options (notice that they are after
-Celery command and before Flower sub-command):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery --broker=amqp://guest:guest@localhost:5672// flower
-</pre></div>
-</div>
+    <div class="section" id="tasks-filtering">
+<h1>Tasks filtering<a class="headerlink" href="#tasks-filtering" title="Permalink to this headline">¶</a></h1>
+<p>By now, tasks can be filtered by worker, type, state, received and started datetime.
+Also, filtering by args/kwargs/result/state value available.</p>
+<div class="section" id="task-filter-syntax">
+<h2>Task filter syntax<a class="headerlink" href="#task-filter-syntax" title="Permalink to this headline">¶</a></h2>
+<p>Flower uses github-style syntax for args/kwargs/result filtering.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>foo</cite> find all tasks containing foo in args, kwargs or result</p></li>
+<li><p><cite>args:foo</cite> find all tasks containing foo in arguments</p></li>
+<li><p><cite>kwargs:foo=bar</cite> find all tasks containing foo=bar keyword</p></li>
+<li><p><cite>result:foo</cite> find all tasks containing foo in result</p></li>
+<li><p><cite>state:FAILURE</cite> find all failed tasks</p></li>
+</ul>
+</div></blockquote>
+<p>If the search term contains spaces it should be enclosed in ” (e.g. <cite>args:”hello world”</cite>).</p>
+<p>For examples, see <cite>tests/utils/test_search.py</cite>.</p>
 </div>
 </div>
 
@@ -107,17 +73,17 @@ Celery command and before Flower sub-command):</p>
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#usage-examples">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage-examples">Usage Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tasks_filter.html">Tasks filtering</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tasks_filter.html#task-filter-syntax">Task filter syntax</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tasks filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#task-filter-syntax">Task filter syntax</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
@@ -154,11 +120,11 @@ Celery command and before Flower sub-command):</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="screenshots.html"
-                        title="previous chapter">Screenshots</a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="config.html"
-                        title="next chapter">Configuration</a></p>
+                        title="previous chapter">Configuration</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">API Reference</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -177,13 +143,13 @@ Celery command and before Flower sub-command):</p>
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="config.html" title="Configuration"
+          <a href="api.html" title="API Reference"
              >next</a></li>
         <li class="right" >
-          <a href="screenshots.html" title="Screenshots"
+          <a href="config.html" title="Configuration"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Installation</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Tasks filtering</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

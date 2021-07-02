@@ -1,93 +1,81 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Flower - Celery monitoring tool &mdash; Flower 0.7.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flower - Celery monitoring tool &#8212; Flower 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.7.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Flower 0.7.0 documentation" href="#" />
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Features" href="features.html" /> 
-  </head>
-  <body>
-    <div class="related">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="features.html" title="Features"
              accesskey="N">next</a></li>
-        <li><a href="#">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Flower - Celery monitoring tool</a></li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
 <div class="deck">
 
 </div>
     <div class="section" id="flower-celery-monitoring-tool">
 <h1>Flower - Celery monitoring tool<a class="headerlink" href="#flower-celery-monitoring-tool" title="Permalink to this headline">¶</a></h1>
-<p>Flower is a web based tool for monitoring and administrating <a class="reference external" href="http://celeryproject.org">Celery</a> clusters</p>
+<p>Flower is a web based tool for monitoring and administrating <a class="reference external" href="https://docs.celeryproject.org/en/stable/#">Celery</a> clusters</p>
 <div class="section" id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
 <ul>
-<li><p class="first">Real-time monitoring using Celery Events</p>
+<li><p>Real-time monitoring using Celery Events</p>
 <blockquote>
 <div><ul class="simple">
-<li>Task progress and history</li>
-<li>Ability to show task details (arguments, start time, runtime, and more)</li>
-<li>Graphs and statistics</li>
+<li><p>Task progress and history</p></li>
+<li><p>Ability to show task details (arguments, start time, runtime, and more)</p></li>
+<li><p>Graphs and statistics</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Remote Control</p>
+<li><p>Remote Control</p>
 <blockquote>
 <div><ul class="simple">
-<li>View worker status and statistics</li>
-<li>Shutdown and restart worker instances</li>
-<li>Control worker pool size and autoscale settings</li>
-<li>View and modify the queues a worker instance consumes from</li>
-<li>View currently running tasks</li>
-<li>View scheduled tasks (ETA/countdown)</li>
-<li>View reserved and revoked tasks</li>
-<li>Apply time and rate limits</li>
-<li>Configuration viewer</li>
-<li>Revoke or terminate tasks</li>
+<li><p>View worker status and statistics</p></li>
+<li><p>Shutdown and restart worker instances</p></li>
+<li><p>Control worker pool size and autoscale settings</p></li>
+<li><p>View and modify the queues a worker instance consumes from</p></li>
+<li><p>View currently running tasks</p></li>
+<li><p>View scheduled tasks (ETA/countdown)</p></li>
+<li><p>View reserved and revoked tasks</p></li>
+<li><p>Apply time and rate limits</p></li>
+<li><p>Configuration viewer</p></li>
+<li><p>Revoke or terminate tasks</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Broker monitoring</p>
+<li><p>Broker monitoring</p>
 <blockquote>
 <div><ul class="simple">
-<li>View statistics for all Celery queues</li>
-<li>Queue length graphs</li>
+<li><p>View statistics for all Celery queues</p></li>
+<li><p>Queue length graphs</p></li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">HTTP API</p>
-</li>
-<li><p class="first">Basic Auth and Google OpenID authentication</p>
-</li>
+<li><p>HTTP API</p></li>
+<li><p>Basic Auth, GitHub OAuth2 and Google OpenID authentication</p></li>
+<li><p>Prometheus integration</p></li>
 </ul>
 <div class="section" id="contents">
 <h3>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h3>
@@ -97,10 +85,15 @@
 <li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage-examples">Usage Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tasks_filter.html">Tasks filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tasks_filter.html#task-filter-syntax">Task filter syntax</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
@@ -108,11 +101,32 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#google-openid">Google OpenID</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#google-oauth-2-0">Google OAuth 2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#okta-oauth">Okta OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#id2">GitHub OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#gitlab-oauth">GitLab OAuth</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus-integration.html">Prometheus Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#configure-prometheus-to-scrape-flower-metrics">Configure Prometheus to scrape Flower metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#available-metrics">Available Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#using-metric-labels">Using Metric Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#example-prometheus-alerts">Example Prometheus Alerts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#example-grafana-dashboard">Example Grafana Dashboard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus-integration.html#celery-flower-prometheus-grafana-integration-guide">Celery -&gt; Flower -&gt; Prometheus -&gt; Grafana Integration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-celery-broker">Start Celery Broker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#set-up-your-celery-application">Set Up Your Celery Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-flower-monitoring">Start Flower Monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#configure-and-start-prometheus">Configure and Start Prometheus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-grafana">Start Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#add-prometheus-as-a-data-source-in-grafana">Add Prometheus As a Data Source In Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#import-the-celery-monitoring-dashboard-in-grafana">Import The Celery Monitoring Dashboard In Grafana</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <p>Flower is Open Source and licensed under the <a class="reference external" href="http://www.opensource.org/licenses/BSD-3-Clause">BSD License</a>.</p>
@@ -121,10 +135,11 @@
 </div>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p>
   <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
     allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
@@ -135,10 +150,15 @@
 <li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage-examples">Usage Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tasks_filter.html">Tasks filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tasks_filter.html#task-filter-syntax">Task filter syntax</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
@@ -146,41 +166,60 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
-<li class="toctree-l2"><a class="reference internal" href="auth.html#google-openid">Google OpenID</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#google-oauth-2-0">Google OAuth 2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#okta-oauth">Okta OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#id2">GitHub OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#gitlab-oauth">GitLab OAuth</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus-integration.html">Prometheus Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#configure-prometheus-to-scrape-flower-metrics">Configure Prometheus to scrape Flower metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#available-metrics">Available Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#using-metric-labels">Using Metric Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#example-prometheus-alerts">Example Prometheus Alerts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#example-grafana-dashboard">Example Grafana Dashboard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus-integration.html#celery-flower-prometheus-grafana-integration-guide">Celery -&gt; Flower -&gt; Prometheus -&gt; Grafana Integration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-celery-broker">Start Celery Broker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#set-up-your-celery-application">Set Up Your Celery Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-flower-monitoring">Start Flower Monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#configure-and-start-prometheus">Configure and Start Prometheus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-grafana">Start Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#add-prometheus-as-a-data-source-in-grafana">Add Prometheus As a Data Source In Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#import-the-celery-monitoring-dashboard-in-grafana">Import The Celery Monitoring Dashboard In Grafana</a></li>
+</ul>
+</li>
 </ul>
 
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="features.html" title="Features"
              >next</a></li>
-        <li><a href="#">Flower 0.7.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="#">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Flower - Celery monitoring tool</a></li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2014, Mher Movsisyan.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mher Movsisyan.
     </div>
   </body>
 </html>

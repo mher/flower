@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>flower &#8212; Flower 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">flower</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+<div class="deck">
+
+</div>
+    <div class="section" id="flower">
+<h1>flower<a class="headerlink" href="#flower" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="synopsis">
+<h2>SYNOPSIS<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">flower</span></code> [<em>OPTIONS</em>]</p>
+</div>
+<div class="section" id="description">
+<h2>DESCRIPTION<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Flower is a web based tool for monitoring and administrating Celery clusters.
+It has these features:</p>
+<ul>
+<li><p>Real-time monitoring using Celery Events</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Task progress and history</p></li>
+<li><p>Ability to show task details (arguments, start time, runtime, and more)</p></li>
+<li><p>Graphs and statistics</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Remote Control</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>View worker status and statistics</p></li>
+<li><p>Shutdown and restart worker instances</p></li>
+<li><p>Control worker pool size and autoscale settings</p></li>
+<li><p>View and modify the queues a worker instance consumes from</p></li>
+<li><p>View currently running tasks</p></li>
+<li><p>View scheduled tasks (ETA/countdown)</p></li>
+<li><p>View reserved and revoked tasks</p></li>
+<li><p>Apply time and rate limits</p></li>
+<li><p>Configuration viewer</p></li>
+<li><p>Revoke or terminate tasks</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Broker monitoring</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>View statistics for all Celery queues</p></li>
+<li><p>Queue length graphs</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>HTTP API</p></li>
+<li><p>Basic Auth and Google OpenID authentication</p></li>
+<li><p>Prometheus integration</p></li>
+</ul>
+</div>
+<div class="section" id="options">
+<h2>OPTIONS<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><dl class="option-list">
+<dt><kbd><span class="option">--address</span></kbd></dt>
+<dd><p>run on the given address</p>
+</dd>
+<dt><kbd><span class="option">--auth</span></kbd></dt>
+<dd><p>regexp  of emails to grant access</p>
+</dd>
+<dt><kbd><span class="option">--auth_provider</span></kbd></dt>
+<dd><p>sets authentication provider class</p>
+</dd>
+<dt><kbd><span class="option">--auto_refresh</span></kbd></dt>
+<dd><p>refresh dashboard automatically (default <em>True</em>)</p>
+</dd>
+<dt><kbd><span class="option">--basic_auth</span></kbd></dt>
+<dd><p>colon separated user-password to enable
+basic auth</p>
+</dd>
+<dt><kbd><span class="option">--broker_api</span></kbd></dt>
+<dd><p>inspect broker e.g.
+<a class="reference external" href="http://guest:guest&#64;localhost:15672/api/">http://guest:guest&#64;localhost:15672/api/</a></p>
+</dd>
+<dt><kbd><span class="option">--ca_certs</span></kbd></dt>
+<dd><p>path to SSL certificate authority (CA) file</p>
+</dd>
+<dt><kbd><span class="option">--certfile</span></kbd></dt>
+<dd><p>path to SSL certificate file</p>
+</dd>
+<dt><kbd><span class="option">--conf</span></kbd></dt>
+<dd><p>flower configuration file path (default <em>flowerconfig.py</em>)</p>
+</dd>
+<dt><kbd><span class="option">--cookie_secret</span></kbd></dt>
+<dd><p>secure cookie secret</p>
+</dd>
+<dt><kbd><span class="option">--db</span></kbd></dt>
+<dd><p>flower database file (default <em>flower.db</em>)</p>
+</dd>
+<dt><kbd><span class="option">--debug</span></kbd></dt>
+<dd><p>run in debug mode (default <em>False</em>)</p>
+</dd>
+<dt><kbd><span class="option">--enable_events</span></kbd></dt>
+<dd><p>periodically enable Celery events (default <em>True</em>)</p>
+</dd>
+<dt><kbd><span class="option">--format_task</span></kbd></dt>
+<dd><p>use custom task formatter</p>
+</dd>
+<dt><kbd><span class="option">--help</span></kbd></dt>
+<dd><p>show this help information</p>
+</dd>
+<dt><kbd><span class="option">--inspect</span></kbd></dt>
+<dd><p>inspect workers (default <em>True</em>)</p>
+</dd>
+<dt><kbd><span class="option">--inspect_timeout</span></kbd></dt>
+<dd><p>inspect timeout (in milliseconds) (default
+<em>1000</em>)</p>
+</dd>
+<dt><kbd><span class="option">--keyfile</span></kbd></dt>
+<dd><p>path to SSL key file</p>
+</dd>
+<dt><kbd><span class="option">--max_workers</span></kbd></dt>
+<dd><p>maximum number of workers to keep in memory
+(default <em>5000</em>)</p>
+</dd>
+<dt><kbd><span class="option">--max_tasks</span></kbd></dt>
+<dd><p>maximum number of tasks to keep in memory
+(default <em>10000</em>)</p>
+</dd>
+<dt><kbd><span class="option">--natural_time</span></kbd></dt>
+<dd><p>show time in relative format (default <em>False</em>)</p>
+</dd>
+<dt><kbd><span class="option">--persistent</span></kbd></dt>
+<dd><p>enable persistent mode (default <em>False</em>)</p>
+</dd>
+<dt><kbd><span class="option">--port</span></kbd></dt>
+<dd><p>run on the given port (default <em>5555</em>)</p>
+</dd>
+<dt><kbd><span class="option">--purge_offline_workers</span></kbd></dt>
+<dd><p>time (in seconds) after which offline workers are purged
+from dashboard</p>
+</dd>
+<dt><kbd><span class="option">--state_save_interval</span></kbd></dt>
+<dd><p>state save interval (in milliseconds) (default <em>0</em>)</p>
+</dd>
+<dt><kbd><span class="option">--tasks_columns</span></kbd></dt>
+<dd><p>slugs of columns on /tasks/ page, delimited by comma
+(default <em>name,uuid,state,args,kwargs,result,received,started,runtime,worker</em>)</p>
+</dd>
+<dt><kbd><span class="option">--unix_socket</span></kbd></dt>
+<dd><p>path to unix socket to bind flower server to</p>
+</dd>
+<dt><kbd><span class="option">--url_prefix</span></kbd></dt>
+<dd><p>base url prefix</p>
+</dd>
+<dt><kbd><span class="option">--xheaders</span></kbd></dt>
+<dd><p>enable support for the ‘X-Real-Ip’ and
+‘X-Scheme’ headers. (default <em>False</em>)</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="tornado-options">
+<h2>TORNADO OPTIONS<a class="headerlink" href="#tornado-options" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><dl class="option-list">
+<dt><kbd><span class="option">--log_file_max_size</span></kbd></dt>
+<dd><p>max size of log files before rollover
+(default <em>100000000</em>)</p>
+</dd>
+<dt><kbd><span class="option">--log_file_num_backups</span></kbd></dt>
+<dd><p>number of log files to keep (default <em>10</em>)</p>
+</dd>
+<dt><kbd><span class="option">--log_file_prefix=<var>PATH</var></span></kbd></dt>
+<dd><p>Path prefix for log files. Note that if you
+are running multiple tornado processes,
+log_file_prefix must be different for each
+of them (e.g. include the port number)</p>
+</dd>
+<dt><kbd><span class="option">--log_to_stderr</span></kbd></dt>
+<dd><p>Send log output to stderr (colorized if
+possible). By default use stderr if
+<code class="docutils literal notranslate"><span class="pre">--log_file_prefix</span></code> is not set and no other
+logging is configured.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>–logging=debug|info|warning|error|none</dt><dd><p>Set the Python log level. If <em>none</em>, tornado
+won’t touch the logging configuration.
+(default <em>info</em>)</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="usage">
+<h2>USAGE<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Launch the Flower server at specified port other than default 5555 (open the UI at <a class="reference external" href="http://localhost:5566">http://localhost:5566</a>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery flower --port=5566
+</pre></div>
+</div>
+<p>Specify Celery application path with address and port for Flower:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery -A proj flower --address=127.0.0.6 --port=5566
+</pre></div>
+</div>
+<p>Broker URL and other configuration options can be passed through the standard Celery options (notice that they are after
+Celery command and before Flower sub-command):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ celery -A proj --broker=amqp://guest:guest@localhost:5672// flower
+</pre></div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p>
+  <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
+    allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage-examples">Usage Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tasks_filter.html">Tasks filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tasks_filter.html#task-filter-syntax">Task filter syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#google-oauth-2-0">Google OAuth 2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#okta-oauth">Okta OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#id2">GitHub OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#gitlab-oauth">GitLab OAuth</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus-integration.html">Prometheus Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#configure-prometheus-to-scrape-flower-metrics">Configure Prometheus to scrape Flower metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#available-metrics">Available Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#using-metric-labels">Using Metric Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#example-prometheus-alerts">Example Prometheus Alerts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#example-grafana-dashboard">Example Grafana Dashboard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus-integration.html#celery-flower-prometheus-grafana-integration-guide">Celery -&gt; Flower -&gt; Prometheus -&gt; Grafana Integration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-celery-broker">Start Celery Broker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#set-up-your-celery-application">Set Up Your Celery Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-flower-monitoring">Start Flower Monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#configure-and-start-prometheus">Configure and Start Prometheus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#start-grafana">Start Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#add-prometheus-as-a-data-source-in-grafana">Add Prometheus As a Data Source In Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prometheus-integration.html#import-the-celery-monitoring-dashboard-in-grafana">Import The Celery Monitoring Dashboard In Grafana</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">flower</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mher Movsisyan.
+    </div>
+  </body>
+</html>

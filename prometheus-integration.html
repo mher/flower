@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prometheus Integration &#8212; Flower 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/celery.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Docker Usage" href="docker.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="docker.html" title="Docker Usage"
+             accesskey="P">previous</a></li>
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Prometheus Integration</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+<div class="deck">
+
+</div>
+    <div class="section" id="prometheus-integration">
+<h1>Prometheus Integration<a class="headerlink" href="#prometheus-integration" title="Permalink to this headline">¶</a></h1>
+<p>Flower exports several celery worker and task metrics in Prometheus’ format.
+The <code class="docutils literal notranslate"><span class="pre">/metrics</span></code> endpoint is available from the get go after you have installed Flower.</p>
+<p>By default on your local machine Flower’s metrics are available at: <code class="docutils literal notranslate"><span class="pre">localhost:5555/metrics</span></code>.</p>
+<p>Read further for more information about configuration and available metrics please.</p>
+<p>Complete guide on integration of Celery, Flower, Prometheus and Grafana is here: <a class="reference internal" href="#celery-flower-prometheus-grafana-integration-guide">Celery -&gt; Flower -&gt; Prometheus -&gt; Grafana Integration Guide</a>.</p>
+<div class="section" id="configure-prometheus-to-scrape-flower-metrics">
+<h2>Configure Prometheus to scrape Flower metrics<a class="headerlink" href="#configure-prometheus-to-scrape-flower-metrics" title="Permalink to this headline">¶</a></h2>
+<p>To integrate with Prometheus you have to add Flower as the target in Prometheus’s configuration.
+In this example we are assuming your Flower and Prometheus are installed on your local machine
+with their defaults and available at <code class="docutils literal notranslate"><span class="pre">localhost:&lt;port</span> <span class="pre">number&gt;</span></code>.</p>
+<p>To add Flower’s metrics to Prometheus go to its config file <code class="docutils literal notranslate"><span class="pre">prometheus.yml</span></code> which initially
+will look like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">global</span><span class="p">:</span>
+  <span class="nt">scrape_interval</span><span class="p">:</span>     <span class="l l-Scalar l-Scalar-Plain">15s</span>
+  <span class="nt">evaluation_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">15s</span>
+
+<span class="nt">scrape_configs</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;localhost:9090&#39;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>and alter the <code class="docutils literal notranslate"><span class="pre">scrape_configs</span></code> definition to be:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">scrape_configs</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;localhost:9090&#39;</span><span class="p p-Indicator">]</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">flower</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;localhost:5555&#39;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>You can also just point Prometheus at the example <code class="docutils literal notranslate"><span class="pre">prometheus.yml</span></code> file in the root of the <cite>Flower repository &lt;https://github.com/mher/flower/prometheus.yml&gt;</cite>
+when you start it from the command line (note that you would have to set <code class="docutils literal notranslate"><span class="pre">flower</span></code> to point at <code class="docutils literal notranslate"><span class="pre">localhost</span></code> in your <code class="docutils literal notranslate"><span class="pre">etc/hosts</span></code> config for the DNS to resolve correctly):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">prometheus</span> <span class="o">--</span><span class="n">config</span><span class="o">.</span><span class="n">file</span><span class="o">=</span><span class="n">prometheus</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="available-metrics">
+<h2>Available Metrics<a class="headerlink" href="#available-metrics" title="Permalink to this headline">¶</a></h2>
+<p>Below you will find a table of available Prometheus metrics exposed by Flower.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 44%" />
+<col style="width: 13%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Labels</p></th>
+<th class="head"><p>Instrument Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>flower_events_total</p></td>
+<td><p>Number of times a celery task event was registered by Flower.</p></td>
+<td><p>task, type, worker</p></td>
+<td><p>counter</p></td>
+</tr>
+<tr class="row-odd"><td><p>flower_task_prefetch_time_seconds</p></td>
+<td><p>The time the task spent waiting at the celery worker to be executed.</p></td>
+<td><p>task, worker</p></td>
+<td><p>gauge</p></td>
+</tr>
+<tr class="row-even"><td><p>flower_worker_prefetched_tasks</p></td>
+<td><p>Number of tasks of given type prefetched at a worker.</p></td>
+<td><p>task, worker</p></td>
+<td><p>gauge</p></td>
+</tr>
+<tr class="row-odd"><td><p>flower_task_runtime_seconds</p></td>
+<td><p>The time it took to run the task.</p></td>
+<td><p>task, worker</p></td>
+<td><p>histogram</p></td>
+</tr>
+<tr class="row-even"><td><p>flower_worker_online</p></td>
+<td><p>Shows celery worker’s online status.</p></td>
+<td><p>worker</p></td>
+<td><p>gauge</p></td>
+</tr>
+<tr class="row-odd"><td><p>flower_worker_number_of_currently_executing_tasks</p></td>
+<td><p>Number of tasks currently executing at this worker.</p></td>
+<td><p>worker</p></td>
+<td><p>gauge</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="using-metric-labels">
+<h2>Using Metric Labels<a class="headerlink" href="#using-metric-labels" title="Permalink to this headline">¶</a></h2>
+<p>You can filter received data in prometheus using <code class="docutils literal notranslate"><span class="pre">promql</span></code> syntax to present information only for selected labels.
+We have the following labels available:</p>
+<ul class="simple">
+<li><p><strong>task</strong> - task name, i.e. <code class="docutils literal notranslate"><span class="pre">tasks.add</span></code>, <code class="docutils literal notranslate"><span class="pre">tasks.multiply</span></code>.</p></li>
+<li><p><strong>type</strong> - task event type, i.e. <code class="docutils literal notranslate"><span class="pre">task-started</span></code>, <code class="docutils literal notranslate"><span class="pre">task-succeeded</span></code>. Note that worker related events <strong>will not be counted</strong>.
+For more info on task event types see: <a class="reference external" href="https://docs.celeryproject.org/en/stable/userguide/monitoring.html#task-events">task events in celery</a>.</p></li>
+<li><p><strong>worker</strong> - celery worker name, i.e <code class="docutils literal notranslate"><span class="pre">celery&#64;&lt;your</span> <span class="pre">computer</span> <span class="pre">name&gt;</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="example-prometheus-alerts">
+<h2>Example Prometheus Alerts<a class="headerlink" href="#example-prometheus-alerts" title="Permalink to this headline">¶</a></h2>
+<p>See example <a class="reference external" href="https://github.com/mher/flower/tree/master/examples/prometheus-alerts.yaml">Prometheus alerts</a>.
+Add the rules to your <code class="docutils literal notranslate"><span class="pre">alertmanager.yml</span></code> config as in the <a class="reference external" href="https://prometheus.io/docs/alerting/latest/configuration/">alert manager’s documentation</a>.</p>
+</div>
+<div class="section" id="example-grafana-dashboard">
+<h2>Example Grafana Dashboard<a class="headerlink" href="#example-grafana-dashboard" title="Permalink to this headline">¶</a></h2>
+<p>See example <a class="reference external" href="https://github.com/mher/flower/tree/master/examples/celery-monitoring-grafana-dashboard.json">Grafana dashboard</a>.
+You can import it easily in Grafana.
+Hover over the + button in the side bar menu -&gt; Import -&gt; Upload JSON file.
+The dashboard should give you a nice starting point for monitoring of your celery cluster.</p>
+</div>
+</div>
+<div class="section" id="celery-flower-prometheus-grafana-integration-guide">
+<h1>Celery -&gt; Flower -&gt; Prometheus -&gt; Grafana Integration Guide<a class="headerlink" href="#celery-flower-prometheus-grafana-integration-guide" title="Permalink to this headline">¶</a></h1>
+<p>In this guide you will learn how to setup each part of the stack to make it talk to the next one and achieve Celery
+monitoring solution with help of Flower.</p>
+<p>Same as above we assume localhost usage and for ease of deployment I will use Pycharm configurations to start docker
+containers with necessary images. If you do not have docker installed on your system: <a class="reference external" href="https://www.docker.com/get-started">download and install it please</a>.</p>
+<div class="section" id="start-celery-broker">
+<h2>Start Celery Broker<a class="headerlink" href="#start-celery-broker" title="Permalink to this headline">¶</a></h2>
+<p>Easiest is to use <a class="reference external" href="https://github.com/mher/flower/tree/master/examples/pycharm-configurations/Redis.run.xml">Redis Pycharm run configuration</a>.</p>
+<p>Or run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">redis</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">p</span> <span class="mi">6379</span><span class="p">:</span><span class="mi">6379</span> <span class="n">redis</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-your-celery-application">
+<h2>Set Up Your Celery Application<a class="headerlink" href="#set-up-your-celery-application" title="Permalink to this headline">¶</a></h2>
+<p>We are assuming that your Celery application has tasks in <cite>tasks.py</cite> file. The <cite>-E</cite> argument makes Celery send events
+which are required to produce Prometheus metrics.</p>
+<p>Create <cite>celeryconfig.py</cite> in root of your Celery app. We are setting Celery to use Redis DB as the broker/backend in this
+example. Skip this if you configure your broker/backend already in another way (make sure to adjust further steps to that).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">broker_url</span> <span class="o">=</span> <span class="s1">&#39;redis://localhost:6379/0&#39;</span>
+<span class="n">celery_result_backend</span> <span class="o">=</span> <span class="s1">&#39;redis://localhost:6379/0&#39;</span>
+</pre></div>
+</div>
+<p>Or download it from <a class="reference external" href="https://github.com/mher/flower/tree/master/examples/celeryconfig.py">here</a>.</p>
+<p>Start your Celery app:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">celery</span> <span class="o">-</span><span class="n">A</span> <span class="n">tasks</span> <span class="n">worker</span> <span class="o">-</span><span class="n">l</span> <span class="n">INFO</span> <span class="o">-</span><span class="n">E</span>
+</pre></div>
+</div>
+<p>When the app starts you should see this line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span> <span class="o">*******</span> <span class="o">----</span> <span class="o">.&gt;</span> <span class="n">task</span> <span class="n">events</span><span class="p">:</span> <span class="n">ON</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-flower-monitoring">
+<h2>Start Flower Monitoring<a class="headerlink" href="#start-flower-monitoring" title="Permalink to this headline">¶</a></h2>
+<p>In your Celery application folder run this command (Flower needs to be installed):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">celery</span> <span class="n">flower</span> <span class="o">-</span><span class="n">A</span> <span class="n">tasks</span> <span class="o">--</span><span class="n">broker</span><span class="o">=</span><span class="n">redis</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">6379</span><span class="o">/</span><span class="mi">0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configure-and-start-prometheus">
+<h2>Configure and Start Prometheus<a class="headerlink" href="#configure-and-start-prometheus" title="Permalink to this headline">¶</a></h2>
+<p>Create <cite>prometheus.yml</cite> file. Note its absolute path - we will use it to start the Prometheus docker image.
+For ease of use put it in the root of your Celery project (so that you can use Pycharm configuration below without any changes).</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">global</span><span class="p">:</span>
+  <span class="nt">scrape_interval</span><span class="p">:</span>     <span class="l l-Scalar l-Scalar-Plain">15s</span>
+  <span class="nt">evaluation_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">15s</span>
+
+<span class="nt">scrape_configs</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;localhost:9090&#39;</span><span class="p p-Indicator">]</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">flower</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;localhost:5555&#39;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Run Prometheus inside docker:</p>
+<p>You can use <a class="reference external" href="https://github.com/mher/flower/tree/master/examples/pycharm-configurations/Prometheus.run.xml">Prometheus Pycharm run configuration</a> (may need to adjust the <cite>prometheus.yml</cite> path if it is not in root of your Celery project).</p>
+<p>Or just start it via command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">Prometheus</span> <span class="o">-</span><span class="n">v</span> <span class="o">&lt;</span><span class="n">ABSOLUTE</span> <span class="n">PATH</span> <span class="n">TO</span> <span class="n">YOUR</span> <span class="n">prometheus</span><span class="o">.</span><span class="n">yml</span> <span class="n">FILE</span><span class="o">&gt;</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">prometheus</span><span class="o">/</span><span class="n">prometheus</span><span class="o">.</span><span class="n">yml</span> <span class="o">-</span><span class="n">p</span> <span class="mi">9090</span><span class="p">:</span><span class="mi">9090</span> <span class="o">--</span><span class="n">network</span> <span class="n">host</span> <span class="n">prom</span><span class="o">/</span><span class="n">prometheus</span>
+</pre></div>
+</div>
+<p>Now go to <cite>localhost:9090</cite> and check that Prometheus is running.
+If everything so far was set up and started correctly, you should be able to see metrics provided by Flower in your
+Prometheus’s GUI. Go to <cite>Graph</cite> tab and start typing <cite>flower</cite> - the autocomplete should show you all available metrics.</p>
+<a class="reference internal image-reference" href="_images/flower-metrics-in-prometheus.png"><img alt="_images/flower-metrics-in-prometheus.png" src="_images/flower-metrics-in-prometheus.png" style="width: 100%;" /></a>
+</div>
+<div class="section" id="start-grafana">
+<h2>Start Grafana<a class="headerlink" href="#start-grafana" title="Permalink to this headline">¶</a></h2>
+<p>You can use <a class="reference external" href="https://github.com/mher/flower/tree/master/examples/pycharm-configurations/Grafna.run.xml">Grafana Pycharm run configuration</a>.</p>
+<p>Or run it from the terminal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">Grafana</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="n">v</span> <span class="n">grafana</span><span class="o">-</span><span class="n">storage</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">grafana</span> <span class="o">-</span><span class="n">p</span> <span class="mi">3000</span><span class="p">:</span><span class="mi">3000</span> <span class="o">--</span><span class="n">network</span> <span class="n">host</span> <span class="n">grafana</span><span class="o">/</span><span class="n">grafana</span>
+</pre></div>
+</div>
+<p>try to access its web GUI now by going to <cite>localhost:3000</cite>, use <cite>admin/admin</cite> for credentials. It will ask you to set up
+a new password - you may click skip for now.</p>
+</div>
+<div class="section" id="add-prometheus-as-a-data-source-in-grafana">
+<h2>Add Prometheus As a Data Source In Grafana<a class="headerlink" href="#add-prometheus-as-a-data-source-in-grafana" title="Permalink to this headline">¶</a></h2>
+<p>Click <cite>Configuration</cite> (settings icon) in the left side-bar. Then the blue <cite>Add data source</cite> button.</p>
+<a class="reference internal image-reference" href="_images/grafana-add-data-source.png"><img alt="_images/grafana-add-data-source.png" src="_images/grafana-add-data-source.png" style="width: 100%;" /></a>
+<p>Search for Prometheus data source and click it (it should be at the top).</p>
+<a class="reference internal image-reference" href="_images/grafana-add-prometheus-data-source.png"><img alt="_images/grafana-add-prometheus-data-source.png" src="_images/grafana-add-prometheus-data-source.png" style="width: 100%;" /></a>
+<p>Once in Prometheus data source configuration, use all defaults and enter the HTTP/URL parameter as below (which is the placeholder by the way):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9090</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/grafana-configure-prometheus-data-source.png"><img alt="_images/grafana-configure-prometheus-data-source.png" src="_images/grafana-configure-prometheus-data-source.png" style="width: 100%;" /></a>
+<p>Scroll down and click <cite>Save &amp; Test</cite>, if all is good a green banner will pop up saying <cite>Data source is working</cite></p>
+<a class="reference internal image-reference" href="_images/grafana-test-prometheus-data-source.png"><img alt="_images/grafana-test-prometheus-data-source.png" src="_images/grafana-test-prometheus-data-source.png" style="width: 100%;" /></a>
+</div>
+<div class="section" id="import-the-celery-monitoring-dashboard-in-grafana">
+<h2>Import The Celery Monitoring Dashboard In Grafana<a class="headerlink" href="#import-the-celery-monitoring-dashboard-in-grafana" title="Permalink to this headline">¶</a></h2>
+<p>Download <a class="reference external" href="https://github.com/mher/flower/tree/master/examples/celery-monitoring-grafana-dashboard.json">Grafana dashboard</a>.</p>
+<p>Hover over the <cite>+</cite> icon in the left side-bar and click <cite>Import</cite> button.</p>
+<a class="reference internal image-reference" href="_images/grafana-import-dashboard.png"><img alt="_images/grafana-import-dashboard.png" src="_images/grafana-import-dashboard.png" style="width: 30%;" /></a>
+<p>Click <cite>Upload JSON file</cite> button and select the <cite>celery-monitoring-grafana-dashboard.json</cite> you have just downloaded.</p>
+<a class="reference internal image-reference" href="_images/grafana-import-celery-monitoring-dashboard.png"><img alt="_images/grafana-import-celery-monitoring-dashboard.png" src="_images/grafana-import-celery-monitoring-dashboard.png" style="width: 100%;" /></a>
+<p>Click on the <cite>Prometheus</cite> field and select a Prometheus data source.</p>
+<a class="reference internal image-reference" href="_images/grafana-configure-imported-dashboard.png"><img alt="_images/grafana-configure-imported-dashboard.png" src="_images/grafana-configure-imported-dashboard.png" style="width: 100%;" /></a>
+<p>Click <cite>Import</cite> to finish the process.</p>
+<p>You should see a dashboard as on the image below. Congratulations!</p>
+<a class="reference internal image-reference" href="_images/grafana-dashboard.png"><img alt="_images/grafana-dashboard.png" src="_images/grafana-dashboard.png" style="width: 100%;" /></a>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p>
+  <iframe src="http://ghbtns.com/github-btn.html?user=mher&repo=flower&type=watch&count=true&size=large"
+    allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="screenshots.html">Screenshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#usage-examples">Usage Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="config.html#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tasks_filter.html">Tasks filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tasks_filter.html#task-filter-syntax">Task filter syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="auth.html">Authentication</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#http-basic-authentication">HTTP Basic Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#google-oauth-2-0">Google OAuth 2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#okta-oauth">Okta OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#id2">GitHub OAuth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auth.html#gitlab-oauth">GitLab OAuth</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reverse-proxy.html">Running behind reverse proxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Prometheus Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configure-prometheus-to-scrape-flower-metrics">Configure Prometheus to scrape Flower metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#available-metrics">Available Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-metric-labels">Using Metric Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-prometheus-alerts">Example Prometheus Alerts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-grafana-dashboard">Example Grafana Dashboard</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#celery-flower-prometheus-grafana-integration-guide">Celery -&gt; Flower -&gt; Prometheus -&gt; Grafana Integration Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#start-celery-broker">Start Celery Broker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-up-your-celery-application">Set Up Your Celery Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#start-flower-monitoring">Start Flower Monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-and-start-prometheus">Configure and Start Prometheus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#start-grafana">Start Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-prometheus-as-a-data-source-in-grafana">Add Prometheus As a Data Source In Grafana</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-the-celery-monitoring-dashboard-in-grafana">Import The Celery Monitoring Dashboard In Grafana</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="docker.html"
+                        title="previous chapter">Docker Usage</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="docker.html" title="Docker Usage"
+             >previous</a></li>
+        <li class="nav-item nav-item-0"><a href="index.html">Flower 1.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Prometheus Integration</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Mher Movsisyan.
+    </div>
+  </body>
+</html>
