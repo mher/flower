@@ -29,4 +29,4 @@ USER flower
 
 VOLUME $FLOWER_DATA_DIR
 
-ENTRYPOINT ["flower"]
+CMD ["celery flower"]
