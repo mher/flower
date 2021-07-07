@@ -29,4 +29,4 @@ USER flower
 
 VOLUME $FLOWER_DATA_DIR
 
-CMD ["celery flower"]
+CMD ["celery", "flower"]
