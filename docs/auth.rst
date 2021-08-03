@@ -56,7 +56,7 @@ Alternatively, you can set environment variables instead of command line argumen
 .. _github-oauth:
 
 Okta OAuth
-------------
+----------
 
 Flower also supports Okta OAuth. Flower should be registered in
 <https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/register-app-in-okta/>
@@ -77,6 +77,27 @@ The client id, secret and redirect uri should be provided using
     $ celery flower --auth_provider=flower.views.auth.OktaLoginHandler --auth=.*@example\.com
 
 .. _Okta OAuth API: https://developer.okta.com/docs/reference/api/oidc/
+
+Auth0 OAuth
+-----------
+
+Flower also supports Auth0 OAuth. Flower should be registered as a *Regular Web Application* in the Auth0 dashboard before getting started. See `Auth0`_ docs for more info.
+
+Auth0 OAuth should be activated using `--auth_provider` option.
+The client id, secret and redirect uri should be provided using
+`--oauth2_key`, `--oauth2_secret`, `--oauth2_redirect_uri` options or using
+`FLOWER_OAUTH2_KEY`, `FLOWER_OAUTH2_SECRET`, `FLOWER_OAUTH2_REDIRECT_URI` environment variables.
+
+ The URL from which OAuth2 API URLs will be built should be set using `FLOWER_OAUTH2_AUTH0_BASE_URL`
+  environment variable: ::
+
+    $ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
+    $ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
+    $ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
+    $ export FLOWER_OAUTH2_AUTH0_BASE_URL=https://my-company.au.auth0.com
+    $ celery flower --auth_provider=flower.views.auth.Auth0LoginHandler --auth=.*@example\.com
+
+.. _Auth0: https://auth0.com/docs/get-started/create-apps/regular-web-apps
 
 GitHub OAuth
 ------------
