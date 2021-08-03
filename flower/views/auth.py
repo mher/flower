@@ -15,6 +15,7 @@ from ..views import BaseHandler
 
 
 class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
+
     _OAUTH_SETTINGS_KEY = 'oauth'
 
     @tornado.gen.coroutine
@@ -66,6 +67,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
 
 class LoginHandler(BaseHandler):
+
     def __new__(cls, *args, **kwargs):
         return instantiate(options.auth_provider, *args, **kwargs)
 
@@ -240,6 +242,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
 
 class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
+
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
 
@@ -340,3 +343,22 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         if self.application.options.url_prefix and next_[0] != '/':
             next_ = '/' + next_
         self.redirect(next_)
+
+
+class Auth0LoginHandler(OktaLoginHandler, tornado.auth.OAuth2Mixin):
+
+    @property
+    def base_url(self):
+        return os.environ.get('FLOWER_OAUTH2_AUTH0_BASE_URL')
+
+    @property
+    def _OAUTH_AUTHORIZE_URL(self):
+        return "{}/authorize".format(self.base_url)
+
+    @property
+    def _OAUTH_ACCESS_TOKEN_URL(self):
+        return "{}/oauth/token".format(self.base_url)
+
+    @property
+    def _OAUTH_USER_INFO_URL(self):
+        return "{}/userinfo".format(self.base_url)
