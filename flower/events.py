@@ -1,3 +1,4 @@
+import os
 import time
 import shelve
 import logging
@@ -23,7 +24,20 @@ logger = logging.getLogger(__name__)
 
 class PrometheusMetrics(object):
     events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
-    runtime = Histogram('flower_task_runtime_seconds', "Task runtime", ['worker', 'task'])
+
+    # use user defined latency buckets if provided otherwise use default buckets. an example of user defined latency
+    # buckets export PROMETHEUS_LATENCY_BUCKETS="[.05, .1, .2, .5, 1.0, 2.0, 5.0, 10.0, 60.0, 120.0, 300.0, 600.0,
+    # float('inf')]"
+    buckets = Histogram.DEFAULT_BUCKETS
+    if os.getenv("PROMETHEUS_LATENCY_BUCKETS"):
+        buckets = eval(os.environ["PROMETHEUS_LATENCY_BUCKETS"])
+
+    runtime = Histogram(
+        'flower_task_runtime_seconds',
+        "Task runtime",
+        ['worker', 'task'],
+        buckets=buckets
+    )
     prefetch_time = Gauge(
         'flower_task_prefetch_time_seconds',
         "The time the task spent waiting at the celery worker to be executed.",
