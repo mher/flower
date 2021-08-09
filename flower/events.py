@@ -6,6 +6,7 @@ import collections
 
 from functools import partial
 
+import prometheus_client
 from tornado.ioloop import IOLoop
 from tornado.ioloop import PeriodicCallback
 
@@ -13,6 +14,8 @@ from celery.events import EventReceiver
 from celery.events.state import State
 
 from . import api
+from .options import options
+# from options import options
 
 from collections import Counter
 
@@ -102,6 +105,56 @@ class EventsState(State):
         cls = getattr(api.events, classname, None)
         if cls:
             cls.send_message(event)
+
+        # purging logic copy pasted for testing
+        workers = {}
+        for name, values in self.counter.items():
+            if name not in self.workers:
+                continue
+            worker = self.workers[name]
+            info = dict(values)
+            info.update(self._as_dict(worker))
+            info.update(status=worker.alive)
+            workers[name] = info
+
+        if options.purge_offline_workers is not None:
+            timestamp = int(time.time())
+            offline_workers = []
+            for name, info in workers.items():
+                if info.get('status', True):
+                    continue
+
+                heartbeats = info.get('heartbeats', [])
+                last_heartbeat = int(max(heartbeats)) if heartbeats else None
+                if not last_heartbeat or timestamp - last_heartbeat > options.purge_offline_workers:
+                    logger.debug('Offline worker found: %s', name)
+                    offline_workers.append(name)
+
+            for name in offline_workers:
+                self.metrics.worker_online.remove(name)
+                logger.debug('Removing worker from worker online metric: %s', name)
+                workers.pop(name)
+
+    @classmethod
+    def _as_dict(cls, worker):
+        if hasattr(worker, '_fields'):
+            return dict((k, worker.__getattribute__(k)) for k in worker._fields)
+        else:
+            return cls._info(worker)
+
+    @classmethod
+    def _info(cls, worker):
+        _fields = ('hostname', 'pid', 'freq', 'heartbeats', 'clock',
+                   'active', 'processed', 'loadavg', 'sw_ident',
+                   'sw_ver', 'sw_sys')
+
+        def _keys():
+            for key in _fields:
+                value = getattr(worker, key, None)
+                if value is not None:
+                    yield key, value
+
+        return dict(_keys())
 
 
 class Events(threading.Thread):
