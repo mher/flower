@@ -6,7 +6,6 @@ from tornado import gen
 
 from ..views import BaseHandler
 from ..options import options
-from ..api.workers import ListWorkers
 
 
 logger = logging.getLogger(__name__)
