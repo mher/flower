@@ -5,7 +5,6 @@ from tornado import gen
 
 from ..events import EventsState
 from ..views import BaseHandler
-from ..options import options
 
 
 logger = logging.getLogger(__name__)
@@ -26,10 +25,7 @@ class DashboardView(BaseHandler):
             except Exception as e:
                 logger.exception('Failed to update workers: %s', e)
 
-        workers = events_state.get_workers()
-        if options.purge_offline_workers is not None:
-            events_state.remove_offline_workers(workers=workers)
-
+        workers = events_state.get_online_workers()
         if json:
             self.write(dict(data=list(workers.values())))
         else:
