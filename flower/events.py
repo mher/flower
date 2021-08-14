@@ -126,7 +126,6 @@ class EventsState(State):
             last_heartbeat = int(max(heartbeats)) if heartbeats else None
             if not last_heartbeat or timestamp - last_heartbeat > options.purge_offline_workers:
                 offline_workers.add(name)
-                logger.debug('Found offline worker: %s', name)
 
         return offline_workers
 
