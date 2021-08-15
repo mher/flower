@@ -16,7 +16,6 @@ from celery.events import Event
 from celery.utils import uuid
 
 from flower.events import EventsState
-from flower.options import options
 
 
 class DashboardTests(AsyncHTTPTestCase):
