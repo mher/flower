@@ -198,7 +198,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             f'flower_worker_prefetched_tasks{{task="{task_name}",worker="{worker_name}"}} 1.0' in metrics
         )
 
-    def test_metrics_are_removed_if_purge_offline_workers_used(self):
+    def test_metrics_are_removed_if_purging_is_enabled(self):
         """
         This test generates metrics for all measured values and as a last event it has worker-offline event which
         together with purge_offline_workers = 0 setting causes all those metrics to be removed from their Prometheus
