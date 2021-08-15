@@ -50,7 +50,7 @@ define("xheaders", type=bool, default=False,
 define("auto_refresh", default=True,
        help="refresh dashboards", type=bool)
 define("purge_offline_workers", default=None, type=int,
-       help="time (in seconds) after which offline workers are purged from dashboard")
+       help="time (in seconds) after which offline workers are purged from dashboard and prometheus metrics")
 define("cookie_secret", type=str, default=None,
        help="secure cookie secret")
 define("conf", default=DEFAULT_CONFIG_FILE,

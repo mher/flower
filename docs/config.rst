@@ -244,7 +244,7 @@ Enable support of `X-Real-Ip` and `X-Scheme` headers
 tasks_columns
 ~~~~~~~~~~~~~
 
-Specifies list of comma-delimited columns on `/tasks/` page. `all` value
+Specifies list of` comma-delimited columns on `/tasks/` page. `all` value
 enables all columns. Columns on the page can be reordered using drag and drop.
 
 (by default, `tasks_columns="name,uuid,state,args,kwargs,result,received,started,runtime,worker"`)
@@ -313,6 +313,9 @@ See `Authentication` for usage examples
 purge_offline_workers
 ~~~~~~~~~~~~~~~~~~~~~
 
-Time (in seconds) after which offline workers are automatically removed from dashboard.
+Time (in seconds) after which:
 
-If omitted, offline workers remain on the dashboard.
+- offline workers are automatically removed from dashboard.
+- any prometheus metrics containing offline worker in the label values are removed.
+
+If omitted, offline workers remain on the dashboard/in prometheus metrics.
