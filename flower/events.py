@@ -83,25 +83,15 @@ class EventsState(State):
         if cls:
             cls.send_message(event)
 
-    def remove_metrics_for_offline_workers(self):
-        if options.purge_offline_workers is not None:
-            offline_workers = self.get_offline_workers(workers=self.get_workers())
-            if not offline_workers:
-                return
-
-            self.metrics.remove_metrics_for_offline_workers(
-                offline_workers=offline_workers
-            )
-
     def get_online_workers(self) -> Dict[str, Any]:
-        workers = self.get_workers()
+        workers = self._get_workers()
         if options.purge_offline_workers is not None:
             for name in self.get_offline_workers(workers=workers):
                 workers.pop(name)
 
         return workers
 
-    def get_workers(self) -> Dict[str, Any]:
+    def _get_workers(self) -> Dict[str, Any]:
         workers = {}
         for name, values in self.counter.items():
             if name not in self.workers:
@@ -160,6 +150,17 @@ class EventsState(State):
 
         return dict(_keys())
 
+    def remove_metrics_for_offline_workers(self):
+        if options.purge_offline_workers is None:
+            return
+
+        offline_workers = self.get_offline_workers(workers=self._get_workers())
+        if not offline_workers:
+            return
+
+        self.metrics.remove_metrics_for_offline_workers(
+            offline_workers=offline_workers
+        )
 
 class Events(threading.Thread):
     events_enable_interval = 5000
