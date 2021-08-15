@@ -162,6 +162,7 @@ class EventsState(State):
             offline_workers=offline_workers
         )
 
+
 class Events(threading.Thread):
     events_enable_interval = 5000
 
