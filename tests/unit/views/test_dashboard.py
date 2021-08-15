@@ -16,7 +16,6 @@ from celery.events import Event
 from celery.utils import uuid
 
 from flower.events import EventsState
-from flower.options import options
 
 
 class DashboardTests(AsyncHTTPTestCase):
@@ -73,7 +72,7 @@ class DashboardTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         self.app.events.state = state
 
-        with patch('flower.views.dashboard.options') as mock_options:
+        with patch('flower.events.options') as mock_options:
             mock_options.purge_offline_workers = 0
             r = self.get('/dashboard')
 

@@ -1,6 +1,7 @@
 import re
 import time
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
 from celery.events import Event
 from kombu import uuid
@@ -195,6 +196,55 @@ class PrometheusTests(AsyncHTTPTestCase):
 
         self.assertTrue(
             f'flower_worker_prefetched_tasks{{task="{task_name}",worker="{worker_name}"}} 1.0' in metrics
+        )
+
+    def test_metrics_are_removed_if_purging_is_enabled(self):
+        """
+        This test generates metrics for all measured values and as a last event it has worker-offline event which
+        together with purge_offline_workers = 0 setting causes all those metrics to be removed from their Prometheus
+        metric objects. The result should be no metric values presented in the '/metrics' endpoint response.
+        """
+        state = EventsState()
+        worker_name = 'worker1'
+        task_name = 'task1'
+        state.get_or_create_worker(worker_name)
+        events = task_succeeded_events(worker=worker_name, name=task_name, id='123')
+        events.append(Event('worker-offline', hostname=worker_name))
+
+        task_received = time.time()
+        task_started = task_received + 3
+        for i, e in enumerate(events):
+            e['clock'] = i
+            e['local_received'] = time.time()
+            if e['type'] == 'task-received':
+                e['timestamp'] = task_received
+            if e['type'] == 'task-started':
+                e['timestamp'] = task_started
+            state.event(e)
+        self.app.events.state = state
+
+        with patch('flower.events.options') as mock_options:
+            mock_options.purge_offline_workers = 0
+            metrics = self.get('/metrics').body.decode('utf-8')
+
+        self.assertTrue(
+            f'flower_task_runtime_seconds_count{{task="{task_name}",worker="{worker_name}"}} 1.0' not in metrics
+        )
+        self.assertTrue(
+            f'flower_events_total{{task="{task_name}",type="task-received",worker="{worker_name}"}} 1.0' not in metrics
+        )
+        self.assertTrue(
+            f'flower_events_total{{task="{task_name}",type="task-started",worker="{worker_name}"}} 1.0' not in metrics
+        )
+        self.assertTrue(
+            f'flower_events_total{{task="{task_name}",type="task-succeeded",worker="{worker_name}"}} 1.0' not in metrics
+        )
+        self.assertTrue(f'flower_worker_online{{worker="{worker_name}"}} 0.0' not in metrics)
+        self.assertTrue(
+            f'flower_worker_prefetched_tasks{{task="{task_name}",worker="{worker_name}"}} 0.0' not in metrics
+        )
+        self.assertTrue(
+            f'flower_task_prefetch_time_seconds{{task="{task_name}",worker="{worker_name}"}} 0.0' not in metrics
         )
 
 

@@ -5,6 +5,7 @@ import threading
 import collections
 
 from functools import partial
+from typing import Dict, Any, Set
 
 from tornado.ioloop import IOLoop
 from tornado.ioloop import PeriodicCallback
@@ -13,33 +14,12 @@ from celery.events import EventReceiver
 from celery.events.state import State
 
 from . import api
+from .api.prometheus_metrics import PrometheusMetrics
+from .options import options
 
 from collections import Counter
 
-from prometheus_client import Counter as PrometheusCounter, Histogram, Gauge
-
 logger = logging.getLogger(__name__)
-
-
-class PrometheusMetrics(object):
-    events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
-    runtime = Histogram('flower_task_runtime_seconds', "Task runtime", ['worker', 'task'])
-    prefetch_time = Gauge(
-        'flower_task_prefetch_time_seconds',
-        "The time the task spent waiting at the celery worker to be executed.",
-        ['worker', 'task']
-    )
-    number_of_prefetched_tasks = Gauge(
-        'flower_worker_prefetched_tasks',
-        'Number of tasks of given type prefetched at a worker',
-        ['worker', 'task']
-    )
-    worker_online = Gauge('flower_worker_online', "Worker online status", ['worker'])
-    worker_number_of_currently_executing_tasks = Gauge(
-        'flower_worker_number_of_currently_executing_tasks',
-        "Number of tasks currently executing at a worker",
-        ['worker']
-    )
 
 
 class EventsState(State):
@@ -102,6 +82,85 @@ class EventsState(State):
         cls = getattr(api.events, classname, None)
         if cls:
             cls.send_message(event)
+
+    def get_online_workers(self) -> Dict[str, Any]:
+        workers = self._get_workers()
+        if options.purge_offline_workers is not None:
+            for name in self.get_offline_workers(workers=workers):
+                workers.pop(name)
+
+        return workers
+
+    def _get_workers(self) -> Dict[str, Any]:
+        workers = {}
+        for name, values in self.counter.items():
+            if name not in self.workers:
+                continue
+            worker = self.workers[name]
+            info = dict(values)
+            info.update(self._as_dict(worker))
+            info.update(status=worker.alive)
+            workers[name] = info
+
+        return workers
+
+    @staticmethod
+    def get_offline_workers(workers: Dict[str, Any]) -> Set[str]:
+        timestamp = int(time.time())
+        offline_workers = set()
+        for name, info in workers.items():
+            if info.get('status', True):
+                continue
+
+            heartbeats = info.get('heartbeats', [])
+            last_heartbeat = int(max(heartbeats)) if heartbeats else None
+            if not last_heartbeat or timestamp - last_heartbeat > options.purge_offline_workers:
+                offline_workers.add(name)
+
+        return offline_workers
+
+    @classmethod
+    def _as_dict(cls, worker) -> Dict[str, Any]:
+        if hasattr(worker, '_fields'):
+            return dict((k, worker.__getattribute__(k)) for k in worker._fields)
+        else:
+            return cls._info(worker)
+
+    @classmethod
+    def _info(cls, worker) -> Dict[str, Any]:
+        _fields = (
+            'hostname',
+            'pid',
+            'freq',
+            'heartbeats',
+            'clock',
+            'active',
+            'processed',
+            'loadavg',
+            'sw_ident',
+            'sw_ver',
+            'sw_sys'
+        )
+
+        def _keys():
+            for key in _fields:
+                value = getattr(worker, key, None)
+                if value is not None:
+                    yield key, value
+
+        return dict(_keys())
+
+    def remove_metrics_for_offline_workers(self):
+        if options.purge_offline_workers is None:
+            return
+
+        offline_workers = self.get_offline_workers(workers=self._get_workers())
+        if not offline_workers:
+            return
+
+        self.metrics.remove_metrics_for_offline_workers(
+            offline_workers=offline_workers
+        )
 
 
 class Events(threading.Thread):
