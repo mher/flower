@@ -316,3 +316,21 @@ purge_offline_workers
 Time (in seconds) after which offline workers are automatically removed from dashboard.
 
 If omitted, offline workers remain on the dashboard.
+
+.. _task_runtime_metric_buckets:
+
+task_runtime_metric_buckets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sets task runtime latency buckets
+
+buckets value can be provided as cli options: ::
+
+    $ celery flower task_runtime_metric_buckets=1,5,10,inf
+
+Or, it can be also provided as ENV variable: ::
+
+    $ export FLOWER_TASK_RUNTIME_METRIC_BUCKETS=1,5,10,inf
+
+If not provided:
+    - default prometheus buckets will be used

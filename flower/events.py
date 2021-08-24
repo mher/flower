@@ -1,3 +1,4 @@
+import os
 import time
 import shelve
 import logging
@@ -11,6 +12,7 @@ from tornado.ioloop import PeriodicCallback
 
 from celery.events import EventReceiver
 from celery.events.state import State
+from tornado.options import options
 
 from . import api
 
@@ -23,7 +25,13 @@ logger = logging.getLogger(__name__)
 
 class PrometheusMetrics(object):
     events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
-    runtime = Histogram('flower_task_runtime_seconds', "Task runtime", ['worker', 'task'])
+
+    runtime = Histogram(
+        'flower_task_runtime_seconds',
+        "Task runtime",
+        ['worker', 'task'],
+        buckets=options.task_runtime_metric_buckets
+    )
     prefetch_time = Gauge(
         'flower_task_prefetch_time_seconds',
         "The time the task spent waiting at the celery worker to be executed.",
