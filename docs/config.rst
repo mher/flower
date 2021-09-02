@@ -326,7 +326,7 @@ Sets task runtime latency buckets
 
 buckets value can be provided as cli options: ::
 
-    $ celery flower task_runtime_metric_buckets=1,5,10,inf
+    $ celery flower --task_runtime_metric_buckets=1,5,10,inf
 
 Or, it can be also provided as ENV variable: ::
 
