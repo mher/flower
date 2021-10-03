@@ -22,15 +22,18 @@ from prometheus_client import Counter as PrometheusCounter, Histogram, Gauge
 
 logger = logging.getLogger(__name__)
 
+prometheus_metrics = None
+
+
+def get_prometheus_metrics():
+    global prometheus_metrics
+    if prometheus_metrics is None:
+        prometheus_metrics = PrometheusMetrics()
+
+    return prometheus_metrics
+
 
 class PrometheusMetrics(object):
-    __instance = None
-
-    @staticmethod
-    def get_instance():
-        if PrometheusMetrics.__instance is None:
-            PrometheusMetrics.__instance = PrometheusMetrics()
-        return PrometheusMetrics.__instance
 
     def __init__(self):
         self.events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
@@ -65,7 +68,7 @@ class EventsState(State):
     def __init__(self, *args, **kwargs):
         super(EventsState, self).__init__(*args, **kwargs)
         self.counter = collections.defaultdict(Counter)
-        self.metrics = PrometheusMetrics.get_instance()
+        self.metrics = get_prometheus_metrics()
 
     def event(self, event):
         # Save the event
