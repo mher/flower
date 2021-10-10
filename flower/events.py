@@ -22,32 +22,44 @@ from prometheus_client import Counter as PrometheusCounter, Histogram, Gauge
 
 logger = logging.getLogger(__name__)
 
+prometheus_metrics = None
+
+
+def get_prometheus_metrics():
+    global prometheus_metrics
+    if prometheus_metrics is None:
+        prometheus_metrics = PrometheusMetrics()
+
+    return prometheus_metrics
+
 
 class PrometheusMetrics(object):
-    events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
 
-    runtime = Histogram(
-        'flower_task_runtime_seconds',
-        "Task runtime",
-        ['worker', 'task'],
-        buckets=options.task_runtime_metric_buckets
-    )
-    prefetch_time = Gauge(
-        'flower_task_prefetch_time_seconds',
-        "The time the task spent waiting at the celery worker to be executed.",
-        ['worker', 'task']
-    )
-    number_of_prefetched_tasks = Gauge(
-        'flower_worker_prefetched_tasks',
-        'Number of tasks of given type prefetched at a worker',
-        ['worker', 'task']
-    )
-    worker_online = Gauge('flower_worker_online', "Worker online status", ['worker'])
-    worker_number_of_currently_executing_tasks = Gauge(
-        'flower_worker_number_of_currently_executing_tasks',
-        "Number of tasks currently executing at a worker",
-        ['worker']
-    )
+    def __init__(self):
+        self.events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
+
+        self.runtime = Histogram(
+            'flower_task_runtime_seconds',
+            "Task runtime",
+            ['worker', 'task'],
+            buckets=options.task_runtime_metric_buckets
+        )
+        self.prefetch_time = Gauge(
+            'flower_task_prefetch_time_seconds',
+            "The time the task spent waiting at the celery worker to be executed.",
+            ['worker', 'task']
+        )
+        self.number_of_prefetched_tasks = Gauge(
+            'flower_worker_prefetched_tasks',
+            'Number of tasks of given type prefetched at a worker',
+            ['worker', 'task']
+        )
+        self.worker_online = Gauge('flower_worker_online', "Worker online status", ['worker'])
+        self.worker_number_of_currently_executing_tasks = Gauge(
+            'flower_worker_number_of_currently_executing_tasks',
+            "Number of tasks currently executing at a worker",
+            ['worker']
+        )
 
 
 class EventsState(State):
@@ -56,7 +68,7 @@ class EventsState(State):
     def __init__(self, *args, **kwargs):
         super(EventsState, self).__init__(*args, **kwargs)
         self.counter = collections.defaultdict(Counter)
-        self.metrics = PrometheusMetrics()
+        self.metrics = get_prometheus_metrics()
 
     def event(self, event):
         # Save the event
