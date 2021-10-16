@@ -208,4 +208,4 @@ class HealthcheckTests(AsyncHTTPTestCase):
 
     def test_healthcheck_route(self):
         response = self.get('/healthcheck').body.decode('utf-8')
-        self.assertEquals(response, 'OK')
+        self.assertEqual(response, 'OK')
