@@ -20,11 +20,11 @@ def bugreport(app=None):
         return 'flower   -> flower:%s tornado:%s humanize:%s%s' % (
             __version__,
             tornado.version,
-            humanize.VERSION,
+            humanize.__version__,
             app.bugreport()
         )
-    except (ImportError, AttributeError):
-        return 'Unknown Celery version'
+    except (ImportError, AttributeError) as e:
+        return f"Error when generating bug report: {e}. Have you installed correct versions of Flower's dependencies?"
 
 
 def abs_path(path):
