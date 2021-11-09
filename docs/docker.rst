@@ -7,7 +7,7 @@ official Redis image.
 
     $ docker run --name localredis -p 6379:6379 --rm -d redis
 
-Now, clone this repository, build flower from the Dockerfile, start the
+Now, clone this repository (https://github.com/mher/flower), build flower from the Dockerfile, start the
 container and open http://localhost:49555 ::
 
     $ docker build -t "flower" .
