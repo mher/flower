@@ -7,9 +7,11 @@ dayjs.extend(timezone);
 
 const workerName = () => $("#workername").text();
 
+const flower = (function () {
     "use strict";
     /*jslint browser: true */
     /*jslint unparam: true, node: true */
+
     /*global $, WebSocket, jQuery */
 
     function on_alert_close(event) {
@@ -20,24 +22,24 @@ const workerName = () => $("#workername").text();
 
     function show_error_alert(message) {
         $("#alert").removeClass("alert-success").addClass("alert-error");
-        $("#alert-message").html("<strong>Error!</strong>    " + message);
+        $("#alert-message").html(`<strong>Error!</strong>    ${message}`);
         $("#alert").show();
     }
 
     function show_success_alert(message) {
         $("#alert").removeClass("alert-error").addClass("alert-success");
-        $("#alert-message").html("<strong>Success!</strong>    " + message);
+        $("#alert-message").html(`<strong>Success!</strong>    ${message}`);
         $("#alert").show();
     }
 
     function url_prefix() {
-        var url_prefix = $("#url_prefix").val();
+        let url_prefix = $("#url_prefix").val();
         if (url_prefix) {
             url_prefix = url_prefix.replace(/\/+$/, "");
             if (url_prefix.startsWith("/")) {
                 return url_prefix;
             } else {
-                return "/" + url_prefix;
+                return `/${url_prefix}`;
             }
         }
         return "";
@@ -68,7 +70,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "GET",
-            url: url_prefix() + "/api/workers",
+            url: `${url_prefix()}/api/workers`,
             dataType: "json",
             data: {
                 workername: unescape(workerName()),
@@ -89,7 +91,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "GET",
-            url: url_prefix() + "/api/workers",
+            url: `${url_prefix()}/api/workers`,
             dataType: "json",
             data: {
                 refresh: 1,
@@ -109,7 +111,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/pool/restart/" + workerName(),
+            url: `${url_prefix()}/api/worker/pool/restart/${workerName()}`,
             dataType: "json",
             data: {
                 workername: workerName(),
@@ -129,7 +131,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/shutdown/" + workerName(),
+            url: `${url_prefix()}/api/worker/shutdown/${workerName()}`,
             dataType: "json",
             data: {
                 workername: workerName(),
@@ -151,7 +153,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/pool/grow/" + workerName(),
+            url: `${url_prefix()}/api/worker/pool/grow/${workerName()}`,
             dataType: "json",
             data: {
                 workername: workerName(),
@@ -174,7 +176,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/pool/shrink/" + workerName(),
+            url: `${url_prefix()}/api/worker/pool/shrink/${workerName()}`,
             dataType: "json",
             data: {
                 workername: workerName(),
@@ -198,7 +200,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/pool/autoscale/" + workerName(),
+            url: `${url_prefix()}/api/worker/pool/autoscale/${workerName()}`,
             dataType: "json",
             data: {
                 workername: workerName(),
@@ -222,8 +224,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url:
-                url_prefix() + "/api/worker/queue/add-consumer/" + workerName(),
+            url: `${url_prefix()}/api/worker/queue/add-consumer/${workerName()}`,
             dataType: "json",
             data: {
                 workername: workerName(),
@@ -233,7 +234,7 @@ const workerName = () => $("#workername").text();
                 show_success_alert(data.message);
                 setTimeout(function () {
                     $("#tab-queues")
-                        .load("/worker/" + workerName() + " #tab-queues")
+                        .load(`/worker/${workerName()} #tab-queues`)
                         .fadeIn("show");
                 }, 10000);
             },
@@ -251,10 +252,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url:
-                url_prefix() +
-                "/api/worker/queue/cancel-consumer/" +
-                workerName(),
+            url: `${url_prefix()}/api/worker/queue/cancel-consumer/${workerName()}`,
             dataType: "json",
             data: {
                 workername: workerName(),
@@ -264,7 +262,7 @@ const workerName = () => $("#workername").text();
                 show_success_alert(data.message);
                 setTimeout(function () {
                     $("#tab-queues")
-                        .load("/worker/" + workername + " #tab-queues")
+                        .load(`/worker/${workername} #tab-queues`)
                         .fadeIn("show");
                 }, 10000);
             },
@@ -293,7 +291,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/task/timeout/" + taskname,
+            url: `${url_prefix()}/api/task/timeout/${taskname}`,
             dataType: "json",
             data: post_data,
             success: function (data) {
@@ -318,7 +316,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/task/rate-limit/" + taskname,
+            url: `${url_prefix()}/api/task/rate-limit/${taskname}`,
             dataType: "json",
             data: {
                 workername: workerName(),
@@ -328,7 +326,7 @@ const workerName = () => $("#workername").text();
                 show_success_alert(data.message);
                 setTimeout(function () {
                     $("#tab-limits")
-                        .load("/worker/" + workerName() + " #tab-limits")
+                        .load(`/worker/${workerName()} #tab-limits`)
                         .fadeIn("show");
                 }, 10000);
             },
@@ -342,11 +340,11 @@ const workerName = () => $("#workername").text();
         event.preventDefault();
         event.stopPropagation();
 
-        var taskid = $("#taskid").text();
+        const taskid = $("#taskid").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/task/revoke/" + taskid,
+            url: `${url_prefix()}/api/task/revoke/${taskid}`,
             dataType: "json",
             data: {
                 terminate: false,
@@ -368,7 +366,7 @@ const workerName = () => $("#workername").text();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/task/revoke/" + taskid,
+            url: `${url_prefix()}/api/task/revoke/${taskid}`,
             dataType: "json",
             data: {
                 terminate: true,
@@ -389,19 +387,19 @@ const workerName = () => $("#workername").text();
     function update_dashboard_counters() {
         var table = $("#workers-table").DataTable();
         $("a#btn-active").text(
-            "Active: " + table.column(2).data().reduce(sum, 0)
+            `Active: ${table.column(2).data().reduce(sum, 0)}`
         );
         $("a#btn-processed").text(
-            "Processed: " + table.column(3).data().reduce(sum, 0)
+            `Processed: ${table.column(3).data().reduce(sum, 0)}`
         );
         $("a#btn-failed").text(
-            "Failed: " + table.column(4).data().reduce(sum, 0)
+            `Failed: ${table.column(4).data().reduce(sum, 0)}`
         );
         $("a#btn-succeeded").text(
-            "Succeeded: " + table.column(5).data().reduce(sum, 0)
+            `Succeeded: ${table.column(5).data().reduce(sum, 0)}`
         );
         $("a#btn-retried").text(
-            "Retried: " + table.column(6).data().reduce(sum, 0)
+            `Retried: ${table.column(6).data().reduce(sum, 0)}`
         );
     }
 
@@ -445,7 +443,7 @@ const workerName = () => $("#workername").text();
     }
 
     $.urlParam = function (name) {
-        var results = new RegExp("[\\?&]" + name + "=([^&#]*)").exec(
+        var results = new RegExp(`[\\?&]${name}=([^&#]*)`).exec(
             window.location.href
         );
         return (results && results[1]) || 0;
@@ -464,7 +462,7 @@ const workerName = () => $("#workername").text();
         // Make bootstrap tabs persistent
         $(document).ready(function () {
             if (location.hash !== "") {
-                $('a[href="' + location.hash + '"]').tab("show");
+                $(`a[href="${location.hash}"]`).tab("show");
             }
 
             $('a[data-toggle="tab"]').on("shown", function (e) {
@@ -486,7 +484,7 @@ const workerName = () => $("#workername").text();
             scrollX: true,
             scrollY: true,
             scrollCollapse: true,
-            ajax: url_prefix() + "/dashboard?json=1",
+            ajax: `${url_prefix()}/dashboard?json=1`,
             order: [[1, "asc"]],
             columnDefs: [
                 {
@@ -494,15 +492,7 @@ const workerName = () => $("#workername").text();
                     data: "hostname",
                     type: "natural",
                     render: function (data, type, full, meta) {
-                        return (
-                            '<a href="' +
-                            url_prefix() +
-                            "/worker/" +
-                            data +
-                            '">' +
-                            data +
-                            "</a>"
-                        );
+                        return `<a href="${url_prefix()}/worker/${data}">${data}</a>`;
                     },
                 },
                 {
@@ -579,12 +569,12 @@ const workerName = () => $("#workername").text();
             colReorder: true,
             ajax: {
                 type: "POST",
-                url: url_prefix() + "/tasks/datatable",
+                url: `${url_prefix()}/tasks/datatable`,
             },
             order: [[7, "desc"]],
             oSearch: {
                 sSearch: $.urlParam("state")
-                    ? "state:" + $.urlParam("state")
+                    ? `state:${$.urlParam("state")}`
                     : "",
             },
             columnDefs: [
@@ -602,15 +592,7 @@ const workerName = () => $("#workername").text();
                     visible: isColumnVisible("uuid"),
                     orderable: false,
                     render: function (data, type, full, meta) {
-                        return (
-                            '<a href="' +
-                            url_prefix() +
-                            "/task/" +
-                            data +
-                            '">' +
-                            data +
-                            "</a>"
-                        );
+                        return `<a href="${url_prefix()}/task/${data}">${data}</a>`;
                     },
                 },
                 {
@@ -620,23 +602,11 @@ const workerName = () => $("#workername").text();
                     render: function (data, type, full, meta) {
                         switch (data) {
                             case "SUCCESS":
-                                return (
-                                    '<span class="label label-success">' +
-                                    data +
-                                    "</span>"
-                                );
+                                return `<span class="label label-success">${data}</span>`;
                             case "FAILURE":
-                                return (
-                                    '<span class="label label-important">' +
-                                    data +
-                                    "</span>"
-                                );
+                                return `<span class="label label-important">${data}</span>`;
                             default:
-                                return (
-                                    '<span class="label label-default">' +
-                                    data +
-                                    "</span>"
-                                );
+                                return `<span class="label label-default">${data}</span>`;
                         }
                     },
                 },
@@ -693,15 +663,7 @@ const workerName = () => $("#workername").text();
                     data: "worker",
                     visible: isColumnVisible("worker"),
                     render: function (data, type, full, meta) {
-                        return (
-                            '<a href="' +
-                            url_prefix() +
-                            "/worker/" +
-                            data +
-                            '">' +
-                            data +
-                            "</a>"
-                        );
+                        return `<a href="${url_prefix()}/worker/${data}">${data}</a>`;
                     },
                 },
                 {
