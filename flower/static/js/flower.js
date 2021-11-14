@@ -1,3 +1,10 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 var flower = (function () {
     "use strict";
     /*jslint browser: true */
@@ -399,10 +406,12 @@ var flower = (function () {
             prefix = time.startsWith('natural-time') ? 'natural-time' : 'time',
             tz = time.substr(prefix.length + 1) || 'UTC';
 
+        console.log(timestamp)
+
         if (prefix === 'natural-time') {
-            return moment.unix(timestamp).tz(tz).fromNow();
+            dayjs(dayjs.unix(timestamp)).tz(tz).fromNow();
         }
-        return moment.unix(timestamp).tz(tz).format('YYYY-MM-DD HH:mm:ss.SSS');
+        return dayjs(dayjs.unix(timestamp)).tz(tz).format('YYYY-MM-DD HH:mm:ss.SSS');
     }
 
     function isColumnVisible(name) {

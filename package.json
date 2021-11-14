@@ -1,0 +1,40 @@
+{
+  "name": "flower",
+  "version": "1.0.0",
+  "description": "Celery Flower",
+  "source": "flower/static/js/flower.js",
+  "modern": "flower/static/dist/js/main.js",
+  "targets": {
+    "modern": {
+      "context": "browser",
+      "outputFormat": "global"
+    }
+  },
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "watch": "parcel watch",
+    "build": "parcel build",
+    "prettier": "prettier --write flower/static/js/flower.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mher/flower.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/mher/flower/issues"
+  },
+  "homepage": "https://github.com/mher/flower#readme",
+  "devDependencies": {
+    "parcel": "^2.0.1",
+    "prettier": "^2.4.1"
+  },
+  "dependencies": {
+    "dayjs": "^1.10.7"
+  }
+}
