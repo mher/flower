@@ -30,3 +30,7 @@ venv
 Pipfile*
 .vscode/
 data/
+node_modules/
+flower/static/dist
+.parcel-cache
+.python-version
