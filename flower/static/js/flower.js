@@ -56,7 +56,7 @@ const flower = (function () {
     }
 
     function active_page(name) {
-        var pathname = $(location).attr("pathname");
+        const pathname = $(location).attr("pathname");
         if (name === "/") {
             return pathname === url_prefix() + name;
         } else {
@@ -276,14 +276,14 @@ const flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var post_data = {
-                workername: workerName(),
-            },
-            taskname = $(event.target)
-                .closest("tr")
-                .children("td:eq(0)")
-                .text(),
-            type = $(event.target).text().toLowerCase(),
+        const post_data = {
+            workername: workerName(),
+        };
+        let taskname = $(event.target)
+            .closest("tr")
+            .children("td:eq(0)")
+            .text();
+        const type = $(event.target).text().toLowerCase(),
             timeout = $(event.target).siblings().closest("input").val();
 
         taskname = taskname.split(" ")[0]; // removes [rate_limit=xxx]
@@ -362,7 +362,7 @@ const flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var taskid = $("#taskid").text();
+        const taskid = $("#taskid").text();
 
         $.ajax({
             type: "POST",
@@ -385,7 +385,7 @@ const flower = (function () {
     }
 
     function update_dashboard_counters() {
-        var table = $("#workers-table").DataTable();
+        const table = $("#workers-table").DataTable();
         $("a#btn-active").text(
             `Active: ${table.column(2).data().reduce(sum, 0)}`
         );
@@ -416,11 +416,9 @@ const flower = (function () {
     }
 
     function format_time(timestamp) {
-        var time = $("#time").val(),
+        const time = $("#time").val(),
             prefix = time.startsWith("natural-time") ? "natural-time" : "time",
             tz = time.substr(prefix.length + 1) || "UTC";
-
-        console.log(timestamp);
 
         if (prefix === "natural-time") {
             dayjs(dayjs.unix(timestamp)).tz(tz).fromNow();
@@ -431,7 +429,7 @@ const flower = (function () {
     }
 
     function isColumnVisible(name) {
-        var columns = $("#columns").val();
+        let columns = $("#columns").val();
         if (columns === "all") return true;
         if (columns) {
             columns = columns.split(",").map(function (e) {
@@ -443,7 +441,7 @@ const flower = (function () {
     }
 
     $.urlParam = function (name) {
-        var results = new RegExp(`[\\?&]${name}=([^&#]*)`).exec(
+        const results = new RegExp(`[\\?&]${name}=([^&#]*)`).exec(
             window.location.href
         );
         return (results && results[1]) || 0;
@@ -451,7 +449,7 @@ const flower = (function () {
 
     $(document).ready(function () {
         //https://github.com/twitter/bootstrap/issues/1768
-        var shiftWindow = function () {
+        const shiftWindow = function () {
             scrollBy(0, -50);
         };
         if (location.hash) {
@@ -544,7 +542,7 @@ const flower = (function () {
             ],
         });
 
-        var autorefresh_interval = $.urlParam("autorefresh") || 1;
+        const autorefresh_interval = $.urlParam("autorefresh") || 1;
         if (autorefresh !== 0) {
             setInterval(function () {
                 $("#workers-table").DataTable().ajax.reload();
