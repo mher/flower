@@ -5,7 +5,8 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-var flower = (function () {
+const workerName = () => $("#workername").text();
+
     "use strict";
     /*jslint browser: true */
     /*jslint unparam: true, node: true */
@@ -65,14 +66,12 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text();
-
         $.ajax({
             type: "GET",
             url: url_prefix() + "/api/workers",
             dataType: "json",
             data: {
-                workername: unescape(workername),
+                workername: unescape(workerName()),
                 refresh: 1,
             },
             success: function (data) {
@@ -108,14 +107,12 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text();
-
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/pool/restart/" + workername,
+            url: url_prefix() + "/api/worker/pool/restart/" + workerName(),
             dataType: "json",
             data: {
-                workername: workername,
+                workername: workerName(),
             },
             success: function (data) {
                 show_success_alert(data.message);
@@ -130,14 +127,12 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text();
-
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/shutdown/" + workername,
+            url: url_prefix() + "/api/worker/shutdown/" + workerName(),
             dataType: "json",
             data: {
-                workername: workername,
+                workername: workerName(),
             },
             success: function (data) {
                 show_success_alert(data.message);
@@ -152,15 +147,14 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text(),
-            grow_size = $("#pool-size option:selected").html();
+        const grow_size = $("#pool-size option:selected").html();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/pool/grow/" + workername,
+            url: url_prefix() + "/api/worker/pool/grow/" + workerName(),
             dataType: "json",
             data: {
-                workername: workername,
+                workername: workerName(),
                 n: grow_size,
             },
             success: function (data) {
@@ -176,15 +170,14 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text(),
-            shrink_size = $("#pool-size option:selected").html();
+        const shrink_size = $("#pool-size option:selected").html();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/pool/shrink/" + workername,
+            url: url_prefix() + "/api/worker/pool/shrink/" + workerName(),
             dataType: "json",
             data: {
-                workername: workername,
+                workername: workerName(),
                 n: shrink_size,
             },
             success: function (data) {
@@ -200,16 +193,15 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text(),
-            min = $("#min-autoscale").val(),
+        const min = $("#min-autoscale").val(),
             max = $("#max-autoscale").val();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/pool/autoscale/" + workername,
+            url: url_prefix() + "/api/worker/pool/autoscale/" + workerName(),
             dataType: "json",
             data: {
-                workername: workername,
+                workername: workerName(),
                 min: min,
                 max: max,
             },
@@ -226,22 +218,22 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text(),
-            queue = $("#add-consumer-name").val();
+        const queue = $("#add-consumer-name").val();
 
         $.ajax({
             type: "POST",
-            url: url_prefix() + "/api/worker/queue/add-consumer/" + workername,
+            url:
+                url_prefix() + "/api/worker/queue/add-consumer/" + workerName(),
             dataType: "json",
             data: {
-                workername: workername,
+                workername: workerName(),
                 queue: queue,
             },
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
                     $("#tab-queues")
-                        .load("/worker/" + workername + " #tab-queues")
+                        .load("/worker/" + workerName() + " #tab-queues")
                         .fadeIn("show");
                 }, 10000);
             },
@@ -255,18 +247,17 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text(),
-            queue = $(event.target).closest("tr").children("td:eq(0)").text();
+        const queue = $(event.target).closest("tr").children("td:eq(0)").text();
 
         $.ajax({
             type: "POST",
             url:
                 url_prefix() +
                 "/api/worker/queue/cancel-consumer/" +
-                workername,
+                workerName(),
             dataType: "json",
             data: {
-                workername: workername,
+                workername: workerName(),
                 queue: queue,
             },
             success: function (data) {
@@ -288,7 +279,7 @@ var flower = (function () {
         event.stopPropagation();
 
         var post_data = {
-                workername: $("#workername").text(),
+                workername: workerName(),
             },
             taskname = $(event.target)
                 .closest("tr")
@@ -318,28 +309,26 @@ var flower = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        var workername = $("#workername").text(),
-            taskname = $(event.target)
-                .closest("tr")
-                .children("td:eq(0)")
-                .text(),
-            ratelimit = $(event.target).prev().val();
-
-        taskname = taskname.split(" ")[0]; // removes [rate_limit=xxx]
+        const taskname = $(event.target)
+            .closest("tr")
+            .children("td:eq(0)")
+            .text()
+            .split(" ")[0]; // removes [rate_limit=xxx]
+        const ratelimit = $(event.target).prev().val();
 
         $.ajax({
             type: "POST",
             url: url_prefix() + "/api/task/rate-limit/" + taskname,
             dataType: "json",
             data: {
-                workername: workername,
+                workername: workerName(),
                 ratelimit: ratelimit,
             },
             success: function (data) {
                 show_success_alert(data.message);
                 setTimeout(function () {
                     $("#tab-limits")
-                        .load("/worker/" + workername + " #tab-limits")
+                        .load("/worker/" + workerName() + " #tab-limits")
                         .fadeIn("show");
                 }, 10000);
             },
