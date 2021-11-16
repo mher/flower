@@ -1,23 +1,28 @@
-<div class="navbar navbar-fixed-top">
-  <div class="navbar-inner">
-    <div class="container-fluid">
-      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
-      <a class="brand" href="{{ reverse_url('main') }}">Flower</a>
-      <div class="nav-collapse collapse">
-        <ul class="nav">
-            <li {% if active_tab == "dashboard" %}class="active"{% end %}><a href="{{ reverse_url('dashboard') }}">Dashboard</a></li>
-            <li {% if active_tab == "tasks" %}class="active"{% end %}><a href="{{ reverse_url('tasks') }}">Tasks</a></li>
-            <li {% if active_tab == "broker" %}class="active"{% end %}><a href="{{ reverse_url('broker') }}">Broker</a></li>
-        </ul>
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ reverse_url('main') }}">Flower</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02"
+            aria-expanded="false" aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a {% if active_tab == "dashboard" %}class="nav-link active"{% else %}class="nav-link"{% end %} class="nav-link" href="{{ reverse_url('dashboard') }}">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a {% if active_tab == "tasks" %}class="nav-link active"{% else %}class="nav-link"{% end %} class="nav-link" href="{{ reverse_url('tasks') }}">Tasks</a>
+        </li>
+        <li class="nav-item">
+          <a {% if active_tab == "broker" %}class="nav-link active"{% else %}class="nav-link"{% end %} class="nav-link" href="{{ reverse_url('broker') }}">Broker</a>
+        </li>
+      </ul>
         <ul class="nav pull-right">
-          <li><a href="https://flower.readthedocs.io" target="_blank">Docs</a></li>
-          <li><a href="https://github.com/mher/flower" target="_blank">Code</a></li>
+          <li class="nav-item"><a class="nav-link" href="https://flower.readthedocs.io" target="_blank">Docs</a></li>
+          <li class="nav-item"><a class="nav-link" href="https://github.com/mher/flower" target="_blank">Code</a></li>
         </ul>
-      </div>
     </div>
   </div>
-</div>
+</nav>

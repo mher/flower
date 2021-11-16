@@ -2,10 +2,128 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
+import "../css/flower.scss";
+import "bootstrap/dist/css/bootstrap.css";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const workerName = () => $("#workername").text();
+const taskId = () => document.getElementById("taskid").innerText;
+
+function urlPrefix() {
+    let url_prefix = document.getElementById("url_prefix").value;
+    if (url_prefix) {
+        url_prefix = url_prefix.replace(/\/+$/, "");
+        if (url_prefix.startsWith("/")) {
+            return url_prefix;
+        } else {
+            return `/${url_prefix}`;
+        }
+    }
+    return "";
+}
+
+/**
+ * @param {string} message the message to be displayed
+ * @param {string} type "error", "success", something else
+ */
+const createAlertBox = (message, type) => {
+    const alert = document.createElement("div");
+    alert.classList.add(
+        "alert",
+        `alert-${type}`,
+        "alert-dismissible",
+        "fade",
+        "show"
+    );
+    alert.setAttribute("role", "alert");
+
+    const closeButton = document.createElement("button");
+    closeButton.classList.add("btn-close");
+    closeButton.setAttribute("type", "button");
+    closeButton.setAttribute("data-bs-dismiss", "alert");
+    closeButton.setAttribute("aria-label", "Close");
+
+    const title = document.createElement("strong");
+    title.textContent = type.charAt(0).toUpperCase() + type.slice(1) + "!"; // Uppercase first letter of type
+
+    const text = document.createElement("span");
+    text.classList.add("d-inline-block", "ms-3");
+    text.textContent = message;
+
+    alert.appendChild(title);
+    alert.appendChild(text);
+    alert.appendChild(closeButton);
+
+    return alert;
+};
+
+const showAlert = (message, type) => {
+    const alertContainer = document.getElementById("alert-container");
+    const alert = createAlertBox(message, type);
+    alertContainer.appendChild(alert);
+};
+
+const showDangerAlert = (message) => {
+    showAlert(message, "danger");
+};
+
+const showSuccessAlert = (message) => {
+    showAlert(message, "success");
+};
+
+const JSON_HTTP_HEADERS = {
+    "Content-Type": "application/json",
+};
+
+const onTaskTerminate = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    fetch(`${urlPrefix()}/api/task/revoke/${taskId()}`, {
+        method: "POST",
+        body: JSON.stringify({
+            terminate: true,
+        }),
+        headers: JSON_HTTP_HEADERS,
+    })
+        .then((response) => {
+            if (response.status === 200) {
+                return response.json();
+            }
+            return Promise.reject(response);
+        })
+        .then((json) => showSuccessAlert(json.message))
+        .catch((response) => showDangerAlert(response.statusText));
+};
+
+document
+    .getElementById("terminate-task")
+    ?.addEventListener("click", onTaskTerminate);
+
+function onTaskRevoke(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    fetch(`${urlPrefix()}/api/task/revoke/${taskId()}`, {
+        method: "POST",
+        body: JSON.stringify({
+            terminate: false,
+        }),
+        headers: JSON_HTTP_HEADERS,
+    })
+        .then((response) => {
+            if (response.status === 200) {
+                return response.json();
+            }
+            return Promise.reject(response);
+        })
+        .then((json) => showSuccessAlert(json.message))
+        .catch((response) => showDangerAlert(response.statusText));
+}
+
+document.getElementById("revoke-task")?.addEventListener("click", onTaskRevoke);
 
 const flower = (function () {
     "use strict";
@@ -18,18 +136,6 @@ const flower = (function () {
         event.preventDefault();
         event.stopPropagation();
         $(event.target).parent().hide();
-    }
-
-    function show_error_alert(message) {
-        $("#alert").removeClass("alert-success").addClass("alert-error");
-        $("#alert-message").html(`<strong>Error!</strong>    ${message}`);
-        $("#alert").show();
-    }
-
-    function show_success_alert(message) {
-        $("#alert").removeClass("alert-error").addClass("alert-success");
-        $("#alert-message").html(`<strong>Success!</strong>    ${message}`);
-        $("#alert").show();
     }
 
     function url_prefix() {
@@ -77,10 +183,10 @@ const flower = (function () {
                 refresh: 1,
             },
             success: function (data) {
-                show_success_alert(data.message || "Refreshed");
+                showSuccessAlert(data.message || "Refreshed");
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -97,10 +203,10 @@ const flower = (function () {
                 refresh: 1,
             },
             success: function (data) {
-                show_success_alert(data.message || "Refreshed All Workers");
+                showSuccessAlert(data.message || "Refreshed All Workers");
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -117,10 +223,10 @@ const flower = (function () {
                 workername: workerName(),
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -137,10 +243,10 @@ const flower = (function () {
                 workername: workerName(),
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -160,10 +266,10 @@ const flower = (function () {
                 n: grow_size,
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -183,10 +289,10 @@ const flower = (function () {
                 n: shrink_size,
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -208,10 +314,10 @@ const flower = (function () {
                 max: max,
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -231,7 +337,7 @@ const flower = (function () {
                 queue: queue,
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
                 setTimeout(function () {
                     $("#tab-queues")
                         .load(`/worker/${workerName()} #tab-queues`)
@@ -239,7 +345,7 @@ const flower = (function () {
                 }, 10000);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -259,7 +365,7 @@ const flower = (function () {
                 queue: queue,
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
                 setTimeout(function () {
                     $("#tab-queues")
                         .load(`/worker/${workername} #tab-queues`)
@@ -267,7 +373,7 @@ const flower = (function () {
                 }, 10000);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -295,10 +401,10 @@ const flower = (function () {
             dataType: "json",
             data: post_data,
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -323,7 +429,7 @@ const flower = (function () {
                 ratelimit: ratelimit,
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
                 setTimeout(function () {
                     $("#tab-limits")
                         .load(`/worker/${workerName()} #tab-limits`)
@@ -331,7 +437,7 @@ const flower = (function () {
                 }, 10000);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
     }
@@ -350,38 +456,12 @@ const flower = (function () {
                 terminate: false,
             },
             success: function (data) {
-                show_success_alert(data.message);
+                showSuccessAlert(data.message);
             },
             error: function (data) {
-                show_error_alert(data.responseText);
+                showDangerAlert(data.responseText);
             },
         });
-    }
-
-    function on_task_terminate(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const taskid = $("#taskid").text();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/task/revoke/${taskid}`,
-            dataType: "json",
-            data: {
-                terminate: true,
-            },
-            success: function (data) {
-                show_success_alert(data.message);
-            },
-            error: function (data) {
-                show_error_alert(data.responseText);
-            },
-        });
-    }
-
-    function sum(a, b) {
-        return parseInt(a, 10) + parseInt(b, 10);
     }
 
     function update_dashboard_counters() {
