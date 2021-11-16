@@ -13,15 +13,13 @@
       body { padding-top: 60px; }
     </style>
 
-    <link href="{{ static_url('css/bootstrap.css') }}" rel="stylesheet">
-    <link href="{{ static_url('css/bootstrap-responsive.css') }}" rel="stylesheet">
     <link href="{{ static_url('css/jquery-ui.css') }}" rel="stylesheet">
-    <link href="{{ static_url('css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
-    <link href="{{ static_url('css/flower.css') }}" rel="stylesheet">
+{#    <link href="{{ static_url('css/flower.css') }}" rel="stylesheet">#}
     <link href="{{ static_url('css/jquery.dataTables.select.min.css') }}" rel="stylesheet">
     <link href="{{ static_url('css/jquery.dataTables.buttons.min.css') }}" rel="stylesheet">
     <link href="{{ static_url('css/jquery.dataTables.colReorder.min.css') }}" rel="stylesheet">
     <link href="{{ static_url('css/jquery.dataTables.css') }}" rel="stylesheet">
+    <link href="{{ static_url('dist/main.css') }}" rel="stylesheet">
 
     {% block extra_styles %}
     {% end %}
@@ -44,11 +42,8 @@
     {% end %}
 
     <div class="container-fluid">
-      <div id="alert" class="alert alert-success hide">
-        <a class="close" onclick="flower.on_alert_close(event)">×</a>
-        <p id="alert-message"></p>
-      </div>
-      <input type="hidden" value="{{ url_prefix or '' }}" id='url_prefix'>
+        <div id="alert-container"></div>
+        <input type="hidden" value="{{ url_prefix or '' }}" id='url_prefix'>
     </div>
 
     {% block container %}
@@ -65,22 +60,18 @@
     <script src="{{ static_url('js/jquery.dataTables.colReorder.min.js') }}"></script>
     <script src="{{ static_url('js/jquery.dataTables.sorting.natural.js') }}"></script>
 
-    <script src="{{ static_url('js/bootstrap-transition.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-alert.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-modal.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-dropdown.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-scrollspy.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-tab.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-tooltip.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-popover.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-button.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-collapse.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-carousel.js') }}"></script>
-    <script src="{{ static_url('js/bootstrap-typeahead.js') }}"></script>
+{#    <script src="{{ static_url('js/bootstrap-transition.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-alert.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-modal.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-dropdown.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-scrollspy.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-tab.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-tooltip.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-popover.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-button.js') }}"></script>#}
+{#    <script src="{{ static_url('js/bootstrap-collapse.js') }}"></script>#}
 
-    <script src="{{ static_url('js/bootstrap-datetimepicker.min.js') }}"></script>
-
-    <script src="{{ static_url('dist/js/main.js') }}" type="module"></script>
+    <script src="{{ static_url('dist/main.js') }}" type="module"></script>
 
     {% block extra_scripts %}
     {% end %}
