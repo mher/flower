@@ -3,7 +3,6 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
 import "../css/flower.scss";
-import "bootstrap/dist/css/bootstrap.css";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

@@ -1,3 +1,5 @@
+@import "~bootstrap/scss/bootstrap";
+
 .spacer {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -135,4 +137,8 @@
 .nav-collapse .nav > li > a,
 .nav-collapse .dropdown-menu a {
     color: #ffffff;
+}
+
+.dataTables_filter {
+    @extend .mb-3
 }
