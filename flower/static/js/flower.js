@@ -11,6 +11,8 @@ dayjs.extend(timezone);
 const workerName = () => $("#workername").text();
 const taskId = () => document.getElementById("taskid").innerText;
 
+const sum = (a, b) => a + b
+
 function urlPrefix() {
     let url_prefix = document.getElementById("url_prefix").value;
     if (url_prefix) {
@@ -798,6 +800,5 @@ const flower = (function () {
         on_task_rate_limit: on_task_rate_limit,
         on_cancel_task_filter: on_cancel_task_filter,
         on_task_revoke: on_task_revoke,
-        on_task_terminate: on_task_terminate,
     };
 })(jQuery);
