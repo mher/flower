@@ -65,7 +65,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def get_current_user(self):
         # Basic Auth
-        basic_auth = self.application.options.basic_auth.split(',')
+        basic_auth = self.application.options.basic_auth
         if basic_auth:
             auth_header = self.request.headers.get("Authorization", "")
             try:
@@ -73,7 +73,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 credentials = b64decode(credentials.encode()).decode()
                 if basic != 'Basic':
                     raise tornado.web.HTTPError(401)
-                for stored_credential in basic_auth:
+                for stored_credential in basic_auth.split(','):
                     if hmac.compare_digest(stored_credential, credentials):
                         break
                 else:
