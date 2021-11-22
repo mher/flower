@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+// noinspection ES6UnusedImports
+import tab from "bootstrap/js/dist/tab";
 
 import "../css/flower.scss";
 
@@ -9,8 +11,9 @@ dayjs.extend(timezone);
 
 const workerName = () => $("#workername").text();
 const taskId = () => document.getElementById("taskid").innerText;
+const poolSize = () => document.getElementById("pool-size").value;
 
-const sum = (a, b) => a + b
+const sum = (a, b) => a + b;
 
 function urlPrefix() {
     let url_prefix = document.getElementById("url_prefix").value;
@@ -78,31 +81,6 @@ const JSON_HTTP_HEADERS = {
     "Content-Type": "application/json",
 };
 
-const onTaskTerminate = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    fetch(`${urlPrefix()}/api/task/revoke/${taskId()}`, {
-        method: "POST",
-        body: JSON.stringify({
-            terminate: true,
-        }),
-        headers: JSON_HTTP_HEADERS,
-    })
-        .then((response) => {
-            if (response.status === 200) {
-                return response.json();
-            }
-            return Promise.reject(response);
-        })
-        .then((json) => showSuccessAlert(json.message))
-        .catch((response) => showDangerAlert(response.statusText));
-};
-
-document
-    .getElementById("terminate-task")
-    ?.addEventListener("click", onTaskTerminate);
-
 function onTaskRevoke(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -124,7 +102,149 @@ function onTaskRevoke(event) {
         .catch((response) => showDangerAlert(response.statusText));
 }
 
+const onTaskTerminate = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    fetch(`${urlPrefix()}/api/task/revoke/${taskId()}`, {
+        method: "POST",
+        body: JSON.stringify({
+            terminate: true,
+        }),
+        headers: JSON_HTTP_HEADERS,
+    })
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            return Promise.reject(response);
+        })
+        .then((json) => showSuccessAlert(json.message))
+        .catch((response) => showDangerAlert(response.statusText));
+};
+
+const onPoolChange = (event, growOrShrink) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    fetch(`${urlPrefix()}/api/worker/pool/${growOrShrink}/${workerName()}`, {
+        method: "POST",
+        body: JSON.stringify({
+            workername: workerName(),
+            n: poolSize(),
+        }),
+        headers: JSON_HTTP_HEADERS,
+    })
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            return Promise.reject(response);
+        })
+        .then((json) => showSuccessAlert(json.message))
+        .catch((response) => showDangerAlert(response.statusText));
+};
+
+const onPoolGrow = (event) => onPoolChange(event, "grow");
+
+const onPoolShrink = (event) => onPoolChange(event, "shrink");
+
+function onPoolAutoscale(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const minAutoScale = document.getElementById("min-autoscale").value;
+    const maxAutoScale = document.getElementById("max-autoscale").value;
+
+    const data = JSON.stringify({
+        workername: workerName(),
+        min_value: minAutoScale,
+        max_value: maxAutoScale,
+    });
+
+    console.log(data);
+
+    fetch(`${urlPrefix()}/api/worker/pool/autoscale/${workerName()}`, {
+        method: "POST",
+        body: data,
+        headers: JSON_HTTP_HEADERS,
+    })
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            return Promise.reject(response);
+        })
+        .then((json) => showSuccessAlert(json.message))
+        .catch((response) => showDangerAlert(response.statusText));
+}
+
+function onCancelConsumer(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    $.ajax({
+        type: "POST",
+        url: `${urlPrefix()}/api/worker/queue/cancel-consumer/${workerName()}`,
+        dataType: "json",
+        data: {
+            workername: workerName(),
+            queue: event.target.value,
+        },
+        success: function (data) {
+            showSuccessAlert(data.message);
+            setTimeout(function () {
+                $("#tab-queues")
+                    .load(`/worker/${workerName()} #tab-queues`)
+                    .fadeIn("show");
+            }, 10000);
+        },
+        error: function (data) {
+            showDangerAlert(data.responseText);
+        },
+    });
+}
+
+function onAddConsumer(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    $.ajax({
+        type: "POST",
+        url: `${urlPrefix()}/api/worker/queue/add-consumer/${workerName()}`,
+        dataType: "json",
+        data: {
+            workername: workerName(),
+            queue: document.getElementById("add-consumer-name").value,
+        },
+        success: function (data) {
+            showSuccessAlert(data.message);
+            setTimeout(function () {
+                $("#tab-queues")
+                    .load(`/worker/${workerName()} #tab-queues`)
+                    .fadeIn("show");
+            }, 10000);
+        },
+        error: function (data) {
+            showDangerAlert(data.responseText);
+        },
+    });
+}
+
 document.getElementById("revoke-task")?.addEventListener("click", onTaskRevoke);
+document
+    .getElementById("terminate-task")
+    ?.addEventListener("click", onTaskTerminate);
+document.getElementById("pool-grow")?.addEventListener("click", onPoolGrow);
+document.getElementById("pool-shrink")?.addEventListener("click", onPoolShrink);
+document
+    .getElementById("autoscale")
+    ?.addEventListener("click", onPoolAutoscale);
+document.getElementById("add-consumer")?.addEventListener("click", onAddConsumer)
+Array.from(document.getElementsByClassName("btn-queue")).forEach((btn) =>
+    btn.addEventListener("click", onCancelConsumer)
+);
+
 
 const flower = (function () {
     "use strict";
@@ -156,9 +276,9 @@ const flower = (function () {
     function htmlEscapeEntities(d) {
         return typeof d === "string"
             ? d
-                  .replace(/</g, "&lt;")
-                  .replace(/>/g, "&gt;")
-                  .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
             : d;
     }
 
@@ -245,133 +365,6 @@ const flower = (function () {
             },
             success: function (data) {
                 showSuccessAlert(data.message);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_pool_grow(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const grow_size = $("#pool-size option:selected").html();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/worker/pool/grow/${workerName()}`,
-            dataType: "json",
-            data: {
-                workername: workerName(),
-                n: grow_size,
-            },
-            success: function (data) {
-                showSuccessAlert(data.message);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_pool_shrink(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const shrink_size = $("#pool-size option:selected").html();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/worker/pool/shrink/${workerName()}`,
-            dataType: "json",
-            data: {
-                workername: workerName(),
-                n: shrink_size,
-            },
-            success: function (data) {
-                showSuccessAlert(data.message);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_pool_autoscale(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const min = $("#min-autoscale").val(),
-            max = $("#max-autoscale").val();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/worker/pool/autoscale/${workerName()}`,
-            dataType: "json",
-            data: {
-                workername: workerName(),
-                min: min,
-                max: max,
-            },
-            success: function (data) {
-                showSuccessAlert(data.message);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_add_consumer(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const queue = $("#add-consumer-name").val();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/worker/queue/add-consumer/${workerName()}`,
-            dataType: "json",
-            data: {
-                workername: workerName(),
-                queue: queue,
-            },
-            success: function (data) {
-                showSuccessAlert(data.message);
-                setTimeout(function () {
-                    $("#tab-queues")
-                        .load(`/worker/${workerName()} #tab-queues`)
-                        .fadeIn("show");
-                }, 10000);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_cancel_consumer(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const queue = $(event.target).closest("tr").children("td:eq(0)").text();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/worker/queue/cancel-consumer/${workerName()}`,
-            dataType: "json",
-            data: {
-                workername: workerName(),
-                queue: queue,
-            },
-            success: function (data) {
-                showSuccessAlert(data.message);
-                setTimeout(function () {
-                    $("#tab-queues")
-                        .load(`/worker/${workername} #tab-queues`)
-                        .fadeIn("show");
-                }, 10000);
             },
             error: function (data) {
                 showDangerAlert(data.responseText);
@@ -790,11 +783,6 @@ const flower = (function () {
         on_refresh_all: on_refresh_all,
         on_worker_pool_restart: on_worker_pool_restart,
         on_worker_shutdown: on_worker_shutdown,
-        on_pool_grow: on_pool_grow,
-        on_pool_shrink: on_pool_shrink,
-        on_pool_autoscale: on_pool_autoscale,
-        on_add_consumer: on_add_consumer,
-        on_cancel_consumer: on_cancel_consumer,
         on_task_timeout: on_task_timeout,
         on_task_rate_limit: on_task_rate_limit,
         on_cancel_task_filter: on_cancel_task_filter,

@@ -17,7 +17,9 @@ services:
     ports:
       - 3000:3000
   worker:
-    build: ./
+    build:
+      context: .
+      dockerfile: compose/hub/flower/Dockerfile
     entrypoint: celery
     command: -A tasks worker -l info -E
     user: nobody
@@ -30,7 +32,9 @@ services:
     depends_on:
       - redis
   flower:
-    build: ./
+    build:
+      context: .
+      dockerfile: compose/hub/flower/Dockerfile
     command: celery -A tasks flower
     volumes:
       - ./examples:/data
