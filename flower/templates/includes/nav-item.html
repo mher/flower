@@ -1,0 +1,11 @@
+<li class="nav-item" role="presentation">
+    <button
+            {% if is_active %}class="nav-link active"{% else %}class="nav-link"{% end %}
+            id="{{ tab_id }}-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#tab-{{ tab_id }}" type="button" role="tab"
+            aria-controls="{{ tab_id }}"
+            aria-selected={% if is_active %}"true"{% else %}"false"{% end %}>
+        {{ tab_label }}
+    </button>
+</li>
