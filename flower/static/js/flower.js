@@ -235,6 +235,66 @@ function onAddConsumer(event) {
     });
 }
 
+const taskName = (event) =>
+    event.target.closest("tr").firstElementChild.textContent.split(" ")[0]; // removes [rate_limit=xxx]
+
+function onTaskRateLimit(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const rateLimit = event.target.firstElementChild.value;
+
+    $.ajax({
+        type: "POST",
+        url: `${urlPrefix()}/api/task/rate-limit/${taskName(event)}`,
+        dataType: "json",
+        data: {
+            workername: workerName(),
+            ratelimit: rateLimit,
+        },
+        success: function (data) {
+            showSuccessAlert(data.message);
+            setTimeout(function () {
+                $("#tab-limits")
+                    .load(`/worker/${workerName()} #tab-limits`)
+                    .fadeIn("show");
+            }, 10000);
+        },
+        error: function (data) {
+            showDangerAlert(data.responseText);
+        },
+    });
+}
+
+function onTaskTimeout(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const postData = {
+        workername: workerName(),
+    };
+
+    const type = event.target.textContent.trim();
+    const timeout = event.target.parentNode.firstElementChild.value;
+
+    postData[type] = timeout;
+
+    console.log(postData);
+
+    $.ajax({
+        type: "POST",
+        url: `${urlPrefix()}/api/task/timeout/${taskName(event)}`,
+        dataType: "json",
+        data: postData,
+        success: function (data) {
+            showSuccessAlert(data.message);
+        },
+        error: function (data) {
+            showDangerAlert(data.responseText);
+        },
+    });
+}
+
 document.getElementById("revoke-task")?.addEventListener("click", onTaskRevoke);
 document
     .getElementById("terminate-task")
@@ -244,11 +304,21 @@ document.getElementById("pool-shrink")?.addEventListener("click", onPoolShrink);
 document
     .getElementById("autoscale")
     ?.addEventListener("click", onPoolAutoscale);
-document.getElementById("add-consumer")?.addEventListener("click", onAddConsumer)
+document
+    .getElementById("add-consumer")
+    ?.addEventListener("click", onAddConsumer);
 Array.from(document.getElementsByClassName("btn-queue")).forEach((btn) =>
     btn.addEventListener("click", onCancelConsumer)
 );
-
+Array.from(document.getElementsByClassName("form-rate-limit")).forEach((form) =>
+    form.addEventListener("submit", onTaskRateLimit)
+);
+Array.from(document.getElementsByClassName("btn-soft-timeout")).forEach((btn) =>
+    btn.addEventListener("click", onTaskTimeout)
+);
+Array.from(document.getElementsByClassName("btn-hard-timeout")).forEach((btn) =>
+    btn.addEventListener("click", onTaskTimeout)
+);
 
 const flower = (function () {
     "use strict";
@@ -280,9 +350,9 @@ const flower = (function () {
     function htmlEscapeEntities(d) {
         return typeof d === "string"
             ? d
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;")
             : d;
     }
 
@@ -369,70 +439,6 @@ const flower = (function () {
             },
             success: function (data) {
                 showSuccessAlert(data.message);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_task_timeout(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const post_data = {
-            workername: workerName(),
-        };
-        let taskname = $(event.target)
-            .closest("tr")
-            .children("td:eq(0)")
-            .text();
-        const type = $(event.target).text().toLowerCase(),
-            timeout = $(event.target).siblings().closest("input").val();
-
-        taskname = taskname.split(" ")[0]; // removes [rate_limit=xxx]
-        post_data[type] = timeout;
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/task/timeout/${taskname}`,
-            dataType: "json",
-            data: post_data,
-            success: function (data) {
-                showSuccessAlert(data.message);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_task_rate_limit(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const taskname = $(event.target)
-            .closest("tr")
-            .children("td:eq(0)")
-            .text()
-            .split(" ")[0]; // removes [rate_limit=xxx]
-        const ratelimit = $(event.target).prev().val();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/task/rate-limit/${taskname}`,
-            dataType: "json",
-            data: {
-                workername: workerName(),
-                ratelimit: ratelimit,
-            },
-            success: function (data) {
-                showSuccessAlert(data.message);
-                setTimeout(function () {
-                    $("#tab-limits")
-                        .load(`/worker/${workerName()} #tab-limits`)
-                        .fadeIn("show");
-                }, 10000);
             },
             error: function (data) {
                 showDangerAlert(data.responseText);
@@ -787,8 +793,6 @@ const flower = (function () {
         on_refresh_all: on_refresh_all,
         on_worker_pool_restart: on_worker_pool_restart,
         on_worker_shutdown: on_worker_shutdown,
-        on_task_timeout: on_task_timeout,
-        on_task_rate_limit: on_task_rate_limit,
         on_cancel_task_filter: on_cancel_task_filter,
         on_task_revoke: on_task_revoke,
     };

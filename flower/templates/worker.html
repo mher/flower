@@ -270,8 +270,8 @@
             </table>
 
             <h2>
-                Reserved <small class="text-secondary fs-5">tasks that have been received, but are
-                still waiting to be executed</small>
+                Reserved <small class="text-secondary fs-5">tasks that have been
+                received, but are still waiting to be executed</small>
             </h2>
             <table class="table table-bordered table-striped">
                 <thead>
@@ -296,7 +296,10 @@
                 </tbody>
             </table>
 
-            <h2>Revoked <small class="text-secondary fs-5">cancelled tasks</small></h2>
+            <h2>
+                Revoked <small class="text-secondary fs-5">cancelled
+                tasks</small>
+            </h2>
             <table class="table table-bordered table-striped">
                 <thead>
                 <tr>
@@ -329,35 +332,26 @@
                 <tr>
                     <td>{{ taskname }}</td>
                     <td>
-                        <div class="control-group">
-                            <div class="controls">
-                                <div class="input-append">
-                                    <input class="input-small"
-                                           type="text">
-                                    <button class="btn" type="button"
-                                            onclick="flower.on_task_rate_limit(event)">
-                                        Apply
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <form class="d-flex form-rate-limit">
+                            <input class="form-control w-25 me-3" type="text"
+                                   required>
+                            <button class="btn btn-primary btn-rate-limit"
+                                    type="submit">
+                                Apply
+                            </button>
+                        </form>
                     </td>
                     <td>
-                        <div class="control-group">
-                            <div class="controls">
-                                <div class="input-append">
-                                    <input class="input-small"
-                                           type="text">
-                                    <button class="btn" type="button"
-                                            onclick="flower.on_task_timeout(event)">
-                                        Soft
-                                    </button>
-                                    <button class="btn" type="button"
-                                            onclick="flower.on_task_timeout(event)">
-                                        Hard
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="d-flex">
+                            <input class="form-control w-25 me-3" type="text">
+                            <button class="btn btn-primary btn-soft-timeout me-3"
+                                    type="button">
+                                Soft
+                            </button>
+                            <button class="btn btn-primary btn-hard-timeout"
+                                    type="button">
+                                Hard
+                            </button>
                         </div>
                     </td>
                 </tr>
