@@ -360,8 +360,8 @@
         </div> <!-- end limits tab -->
 
         <div class="tab-pane" id="tab-config">
-            <div class="span8">
-                <table class="table table-bordered table-striped">
+            <div class="col-8">
+                <table class="table table-bordered table-striped caption-top">
                     <caption>Configuration options</caption>
                     <tbody>
                     {% for name,value in sorted(worker.get('conf', {}).items()) %}
@@ -369,7 +369,10 @@
                     <tr>
                         <td>
                             <a href="http://docs.celeryproject.org/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}"
-                               target="_blank">{{ name }}</a></td>
+                               target="_blank">
+                                {{ name }}
+                            </a>
+                        </td>
                         <td>{{ value }}</td>
                     </tr>
                     {% end %}
