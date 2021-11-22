@@ -419,13 +419,6 @@ const flower = (function () {
     /*jslint unparam: true, node: true */
 
     /*global $, WebSocket, jQuery */
-
-    function on_alert_close(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        $(event.target).parent().hide();
-    }
-
     //https://github.com/DataTables/DataTables/blob/1.10.11/media/js/jquery.dataTables.js#L14882
     function htmlEscapeEntities(d) {
         return typeof d === "string"
@@ -787,7 +780,6 @@ const flower = (function () {
     });
 
     return {
-        on_alert_close: on_alert_close,
         on_cancel_task_filter: on_cancel_task_filter,
         on_task_revoke: on_task_revoke,
     };
