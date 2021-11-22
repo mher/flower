@@ -342,17 +342,17 @@
                         </form>
                     </td>
                     <td>
-                        <div class="d-flex">
-                            <input class="form-control w-25 me-3" type="text">
+                        <form class="d-flex form-timeout">
+                            <input class="form-control w-25 me-3" type="text" required>
                             <button class="btn btn-primary btn-soft-timeout me-3"
-                                    type="button">
+                                    type="submit">
                                 Soft
                             </button>
                             <button class="btn btn-primary btn-hard-timeout"
-                                    type="button">
+                                    type="submit">
                                 Hard
                             </button>
-                        </div>
+                        </form>
                     </td>
                 </tr>
                 {% end %}
