@@ -383,8 +383,8 @@
         </div> <!-- end config tab -->
 
         <div class="tab-pane" id="tab-system">
-            <div class="span8">
-                <table class="table table-bordered table-striped">
+            <div class="col-8">
+                <table class="table table-bordered table-striped caption-top">
                     <caption>System usage statistics</caption>
                     <tbody>
                     {% if isinstance(worker['stats'].get('rusage', None), dict) %}
