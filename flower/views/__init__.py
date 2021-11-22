@@ -65,7 +65,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def get_current_user(self):
         # Basic Auth
-        basic_auth = self.application.options.basic_auth
+        basic_auth = self.application.options.basic_auth.split(',')
         if basic_auth:
             auth_header = self.request.headers.get("Authorization", "")
             try:
