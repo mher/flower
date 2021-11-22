@@ -270,16 +270,14 @@ function onTaskTimeout(event) {
     event.preventDefault();
     event.stopPropagation();
 
+    const type = event.submitter.textContent.trim();
+    const timeout = event.target.firstElementChild.value;
+
     const postData = {
         workername: workerName(),
     };
 
-    const type = event.target.textContent.trim();
-    const timeout = event.target.parentNode.firstElementChild.value;
-
     postData[type] = timeout;
-
-    console.log(postData);
 
     $.ajax({
         type: "POST",
@@ -313,12 +311,15 @@ Array.from(document.getElementsByClassName("btn-queue")).forEach((btn) =>
 Array.from(document.getElementsByClassName("form-rate-limit")).forEach((form) =>
     form.addEventListener("submit", onTaskRateLimit)
 );
-Array.from(document.getElementsByClassName("btn-soft-timeout")).forEach((btn) =>
-    btn.addEventListener("click", onTaskTimeout)
+Array.from(document.getElementsByClassName("form-timeout")).forEach((form) =>
+    form.addEventListener("submit", onTaskTimeout)
 );
-Array.from(document.getElementsByClassName("btn-hard-timeout")).forEach((btn) =>
-    btn.addEventListener("click", onTaskTimeout)
-);
+// Array.from(document.getElementsByClassName("btn-soft-timeout")).forEach((btn) =>
+//     btn.addEventListener("click", onTaskTimeout)
+// );
+// Array.from(document.getElementsByClassName("btn-hard-timeout")).forEach((btn) =>
+//     btn.addEventListener("click", onTaskTimeout)
+// );
 
 const flower = (function () {
     "use strict";
