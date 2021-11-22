@@ -49,6 +49,10 @@ const createAlertBox = (message, type) => {
     closeButton.setAttribute("data-bs-dismiss", "alert");
     closeButton.setAttribute("aria-label", "Close");
 
+    closeButton.addEventListener("click", (event) =>
+        event.target.parentNode.remove()
+    );
+
     const title = document.createElement("strong");
     title.textContent = type.charAt(0).toUpperCase() + type.slice(1) + "!"; // Uppercase first letter of type
 
