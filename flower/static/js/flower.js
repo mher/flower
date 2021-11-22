@@ -2,7 +2,11 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 // noinspection ES6UnusedImports
+import popper from "@popperjs/core/dist/esm/popper";
+// noinspection ES6UnusedImports
 import tab from "bootstrap/js/dist/tab";
+// noinspection ES6UnusedImports
+import dropdown from "bootstrap/js/dist/dropdown";
 
 import "../css/flower.scss";
 
@@ -293,6 +297,87 @@ function onTaskTimeout(event) {
     });
 }
 
+function onWorkerRefresh(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    $.ajax({
+        type: "GET",
+        url: `${urlPrefix()}/api/workers`,
+        dataType: "json",
+        data: {
+            workername: unescape(workerName()),
+            refresh: 1,
+        },
+        success: function (data) {
+            showSuccessAlert(data.message || "Refreshed");
+        },
+        error: function (data) {
+            showDangerAlert(data.responseText);
+        },
+    });
+}
+
+function onRefreshAll(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    $.ajax({
+        type: "GET",
+        url: `${urlPrefix()}/api/workers`,
+        dataType: "json",
+        data: {
+            refresh: 1,
+        },
+        success: function (data) {
+            showSuccessAlert(data.message || "Refreshed All Workers");
+        },
+        error: function (data) {
+            showDangerAlert(data.responseText);
+        },
+    });
+}
+
+function onWorkerPoolRestart(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    $.ajax({
+        type: "POST",
+        url: `${urlPrefix()}/api/worker/pool/restart/${workerName()}`,
+        dataType: "json",
+        data: {
+            workername: workerName(),
+        },
+        success: function (data) {
+            showSuccessAlert(data.message);
+        },
+        error: function (data) {
+            showDangerAlert(data.responseText);
+        },
+    });
+}
+
+function onWorkerShutdown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    $.ajax({
+        type: "POST",
+        url: `${urlPrefix()}/api/worker/shutdown/${workerName()}`,
+        dataType: "json",
+        data: {
+            workername: workerName(),
+        },
+        success: function (data) {
+            showSuccessAlert(data.message);
+        },
+        error: function (data) {
+            showDangerAlert(data.responseText);
+        },
+    });
+}
+
 document.getElementById("revoke-task")?.addEventListener("click", onTaskRevoke);
 document
     .getElementById("terminate-task")
@@ -314,12 +399,18 @@ Array.from(document.getElementsByClassName("form-rate-limit")).forEach((form) =>
 Array.from(document.getElementsByClassName("form-timeout")).forEach((form) =>
     form.addEventListener("submit", onTaskTimeout)
 );
-// Array.from(document.getElementsByClassName("btn-soft-timeout")).forEach((btn) =>
-//     btn.addEventListener("click", onTaskTimeout)
-// );
-// Array.from(document.getElementsByClassName("btn-hard-timeout")).forEach((btn) =>
-//     btn.addEventListener("click", onTaskTimeout)
-// );
+document
+    .getElementById("worker-refresh")
+    .addEventListener("click", onWorkerRefresh);
+document
+    .getElementById("worker-shut-down")
+    .addEventListener("click", onWorkerShutdown);
+document
+    .getElementById("worker-pool-restart")
+    .addEventListener("click", onWorkerPoolRestart);
+document
+    .getElementById("worker-refresh-all")
+    .addEventListener("click", onRefreshAll);
 
 const flower = (function () {
     "use strict";
@@ -364,87 +455,6 @@ const flower = (function () {
         } else {
             return pathname.startsWith(url_prefix() + name);
         }
-    }
-
-    function on_worker_refresh(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        $.ajax({
-            type: "GET",
-            url: `${url_prefix()}/api/workers`,
-            dataType: "json",
-            data: {
-                workername: unescape(workerName()),
-                refresh: 1,
-            },
-            success: function (data) {
-                showSuccessAlert(data.message || "Refreshed");
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_refresh_all(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        $.ajax({
-            type: "GET",
-            url: `${url_prefix()}/api/workers`,
-            dataType: "json",
-            data: {
-                refresh: 1,
-            },
-            success: function (data) {
-                showSuccessAlert(data.message || "Refreshed All Workers");
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_worker_pool_restart(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/worker/pool/restart/${workerName()}`,
-            dataType: "json",
-            data: {
-                workername: workerName(),
-            },
-            success: function (data) {
-                showSuccessAlert(data.message);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
-    }
-
-    function on_worker_shutdown(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        $.ajax({
-            type: "POST",
-            url: `${url_prefix()}/api/worker/shutdown/${workerName()}`,
-            dataType: "json",
-            data: {
-                workername: workerName(),
-            },
-            success: function (data) {
-                showSuccessAlert(data.message);
-            },
-            error: function (data) {
-                showDangerAlert(data.responseText);
-            },
-        });
     }
 
     function on_task_revoke(event) {
@@ -790,10 +800,6 @@ const flower = (function () {
 
     return {
         on_alert_close: on_alert_close,
-        on_worker_refresh: on_worker_refresh,
-        on_refresh_all: on_refresh_all,
-        on_worker_pool_restart: on_worker_pool_restart,
-        on_worker_shutdown: on_worker_shutdown,
         on_cancel_task_filter: on_cancel_task_filter,
         on_task_revoke: on_task_revoke,
     };

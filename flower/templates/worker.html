@@ -9,12 +9,42 @@
 {% set other = {key: value for key, value in worker['stats'].items() if key not in'pool pid prefetch_count autoscaler consumer broker clock total rusage'.split()} %}
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="page-header">
+    <div class="d-flex justify-content-between">
+        <div>
             <small>Worker: </small>
             <h1 id="workername">{{ worker['name'] }}</h1>
         </div>
+
+        <div class="dropdown align-self-end">
+            <button class="btn btn-secondary dropdown-toggle" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                Refresh
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li>
+                    <a class="dropdown-item" href="#" id="worker-shut-down">
+                        Shut down
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" id="worker-refresh">
+                        Refresh
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" id="worker-pool-restart">
+                        Restart pool
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" id="worker-refresh-all">
+                        Refresh all
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
+
     <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
         {% module Template("includes/nav-item.html", tab_id="pool", tab_label="Pool", is_active=True) %}
         {% module Template("includes/nav-item.html", tab_id="broker", tab_label="Broker", is_active=False) %}
@@ -343,7 +373,8 @@
                     </td>
                     <td>
                         <form class="d-flex form-timeout">
-                            <input class="form-control w-25 me-3" type="text" required>
+                            <input class="form-control w-25 me-3" type="text"
+                                   required>
                             <button class="btn btn-primary btn-soft-timeout me-3"
                                     type="submit">
                                 Soft
@@ -402,8 +433,8 @@
 
         {% if other %}
         <div class="tab-pane" id="tab-other">
-            <div class="span8">
-                <table class="table table-bordered table-striped">
+            <div class="col-8">
+                <table class="table table-bordered table-striped caption-top">
                     <caption>Other statistics</caption>
                     <tbody>
                     {% for name, value in other.items() %}
@@ -420,49 +451,4 @@
 
     </div>
 </div>
-
-
-{#<div class="container-fluid">#}
-{#    <div class="row-fluid">#}
-{#        <div class="span12">#}
-{#            <div class="page-header">#}
-{#                <small>Worker: </small>#}
-{#                <h1 id="workername">{{ worker['name'] }}</h1>#}
-{#            </div>#}
-{##}
-{#            <div class="btn-group pull-right">#}
-{#                <button class="btn" onclick="flower.on_worker_refresh(event);">#}
-{#                    Refresh#}
-{#                </button>#}
-{#                <button class="btn dropdown-toggle" data-toggle="dropdown">#}
-{#                    <span class="caret"></span>#}
-{#                </button>#}
-{#                <ul class="dropdown-menu">#}
-{#                    <li>#}
-{#                        <a href="#" onclick="flower.on_worker_shutdown(event);">#}
-{#                            Shut Down#}
-{#                        </a>#}
-{#                    </li>#}
-{#                    <li>#}
-{#                        <a href="#"#}
-{#                           onclick="flower.on_worker_pool_restart(event);">#}
-{#                            Restart Pool</a>#}
-{#                    </li>#}
-{#                    <li>#}
-{#                        <a href="#" onclick="flower.on_worker_refresh(event);">#}
-{#                            Refresh#}
-{#                        </a>#}
-{#                    </li>#}
-{#                    <li>#}
-{#                        <a href="#" onclick="flower.on_refresh_all(event);">#}
-{#                            Refresh All#}
-{#                        </a>#}
-{#                    </li>#}
-{#                </ul>#}
-{#            </div>#}
-{#        </div>#}
-{##}
-
-{#</div>#}
-{#</div>#}
 {% end %}
