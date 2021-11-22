@@ -9,6 +9,7 @@ import tab from "bootstrap/js/dist/tab";
 import dropdown from "bootstrap/js/dist/dropdown";
 
 import "../css/flower.scss";
+import * as url from "url";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -425,19 +426,6 @@ const flower = (function () {
         $(event.target).parent().hide();
     }
 
-    function url_prefix() {
-        let url_prefix = $("#url_prefix").val();
-        if (url_prefix) {
-            url_prefix = url_prefix.replace(/\/+$/, "");
-            if (url_prefix.startsWith("/")) {
-                return url_prefix;
-            } else {
-                return `/${url_prefix}`;
-            }
-        }
-        return "";
-    }
-
     //https://github.com/DataTables/DataTables/blob/1.10.11/media/js/jquery.dataTables.js#L14882
     function htmlEscapeEntities(d) {
         return typeof d === "string"
@@ -451,9 +439,9 @@ const flower = (function () {
     function active_page(name) {
         const pathname = $(location).attr("pathname");
         if (name === "/") {
-            return pathname === url_prefix() + name;
+            return pathname === urlPrefix() + name;
         } else {
-            return pathname.startsWith(url_prefix() + name);
+            return pathname.startsWith(urlPrefix() + name);
         }
     }
 
@@ -465,7 +453,7 @@ const flower = (function () {
 
         $.ajax({
             type: "POST",
-            url: `${url_prefix()}/api/task/revoke/${taskid}`,
+            url: `${urlPrefix()}/api/task/revoke/${taskid}`,
             dataType: "json",
             data: {
                 terminate: false,
@@ -577,7 +565,7 @@ const flower = (function () {
             scrollX: true,
             scrollY: true,
             scrollCollapse: true,
-            ajax: `${url_prefix()}/dashboard?json=1`,
+            ajax: `${urlPrefix()}/dashboard?json=1`,
             order: [[1, "asc"]],
             columnDefs: [
                 {
@@ -585,7 +573,7 @@ const flower = (function () {
                     data: "hostname",
                     type: "natural",
                     render: function (data, type, full, meta) {
-                        return `<a href="${url_prefix()}/worker/${data}">${data}</a>`;
+                        return `<a href="${urlPrefix()}/worker/${data}">${data}</a>`;
                     },
                 },
                 {
@@ -662,7 +650,7 @@ const flower = (function () {
             colReorder: true,
             ajax: {
                 type: "POST",
-                url: `${url_prefix()}/tasks/datatable`,
+                url: `${urlPrefix()}/tasks/datatable`,
             },
             order: [[7, "desc"]],
             oSearch: {
@@ -685,7 +673,7 @@ const flower = (function () {
                     visible: isColumnVisible("uuid"),
                     orderable: false,
                     render: function (data, type, full, meta) {
-                        return `<a href="${url_prefix()}/task/${data}">${data}</a>`;
+                        return `<a href="${urlPrefix()}/task/${data}">${data}</a>`;
                     },
                 },
                 {
@@ -756,7 +744,7 @@ const flower = (function () {
                     data: "worker",
                     visible: isColumnVisible("worker"),
                     render: function (data, type, full, meta) {
-                        return `<a href="${url_prefix()}/worker/${data}">${data}</a>`;
+                        return `<a href="${urlPrefix()}/worker/${data}">${data}</a>`;
                     },
                 },
                 {
