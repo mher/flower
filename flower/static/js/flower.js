@@ -402,16 +402,16 @@ Array.from(document.getElementsByClassName("form-timeout")).forEach((form) =>
 );
 document
     .getElementById("worker-refresh")
-    .addEventListener("click", onWorkerRefresh);
+    ?.addEventListener("click", onWorkerRefresh);
 document
     .getElementById("worker-shut-down")
-    .addEventListener("click", onWorkerShutdown);
+    ?.addEventListener("click", onWorkerShutdown);
 document
     .getElementById("worker-pool-restart")
-    .addEventListener("click", onWorkerPoolRestart);
+    ?.addEventListener("click", onWorkerPoolRestart);
 document
     .getElementById("worker-refresh-all")
-    .addEventListener("click", onRefreshAll);
+    ?.addEventListener("click", onRefreshAll);
 
 const flower = (function () {
     "use strict";
