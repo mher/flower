@@ -207,10 +207,6 @@ Shrink worker's pool
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
-        logger.info("--------------------")
-        logger.info(self.request.body)
-        logger.info("--------------------")
-
         n = self.get_argument('n', default=1, type=int)
 
         logger.info("Shrinking '%s' worker's pool by '%s'", workername, n)
