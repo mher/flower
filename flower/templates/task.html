@@ -45,11 +45,11 @@
                     <td>State</td>
                     <td>
                         {% if task.state == "SUCCESS" %}
-                        <span class="label-success">{{ task.state }}</span>
+                        <span class="badge bg-success">{{ task.state }}</span>
                         {% elif task.state == "FAILURE" %}
-                        <span class="label-important">{{ task.state }}</span>
+                        <span class="badge bg-danger">{{ task.state }}</span>
                         {% else %}
-                        <span class="label-default">{{ task.state }}</span>
+                        <span class="badge bg-primary">{{ task.state }}</span>
                         {% end %}
                     </td>
                 </tr>
