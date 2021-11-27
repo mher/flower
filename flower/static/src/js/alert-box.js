@@ -1,4 +1,6 @@
 /**
+ * Create a dismissible Bootstrap 5 alert box.
+ *
  * @param {string} message the message to be displayed
  * @param {string} type "error", "success", something else
  */
