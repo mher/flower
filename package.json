@@ -2,7 +2,7 @@
   "name": "flower",
   "version": "1.0.0",
   "description": "Celery Flower",
-  "source": "flower/static/js/flower.js",
+  "source": "flower/static/src/js/flower.js",
   "modern": "flower/static/dist/main.js",
   "targets": {
     "modern": {
@@ -19,7 +19,7 @@
   "scripts": {
     "watch": "parcel watch",
     "build": "parcel build",
-    "prettier": "prettier --write flower/static/js/flower.js flower/static/css/flower.scss"
+    "prettier": "prettier --write flower/static/src/"
   },
   "repository": {
     "type": "git",
