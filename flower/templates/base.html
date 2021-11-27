@@ -13,11 +13,6 @@
       body { padding-top: 60px; }
     </style>
 
-    <link href="{{ static_url('css/jquery-ui.css') }}" rel="stylesheet">
-    <link href="{{ static_url('css/jquery.dataTables.select.min.css') }}" rel="stylesheet">
-    <link href="{{ static_url('css/jquery.dataTables.buttons.min.css') }}" rel="stylesheet">
-    <link href="{{ static_url('css/jquery.dataTables.colReorder.min.css') }}" rel="stylesheet">
-    <link href="{{ static_url('css/jquery.dataTables.css') }}" rel="stylesheet">
     <link href="{{ static_url('dist/main.css') }}" rel="stylesheet">
 
     {% block extra_styles %}
@@ -47,17 +42,6 @@
 
     {% block container %}
     {% end %}
-
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ static_url('js/jquery-1.7.2.min.js') }}"></script>
-    <script src="{{ static_url('js/jquery-ui-1-8-15.min.js') }}"></script>
-    <script src="{{ static_url('js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ static_url('js/jquery.dataTables.select.min.js') }}"></script>
-    <script src="{{ static_url('js/jquery.dataTables.buttons.min.js') }}"></script>
-    <script src="{{ static_url('js/jquery.dataTables.colReorder.min.js') }}"></script>
-    <script src="{{ static_url('js/jquery.dataTables.sorting.natural.js') }}"></script>
 
     <script src="{{ static_url('dist/main.js') }}" type="module"></script>
 

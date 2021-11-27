@@ -1,24 +1,21 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-// noinspection ES6UnusedImports
-import popper from "@popperjs/core/dist/esm/popper";
-// noinspection ES6UnusedImports
-import tab from "bootstrap/js/dist/tab";
-// noinspection ES6UnusedImports
-import dropdown from "bootstrap/js/dist/dropdown";
-
+import $ from "jquery";
+import "@popperjs/core/dist/esm/popper";
+import "bootstrap/js/dist/tab";
+import "bootstrap/js/dist/dropdown";
 import "../css/flower.scss";
-import * as url from "url";
+
+require("datatables.net-bs5")();
+require("datatables.net-colreorder-bs5")();
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const workerName = () => $("#workername").text();
+const workerName = () => document.getElementById("workername").innerText;
 const taskId = () => document.getElementById("taskid").innerText;
 const poolSize = () => document.getElementById("pool-size").value;
-
-const sum = (a, b) => a + b;
 
 function urlPrefix() {
     let url_prefix = document.getElementById("url_prefix").value;
@@ -413,374 +410,297 @@ document
     .getElementById("worker-refresh-all")
     ?.addEventListener("click", onRefreshAll);
 
-const flower = (function () {
-    "use strict";
-    /*jslint browser: true */
-    /*jslint unparam: true, node: true */
+function formatTime(timestamp) {
+    const time = $("#time").val(),
+        prefix = time.startsWith("natural-time") ? "natural-time" : "time",
+        tz = time.substr(prefix.length + 1) || "UTC";
 
-    /*global $, WebSocket, jQuery */
-    //https://github.com/DataTables/DataTables/blob/1.10.11/media/js/jquery.dataTables.js#L14882
-    function htmlEscapeEntities(d) {
-        return typeof d === "string"
-            ? d
-                  .replace(/</g, "&lt;")
-                  .replace(/>/g, "&gt;")
-                  .replace(/"/g, "&quot;")
-            : d;
+    if (prefix === "natural-time") {
+        dayjs(dayjs.unix(timestamp)).tz(tz).fromNow();
+    }
+    return dayjs(dayjs.unix(timestamp))
+        .tz(tz)
+        .format("YYYY-MM-DD HH:mm:ss.SSS");
+}
+
+//https://github.com/DataTables/DataTables/blob/1.10.11/media/js/jquery.dataTables.js#L14882
+function htmlEscapeEntities(d) {
+    return typeof d === "string"
+        ? d.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        : d;
+}
+
+function activePage(name) {
+    const pathname = $(location).attr("pathname");
+    if (name === "/") {
+        return pathname === urlPrefix() + name;
+    } else {
+        return pathname.startsWith(urlPrefix() + name);
+    }
+}
+
+function isColumnVisible(name) {
+    let columns = $("#columns").val();
+    if (columns === "all") return true;
+    if (columns) {
+        columns = columns.split(",").map(function (e) {
+            return e.trim();
+        });
+        return columns.indexOf(name) !== -1;
+    }
+    return true;
+}
+
+$.urlParam = function (name) {
+    const results = new RegExp(`[\\?&]${name}=([^&#]*)`).exec(
+        window.location.href
+    );
+    return (results && results[1]) || 0;
+};
+
+$(document).ready(function () {
+    if (!activePage("/tasks")) {
+        return;
     }
 
-    function active_page(name) {
-        const pathname = $(location).attr("pathname");
-        if (name === "/") {
-            return pathname === urlPrefix() + name;
-        } else {
-            return pathname.startsWith(urlPrefix() + name);
-        }
-    }
-
-    function on_task_revoke(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const taskid = $("#taskid").text();
-
-        $.ajax({
+    $("#tasks-table").DataTable({
+        rowId: "uuid",
+        searching: true,
+        paginate: true,
+        scrollCollapse: true,
+        processing: true,
+        serverSide: true,
+        colReorder: true,
+        ajax: {
             type: "POST",
-            url: `${urlPrefix()}/api/task/revoke/${taskid}`,
-            dataType: "json",
-            data: {
-                terminate: false,
+            url: `${urlPrefix()}/tasks/datatable`,
+        },
+        order: [[7, "desc"]],
+        oSearch: {
+            sSearch: $.urlParam("state") ? `state:${$.urlParam("state")}` : "",
+        },
+        columnDefs: [
+            {
+                targets: 0,
+                data: "name",
+                visible: isColumnVisible("name"),
+                render: function (data, type, full, meta) {
+                    return data;
+                },
             },
-            success: function (data) {
-                showSuccessAlert(data.message);
+            {
+                targets: 1,
+                data: "uuid",
+                visible: isColumnVisible("uuid"),
+                orderable: false,
+                render: function (data, type, full, meta) {
+                    return `<a href="${urlPrefix()}/task/${data}">${data}</a>`;
+                },
             },
-            error: function (data) {
-                showDangerAlert(data.responseText);
+            {
+                targets: 2,
+                data: "state",
+                visible: isColumnVisible("state"),
+                render: function (data, type, full, meta) {
+                    switch (data) {
+                        case "SUCCESS":
+                            return `<span class="badge bg-success">${data}</span>`;
+                        case "FAILURE":
+                            return `<span class="badge bg-danger">${data}</span>`;
+                        default:
+                            return `<span class="badge bg-primary">${data}</span>`;
+                    }
+                },
             },
-        });
+            {
+                targets: 3,
+                data: "args",
+                visible: isColumnVisible("args"),
+                render: htmlEscapeEntities,
+            },
+            {
+                targets: 4,
+                data: "kwargs",
+                visible: isColumnVisible("kwargs"),
+                render: htmlEscapeEntities,
+            },
+            {
+                targets: 5,
+                data: "result",
+                visible: isColumnVisible("result"),
+                render: htmlEscapeEntities,
+            },
+            {
+                targets: 6,
+                data: "received",
+                visible: isColumnVisible("received"),
+                render: function (data, type, full, meta) {
+                    if (data) {
+                        return formatTime(data);
+                    }
+                    return data;
+                },
+            },
+            {
+                targets: 7,
+                data: "started",
+                visible: isColumnVisible("started"),
+                render: function (data, type, full, meta) {
+                    if (data) {
+                        return formatTime(data);
+                    }
+                    return data;
+                },
+            },
+            {
+                targets: 8,
+                data: "runtime",
+                visible: isColumnVisible("runtime"),
+                render: function (data, type, full, meta) {
+                    return data ? data.toFixed(3) : data;
+                },
+            },
+            {
+                targets: 9,
+                data: "worker",
+                visible: isColumnVisible("worker"),
+                render: function (data, type, full, meta) {
+                    return `<a href="${urlPrefix()}/worker/${data}">${data}</a>`;
+                },
+            },
+            {
+                targets: 10,
+                data: "exchange",
+                visible: isColumnVisible("exchange"),
+            },
+            {
+                targets: 11,
+                data: "routing_key",
+                visible: isColumnVisible("routing_key"),
+            },
+            {
+                targets: 12,
+                data: "retries",
+                visible: isColumnVisible("retries"),
+            },
+            {
+                targets: 13,
+                data: "revoked",
+                visible: isColumnVisible("revoked"),
+            },
+            {
+                targets: 14,
+                data: "exception",
+                visible: isColumnVisible("exception"),
+            },
+            {
+                targets: 15,
+                data: "expires",
+                visible: isColumnVisible("expires"),
+            },
+            {
+                targets: 16,
+                data: "eta",
+                visible: isColumnVisible("eta"),
+            },
+        ],
+    });
+});
+
+$(document).ready(function () {
+    if (!activePage("/") && !activePage("/dashboard")) {
+        return;
     }
 
-    function update_dashboard_counters() {
-        const table = $("#workers-table").DataTable();
-        $("a#btn-active").text(
-            `Active: ${table.column(2).data().reduce(sum, 0)}`
-        );
-        $("a#btn-processed").text(
-            `Processed: ${table.column(3).data().reduce(sum, 0)}`
-        );
-        $("a#btn-failed").text(
-            `Failed: ${table.column(4).data().reduce(sum, 0)}`
-        );
-        $("a#btn-succeeded").text(
-            `Succeeded: ${table.column(5).data().reduce(sum, 0)}`
-        );
-        $("a#btn-retried").text(
-            `Retried: ${table.column(6).data().reduce(sum, 0)}`
-        );
-    }
-
-    function on_cancel_task_filter(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        $("#task-filter-form").each(function () {
-            $(this).find("SELECT").val("");
-            $(this).find(".datetimepicker").val("");
-        });
-
-        $("#task-filter-form").submit();
-    }
-
-    function format_time(timestamp) {
-        const time = $("#time").val(),
-            prefix = time.startsWith("natural-time") ? "natural-time" : "time",
-            tz = time.substr(prefix.length + 1) || "UTC";
-
-        if (prefix === "natural-time") {
-            dayjs(dayjs.unix(timestamp)).tz(tz).fromNow();
-        }
-        return dayjs(dayjs.unix(timestamp))
-            .tz(tz)
-            .format("YYYY-MM-DD HH:mm:ss.SSS");
-    }
-
-    function isColumnVisible(name) {
-        let columns = $("#columns").val();
-        if (columns === "all") return true;
-        if (columns) {
-            columns = columns.split(",").map(function (e) {
-                return e.trim();
-            });
-            return columns.indexOf(name) !== -1;
-        }
-        return true;
-    }
-
-    $.urlParam = function (name) {
-        const results = new RegExp(`[\\?&]${name}=([^&#]*)`).exec(
-            window.location.href
-        );
-        return (results && results[1]) || 0;
-    };
-
-    $(document).ready(function () {
-        //https://github.com/twitter/bootstrap/issues/1768
-        const shiftWindow = function () {
-            scrollBy(0, -50);
-        };
-        if (location.hash) {
-            shiftWindow();
-        }
-        window.addEventListener("hashchange", shiftWindow);
-
-        // Make bootstrap tabs persistent
-        $(document).ready(function () {
-            if (location.hash !== "") {
-                $(`a[href="${location.hash}"]`).tab("show");
-            }
-
-            $('a[data-toggle="tab"]').on("shown", function (e) {
-                location.hash = $(e.target).attr("href").substr(1);
-            });
-        });
+    const workersTable = $("#workers-table").DataTable({
+        rowId: "hostname",
+        paginate: false,
+        scrollY: true,
+        scrollCollapse: true,
+        ajax: `${urlPrefix()}/dashboard?json=1`,
+        order: [[1, "asc"]],
+        columnDefs: [
+            {
+                targets: 0,
+                data: "hostname",
+                type: "natural",
+                render: function (data, type, full, meta) {
+                    return `<a href="${urlPrefix()}/worker/${data}">${data}</a>`;
+                },
+            },
+            {
+                targets: 1,
+                data: "status",
+                render: function (data, type, full, meta) {
+                    if (data) {
+                        return '<span class="label label-success">Online</span>';
+                    } else {
+                        return '<span class="label label-important">Offline</span>';
+                    }
+                },
+            },
+            {
+                targets: 2,
+                data: "active",
+                defaultContent: 0,
+            },
+            {
+                targets: 3,
+                data: "task-received",
+                defaultContent: 0,
+            },
+            {
+                targets: 4,
+                data: "task-failed",
+                defaultContent: 0,
+            },
+            {
+                targets: 5,
+                data: "task-succeeded",
+                defaultContent: 0,
+            },
+            {
+                targets: 6,
+                data: "task-retried",
+                defaultContent: 0,
+            },
+            {
+                targets: 7,
+                data: "loadavg",
+                render: function (data, type, full, meta) {
+                    if (Array.isArray(data)) {
+                        return data.join(", ");
+                    }
+                    return data;
+                },
+            },
+        ],
     });
 
-    $(document).ready(function () {
-        if (!active_page("/") && !active_page("/dashboard")) {
-            return;
-        }
+    function columnSum(columnSelector) {
+        const sum = (a, b) => a + b;
+        return workersTable.column(columnSelector).data().reduce(sum, 0);
+    }
 
-        $("#workers-table").DataTable({
-            rowId: "name",
-            searching: true,
-            paginate: false,
-            select: false,
-            scrollX: true,
-            scrollY: true,
-            scrollCollapse: true,
-            ajax: `${urlPrefix()}/dashboard?json=1`,
-            order: [[1, "asc"]],
-            columnDefs: [
-                {
-                    targets: 0,
-                    data: "hostname",
-                    type: "natural",
-                    render: function (data, type, full, meta) {
-                        return `<a href="${urlPrefix()}/worker/${data}">${data}</a>`;
-                    },
-                },
-                {
-                    targets: 1,
-                    data: "status",
-                    render: function (data, type, full, meta) {
-                        if (data) {
-                            return '<span class="label label-success">Online</span>';
-                        } else {
-                            return '<span class="label label-important">Offline</span>';
-                        }
-                    },
-                },
-                {
-                    targets: 2,
-                    data: "active",
-                    defaultContent: 0,
-                },
-                {
-                    targets: 3,
-                    data: "task-received",
-                    defaultContent: 0,
-                },
-                {
-                    targets: 4,
-                    data: "task-failed",
-                    defaultContent: 0,
-                },
-                {
-                    targets: 5,
-                    data: "task-succeeded",
-                    defaultContent: 0,
-                },
-                {
-                    targets: 6,
-                    data: "task-retried",
-                    defaultContent: 0,
-                },
-                {
-                    targets: 7,
-                    data: "loadavg",
-                    render: function (data, type, full, meta) {
-                        if (Array.isArray(data)) {
-                            return data.join(", ");
-                        }
-                        return data;
-                    },
-                },
-            ],
-        });
+    function setBtnText(columnSelector, btnName) {
+        document.getElementById(
+            `btn-${btnName.toLowerCase()}`
+        ).innerText = `${btnName}: ${columnSum(columnSelector)}`;
+    }
 
-        const autorefresh_interval = $.urlParam("autorefresh") || 1;
-        if (autorefresh !== 0) {
-            setInterval(function () {
-                $("#workers-table").DataTable().ajax.reload();
-                update_dashboard_counters();
-            }, autorefresh_interval * 1000);
-        }
-    });
+    function updateDashboardCounters() {
+        setBtnText(2, "Active");
+        setBtnText(3, "Processed");
+        setBtnText(4, "Failed");
+        setBtnText(5, "Succeeded");
+        setBtnText(6, "Retried");
+    }
 
-    $(document).ready(function () {
-        if (!active_page("/tasks")) {
-            return;
-        }
-
-        $("#tasks-table").DataTable({
-            rowId: "uuid",
-            searching: true,
-            paginate: true,
-            scrollX: true,
-            scrollCollapse: true,
-            processing: true,
-            serverSide: true,
-            colReorder: true,
-            ajax: {
-                type: "POST",
-                url: `${urlPrefix()}/tasks/datatable`,
-            },
-            order: [[7, "desc"]],
-            oSearch: {
-                sSearch: $.urlParam("state")
-                    ? `state:${$.urlParam("state")}`
-                    : "",
-            },
-            columnDefs: [
-                {
-                    targets: 0,
-                    data: "name",
-                    visible: isColumnVisible("name"),
-                    render: function (data, type, full, meta) {
-                        return data;
-                    },
-                },
-                {
-                    targets: 1,
-                    data: "uuid",
-                    visible: isColumnVisible("uuid"),
-                    orderable: false,
-                    render: function (data, type, full, meta) {
-                        return `<a href="${urlPrefix()}/task/${data}">${data}</a>`;
-                    },
-                },
-                {
-                    targets: 2,
-                    data: "state",
-                    visible: isColumnVisible("state"),
-                    render: function (data, type, full, meta) {
-                        switch (data) {
-                            case "SUCCESS":
-                                return `<span class="label label-success">${data}</span>`;
-                            case "FAILURE":
-                                return `<span class="label label-important">${data}</span>`;
-                            default:
-                                return `<span class="label label-default">${data}</span>`;
-                        }
-                    },
-                },
-                {
-                    targets: 3,
-                    data: "args",
-                    visible: isColumnVisible("args"),
-                    render: htmlEscapeEntities,
-                },
-                {
-                    targets: 4,
-                    data: "kwargs",
-                    visible: isColumnVisible("kwargs"),
-                    render: htmlEscapeEntities,
-                },
-                {
-                    targets: 5,
-                    data: "result",
-                    visible: isColumnVisible("result"),
-                    render: htmlEscapeEntities,
-                },
-                {
-                    targets: 6,
-                    data: "received",
-                    visible: isColumnVisible("received"),
-                    render: function (data, type, full, meta) {
-                        if (data) {
-                            return format_time(data);
-                        }
-                        return data;
-                    },
-                },
-                {
-                    targets: 7,
-                    data: "started",
-                    visible: isColumnVisible("started"),
-                    render: function (data, type, full, meta) {
-                        if (data) {
-                            return format_time(data);
-                        }
-                        return data;
-                    },
-                },
-                {
-                    targets: 8,
-                    data: "runtime",
-                    visible: isColumnVisible("runtime"),
-                    render: function (data, type, full, meta) {
-                        return data ? data.toFixed(3) : data;
-                    },
-                },
-                {
-                    targets: 9,
-                    data: "worker",
-                    visible: isColumnVisible("worker"),
-                    render: function (data, type, full, meta) {
-                        return `<a href="${urlPrefix()}/worker/${data}">${data}</a>`;
-                    },
-                },
-                {
-                    targets: 10,
-                    data: "exchange",
-                    visible: isColumnVisible("exchange"),
-                },
-                {
-                    targets: 11,
-                    data: "routing_key",
-                    visible: isColumnVisible("routing_key"),
-                },
-                {
-                    targets: 12,
-                    data: "retries",
-                    visible: isColumnVisible("retries"),
-                },
-                {
-                    targets: 13,
-                    data: "revoked",
-                    visible: isColumnVisible("revoked"),
-                },
-                {
-                    targets: 14,
-                    data: "exception",
-                    visible: isColumnVisible("exception"),
-                },
-                {
-                    targets: 15,
-                    data: "expires",
-                    visible: isColumnVisible("expires"),
-                },
-                {
-                    targets: 16,
-                    data: "eta",
-                    visible: isColumnVisible("eta"),
-                },
-            ],
-        });
-    });
-
-    return {
-        on_cancel_task_filter: on_cancel_task_filter,
-        on_task_revoke: on_task_revoke,
-    };
-})(jQuery);
+    const autoRefreshInterval = $.urlParam("autorefresh") || 1;
+    if (autorefresh !== 0) {
+        setInterval(function () {
+            workersTable.ajax.reload();
+            updateDashboardCounters();
+        }, autoRefreshInterval * 1000);
+    }
+});
