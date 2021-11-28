@@ -6,7 +6,7 @@ import {
     urlPrefix,
 } from "../utils";
 import { showDangerAlert, showSuccessAlert } from "../alert-box";
-import { JSON_HTTP_HEADERS } from "../http";
+import { postFormData } from "../http";
 
 const workerName = () => document.getElementById("workername").innerText;
 const poolSize = () => document.getElementById("pool-size").value;
@@ -15,22 +15,13 @@ const onPoolChange = (event, growOrShrink) => {
     event.preventDefault();
     event.stopPropagation();
 
-    fetch(`${urlPrefix()}/api/worker/pool/${growOrShrink}/${workerName()}`, {
-        method: "POST",
-        body: JSON.stringify({
+    postFormData(
+        `${urlPrefix()}/api/worker/pool/${growOrShrink}/${workerName()}`,
+        {
             workername: workerName(),
             n: poolSize(),
-        }),
-        headers: JSON_HTTP_HEADERS,
-    })
-        .then((response) => {
-            if (response.ok) {
-                return response.json();
-            }
-            return Promise.reject(response);
-        })
-        .then((json) => showSuccessAlert(json.message))
-        .catch((response) => showDangerAlert(response.statusText));
+        }
+    );
 };
 
 const onPoolGrow = (event) => onPoolChange(event, "grow");
@@ -40,30 +31,10 @@ function onPoolAutoscale(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    const minAutoScale = document.getElementById("min-autoscale").value;
-    const maxAutoScale = document.getElementById("max-autoscale").value;
-
-    const data = JSON.stringify({
-        workername: workerName(),
-        min_value: minAutoScale,
-        max_value: maxAutoScale,
+    postFormData(`${urlPrefix()}/api/worker/pool/autoscale/${workerName()}`, {
+        min: document.getElementById("min-autoscale").value,
+        max: document.getElementById("max-autoscale").value,
     });
-
-    console.log(data);
-
-    fetch(`${urlPrefix()}/api/worker/pool/autoscale/${workerName()}`, {
-        method: "POST",
-        body: data,
-        headers: JSON_HTTP_HEADERS,
-    })
-        .then((response) => {
-            if (response.ok) {
-                return response.json();
-            }
-            return Promise.reject(response);
-        })
-        .then((json) => showSuccessAlert(json.message))
-        .catch((response) => showDangerAlert(response.statusText));
 }
 
 function onCancelConsumer(event) {
