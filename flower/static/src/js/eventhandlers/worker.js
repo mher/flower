@@ -1,11 +1,10 @@
-import $ from "jquery";
 import {
     addClickEventListenerToElementsWithClassNames,
     addClickEventListenerToElementWithId,
     addSubmitEventListenerToElementsWithClassNames,
     urlPrefix,
 } from "../utils";
-import { showDangerAlert, showSuccessAlert } from "../alert-box";
+import { showSuccessAlert } from "../alert-box";
 import { performGetRequest, performPostRequest } from "../http";
 
 const workerName = () => document.getElementById("workername").innerText;
@@ -75,26 +74,13 @@ function onTaskRateLimit(event) {
 
     const rateLimit = event.target.firstElementChild.value;
 
-    $.ajax({
-        type: "POST",
-        url: `${urlPrefix()}/api/task/rate-limit/${taskName(event)}`,
-        dataType: "json",
-        data: {
+    performPostRequest(
+        `${urlPrefix()}/api/task/rate-limit/${taskName(event)}`,
+        {
             workername: workerName(),
             ratelimit: rateLimit,
-        },
-        success: function (data) {
-            showSuccessAlert(data.message);
-            setTimeout(function () {
-                $("#tab-limits")
-                    .load(`/worker/${workerName()} #tab-limits`)
-                    .fadeIn("show");
-            }, 10000);
-        },
-        error: function (data) {
-            showDangerAlert(data.responseText);
-        },
-    });
+        }
+    );
 }
 
 function onTaskTimeout(event) {
