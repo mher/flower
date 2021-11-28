@@ -6,17 +6,14 @@
 
 {% block container %}
 <div class="container-fluid">
+    <div>
+        <small class="text-secondary">Broker: </small>
+        <h1>{{ broker_url }}</h1>
+    </div>
     <div class="card">
-        <div class="card-header">
-            <h3><small
-                    class="text-secondary fs-5">Broker:</small> {{ broker_url }}
-            </h3>
-        </div>
-
+        <div class="card-header">Queues</div>
         <div class="card-body">
-            <table id="queue-table"
-                   class="table table-bordered table-striped caption-top">
-                <caption>Queues</caption>
+            <table id="queue-table" class="table table-bordered table-striped">
                 <thead>
                 <tr>
                     <th>Name</th>
