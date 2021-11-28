@@ -151,20 +151,9 @@ function onWorkerPoolRestart(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    $.ajax({
-        type: "POST",
-        url: `${urlPrefix()}/api/worker/pool/restart/${workerName()}`,
-        dataType: "json",
-        data: {
-            workername: workerName(),
-        },
-        success: function (data) {
-            showSuccessAlert(data.message);
-        },
-        error: function (data) {
-            showDangerAlert(data.responseText);
-        },
-    });
+    performPostRequest(
+        `${urlPrefix()}/api/worker/pool/restart/${workerName()}`
+    );
 }
 
 function onWorkerShutdown(event) {
