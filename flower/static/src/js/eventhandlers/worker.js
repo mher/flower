@@ -136,20 +136,15 @@ function onRefreshAll(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    $.ajax({
-        type: "GET",
-        url: `${urlPrefix()}/api/workers`,
-        dataType: "json",
-        data: {
+    performGetRequest(
+        `${urlPrefix()}/api/workers`,
+        {
             refresh: 1,
         },
-        success: function (data) {
-            showSuccessAlert(data.message || "Refreshed All Workers");
-        },
-        error: function (data) {
-            showDangerAlert(data.responseText);
-        },
-    });
+        (json) => {
+            showSuccessAlert(json.message || "Refreshed All Workers");
+        }
+    );
 }
 
 function onWorkerPoolRestart(event) {
