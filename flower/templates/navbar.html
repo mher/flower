@@ -2,12 +2,12 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="{{ reverse_url('main') }}">Flower</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02"
+            data-bs-target="#top-navbar-toggler" aria-controls="top-navbar-toggler"
             aria-expanded="false" aria-label="Toggle navigation"
     >
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+    <div class="collapse navbar-collapse" id="top-navbar-toggler">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a {% if active_tab == "dashboard" %}class="nav-link active"{% else %}class="nav-link"{% end %} class="nav-link" href="{{ reverse_url('dashboard') }}">Dashboard</a>
