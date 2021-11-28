@@ -1,11 +1,10 @@
+import { showSuccessAlert } from "../alert-box";
+import { performGetRequest, performPostRequest } from "../http";
 import {
     addClickEventListenerToElementsWithClassNames,
     addClickEventListenerToElementWithId,
     addSubmitEventListenerToElementsWithClassNames,
-    urlPrefix,
 } from "../utils";
-import { showSuccessAlert } from "../alert-box";
-import { performGetRequest, performPostRequest } from "../http";
 
 const workerName = () => document.getElementById("workername").innerText;
 const poolSize = () => document.getElementById("pool-size").value;
@@ -20,8 +19,8 @@ const onPoolChange = (event, growOrShrink) => {
     });
 };
 
-const onPoolGrow = (event) => onPoolChange(event, "grow");
-const onPoolShrink = (event) => onPoolChange(event, "shrink");
+const onPoolGrow = event => onPoolChange(event, "grow");
+const onPoolShrink = event => onPoolChange(event, "shrink");
 
 function onPoolAutoscale(event) {
     event.preventDefault();
@@ -53,7 +52,7 @@ function onAddConsumer(event) {
     });
 }
 
-const taskName = (event) =>
+const taskName = event =>
     event.target.closest("tr").firstElementChild.textContent.split(" ")[0]; // removes [rate_limit=xxx]
 
 function onTaskRateLimit(event) {
@@ -93,7 +92,7 @@ function onWorkerRefresh(event) {
             workername: unescape(workerName()),
             refresh: 1,
         },
-        (json) => {
+        json => {
             showSuccessAlert(json.message || "Refreshed");
         }
     );
@@ -107,7 +106,7 @@ function onRefreshAll(event) {
         {
             refresh: 1,
         },
-        (json) => {
+        json => {
             showSuccessAlert(json.message || "Refreshed All Workers");
         }
     );

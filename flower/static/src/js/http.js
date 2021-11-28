@@ -8,11 +8,11 @@ export const JSON_HTTP_HEADERS = {
 export function performGetRequest(
     path,
     data = {},
-    onSuccess = (json) => showSuccessAlert(json.message)
+    onSuccess = json => showSuccessAlert(json.message)
 ) {
     const url = new URL(window.location.href);
     url.pathname = `${urlPrefix()}/${path}`;
-    Object.entries(data).forEach((item) =>
+    Object.entries(data).forEach(item =>
         url.searchParams.append(item[0], item[1])
     );
 
@@ -22,14 +22,14 @@ export function performGetRequest(
             Accept: "application/json, text/javascript, */*; q=0.01",
         },
     })
-        .then((response) => {
+        .then(response => {
             if (response.ok) {
                 return response.json();
             }
             return Promise.reject(response);
         })
-        .then((json) => onSuccess(json))
-        .catch(async (response) => {
+        .then(json => onSuccess(json))
+        .catch(async response => {
             const text = await response.text();
             showDangerAlert(text);
         });
@@ -38,10 +38,10 @@ export function performGetRequest(
 export function performPostRequest(
     url,
     data = {},
-    onSuccess = (json) => showSuccessAlert(json.message)
+    onSuccess = json => showSuccessAlert(json.message)
 ) {
     const formData = new URLSearchParams();
-    Object.entries(data).forEach((item) => formData.append(item[0], item[1]));
+    Object.entries(data).forEach(item => formData.append(item[0], item[1]));
 
     fetch(`${urlPrefix()}/${url}`, {
         method: "POST",
@@ -52,14 +52,14 @@ export function performPostRequest(
             Accept: "application/json, text/javascript, */*; q=0.01",
         },
     })
-        .then((response) => {
+        .then(response => {
             if (response.ok) {
                 return response.json();
             }
             return Promise.reject(response);
         })
-        .then((json) => onSuccess(json))
-        .catch(async (response) => {
+        .then(json => onSuccess(json))
+        .catch(async response => {
             const text = await response.text();
             showDangerAlert(text);
         });

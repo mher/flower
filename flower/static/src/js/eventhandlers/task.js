@@ -1,6 +1,5 @@
-import { addClickEventListenerToElementWithId, urlPrefix } from "../utils";
-import { showDangerAlert, showSuccessAlert } from "../alert-box";
-import { JSON_HTTP_HEADERS, performPostRequest } from "../http";
+import { performPostRequest } from "../http";
+import { addClickEventListenerToElementWithId } from "../utils";
 
 const taskId = () => document.getElementById("taskid").innerText;
 
@@ -13,7 +12,7 @@ function onTaskRevoke(event) {
     });
 }
 
-const onTaskTerminate = (event) => {
+const onTaskTerminate = event => {
     event.preventDefault();
     event.stopPropagation();
 

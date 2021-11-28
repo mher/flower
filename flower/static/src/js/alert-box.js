@@ -21,7 +21,7 @@ const createAlertBox = (message, type) => {
     closeButton.setAttribute("data-bs-dismiss", "alert");
     closeButton.setAttribute("aria-label", "Close");
 
-    closeButton.addEventListener("click", (event) =>
+    closeButton.addEventListener("click", event =>
         event.target.parentNode.remove()
     );
 
@@ -45,10 +45,10 @@ const showAlert = (message, type) => {
     alertContainer.appendChild(alert);
 };
 
-export const showDangerAlert = (message) => {
+export const showDangerAlert = message => {
     showAlert(message, "danger");
 };
 
-export const showSuccessAlert = (message) => {
+export const showSuccessAlert = message => {
     showAlert(message, "success");
 };

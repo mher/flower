@@ -1,7 +1,7 @@
-import $ from "jquery";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import $ from "jquery";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -53,7 +53,7 @@ export function addClickEventListenerToElementWithId(elementId, listener) {
 }
 
 function addEventListenerToElementsWithClassNames(classNames, type, listener) {
-    Array.from(document.getElementsByClassName(classNames)).forEach((element) =>
+    Array.from(document.getElementsByClassName(classNames)).forEach(element =>
         element.addEventListener(type, listener)
     );
 }

@@ -1,4 +1,5 @@
 import $ from "jquery";
+
 import { activePage, urlPrefix } from "../utils";
 
 require("datatables.net-bs5")();
