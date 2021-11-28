@@ -11,15 +11,17 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between">
         <div>
-            <small>Worker: </small>
+            <small class="text-secondary">Worker: </small>
             <h1 id="workername">{{ worker['name'] }}</h1>
         </div>
         <div class="dropdown align-self-end">
-            <button class="btn btn-secondary dropdown-toggle" type="button"
-                    data-bs-toggle="dropdown" aria-expanded="false">
+            <button id="refresh-dropdown-menu"
+                    class="btn btn-secondary dropdown-toggle" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false"
+            >
                 Refresh
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <ul class="dropdown-menu" aria-labelledby="refresh-dropdown-menu">
                 <li>
                     <a class="dropdown-item" href="#" id="worker-shut-down">
                         Shut down
@@ -44,7 +46,7 @@
         </div>
     </div>
 
-    <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+    <ul class="nav nav-tabs mb-3" role="tablist">
         {% module Template("includes/nav-item.html", tab_id="pool", tab_label="Pool", is_active=True) %}
         {% module Template("includes/nav-item.html", tab_id="broker", tab_label="Broker", is_active=False) %}
         {% module Template("includes/nav-item.html", tab_id="queues", tab_label="Queues", is_active=False) %}
@@ -93,81 +95,82 @@
                             Pool size control
                         </div>
                         <div class="card-body">
-                            <div class="form-horizontal">
-                                <fieldset>
-                                    <legend></legend>
-                                    <div>
-                                        <label class="form-label"
-                                               for="pool-size">
-                                            Pool size
-                                        </label>
-                                        <div class="d-flex">
-                                            <select class="form-select w-25"
-                                                    id="pool-size">
-                                                {% for i in range(1, 6) %}
-                                                <option value="{{ i }}">{{ i }}</option>
-                                                {% end %}
-                                            </select>
-                                            <button class="btn btn-primary ms-2"
-                                                    type="button"
-                                                    id="pool-grow">
-                                                Grow
-                                            </button>
-                                            <button class="btn btn-primary ms-2"
-                                                    type="button"
-                                                    id="pool-shrink">
-                                                Shrink
-                                            </button>
-                                        </div>
+                            <fieldset>
+                                <legend></legend>
+                                <div>
+                                    <label class="form-label" for="pool-size">
+                                        Pool size
+                                    </label>
+                                    <div class="d-flex">
+                                        <select class="form-select w-25"
+                                                id="pool-size">
+                                            {% for i in range(1, 6) %}
+                                            <option value="{{ i }}">{{ i }}</option>
+                                            {% end %}
+                                        </select>
+                                        <button class="btn btn-primary ms-2"
+                                                type="button"
+                                                id="pool-grow">
+                                            Grow
+                                        </button>
+                                        <button class="btn btn-primary ms-2"
+                                                type="button"
+                                                id="pool-shrink">
+                                            Shrink
+                                        </button>
                                     </div>
-                                    <div class="mt-3">
-                                        <div class="d-flex">
-                                            <div class="w-25">
-                                                <label class="form-label"
-                                                       for="min-autoscale">
-                                                    Min autoscale
-                                                </label>
-                                                <input class="form-control"
-                                                       id="min-autoscale"
-                                                       size="6" type="number">
-                                            </div>
-                                            <div class="w-25 ms-2">
-                                                <label class="form-label"
-                                                       for="max-autoscale">
-                                                    Max autoscale
-                                                </label>
-                                                <input class="form-control"
-                                                       id="max-autoscale"
-                                                       size="6" type="number">
-                                            </div>
-                                            <button class="btn btn-primary ms-2 align-self-end"
-                                                    type="button"
-                                                    id="autoscale">
-                                                Apply
-                                            </button>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="d-flex">
+                                        <div class="w-25">
+                                            <label class="form-label"
+                                                   for="min-autoscale">
+                                                Min autoscale
+                                            </label>
+                                            <input class="form-control"
+                                                   id="min-autoscale"
+                                                   size="6" type="number">
                                         </div>
+                                        <div class="w-25 ms-2">
+                                            <label class="form-label"
+                                                   for="max-autoscale">
+                                                Max autoscale
+                                            </label>
+                                            <input class="form-control"
+                                                   id="max-autoscale"
+                                                   size="6" type="number">
+                                        </div>
+                                        <button class="btn btn-primary ms-2 align-self-end"
+                                                type="button"
+                                                id="autoscale">
+                                            Apply
+                                        </button>
                                     </div>
-                                </fieldset>
-                            </div>
+                                </div>
+                            </fieldset>
                         </div>
                     </div>
                 </div>
             </div>
 
             {% if worker['stats'].get('autoscaler', None) %}
-            <div class="row-fluid">
-                <div class="span6">
-                    <table class="table table-bordered table-striped">
-                        <caption>Autoscaler options</caption>
-                        <tbody>
-                        {% for name,value in worker['stats']['autoscaler'].items() %}
-                        <tr>
-                            <td>{{ humanize(name) }}</td>
-                            <td>{{ humanize(value) }}</td>
-                        </tr>
-                        {% end %}
-                        </tbody>
-                    </table>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">Autoscaler options</div>
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped">
+                                <tbody>
+                                {% for name,value in worker['stats']['autoscaler'].items() %}
+                                <tr>
+                                    <td>{{ humanize(name) }}</td>
+                                    <td>{{ humanize(value) }}</td>
+                                </tr>
+                                {% end %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
             {% end %}
