@@ -32,9 +32,9 @@ export const initWorkersTable = () =>
                     data: "status",
                     render: function (data, type, full, meta) {
                         if (data) {
-                            return '<span class="label label-success">Online</span>';
+                            return '<span class="badge bg-success">Online</span>';
                         } else {
-                            return '<span class="label label-important">Offline</span>';
+                            return '<span class="badge bg-warning">Offline</span>';
                         }
                     },
                 },
