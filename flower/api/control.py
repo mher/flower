@@ -6,7 +6,6 @@ import collections
 from tornado import web
 from tornado import gen
 from tornado import util
-from tornado.escape import json_decode
 
 from ..views import BaseHandler
 
@@ -262,11 +261,11 @@ Autoscale worker pool
         if not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
 
-        body = json_decode(self.request.body)
-        min = body["min_value"]
-        max = body["max_value"]
+        min = self.get_argument('min', type=int)
+        max = self.get_argument('max', type=int)
 
-        logger.info("Autoscaling '%s' worker by '%s'", workername, (min, max))
+        logger.info("Autoscaling '%s' worker by '%s'",
+                    workername, (min, max))
         response = self.capp.control.broadcast(
             'autoscale', arguments={'min': min, 'max': max},
             destination=[workername], reply=True)
