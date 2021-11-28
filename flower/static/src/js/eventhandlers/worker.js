@@ -86,7 +86,6 @@ function onTaskTimeout(event) {
 
 function onWorkerRefresh(event) {
     event.preventDefault();
-    event.stopPropagation();
 
     performGetRequest(
         `api/workers`,
@@ -102,7 +101,6 @@ function onWorkerRefresh(event) {
 
 function onRefreshAll(event) {
     event.preventDefault();
-    event.stopPropagation();
 
     performGetRequest(
         `api/workers`,
@@ -117,14 +115,12 @@ function onRefreshAll(event) {
 
 function onWorkerPoolRestart(event) {
     event.preventDefault();
-    event.stopPropagation();
 
     performPostRequest(`api/worker/pool/restart/${workerName()}`);
 }
 
 function onWorkerShutdown(event) {
     event.preventDefault();
-    event.stopPropagation();
 
     performPostRequest(`api/worker/shutdown/${workerName()}`);
 }
