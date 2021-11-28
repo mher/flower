@@ -16,8 +16,6 @@ export function performGetRequest(
         url.searchParams.append(item[0], item[1])
     );
 
-    // let addr = new URL(url)
-
     fetch(url.toString(), {
         method: "GET",
         headers: {
@@ -32,9 +30,8 @@ export function performGetRequest(
         })
         .then((json) => onSuccess(json))
         .catch(async (response) => {
-            console.log(response);
-            // const text = await response.text();
-            // showDangerAlert(text);
+            const text = await response.text();
+            showDangerAlert(text);
         });
 }
 
