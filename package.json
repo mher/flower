@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/mher/flower#readme",
   "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^4.1.1",
     "@parcel/transformer-sass": "^2.0.1",
     "@trivago/prettier-plugin-sort-imports": "^3.1.1",
     "parcel": "^2.0.1",
