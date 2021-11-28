@@ -4,6 +4,39 @@ export const JSON_HTTP_HEADERS = {
     "Content-Type": "application/json",
 };
 
+export function performGetRequest(
+    path,
+    data = {},
+    onSuccess = (json) => showSuccessAlert(json.message)
+) {
+    const url = new URL(window.location.href);
+    url.pathname = path;
+    Object.entries(data).forEach((item) =>
+        url.searchParams.append(item[0], item[1])
+    );
+
+    // let addr = new URL(url)
+
+    fetch(url.toString(), {
+        method: "GET",
+        headers: {
+            "Accept": "application/json, text/javascript, */*; q=0.01"
+        }
+    })
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            return Promise.reject(response);
+        })
+        .then((json) => onSuccess(json))
+        .catch(async (response) => {
+            console.log(response);
+            // const text = await response.text();
+            // showDangerAlert(text);
+        });
+}
+
 export function performPostRequest(
     url,
     data = {},

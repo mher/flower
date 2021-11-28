@@ -6,7 +6,7 @@ import {
     urlPrefix,
 } from "../utils";
 import { showDangerAlert, showSuccessAlert } from "../alert-box";
-import { performPostRequest } from "../http";
+import { performGetRequest, performPostRequest } from "../http";
 
 const workerName = () => document.getElementById("workername").innerText;
 const poolSize = () => document.getElementById("pool-size").value;
@@ -120,21 +120,16 @@ function onWorkerRefresh(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    $.ajax({
-        type: "GET",
-        url: `${urlPrefix()}/api/workers`,
-        dataType: "json",
-        data: {
+    performGetRequest(
+        `${urlPrefix()}/api/workers`,
+        {
             workername: unescape(workerName()),
             refresh: 1,
         },
-        success: function (data) {
-            showSuccessAlert(data.message || "Refreshed");
-        },
-        error: function (data) {
-            showDangerAlert(data.responseText);
-        },
-    });
+        (json) => {
+            showSuccessAlert(json.message || "Refreshed");
+        }
+    );
 }
 
 function onRefreshAll(event) {
