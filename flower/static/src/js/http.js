@@ -20,8 +20,8 @@ export function performGetRequest(
     fetch(url.toString(), {
         method: "GET",
         headers: {
-            "Accept": "application/json, text/javascript, */*; q=0.01"
-        }
+            Accept: "application/json, text/javascript, */*; q=0.01",
+        },
     })
         .then((response) => {
             if (response.ok) {
@@ -51,7 +51,7 @@ export function performPostRequest(
         body: formData,
         headers: {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Accept": "application/json, text/javascript, */*; q=0.01"
+            Accept: "application/json, text/javascript, */*; q=0.01",
         },
     })
         .then((response) => {
