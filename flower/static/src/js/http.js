@@ -4,7 +4,11 @@ export const JSON_HTTP_HEADERS = {
     "Content-Type": "application/json",
 };
 
-export function postFormData(url, data) {
+export function performPostRequest(
+    url,
+    data = {},
+    onSuccess = (json) => showSuccessAlert(json.message)
+) {
     const formData = new URLSearchParams();
     Object.entries(data).forEach((item) => formData.append(item[0], item[1]));
 
@@ -22,8 +26,8 @@ export function postFormData(url, data) {
             }
             return Promise.reject(response);
         })
-        .then((json) => showSuccessAlert(json.message))
-        .catch(async response => {
+        .then((json) => onSuccess(json))
+        .catch(async (response) => {
             const text = await response.text();
             showDangerAlert(text);
         });

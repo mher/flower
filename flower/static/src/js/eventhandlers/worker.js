@@ -6,7 +6,7 @@ import {
     urlPrefix,
 } from "../utils";
 import { showDangerAlert, showSuccessAlert } from "../alert-box";
-import { postFormData } from "../http";
+import { performPostRequest } from "../http";
 
 const workerName = () => document.getElementById("workername").innerText;
 const poolSize = () => document.getElementById("pool-size").value;
@@ -15,7 +15,7 @@ const onPoolChange = (event, growOrShrink) => {
     event.preventDefault();
     event.stopPropagation();
 
-    postFormData(
+    performPostRequest(
         `${urlPrefix()}/api/worker/pool/${growOrShrink}/${workerName()}`,
         {
             workername: workerName(),
@@ -31,10 +31,13 @@ function onPoolAutoscale(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    postFormData(`${urlPrefix()}/api/worker/pool/autoscale/${workerName()}`, {
-        min: document.getElementById("min-autoscale").value,
-        max: document.getElementById("max-autoscale").value,
-    });
+    performPostRequest(
+        `${urlPrefix()}/api/worker/pool/autoscale/${workerName()}`,
+        {
+            min: document.getElementById("min-autoscale").value,
+            max: document.getElementById("max-autoscale").value,
+        }
+    );
 }
 
 function onCancelConsumer(event) {
