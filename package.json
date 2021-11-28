@@ -11,11 +11,6 @@
       "distDir": "./flower/static/dist/"
     }
   },
-  "directories": {
-    "doc": "docs",
-    "example": "examples",
-    "test": "tests"
-  },
   "scripts": {
     "watch": "parcel watch",
     "build": "parcel build",
