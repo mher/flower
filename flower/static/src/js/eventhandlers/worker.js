@@ -110,18 +110,10 @@ function onTaskTimeout(event) {
 
     postData[type] = timeout;
 
-    $.ajax({
-        type: "POST",
-        url: `${urlPrefix()}/api/task/timeout/${taskName(event)}`,
-        dataType: "json",
-        data: postData,
-        success: function (data) {
-            showSuccessAlert(data.message);
-        },
-        error: function (data) {
-            showDangerAlert(data.responseText);
-        },
-    });
+    performPostRequest(
+        `${urlPrefix()}/api/task/timeout/${taskName(event)}`,
+        postData
+    );
 }
 
 function onWorkerRefresh(event) {
