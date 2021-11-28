@@ -9,27 +9,27 @@
 
 <div class="container-fluid">
     <div class="btn-group mt-3 d-flex flex-row justify-content-between">
-        <a id="btn-active" class="btn btn-success btn-large py-3"
+        <a id="btn-active" class="btn btn-success py-3"
            href="{{ reverse_url('tasks') }}?state=STARTED">
             Active:
             {{ sum(map(lambda x:x.get('active') or 0, workers.values() )) }}
         </a>
-        <a id="btn-processed" class="btn btn-success btn-large py-3"
+        <a id="btn-processed" class="btn btn-success py-3"
            href="{{ reverse_url('tasks') }}">
             Processed:
             {{ sum(map(lambda x:x.get('task-received') or 0, workers.values() )) }}
         </a>
-        <a id="btn-failed" class="btn btn-success btn-large py-3"
+        <a id="btn-failed" class="btn btn-success py-3"
            href="{{ reverse_url('tasks') }}?state=FAILURE">
             Failed:
             {{ sum(map(lambda x:x.get('task-failed') or 0, workers.values() )) }}
         </a>
-        <a id="btn-succeeded" class="btn btn-success btn-large py-3"
+        <a id="btn-succeeded" class="btn btn-success py-3"
            href="{{ reverse_url('tasks') }}?state=SUCCESS">
             Succeeded:
             {{ sum(map(lambda x:x.get('task-succeeded') or 0, workers.values() )) }}
         </a>
-        <a id="btn-retried" class="btn btn-success btn-large py-3"
+        <a id="btn-retried" class="btn btn-success py-3"
            href="{{ reverse_url('tasks') }}?state=RETRY">
             Retried:
             {{ sum(map(lambda x:x.get('task-retried') or 0, workers.values() )) }}
