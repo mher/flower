@@ -14,13 +14,10 @@ const onPoolChange = (event, growOrShrink) => {
     event.preventDefault();
     event.stopPropagation();
 
-    performPostRequest(
-        `${urlPrefix()}/api/worker/pool/${growOrShrink}/${workerName()}`,
-        {
-            workername: workerName(),
-            n: poolSize(),
-        }
-    );
+    performPostRequest(`api/worker/pool/${growOrShrink}/${workerName()}`, {
+        workername: workerName(),
+        n: poolSize(),
+    });
 };
 
 const onPoolGrow = (event) => onPoolChange(event, "grow");
@@ -30,39 +27,30 @@ function onPoolAutoscale(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    performPostRequest(
-        `${urlPrefix()}/api/worker/pool/autoscale/${workerName()}`,
-        {
-            min: document.getElementById("min-autoscale").value,
-            max: document.getElementById("max-autoscale").value,
-        }
-    );
+    performPostRequest(`api/worker/pool/autoscale/${workerName()}`, {
+        min: document.getElementById("min-autoscale").value,
+        max: document.getElementById("max-autoscale").value,
+    });
 }
 
 function onCancelConsumer(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    performPostRequest(
-        `${urlPrefix()}/api/worker/queue/cancel-consumer/${workerName()}`,
-        {
-            workername: workerName(),
-            queue: event.target.value,
-        }
-    );
+    performPostRequest(`api/worker/queue/cancel-consumer/${workerName()}`, {
+        workername: workerName(),
+        queue: event.target.value,
+    });
 }
 
 function onAddConsumer(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    performPostRequest(
-        `${urlPrefix()}/api/worker/queue/add-consumer/${workerName()}`,
-        {
-            workername: workerName(),
-            queue: document.getElementById("add-consumer-name").value,
-        }
-    );
+    performPostRequest(`api/worker/queue/add-consumer/${workerName()}`, {
+        workername: workerName(),
+        queue: document.getElementById("add-consumer-name").value,
+    });
 }
 
 const taskName = (event) =>
@@ -74,13 +62,10 @@ function onTaskRateLimit(event) {
 
     const rateLimit = event.target.firstElementChild.value;
 
-    performPostRequest(
-        `${urlPrefix()}/api/task/rate-limit/${taskName(event)}`,
-        {
-            workername: workerName(),
-            ratelimit: rateLimit,
-        }
-    );
+    performPostRequest(`api/task/rate-limit/${taskName(event)}`, {
+        workername: workerName(),
+        ratelimit: rateLimit,
+    });
 }
 
 function onTaskTimeout(event) {
@@ -96,10 +81,7 @@ function onTaskTimeout(event) {
 
     postData[type] = timeout;
 
-    performPostRequest(
-        `${urlPrefix()}/api/task/timeout/${taskName(event)}`,
-        postData
-    );
+    performPostRequest(`api/task/timeout/${taskName(event)}`, postData);
 }
 
 function onWorkerRefresh(event) {
@@ -107,7 +89,7 @@ function onWorkerRefresh(event) {
     event.stopPropagation();
 
     performGetRequest(
-        `${urlPrefix()}/api/workers`,
+        `api/workers`,
         {
             workername: unescape(workerName()),
             refresh: 1,
@@ -123,7 +105,7 @@ function onRefreshAll(event) {
     event.stopPropagation();
 
     performGetRequest(
-        `${urlPrefix()}/api/workers`,
+        `api/workers`,
         {
             refresh: 1,
         },
@@ -137,16 +119,14 @@ function onWorkerPoolRestart(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    performPostRequest(
-        `${urlPrefix()}/api/worker/pool/restart/${workerName()}`
-    );
+    performPostRequest(`api/worker/pool/restart/${workerName()}`);
 }
 
 function onWorkerShutdown(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    performPostRequest(`${urlPrefix()}/api/worker/shutdown/${workerName()}`);
+    performPostRequest(`api/worker/shutdown/${workerName()}`);
 }
 
 export function init() {

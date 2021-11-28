@@ -1,4 +1,5 @@
 import { showDangerAlert, showSuccessAlert } from "./alert-box";
+import { urlPrefix } from "./utils";
 
 export const JSON_HTTP_HEADERS = {
     "Content-Type": "application/json",
@@ -10,7 +11,7 @@ export function performGetRequest(
     onSuccess = (json) => showSuccessAlert(json.message)
 ) {
     const url = new URL(window.location.href);
-    url.pathname = path;
+    url.pathname = `${urlPrefix()}/${path}`;
     Object.entries(data).forEach((item) =>
         url.searchParams.append(item[0], item[1])
     );
@@ -45,7 +46,7 @@ export function performPostRequest(
     const formData = new URLSearchParams();
     Object.entries(data).forEach((item) => formData.append(item[0], item[1]));
 
-    fetch(url, {
+    fetch(`${urlPrefix()}/${url}`, {
         method: "POST",
         mode: "cors",
         body: formData,

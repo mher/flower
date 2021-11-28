@@ -8,7 +8,7 @@ function onTaskRevoke(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    performPostRequest(`${urlPrefix()}/api/task/revoke/${taskId()}`, {
+    performPostRequest(`api/task/revoke/${taskId()}`, {
         terminate: false,
     });
 }
@@ -17,7 +17,7 @@ const onTaskTerminate = (event) => {
     event.preventDefault();
     event.stopPropagation();
 
-    performPostRequest(`${urlPrefix()}/api/task/revoke/${taskId()}`, {
+    performPostRequest(`api/task/revoke/${taskId()}`, {
         terminate: true,
     });
 };
