@@ -44,52 +44,26 @@ function onCancelConsumer(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    $.ajax({
-        type: "POST",
-        url: `${urlPrefix()}/api/worker/queue/cancel-consumer/${workerName()}`,
-        dataType: "json",
-        data: {
+    performPostRequest(
+        `${urlPrefix()}/api/worker/queue/cancel-consumer/${workerName()}`,
+        {
             workername: workerName(),
             queue: event.target.value,
-        },
-        success: function (data) {
-            showSuccessAlert(data.message);
-            setTimeout(function () {
-                $("#tab-queues")
-                    .load(`/worker/${workerName()} #tab-queues`)
-                    .fadeIn("show");
-            }, 10000);
-        },
-        error: function (data) {
-            showDangerAlert(data.responseText);
-        },
-    });
+        }
+    );
 }
 
 function onAddConsumer(event) {
     event.preventDefault();
     event.stopPropagation();
 
-    $.ajax({
-        type: "POST",
-        url: `${urlPrefix()}/api/worker/queue/add-consumer/${workerName()}`,
-        dataType: "json",
-        data: {
+    performPostRequest(
+        `${urlPrefix()}/api/worker/queue/add-consumer/${workerName()}`,
+        {
             workername: workerName(),
             queue: document.getElementById("add-consumer-name").value,
-        },
-        success: function (data) {
-            showSuccessAlert(data.message);
-            setTimeout(function () {
-                $("#tab-queues")
-                    .load(`/worker/${workerName()} #tab-queues`)
-                    .fadeIn("show");
-            }, 10000);
-        },
-        error: function (data) {
-            showDangerAlert(data.responseText);
-        },
-    });
+        }
+    );
 }
 
 const taskName = (event) =>
