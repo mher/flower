@@ -399,15 +399,15 @@ Return length of all active queues
 :statuscode 503: result backend is not configured
         """
         app = self.application
-        broker_options = self.capp.conf.BROKER_TRANSPORT_OPTIONS
+        broker_options = self.capp.conf.broker_transport_options
 
         http_api = None
         if app.transport == 'amqp' and app.options.broker_api:
             http_api = app.options.broker_api
 
         broker_use_ssl = None
-        if self.capp.conf.BROKER_USE_SSL:
-            broker_use_ssl = self.capp.conf.BROKER_USE_SSL
+        if self.capp.conf.broker_use_ssl:
+            broker_use_ssl = self.capp.conf.broker_use_ssl
 
         broker = Broker(app.capp.connection().as_uri(include_password=True),
                         http_api=http_api, broker_options=broker_options, broker_use_ssl=broker_use_ssl)
@@ -415,8 +415,7 @@ Return length of all active queues
         queue_names = self.get_active_queue_names()
 
         if not queue_names:
-            queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
-                set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
+            queue_names = set(self.capp.amqp.queues)
 
         queues = yield broker.queues(sorted(queue_names))
         self.write({'active_queues': queues})
