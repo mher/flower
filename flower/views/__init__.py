@@ -19,7 +19,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
         self.set_header('Access-Control-Allow-Methods',
-                        ' PUT, DELETE, OPTIONS')
+                        ' PUT, DELETE, OPTIONS, POST, GET, PATCH')
 
     def options(self, *args, **kwargs):
         self.set_status(204)
