@@ -21,7 +21,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods',
                         ' PUT, DELETE, OPTIONS')
 
-    def options(self):
+    def options(self, *args, **kwargs):
         self.set_status(204)
         self.finish()
 
