@@ -468,7 +468,7 @@ var flower = (function () {
                 data: 'hostname',
                 type: 'natural',
                 render: function (data, type, full, meta) {
-                    return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
+                    return '<a href="' + url_prefix() + '/worker/' + encodeURIComponent(data) + '">' + data + '</a>';
                 }
             }, {
                 targets: 1,
@@ -559,7 +559,7 @@ var flower = (function () {
                 visible: isColumnVisible('uuid'),
                 orderable: false,
                 render: function (data, type, full, meta) {
-                    return '<a href="' + url_prefix() + '/task/' + data + '">' + data + '</a>';
+                    return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(data) + '">' + data + '</a>';
                 }
             }, {
                 targets: 2,
@@ -623,7 +623,7 @@ var flower = (function () {
                 data: 'worker',
                 visible: isColumnVisible('worker'),
                 render: function (data, type, full, meta) {
-                    return '<a href="' + url_prefix() + '/worker/' + data + '">' + data + '</a>';
+                    return '<a href="' + url_prefix() + '/worker/' + encodeURIComponent(data) + '">' + data + '</a>';
                 }
             }, {
                 targets: 10,
