@@ -24,7 +24,7 @@
     <link href="{{ static_url('css/jquery.dataTables.css') }}" rel="stylesheet">
 
     {% block extra_styles %}
-    {% end %}
+    {% endblock %}
 
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -41,7 +41,7 @@
   <body>
     {% block navbar %}
         {% module Template("navbar.html", active_tab="") %}
-    {% end %}
+    {% endblock %}
 
     <div class="container-fluid">
       <div id="alert" class="alert alert-success hide">
@@ -52,7 +52,7 @@
     </div>
 
     {% block container %}
-    {% end %}
+    {% endblock %}
 
     <!-- Le javascript
     ================================================== -->
@@ -85,7 +85,7 @@
     <script src="{{ static_url('js/flower.js') }}"></script>
 
     {% block extra_scripts %}
-    {% end %}
+    {% endblock %}
 
   </body>
 </html>

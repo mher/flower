@@ -2,7 +2,7 @@
 
 {% block navbar %}
   {% module Template("navbar.html", active_tab="broker") %}
-{% end %}
+{% endblock %}
 
 {% block container %}
   <div class="container-fluid">
@@ -32,9 +32,9 @@
             <td>{{ queue.get('consumers', 'N/A') }}</td>
             <td>{{ queue.get('idle_since', 'N/A') }}</td>
         </tr>
-      {% end %}
+      {% endfor %}
       </tbody>
      </table>
 
 </div>
-{% end %}
+{% endblock %}

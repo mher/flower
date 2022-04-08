@@ -2,7 +2,7 @@
 
 {% block navbar %}
   {% module Template("navbar.html", active_tab="tasks") %}
-{% end %}
+{% endblock %}
 
 {% block container %}
   <div id='task-page' class="container-fluid">
@@ -16,7 +16,7 @@
                 <button style="float: right" class="btn btn-danger" onclick="flower.on_task_terminate(event)">Terminate</button>
             {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
                 <button  style="float: right" class="btn btn-danger" onclick="flower.on_task_revoke(event)">Revoke</button>
-            {% end %}
+            {% endif %}
           </h2>
         </div>
         <div class="row-fluid">
@@ -41,7 +41,7 @@
                   <span class="label label-important">{{ task.state }}</span>
                   {% else %}
                   <span class="label label-default">{{ task.state }}</span>
-                  {% end %}
+                  {% endif %}
                 </td>
               </tr>
               <tr>
@@ -83,14 +83,14 @@
                       {% for child in getattr(task, name, {}) %}
                         <a href="{{ reverse_url('task', child.id) }}">{{ child.id }}</a>
                         <br>
-                      {% end %}
+                      {% endfor %}
                     {% else %}
                       {{ getattr(task, name, None) }}
-                    {% end %}
+                    {% endif %}
                   </td>
                 </tr>
-                {% end %}
-              {% end %}
+                {% endif %}
+              {% endfor %}
               </tbody>
             </table>
           </div>
@@ -98,4 +98,4 @@
       </div>
     </div>
   </div>
-{% end %}
+{% endblock %}

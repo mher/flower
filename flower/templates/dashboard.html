@@ -2,7 +2,7 @@
 
 {% block navbar %}
   {% module Template("navbar.html", active_tab="dashboard")%}
-{% end %}
+{% endblock %}
 
 {% block container %}
   <div class="container-fluid">
@@ -42,17 +42,17 @@
             <td>{{ info.get('task-retried', 0) }}</td>
             <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
         </tr>
-        {% end %}
+        {% endfor %}
       </tbody>
     </table>
 
         </div>
     </div>
 
-{% end %}
+{% endblock %}
 
 {% block extra_scripts %}
 <script type="text/javascript">
   var autorefresh = {{ autorefresh }};
 </script>
-{% end %}
+{% endblock %}
