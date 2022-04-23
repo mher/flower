@@ -7,13 +7,13 @@ from tornado import web
 from tornado import gen
 from tornado import util
 
-from ..views import BaseHandler
+from ..api import BaseApiHandler
 
 
 logger = logging.getLogger(__name__)
 
 
-class ControlHandler(BaseHandler):
+class ControlHandler(BaseApiHandler):
     def is_worker(self, workername):
         return workername and workername in self.application.workers
 
