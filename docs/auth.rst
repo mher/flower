@@ -6,6 +6,10 @@ Protecting your Flower instance from unwarranted access is important
 if it runs in an untrusted environment. Below, we outline the various
 forms of authentication supported by Flower.
 
+By default, Flower's APIs are not enabled unless authentication is configured.
+The `--dangerous_allow_unauth_api` configuration option allows unauthenticated
+API access - use this at your own risk.
+
 **NOTE:** The following endpoints are exempt from authentication:
 
 - /healthcheck
@@ -28,6 +32,20 @@ this argument: ::
 See also :ref:`reverse-proxy`
 
 .. _google-oauth:
+
+Common OAuth Config Options
+---------------------------
+
+OAuth is supported with a variety of providers (more below). The shared `--auth`
+flags allow you to limit which users may log in by validating email addresses.
+
+`--auth` supports a basic regex syntax: single email (`user@example.com`),
+wildcard (`.*@example.com`) or list of emails separated by pipes (`a@example.com|b@example.com`).
+`--auth-regex` supports a full regular expression syntax. You must be absolutely
+sure to use anchors and fully escape regex metacharacters. Be careful because the
+number of backslashes needed for correct escaping may vary depending on whether
+you provide the regex in a config file or on the command line (even different
+shells may have different results).
 
 Google OAuth 2.0
 ----------------
