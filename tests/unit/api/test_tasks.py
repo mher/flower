@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from celery.result import AsyncResult
 import celery.states as states
 
-from tests.unit import AsyncHTTPTestCase
+from tests.unit.api import ApiTestCase
 from flower.events import EventsState
 from celery.events import Event
 
@@ -14,7 +14,7 @@ import time
 from collections import OrderedDict
 
 
-class ApplyTests(AsyncHTTPTestCase):
+class ApplyTests(ApiTestCase):
     def test_apply(self):
         from mock import patch, PropertyMock
         import json
@@ -39,7 +39,7 @@ class ApplyTests(AsyncHTTPTestCase):
         task.apply_async.assert_called_once_with(args=[], kwargs={})
 
 
-class AsyncApplyTests(AsyncHTTPTestCase):
+class AsyncApplyTests(ApiTestCase):
     def test_async_apply(self):
         task = self._app.capp.tasks['foo'] = Mock()
         task.apply_async = Mock(return_value=AsyncResult(123))
@@ -99,7 +99,7 @@ class MockTasks:
         return Task()
 
 
-class TaskTests(AsyncHTTPTestCase):
+class TaskTests(ApiTestCase):
     def setUp(self):
         self.app = super(TaskTests, self).get_app()
         super(TaskTests, self).setUp()

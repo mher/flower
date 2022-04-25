@@ -13,7 +13,6 @@ from celery.utils.imports import instantiate
 
 from ..views import BaseHandler
 
-
 class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
     _OAUTH_SETTINGS_KEY = 'oauth'
 
@@ -49,7 +48,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
             raise tornado.web.HTTPError(403, 'Google auth failed: %s' % e)
 
         email = json.loads(response.body.decode('utf-8'))['email']
-        if not re.match(self.application.options.auth, email):
+        if not self.is_valid_email(email):
             message = (
                 "Access denied to '{email}'. Please use another account or "
                 "ask your admin to add your email to flower --auth."
@@ -129,7 +128,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                      'User-agent': 'Tornado auth'})
 
         emails = [email['email'].lower() for email in json.loads(response.body.decode('utf-8'))
-                  if email['verified'] and re.match(self.application.options.auth, email['email'])]
+                  if email['verified'] and self.is_valid_email(email)]
 
         if not emails:
             message = (
@@ -209,7 +208,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             raise tornado.web.HTTPError(403, 'GitLab auth failed: %s' % e)
 
         user_email = json.loads(response.body.decode('utf-8'))['email']
-        email_allowed = re.match(self.application.options.auth, user_email)
+        email_allowed = self.is_valid_email(email)
 
         # Check user's groups against list of allowed groups
         matching_groups = []
@@ -323,7 +322,7 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         email = (decoded_body.get('email') or '').strip()
         email_verified = (
             decoded_body.get('email_verified') and
-            re.match(self.application.options.auth, email)
+            self.is_valid_email(email)
         )
 
         if not email_verified:

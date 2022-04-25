@@ -13,8 +13,42 @@ from ..utils import template, bugreport, prepend_url
 
 logger = logging.getLogger(__name__)
 
+class RequireAuthMixin():
+    def is_valid_email(self, email):
+        if self.settings['auth_email_list']:
+            return email in self.settings['auth_email_list']
 
-class BaseHandler(tornado.web.RequestHandler):
+        if self.settings['auth_regex']:
+            return self.settings['auth_regex'].match(email)
+
+        return False
+
+    def get_current_user(self):
+        # Basic Auth
+        basic_auth = self.application.options.basic_auth
+        if basic_auth:
+
+            auth_header = self.request.headers.get("Authorization", "")
+            try:
+                basic, credentials = auth_header.split()
+                credentials = b64decode(credentials.encode()).decode()
+                if basic != 'Basic' or credentials not in basic_auth:
+                    raise tornado.web.HTTPError(401)
+            except ValueError:
+                raise tornado.web.HTTPError(401)
+
+        # OAuth2
+        if not self.application.options.auth:
+            return True
+        user = self.get_secure_cookie('user')
+        if user:
+            if not isinstance(user, str):
+                user = user.decode()
+            if self.is_valid_email(user):
+                return user
+        return None
+
+class BaseHandler(RequireAuthMixin, tornado.web.RequestHandler):
     def options(self):
         self.set_status(204)
         self.finish()
@@ -55,30 +89,6 @@ class BaseHandler(tornado.web.RequestHandler):
                 self.write(str(message))
             self.set_status(status_code)
             self.finish()
-
-    def get_current_user(self):
-        # Basic Auth
-        basic_auth = self.application.options.basic_auth
-        if basic_auth:
-            auth_header = self.request.headers.get("Authorization", "")
-            try:
-                basic, credentials = auth_header.split()
-                credentials = b64decode(credentials.encode()).decode()
-                if basic != 'Basic' or credentials not in basic_auth:
-                    raise tornado.web.HTTPError(401)
-            except ValueError:
-                raise tornado.web.HTTPError(401)
-
-        # OAuth2
-        if not self.application.options.auth:
-            return True
-        user = self.get_secure_cookie('user')
-        if user:
-            if not isinstance(user, str):
-                user = user.decode()
-            if re.match(self.application.options.auth, user):
-                return user
-        return None
 
     def get_argument(self, name, default=[], strip=True, type=None):
         arg = super(BaseHandler, self).get_argument(name, default, strip)

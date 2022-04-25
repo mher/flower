@@ -2,23 +2,23 @@ from mock import MagicMock
 
 from flower.api.control import ControlHandler
 
-from tests.unit import AsyncHTTPTestCase
+from tests.unit.api import ApiTestCase
 
 
-class UnknownWorkerControlTests(AsyncHTTPTestCase):
+class UnknownWorkerControlTests(ApiTestCase):
     def test_unknown_worker(self):
         r = self.post('/api/worker/shutdown/test', body={})
         self.assertEqual(404, r.code)
 
 
-class WorkerControlTests(AsyncHTTPTestCase):
+class WorkerControlTests(ApiTestCase):
     def setUp(self):
-        AsyncHTTPTestCase.setUp(self)
+        super().setUp()
         self.is_worker = ControlHandler.is_worker
         ControlHandler.is_worker = lambda *args: True
 
     def tearDown(self):
-        AsyncHTTPTestCase.tearDown(self)
+        super().tearDown()
         ControlHandler.is_worker = self.is_worker
 
     def test_shutdown(self):
@@ -141,7 +141,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             arguments={'queue': 'foo&amp;bar'})
 
 
-class TaskControlTests(AsyncHTTPTestCase):
+class TaskControlTests(ApiTestCase):
     def test_revoke(self):
         celery = self._app.capp
         celery.control.revoke = MagicMock()

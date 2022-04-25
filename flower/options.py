@@ -19,9 +19,13 @@ define("debug", default=False,
 define("inspect_timeout", default=1000, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
-       help="regexp of emails to grant access")
+       help="simple regexp of emails to grant access - only allows | or .*")
+define("auth_regex", default='', type=str,
+       help="full regexp of emails to grant access (dangerous - be careful with anchors and unescaped metacharacters)")
 define("basic_auth", type=str, default=None, multiple=True,
        help="enable http basic authentication")
+define("dangerous_allow_unauth_api", default=False, type=bool,
+       help="allow unauthenticated API access (dangerous)")
 define("oauth2_key", type=str, default=None,
        help="OAuth2 key (requires --auth)")
 define("oauth2_secret", type=str, default=None,

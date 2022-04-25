@@ -64,8 +64,31 @@ Address may be an empty string or None to listen on all available interfaces.
 auth
 ~~~~
 
-Enables authentication. `auth` is a regexp of emails to grant access.
+Enables authentication via OAuth. `auth` is a limited regexp of emails to grant access which
+supports a wildcard `.*@example.com` or list of emails separated by a pipe
+`user1@example.com|user2@example.com.`.
 For more info see :ref:`authentication`.
+
+.. _auth_regex:
+
+auth_regex
+~~~~~~~~~~
+
+**Dangerous**: If using OAuth, you can provide a full regular expression which takes precedence
+over the simple regular expression syntax supported by `auth`. This is dangerous because you must
+make absolutely sure to use anchors and escape all metacharacters, especially if provided on the
+command line. In general, regular expressions are not an appropriate tool for matching arbitrary
+email addresses.
+For more info see :ref:`authentication`.
+
+.. _dangerous_allow_unauth_api:
+
+dangerous_allow_unauth_api
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Dangerous**: Allow unauthenticated access to Flower's APIs. Only use this setting if you know
+Flower cannot be accessed by any untrusted users, such as if Flower is firewalled behind an
+authenticating proxy.
 
 .. _auto_refresh:
 

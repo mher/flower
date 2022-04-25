@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import atexit
 import signal
@@ -123,6 +124,40 @@ def extract_settings():
             settings[name] = prepend_url(settings[name], options.url_prefix)
 
     if options.auth:
+        # This is necessarily complex in order to try and respect documented behavior
+        # If this was designed from scratch, it could be much simpler
+
+        # The user has provided their own full regex
+        if options.auth_regex:
+            settings['auth_regex'] = re.compile(options.auth_regex)
+
+        # List of emails to allow, without any regex check
+        elif '|' in auth_string:
+            if '.*' in options.auth:
+                raise '--auth options only allows wildcard or pipe, not both'
+
+            settings['auth_email_list'] = options.auth.split('|')
+
+        # Wildcard (any user at a given domain)
+        elif '.*' in options.auth:
+            if '|' in options.auth:
+                raise '--auth option only allows wildcard or pipe, not both'
+
+            if options.auth.count('.*') != 1:
+                raise '--auth option only allows exactly one wildcard, use --auth-regex instead'
+
+            if options.auth[:3] != '.*@':
+                raise '--auth with wildcard must start with the wildcard, exactly prior to the @domain.com'
+
+            # From https://en.wikipedia.org/wiki/Email_address#Local-part, allowed chars for email
+            allowed_wildcard_class = r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~.\-]+"
+            domain = re.escape(options.auth[3:])
+            settings['auth_regex'] = re.compile(r'\A' + allowed_wildcard_class + domain + r'\Z')
+
+        # Otherwise, assume the user provided exactly one valid email
+        else:
+            settings['auth_email_list'] = [options.auth]
+
         settings['oauth'] = {
             'key': options.oauth2_key or os.environ.get('FLOWER_OAUTH2_KEY'),
             'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
