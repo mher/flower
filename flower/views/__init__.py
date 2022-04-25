@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 
 class RequireAuthMixin():
     def is_valid_email(self, email):
-        if self.settings['auth_email_list']:
+        if 'auth_email_list' in self.settings:
             return email in self.settings['auth_email_list']
 
-        if self.settings['auth_regex']:
+        if 'auth_regex' in self.settings:
             return self.settings['auth_regex'].match(email)
 
         return False

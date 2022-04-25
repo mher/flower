@@ -132,27 +132,27 @@ def extract_settings():
             settings['auth_regex'] = re.compile(options.auth_regex)
 
         # List of emails to allow, without any regex check
-        elif '|' in auth_string:
+        elif '|' in options.auth:
             if '.*' in options.auth:
-                raise '--auth options only allows wildcard or pipe, not both'
+                raise ValueError('--auth options only allows wildcard or pipe, not both')
 
             settings['auth_email_list'] = options.auth.split('|')
 
         # Wildcard (any user at a given domain)
         elif '.*' in options.auth:
             if '|' in options.auth:
-                raise '--auth option only allows wildcard or pipe, not both'
+                raise ValueError('--auth option only allows wildcard or pipe, not both')
 
             if options.auth.count('.*') != 1:
-                raise '--auth option only allows exactly one wildcard, use --auth-regex instead'
+                raise ValueError('--auth option only allows exactly one wildcard, use --auth-regex instead')
 
             if options.auth[:3] != '.*@':
-                raise '--auth with wildcard must start with the wildcard, exactly prior to the @domain.com'
+                raise ValueError('--auth with wildcard must start with the wildcard, exactly prior to the @domain.com')
 
             # From https://en.wikipedia.org/wiki/Email_address#Local-part, allowed chars for email
             allowed_wildcard_class = r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~.\-]+"
             domain = re.escape(options.auth[3:])
-            settings['auth_regex'] = re.compile(r'\A' + allowed_wildcard_class + domain + r'\Z')
+            settings['auth_regex'] = re.compile(r'\A' + allowed_wildcard_class + '@' + domain + r'\Z')
 
         # Otherwise, assume the user provided exactly one valid email
         else:
