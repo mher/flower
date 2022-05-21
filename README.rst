@@ -73,7 +73,7 @@ Core Celery args that you may want to set::
     -b, --broker
     --result-backend
 
-More info on available `Celery command args <https://docs.celeryproject.org/en/stable/reference/cli.html#celery>`_.
+More info on available `Celery command args <https://docs.celeryq.dev/en/stable/reference/cli.html#celery>`_.
 
 For Flower command args `see here <https://flower.readthedocs.io/en/latest/config.html#options>`_.
 

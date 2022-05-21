@@ -4,7 +4,7 @@ Flower - Celery monitoring tool
 
 Flower is a web based tool for monitoring and administrating `Celery`_ clusters
 
-.. _Celery: https://docs.celeryproject.org/en/stable/#
+.. _Celery: https://docs.celeryq.dev/en/stable/#
 
 .. include:: features.rst
 
