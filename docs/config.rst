@@ -35,7 +35,7 @@ Standard Celery configuration settings can be overridden in the configuration
 file. See `Celery Configuration reference`_ for a complete listing of all
 the available settings, and their default values.
 
-.. _`Celery Configuration reference`: http://docs.celeryproject.org/en/latest/userguide/configuration.html
+.. _`Celery Configuration reference`: https://docs.celeryq.dev/en/latest/userguide/configuration.html
 
 Celery command line options also can be passed to Flower. For example
 the `--broker` sets the default broker URL: ::
@@ -88,7 +88,8 @@ dangerous_allow_unauth_api
 
 **Dangerous**: Allow unauthenticated access to Flower's APIs. Only use this setting if you know
 Flower cannot be accessed by any untrusted users, such as if Flower is firewalled behind an
-authenticating proxy.
+authenticating proxy. Additionally opens CORS policies, enabling CSRF attacks. Use at your
+own risk.
 
 .. _auto_refresh:
 

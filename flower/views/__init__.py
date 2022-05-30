@@ -50,6 +50,17 @@ class RequireAuthMixin():
 
 class BaseHandler(RequireAuthMixin, tornado.web.RequestHandler):
     def options(self):
+
+class BaseHandler(tornado.web.RequestHandler):
+    def set_default_headers(self):
+        if self.application.options.dangerous_allow_unauth_api:
+            self.set_header("Access-Control-Allow-Origin", "*")
+            self.set_header("Access-Control-Allow-Headers",
+                            "x-requested-with,access-control-allow-origin,authorization,content-type")
+            self.set_header('Access-Control-Allow-Methods',
+                            ' PUT, DELETE, OPTIONS, POST, GET, PATCH')
+
+    def options(self, *args, **kwargs):
         self.set_status(204)
         self.finish()
 
