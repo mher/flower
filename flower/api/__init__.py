@@ -28,9 +28,3 @@ class BaseApiHandler(BaseHandler):
     def prepare(self):
         if self.application.options.basic_auth or self.application.options.auth:
             raise tornado.web.HTTPError(405, "api is not available when auth is enabled")
-
-    def get_current_user2(self):
-        #if self.application.options.basic_auth or self.application.options.auth:
-        #    raise tornado.web.HTTPError(405, "api is not available when auth is enabled")
-
-        return super(self).get_current_user()
