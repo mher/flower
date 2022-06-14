@@ -15,7 +15,7 @@ from celery.contrib.abortable import AbortableAsyncResult
 from celery.backends.base import DisabledBackend
 
 from ..utils import tasks
-from ..views import BaseHandler
+from . import BaseApiHandler
 from ..utils.broker import Broker
 from ..api.control import ControlHandler
 from collections import OrderedDict
@@ -24,7 +24,7 @@ from collections import OrderedDict
 logger = logging.getLogger(__name__)
 
 
-class BaseTaskHandler(BaseHandler):
+class BaseTaskHandler(BaseApiHandler):
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
     def get_task_args(self):
