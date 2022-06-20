@@ -12,11 +12,11 @@
           <p id="taskid" class="hidden">{{ task.uuid }}</p>
           <h2>{{ getattr(task, 'name', None) }}
             <small>{{ task.uuid }}</small>
-            {% if task.state == "STARTED" %}
+            <!-- {% if task.state == "STARTED" %}
                 <button style="float: right" class="btn btn-danger" onclick="flower.on_task_terminate(event)">Terminate</button>
             {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
                 <button  style="float: right" class="btn btn-danger" onclick="flower.on_task_revoke(event)">Revoke</button>
-            {% end %}
+            {% end %} -->
           </h2>
         </div>
         <div class="row-fluid">

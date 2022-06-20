@@ -15,7 +15,6 @@ from .views.error import NotFoundErrorHandler
 from .views.dashboard import DashboardView
 from .utils import gen_cookie_secret
 
-
 settings = dict(
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
     static_path=os.path.join(os.path.dirname(__file__), "static"),
@@ -27,6 +26,7 @@ settings = dict(
 
 handlers = [
     # App
+    url(r"", BrokerView, name='home'),
     url(r"/", DashboardView, name='main'),
     url(r"/dashboard", DashboardView, name='dashboard'),
     url(r"/worker/(.+)", WorkerView, name='worker'),

@@ -61,8 +61,8 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
         next_ = self.get_argument('next', self.application.options.url_prefix or '/')
         if self.application.options.url_prefix and next_[0] != '/':
             next_ = '/' + next_
-
-        self.redirect(next_)
+        next_url = self.application.options.url_prefix + "/" 
+        self.redirect(next_url)
 
 
 class LoginHandler(BaseHandler):
