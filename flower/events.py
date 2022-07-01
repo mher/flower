@@ -117,11 +117,6 @@ class EventsState(State):
         if event_type == 'worker-offline':
             self.metrics.worker_online.labels(worker_name).set(0)
 
-        # Send event to api subscribers (via websockets)
-        classname = api.events.getClassName(event_type)
-        cls = getattr(api.events, classname, None)
-        if cls:
-            cls.send_message(event)
 
 
 class Events(threading.Thread):

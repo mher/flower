@@ -104,8 +104,7 @@ Celery command and before Flower sub-command): ::
 API
 ---
 
-Flower API enables to manage the cluster via REST API, call tasks and
-receive task events in real-time via WebSockets.
+Flower API enables to manage the cluster via REST API.
 
 For example you can restart worker's pool by: ::
 
@@ -118,13 +117,6 @@ Or call a task by: ::
 Or terminate executing task by: ::
 
     $ curl -X POST -d 'terminate=True' http://localhost:5555/api/task/revoke/8a4da87b-e12b-4547-b89a-e92e4d1f8efd
-
-Or receive task completion events in real-time: ::
-
-    var ws = new WebSocket("ws://localhost:5555/api/task/events/task-succeeded/");
-    ws.onmessage = function (event) {
-        console.log(event.data);
-    }
 
 For more info checkout `API Reference`_ and `examples`_.
 
