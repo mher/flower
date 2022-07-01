@@ -6,6 +6,11 @@ Protecting your Flower instance from unwarranted access is important
 if it runs in an untrusted environment. Below, we outline the various
 forms of authentication supported by Flower.
 
+**NOTE:** The following endpoints are exempt from authentication:
+
+- /healthcheck
+- /metrics
+
 .. _basic-auth:
 
 HTTP Basic Authentication

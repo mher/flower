@@ -82,6 +82,7 @@ OPTIONS
   --url_prefix                     base url prefix
   --xheaders                       enable support for the 'X-Real-Ip' and
                                    'X-Scheme' headers. (default *False*)
+  --task_runtime_metric_buckets    task runtime prometheus latency metric buckets (default prometheus latency buckets)
 
 TORNADO OPTIONS
 ===============

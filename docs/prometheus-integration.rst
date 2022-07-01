@@ -77,7 +77,7 @@ We have the following labels available:
 
 * **task** - task name, i.e. ``tasks.add``, ``tasks.multiply``.
 * **type** - task event type, i.e. ``task-started``, ``task-succeeded``. Note that worker related events **will not be counted**.
-  For more info on task event types see: `task events in celery <https://docs.celeryproject.org/en/stable/userguide/monitoring.html#task-events>`_.
+  For more info on task event types see: `task events in celery <https://docs.celeryq.dev/en/stable/userguide/monitoring.html#task-events>`_.
 * **worker** - celery worker name, i.e ``celery@<your computer name>``.
 
 Example Prometheus Alerts
@@ -144,7 +144,7 @@ Start Flower Monitoring
 
 In your Celery application folder run this command (Flower needs to be installed)::
 
-    celery flower -A tasks --broker=redis://localhost:6379/0
+    celery -A tasks --broker=redis://localhost:6379/0 flower
 
 Configure and Start Prometheus
 ------------------------------

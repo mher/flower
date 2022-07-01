@@ -1,8 +1,9 @@
 from mock import MagicMock
-
+import mock
 from flower.api.control import ControlHandler
 
 from tests.unit import AsyncHTTPTestCase
+from tornado.options import options
 
 
 class UnknownWorkerControlTests(AsyncHTTPTestCase):
@@ -169,3 +170,12 @@ class TaskControlTests(AsyncHTTPTestCase):
         celery.control.revoke.assert_called_once_with('test',
                                                       terminate=True,
                                                       signal='SIGUSR1')
+
+
+class ControlAuthTests(WorkerControlTests):
+    def test_auth(self):
+        with mock.patch.object(options.mockable(), 'basic_auth', ['user1:password1']):
+            app = self._app.capp
+            app.control.broadcast = MagicMock()
+            r = self.post('/api/worker/shutdown/test', body={})
+            self.assertEqual(405, r.code)

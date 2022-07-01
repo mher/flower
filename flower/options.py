@@ -1,5 +1,6 @@
 import types
 
+from prometheus_client import Histogram
 from tornado.options import define
 from tornado.options import options
 
@@ -67,6 +68,8 @@ define("tasks_columns", type=str,
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
+define("task_runtime_metric_buckets", type=float, default=Histogram.DEFAULT_BUCKETS,
+       multiple=True, help="histogram latency bucket value")
 
 # deprecated options
 define("inspect", default=False, help="inspect workers", type=bool)
