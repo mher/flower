@@ -1,4 +1,5 @@
 import types
+from secrets import token_urlsafe
 
 from prometheus_client import Histogram
 from tornado.options import define
@@ -52,7 +53,7 @@ define("auto_refresh", default=True,
        help="refresh dashboards", type=bool)
 define("purge_offline_workers", default=None, type=int,
        help="time (in seconds) after which offline workers are purged from dashboard")
-define("cookie_secret", type=str, default=None,
+define("cookie_secret", type=str, default=token_urlsafe(64),
        help="secure cookie secret")
 define("conf", default=DEFAULT_CONFIG_FILE,
        help="configuration file")
