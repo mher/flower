@@ -18,7 +18,7 @@ def authenticate(pattern, email):
     if '|' in pattern:
         return email in pattern.split('|')
     elif '*' in pattern:
-        pattern = pattern.replace('.', '\.').replace('\.*', '.*')
+        pattern = re.escape(pattern).replace('\.\*', "[A-Za-z0-9!#$%&'*+/=?^_`{|}~.\-]*")
         return re.fullmatch(pattern, email)
     else:
         return pattern == email
