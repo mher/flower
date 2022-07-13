@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from urllib.parse import urlencode
 
 import tornado.testing
@@ -6,7 +7,6 @@ from tornado.options import options
 from tornado.concurrent import Future
 
 import celery
-import mock
 
 from flower.app import Flower
 from flower.urls import handlers
@@ -37,4 +37,4 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
         return self.fetch(url, method='POST', **kwargs)
 
     def mock_option(self, name, value):
-        return mock.patch.object(options.mockable(), name, value)
+        return patch.object(options.mockable(), name, value)

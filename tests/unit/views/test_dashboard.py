@@ -1,16 +1,11 @@
 import time
 import unittest
+from unittest.mock import patch
 import sys
 
 from tests.unit import AsyncHTTPTestCase
 from tests.unit.utils import task_succeeded_events, task_failed_events
 from tests.unit.utils import HtmlTableParser
-
-if sys.version_info >= (2, 7):
-    from mock import patch
-else:
-    from unittest.mock import patch
-
 
 from celery.events import Event
 from celery.utils import uuid
