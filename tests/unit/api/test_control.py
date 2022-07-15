@@ -1,5 +1,4 @@
-from mock import MagicMock
-import mock
+from unittest.mock import MagicMock, patch
 from flower.api.control import ControlHandler
 
 from tests.unit import AsyncHTTPTestCase
@@ -174,7 +173,7 @@ class TaskControlTests(AsyncHTTPTestCase):
 
 class ControlAuthTests(WorkerControlTests):
     def test_auth(self):
-        with mock.patch.object(options.mockable(), 'basic_auth', ['user1:password1']):
+        with patch.object(options.mockable(), 'basic_auth', ['user1:password1']):
             app = self._app.capp
             app.control.broadcast = MagicMock()
             r = self.post('/api/worker/shutdown/test', body={})

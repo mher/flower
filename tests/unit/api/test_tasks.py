@@ -1,4 +1,4 @@
-from mock import Mock, patch
+from unittest.mock import Mock, patch, PropertyMock
 from datetime import datetime, timedelta
 
 from celery.result import AsyncResult
@@ -16,7 +16,6 @@ from collections import OrderedDict
 
 class ApplyTests(AsyncHTTPTestCase):
     def test_apply(self):
-        from mock import patch, PropertyMock
         import json
 
         result = 'result'

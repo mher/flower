@@ -1,6 +1,5 @@
 import json
-
-import mock
+from unittest import mock
 
 from flower.api.control import ControlHandler
 from flower.inspector import Inspector

@@ -5,7 +5,6 @@ import unittest
 import subprocess
 from unittest.mock import Mock, patch
 
-import mock
 from prometheus_client import Histogram
 
 from flower.command import apply_options, warn_about_celery_args_used_in_flower_command, apply_env_options
@@ -49,7 +48,7 @@ class TestFlowerCommand(AsyncHTTPTestCase):
         - create flower command
         """
         celery_app = self._get_celery_app()
-        with mock.patch.object(celery_app, '_autodiscover_tasks') as autodiscover:
+        with patch.object(celery_app, '_autodiscover_tasks') as autodiscover:
             celery_app.autodiscover_tasks()
 
             self.get_app(capp=celery_app)
