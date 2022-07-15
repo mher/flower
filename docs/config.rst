@@ -65,6 +65,8 @@ auth
 ~~~~
 
 Enables authentication. `auth` is a regexp of emails to grant access.
+For security reasons `auth` only supports a basic regex syntax: single email (`user@example.com`),
+wildcard (`.*@example.com`) or list of emails separated by pipes (`one@example.com|two@example.com`).
 For more info see :ref:`authentication`.
 
 .. _auto_refresh:
