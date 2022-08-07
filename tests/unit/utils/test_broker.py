@@ -1,6 +1,5 @@
 import unittest
-
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from flower.utils import broker
 from flower.utils.broker import RabbitMQ, Redis, RedisBase, RedisSocket, Broker, RedisSentinel
