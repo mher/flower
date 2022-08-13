@@ -50,7 +50,7 @@ class RabbitMQ(BrokerBase):
         self.password = self.password or 'guest'
 
         if not http_api:
-            http_api = "http://{username}:{password}@{host}:{port}/api/{vhost}".format(
+            http_api = "http://{username}:{password}@{host}:15672/api/{vhost}".format(
                 username=self.username, password=self.password,
                 host=self.host, port=self.port, vhost=self.vhost
             )
