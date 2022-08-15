@@ -1,5 +1,7 @@
 import types
+from secrets import token_urlsafe
 
+from prometheus_client import Histogram
 from tornado.options import define
 from tornado.options import options
 
@@ -51,7 +53,7 @@ define("auto_refresh", default=True,
        help="refresh dashboards", type=bool)
 define("purge_offline_workers", default=None, type=int,
        help="time (in seconds) after which offline workers are purged from dashboard")
-define("cookie_secret", type=str, default=None,
+define("cookie_secret", type=str, default=token_urlsafe(64),
        help="secure cookie secret")
 define("conf", default=DEFAULT_CONFIG_FILE,
        help="configuration file")
@@ -67,6 +69,8 @@ define("tasks_columns", type=str,
 define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
        help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
+define("task_runtime_metric_buckets", type=float, default=Histogram.DEFAULT_BUCKETS,
+       multiple=True, help="histogram latency bucket value")
 
 # deprecated options
 define("inspect", default=False, help="inspect workers", type=bool)

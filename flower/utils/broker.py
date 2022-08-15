@@ -168,7 +168,7 @@ class RedisSentinel(RedisBase):
         self.port = self.port or 26379
         self.vhost = self._prepare_virtual_host(self.vhost)
         self.master_name = self._prepare_master_name(broker_options)
-        self.redis = self._get_redis_client()
+        self.redis = self._get_redis_client(broker_options)
 
     def _prepare_virtual_host(self, vhost):
         if not isinstance(vhost, numbers.Integral):
@@ -194,8 +194,11 @@ class RedisSentinel(RedisBase):
             )
         return master_name
 
-    def _get_redis_client(self):
-        connection_kwargs = {'password': self.password}
+    def _get_redis_client(self, broker_options):
+        connection_kwargs = {
+            'password': self.password,
+            'sentinel_kwargs': broker_options.get('sentinel_kwargs')
+        }
         # TODO: get all sentinel hosts from Celery App config and use them to initialize Sentinel
         sentinel = redis.sentinel.Sentinel(
             [(self.host, self.port)], **connection_kwargs)

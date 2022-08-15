@@ -28,7 +28,7 @@ Core Celery args that you may want to set::
     -b, --broker
     --result-backend
 
-More info on available `Celery command args <https://docs.celeryproject.org/en/stable/reference/cli.html#celery>`_.
+More info on available `Celery command args <https://docs.celeryq.dev/en/stable/reference/cli.html#celery>`_.
 
 For Flower command args `see here <https://flower.readthedocs.io/en/latest/config.html#options>`_.
 
@@ -41,7 +41,7 @@ Launch the Flower server at specified port other than default 5555 (open the UI 
 
 Specify Celery application path with address and port for Flower: ::
 
-    $ celery -A proj flower  --address=127.0.0.6 --port=5566
+    $ celery -A proj flower --address=127.0.0.6 --port=5566
 
 Launch using docker: ::
 

@@ -5,14 +5,31 @@ import unittest
 import subprocess
 from unittest.mock import Mock, patch
 
-import mock
+from prometheus_client import Histogram
 
-from flower.command import apply_options, warn_about_celery_args_used_in_flower_command
+from flower.command import apply_options, warn_about_celery_args_used_in_flower_command, apply_env_options
 from tornado.options import options
 from tests.unit import AsyncHTTPTestCase
 
 
 class TestFlowerCommand(AsyncHTTPTestCase):
+    def test_task_runtime_metric_buckets_read_from_cmd_line(self):
+        apply_options('flower', argv=['--task_runtime_metric_buckets=1,10,inf'])
+        self.assertEqual([1.0, 10.0, float('inf')], options.task_runtime_metric_buckets)
+
+    def test_task_runtime_metric_buckets_no_cmd_line_arg(self):
+        apply_options('flower', argv=[])
+        self.assertEqual(Histogram.DEFAULT_BUCKETS, options.task_runtime_metric_buckets)
+
+    def test_task_runtime_metric_buckets_read_from_env(self):
+        os.environ["FLOWER_TASK_RUNTIME_METRIC_BUCKETS"] = "2,5,inf"
+        apply_env_options()
+        self.assertEqual([2.0, 5.0, float('inf')], options.task_runtime_metric_buckets)
+
+    def test_task_runtime_metric_buckets_no_env_value_provided(self):
+        apply_env_options()
+        self.assertEqual(Histogram.DEFAULT_BUCKETS, options.task_runtime_metric_buckets)
+
     def test_port(self):
         with self.mock_option('port', 5555):
             apply_options('flower', argv=['--port=123'])
@@ -31,7 +48,7 @@ class TestFlowerCommand(AsyncHTTPTestCase):
         - create flower command
         """
         celery_app = self._get_celery_app()
-        with mock.patch.object(celery_app, '_autodiscover_tasks') as autodiscover:
+        with patch.object(celery_app, '_autodiscover_tasks') as autodiscover:
             celery_app.autodiscover_tasks()
 
             self.get_app(capp=celery_app)

@@ -35,7 +35,7 @@ Standard Celery configuration settings can be overridden in the configuration
 file. See `Celery Configuration reference`_ for a complete listing of all
 the available settings, and their default values.
 
-.. _`Celery Configuration reference`: http://docs.celeryproject.org/en/latest/userguide/configuration.html
+.. _`Celery Configuration reference`: https://docs.celeryq.dev/en/latest/userguide/configuration.html
 
 Celery command line options also can be passed to Flower. For example
 the `--broker` sets the default broker URL: ::
@@ -65,6 +65,8 @@ auth
 ~~~~
 
 Enables authentication. `auth` is a regexp of emails to grant access.
+For security reasons `auth` only supports a basic regex syntax: single email (`user@example.com`),
+wildcard (`.*@example.com`) or list of emails separated by pipes (`one@example.com|two@example.com`).
 For more info see :ref:`authentication`.
 
 .. _auto_refresh:
@@ -316,3 +318,21 @@ purge_offline_workers
 Time (in seconds) after which offline workers are automatically removed from dashboard.
 
 If omitted, offline workers remain on the dashboard.
+
+.. _task_runtime_metric_buckets:
+
+task_runtime_metric_buckets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sets task runtime latency buckets
+
+buckets value can be provided as cli options: ::
+
+    $ celery flower --task_runtime_metric_buckets=1,5,10,inf
+
+Or, it can be also provided as ENV variable: ::
+
+    $ export FLOWER_TASK_RUNTIME_METRIC_BUCKETS=1,5,10,inf
+
+If not provided:
+    - default prometheus buckets will be used

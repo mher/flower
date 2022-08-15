@@ -16,12 +16,14 @@ logger = logging.getLogger(__name__)
 
 class BaseHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods',
-                        ' PUT, DELETE, OPTIONS')
+        if not (self.application.options.basic_auth or self.application.options.auth):
+            self.set_header("Access-Control-Allow-Origin", "*")
+            self.set_header("Access-Control-Allow-Headers",
+                            "x-requested-with,access-control-allow-origin,authorization,content-type")
+            self.set_header('Access-Control-Allow-Methods',
+                            ' PUT, DELETE, OPTIONS, POST, GET, PATCH')
 
-    def options(self):
+    def options(self, *args, **kwargs):
         self.set_status(204)
         self.finish()
 
