@@ -18,10 +18,10 @@ empty_inspect_response = {
 }
 
 inspect_response_with_non_serializable_args = {
-    'celery@worker1' : {
+    'celery@worker1': {
         'active': {
             'id': '1234',
-            'args': [set([1,2])]
+            'args': [set([1, 2])]
         }
     }
 }
