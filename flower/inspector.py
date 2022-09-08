@@ -35,7 +35,11 @@ class Inspector(object):
 
         logger.debug('Sending %s inspect command', method)
         start = time.time()
-        result = getattr(inspect, method)()
+        result = (
+            getattr(inspect, method)()
+            if method != 'active'
+            else getattr(inspect, method)(safe=True)
+        )
         logger.debug("Inspect command %s took %.2fs to complete", method, time.time() - start)
         
         if result is None or 'error' in result:
