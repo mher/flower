@@ -1,5 +1,9 @@
+import base64
 import json
 from unittest import mock
+from unittest.mock import patch
+
+from tornado.options import options
 
 from flower.inspector import Inspector
 
@@ -23,51 +27,60 @@ empty_inspect_response = {
                    return_value=['inspect_method'])
 class ListWorkersTest(AsyncHTTPTestCase):
 
+    def get(self, url, **kwargs):
+        return super(ListWorkersTest, self).get(
+            url,
+            **kwargs,
+            headers={"Authorization": "Basic " + base64.b64encode(("user1"+":"+"password1").encode()).decode()}
+        )
+
     def test_refresh_cache(self, m_inspect):
-        celery = self._app.capp
-        celery.control.inspect = mock.Mock()
-        celery.control.inspect.return_value.inspect_method = mock.Mock(
-            return_value=inspect_response
-        )
+        with patch.object(options.mockable(), 'basic_auth', ['user1:password1']):
+            celery = self._app.capp
+            celery.control.inspect = mock.Mock()
+            celery.control.inspect.return_value.inspect_method = mock.Mock(
+                return_value=inspect_response
+            )
 
-        r = self.get('/api/workers?refresh=1')
-        celery.control.inspect.assert_called_once_with(
-            timeout=1,
-            destination=None
-        )
+            r = self.get('/api/workers?refresh=1')
+            celery.control.inspect.assert_called_once_with(
+                timeout=1,
+                destination=None
+            )
 
-        body = json.loads(r.body.decode("utf-8"))
-        self.assertEqual(
-            inspect_response['celery@worker1'],
-            body['celery@worker1']['inspect_method']
-        )
-        self.assertIn('timestamp', body['celery@worker1'])
-        self.assertEqual(
-            inspect_response['celery@worker1'],
-            self._app.workers['celery@worker1']['inspect_method']
-        )
+            body = json.loads(r.body.decode("utf-8"))
+            self.assertEqual(
+                inspect_response['celery@worker1'],
+                body['celery@worker1']['inspect_method']
+            )
+            self.assertIn('timestamp', body['celery@worker1'])
+            self.assertEqual(
+                inspect_response['celery@worker1'],
+                self._app.workers['celery@worker1']['inspect_method']
+            )
 
     def test_refresh_cache_with_empty_response(self, m_inspect):
-        celery = self._app.capp
-        celery.control.inspect = mock.Mock()
-        celery.control.inspect.return_value.inspect_method = mock.Mock(
-            return_value=inspect_response
-        )
-        r = self.get('/api/workers?refresh=1')
+        with patch.object(options.mockable(), 'basic_auth', ['user1:password1']):
+            celery = self._app.capp
+            celery.control.inspect = mock.Mock()
+            celery.control.inspect.return_value.inspect_method = mock.Mock(
+                return_value=inspect_response
+            )
+            r = self.get('/api/workers?refresh=1')
 
-        celery.control.inspect.return_value.inspect_method = mock.Mock(
-            return_value=empty_inspect_response
-        )
+            celery.control.inspect.return_value.inspect_method = mock.Mock(
+                return_value=empty_inspect_response
+            )
 
-        r = self.get('/api/workers?refresh=1')
+            r = self.get('/api/workers?refresh=1')
 
-        body = json.loads(r.body.decode("utf-8"))
-        self.assertEqual(
-            [],
-            body['celery@worker1']['inspect_method']
-        )
-        self.assertIn('timestamp', body['celery@worker1'])
-        self.assertEqual(
-            [],
-            self._app.workers['celery@worker1']['inspect_method']
-        )
+            body = json.loads(r.body.decode("utf-8"))
+            self.assertEqual(
+                [],
+                body['celery@worker1']['inspect_method']
+            )
+            self.assertIn('timestamp', body['celery@worker1'])
+            self.assertEqual(
+                [],
+                self._app.workers['celery@worker1']['inspect_method']
+            )

@@ -1,9 +1,20 @@
+import base64
+from unittest.mock import patch
+
 from tests.unit import AsyncHTTPTestCase
 from flower.app import rewrite_handler
 from tornado.web import url
+from tornado.options import options
 
 
 class UrlsTests(AsyncHTTPTestCase):
+    def get(self, url, **kwargs):
+        return super(UrlsTests, self).get(
+            url,
+            **kwargs,
+            headers={"Authorization": "Basic " + base64.b64encode(("user1"+":"+"password1").encode()).decode()}
+        )
+
     def test_dashboard_url(self):
         r = self.get('/dashboard')
         self.assertEqual(200, r.code)
@@ -13,11 +24,19 @@ class UrlsTests(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
 
     def test_tasks_api_url(self):
-        r = self.get('/api/tasks')
-        self.assertEqual(200, r.code)
+        with patch.object(options.mockable(), 'basic_auth', ['user1:password1']):
+            r = self.get('/api/tasks')
+            self.assertEqual(200, r.code)
 
 
 class URLPrefixTests(AsyncHTTPTestCase):
+    def get(self, url, **kwargs):
+        return super(URLPrefixTests, self).get(
+            url,
+            **kwargs,
+            headers={"Authorization": "Basic " + base64.b64encode(("user1"+":"+"password1").encode()).decode()}
+        )
+
     def setUp(self):
         with self.mock_option('url_prefix', 'test_root'):
             super(URLPrefixTests, self).setUp()
@@ -31,8 +50,9 @@ class URLPrefixTests(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
 
     def test_tasks_api_url(self):
-        r = self.get('/test_root/api/tasks')
-        self.assertEqual(200, r.code)
+        with patch.object(options.mockable(), 'basic_auth', ['user1:password1']):
+            r = self.get('/test_root/api/tasks')
+            self.assertEqual(200, r.code)
 
     def test_base_url_no_longer_working(self):
         r = self.get('/dashboard')
