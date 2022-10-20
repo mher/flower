@@ -124,9 +124,15 @@ def extract_settings():
             settings[name] = prepend_url(settings[name], options.url_prefix)
 
     if options.auth:
+        oauth2_secret_file = os.environ.get("FLOWER_OAUTH2_SECRET_FILE", "")
+        oauth2_secret = (
+            options.oauth2_secret or os.environ.get("FLOWER_OAUTH2_SECRET")
+            if not oauth2_secret_file
+            else open(oauth2_secret_file, "r").readline()
+        )
         settings['oauth'] = {
             'key': options.oauth2_key or os.environ.get('FLOWER_OAUTH2_KEY'),
-            'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
+            'secret': oauth2_secret,
             'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_OAUTH2_REDIRECT_URI'),
         }
 
