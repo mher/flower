@@ -50,7 +50,7 @@ setup(
     author='Mher Movsisyan',
     author_email='mher.movsisyan@gmail.com',
     url='https://github.com/mher/flower',
-    license='BSD',
+    license='BSD-3-Clause',
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=get_requirements('default.txt'),
