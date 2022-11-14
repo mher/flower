@@ -109,6 +109,7 @@ class RedisBase(BrokerBase):
         self.priority_steps = broker_options.get(
             'priority_steps', self.DEFAULT_PRIORITY_STEPS)
         self.sep = broker_options.get('sep', self.DEFAULT_SEP)
+        self.broker_prefix = broker_options.get('global_keyprefix', '')
 
     def _q_for_pri(self, queue, pri):
         if pri not in self.priority_steps:
@@ -119,7 +120,7 @@ class RedisBase(BrokerBase):
     def queues(self, names):
         queue_stats = []
         for name in names:
-            priority_names = [self._q_for_pri(
+            priority_names = [self.broker_prefix + self._q_for_pri(
                 name, pri) for pri in self.priority_steps]
             queue_stats.append({
                 'name': name,
