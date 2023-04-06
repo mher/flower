@@ -154,7 +154,13 @@ class Redis(RedisBase):
         return vhost
 
     def _get_redis_client_args(self):
-        return {'host': self.host, 'port': self.port, 'db': self.vhost, 'password': self.password}
+        return {
+            'host': self.host,
+            'port': self.port,
+            'db': self.vhost,
+            'username': self.username,
+            'password': self.password
+        }
 
     def _get_redis_client(self):
         return redis.Redis(**self._get_redis_client_args())

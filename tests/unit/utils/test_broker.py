@@ -93,6 +93,14 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(5, b.vhost)
         self.assertEqual('pass', b.password)
 
+    def test_url_with_user_and_password(self):
+        b = Broker('redis://user:pass@host:4444/5')
+        self.assertEqual('host', b.host)
+        self.assertEqual(4444, b.port)
+        self.assertEqual(5, b.vhost)
+        self.assertEqual('user', b.username)
+        self.assertEqual('pass', b.password)
+
 
 class TestRedisSentinel(unittest.TestCase):
     def test_init(self):
