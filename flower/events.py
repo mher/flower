@@ -36,7 +36,7 @@ def get_prometheus_metrics():
 class PrometheusMetrics(object):
 
     def __init__(self):
-        self.events = PrometheusCounter('flower_events_total', "Number of events", ['worker', 'type', 'task'])
+        self.events = PrometheusCounter('flower_events_total', "Number of events", ['type', 'task'])
 
         self.runtime = Histogram(
             'flower_task_runtime_seconds',
@@ -85,7 +85,8 @@ class EventsState(State):
             task_name = event.get('name', '')
             if not task_name and task_id in self.tasks:
                 task_name = task.name or ''
-            self.metrics.events.labels(worker_name, event_type, task_name).inc()
+
+            self.metrics.events.labels(event_type, task_name).inc()
 
             runtime = event.get('runtime', 0)
             if runtime:
