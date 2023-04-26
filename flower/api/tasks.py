@@ -524,6 +524,7 @@ List tasks
         received_start = self.get_argument('received_start', None)
         received_end = self.get_argument('received_end', None)
         sort_by = self.get_argument('sort_by', None)
+        search = self.get_argument('search', None)
 
         limit = limit and int(limit)
         offset = max(offset, 0)
@@ -536,7 +537,9 @@ List tasks
                 app.events, limit=limit, offset=offset, sort_by=sort_by, type=type,
                 worker=worker, state=state,
                 received_start=received_start,
-                received_end=received_end):
+                received_end=received_end,
+                search=search
+        ):
             task = tasks.as_dict(task)
             worker = task.pop('worker', None)
             if worker is not None:
