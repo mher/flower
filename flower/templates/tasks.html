@@ -9,28 +9,27 @@
 <input type="hidden" value="{{ time }}" id='time'>
 <input type="hidden" value="{{ columns }}" id='columns'>
 
-<div class="container-fluid">
-
-  <table id="tasks-table" class="table table-bordered table-striped">
+<div class="container-fluid mt-3">
+  <table id="tasks-table" class="table table-bordered table-striped table-hover w-100">
     <thead>
     <tr>
       <th>Name</th>
       <th>UUID</th>
-      <th>State</th>
+      <th class="text-center">State</th>
       <th>args</th>
       <th>kwargs</th>
       <th>Result</th>
-      <th>Received</th>
-      <th>Started</th>
-      <th>Runtime</th>
+      <th class="text-center">Received</th>
+      <th class="text-center">Started</th>
+      <th class="text-center">Runtime</th>
       <th>Worker</th>
       <th>Exchange</th>
       <th>Routing Key</th>
-      <th>Retries</th>
-      <th>Revoked</th>
+      <th class="text-center">Retries</th>
+      <th class="text-center">Revoked</th>
       <th>Exception</th>
-      <th>Expires</th>
-      <th>ETA</th>
+      <th class="text-center">Expires</th>
+      <th class="text-center">ETA</th>
     </tr>
     </thead>
     <tbody>
