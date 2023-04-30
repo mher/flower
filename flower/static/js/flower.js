@@ -435,7 +435,7 @@ var flower = (function () {
     });
 
     $(document).ready(function () {
-        if (!active_page('/') && !active_page('/dashboard')) {
+        if (!active_page('/') && !active_page('/workers')) {
             return;
         }
 
@@ -454,7 +454,7 @@ var flower = (function () {
                 info: 'Showing _START_ to _END_ of _TOTAL_ workers',
                 infoFiltered: '(filtered from _MAX_ total workers)'
             },
-            ajax: url_prefix() + '/dashboard?json=1',
+            ajax: url_prefix() + '/workers?json=1',
             order: [
                 [1, "des"]
             ],

@@ -14,21 +14,21 @@ from flower.events import EventsState
 from flower.options import options
 
 
-class DashboardTests(AsyncHTTPTestCase):
+class WorkersTests(AsyncHTTPTestCase):
     def setUp(self):
-        self.app = super(DashboardTests, self).get_app()
-        super(DashboardTests, self).setUp()
+        self.app = super(WorkersTests, self).get_app()
+        super(WorkersTests, self).setUp()
 
     def get_app(self):
         return self.app
 
     def test_default_page(self):
         r1 = self.get('/')
-        r2 = self.get('/dashboard')
+        r2 = self.get('/workers')
         self.assertEqual(r1.body, r2.body)
 
     def test_no_workers(self):
-        r = self.get('/dashboard')
+        r = self.get('/workers')
         self.assertEqual(200, r.code)
         self.assertIn('Load Average', str(r.body))
         self.assertNotIn('<tr id=', str(r.body))
@@ -48,7 +48,7 @@ class DashboardTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         self.app.events.state = state
 
-        r = self.get('/dashboard')
+        r = self.get('/workers')
         table = HtmlTableParser()
         table.parse(str(r.body))
 
@@ -68,9 +68,9 @@ class DashboardTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         self.app.events.state = state
 
-        with patch('flower.views.dashboard.options') as mock_options:
+        with patch('flower.views.workers.options') as mock_options:
             mock_options.purge_offline_workers = 0
-            r = self.get('/dashboard')
+            r = self.get('/workers')
 
         table = HtmlTableParser()
         table.parse(str(r.body))
@@ -85,7 +85,7 @@ class DashboardTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         self.app.events.state = state
 
-        r = self.get('/dashboard')
+        r = self.get('/workers')
 
         table = HtmlTableParser()
         table.parse(str(r.body))
@@ -113,7 +113,7 @@ class DashboardTests(AsyncHTTPTestCase):
 
         self.app.events.state = state
 
-        r = self.get('/dashboard')
+        r = self.get('/workers')
 
         table = HtmlTableParser()
         table.parse(str(r.body))
@@ -143,7 +143,7 @@ class DashboardTests(AsyncHTTPTestCase):
 
         self.app.events.state = state
 
-        r = self.get('/dashboard')
+        r = self.get('/workers')
 
         table = HtmlTableParser()
         table.parse(str(r.body))
@@ -175,7 +175,7 @@ class DashboardTests(AsyncHTTPTestCase):
 
         self.app.events.state = state
 
-        r = self.get('/dashboard')
+        r = self.get('/workers')
 
         table = HtmlTableParser()
         table.parse(str(r.body))
@@ -207,7 +207,7 @@ class DashboardTests(AsyncHTTPTestCase):
 
         self.app.events.state = state
 
-        r = self.get('/dashboard')
+        r = self.get('/workers')
 
         table = HtmlTableParser()
         table.parse(str(r.body))
@@ -241,7 +241,7 @@ class DashboardTests(AsyncHTTPTestCase):
 
         self.app.events.state = state
 
-        r = self.get('/dashboard')
+        r = self.get('/workers')
 
         table = HtmlTableParser()
         table.parse(str(r.body))
@@ -274,7 +274,7 @@ class DashboardTests(AsyncHTTPTestCase):
 
         self.app.events.state = state
 
-        r = self.get('/dashboard')
+        r = self.get('/workers')
 
         table = HtmlTableParser()
         table.parse(str(r.body))

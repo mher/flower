@@ -48,7 +48,7 @@ OPTIONS
   --address                        run on the given address
   --auth                           regexp  of emails to grant access
   --auth_provider                  sets authentication provider class
-  --auto_refresh                   refresh dashboard automatically (default *True*)
+  --auto_refresh                   refresh workers automatically (default *True*)
   --basic_auth                     colon separated user-password to enable
                                    basic auth
   --broker_api                     inspect broker e.g.
@@ -74,7 +74,7 @@ OPTIONS
   --persistent                     enable persistent mode (default *False*)
   --port                           run on the given port (default *5555*)
   --purge_offline_workers          time (in seconds) after which offline workers are purged
-                                   from dashboard
+                                   from workers
   --state_save_interval            state save interval (in milliseconds) (default *0*)
   --tasks_columns                  slugs of columns on /tasks/ page, delimited by comma
                                    (default *name,uuid,state,args,kwargs,result,received,started,runtime,worker*)
