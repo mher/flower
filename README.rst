@@ -1,14 +1,17 @@
 Flower
 ======
 
+.. image:: https://img.shields.io/pypi/dm/flower
+   :alt: PyPI - Downloads
+
+.. image:: https://img.shields.io/docker/pulls/mher/flower
+   :alt: Docker Pulls
+
 .. image:: https://github.com/mher/flower/workflows/Build/badge.svg
     :target: https://github.com/mher/flower/actions
 
 .. image:: https://img.shields.io/pypi/v/flower.svg
     :target: https://pypi.python.org/pypi/flower
-
-.. image:: https://travis-ci.org/mher/flower.svg?branch=master
-        :target: https://travis-ci.org/mher/flower
 
 Flower is a web based tool for monitoring and administrating Celery clusters.
 
