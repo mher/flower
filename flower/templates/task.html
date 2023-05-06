@@ -7,7 +7,7 @@
 {% block container %}
   <div id='task-page' class="container-fluid mt-3">
     <div class="row-fluid">
-      <div class="col-12">
+      <div class="col-lg-12">
         <div class="page-header">
           <p id="taskid" class="d-none">{{ task.uuid }}</p>
           <h2>{{ getattr(task, 'name', None) }}
@@ -20,7 +20,7 @@
           </h2>
         </div>
         <div class="row-fluid">
-          <div class="col-6">
+          <div class="col-lg-6">
             <table class="table table-bordered table-striped">
               <tbody>
               <tr>

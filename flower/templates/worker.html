@@ -11,7 +11,7 @@
 
 <div class="container-fluid">
   <div class="row-fluid">
-    <div class="col-12">
+    <div class="col-lg-12">
       <div class="mt-4 mb-4">
         <h3 id="workername">{{ worker['name'] }}</h3>
       </div>
@@ -62,7 +62,7 @@
           <div class="tab-pane fade show active" id="tab-pool" role="tabpanel" aria-labelledby="tab-pool">
             <div class="container-fluid">
               <div class="row">
-                <div class="col-8">
+                <div class="col-lg-8">
                   <table class="table table-bordered table-striped caption-top">
                     <caption>Worker pool options</caption>
                     <tbody>
@@ -84,44 +84,29 @@
                   </table>
                 </div>
 
-                <div class="col-sm-4 d-flex align-items-center">
-                  <div class="form-group">
-                    <fieldset>
-                      <legend class="text-center">Pool size control</legend>
-                      <label class="col-form-label" for="pool-size">Pool size</label>
-                      <div class="row">
-                        <div class="col-sm-6">
-                          <div class="input-group">
-                            <select class="form-select" id="pool-size">
-                              <option>1</option>
-                              <option>2</option>
-                              <option>3</option>
-                              <option>4</option>
-                              <option>5</option>
-                            </select>
-                            <button id="worker-pool-grow" class="btn btn-primary mx-1" type="button">Grow</button>
-                            <button id="worker-pool-shrink" class="btn btn-primary" type="button">Shrink</button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <label class="col-form-label" for="min-autoscale">Min/Max autoscale</label>
-                      <div class="row">
-                        <div class="col-sm-9">
-                          <div class="input-group">
-                            <input class="form-control" id="min-autoscale" type="text">
-                            <input class="form-control mx-1" id="max-autoscale" type="text">
-                            <button id="worker-pool-autoscale" class="btn btn-primary" type="button">Apply</button>
-                          </div>
-                        </div>
-                      </div>
-                    </fieldset>
-                  </div>
+                <div class="col-lg-4 container">
+                  <form class="mx-auto">
+                    <legend class="form-label mt-md-5">Pool size control</legend>
+                    <div class="mb-3">
+                      <label for="pool-size" class="col-sm-2 col-form-label text-nowrap">Pool size</label>
+                      <input type="number" id="pool-size" min="1" max="100" value="1">
+                      <button id="worker-pool-grow" class="btn btn-primary btn-sm" type="button">Grow</button>
+                      <button id="worker-pool-shrink" class="btn btn-primary btn-sm" type="button">Shrink</button>
+                    </div>
+                    <div class="mb-3 input-group">
+                      <label for="min-autoscale" class="col-sm-2 form-label text-nowrap">Auto scale</label>
+                      <input class="form-control-sm" id="min-autoscale" type="number" placeholder="Min" min="1"
+                        max="100">
+                      <input class="form-control-sm mx-1" id="max-autoscale" type="number" placeholder="Max" min="1"
+                        max="100">
+                      <button id="worker-pool-autoscale" class="btn btn-primary btn-sm" type="button">Apply</button>
+                    </div>
+                  </form>
                 </div>
               </div>
 
               {% if worker['stats'].get('autoscaler', None) %}
-              <div class="col-4">
+              <div class="col-md-4">
                 <table class="table table-bordered table-striped caption-top">
                   <caption>Autoscaler options</caption>
                   <tbody>
@@ -139,7 +124,7 @@
           </div> <!-- end pool tab -->
 
           <div class="tab-pane fade" id="tab-broker" role="tabpanel" aria-labelledby="tab-broker">
-            <div class="col-6">
+            <div class="col-lg-6">
               <table class="table table-bordered table-striped caption-top">
                 <caption>Broker options</caption>
                 <tbody>
@@ -191,12 +176,11 @@
                 {% end %}
               </tbody>
             </table>
-            <div class="control-group">
-              <div class="controls">
-                <div class="input-append">
-                  <input class="span2" id="add-consumer-name" type="text">
-                  <button id="worker-add-consumer" class="btn btn-primary" type="button">Add Consumer</button>
-                </div>
+            <div class="control-group col-lg-3">
+              <div class="input-group mb-3">
+                <input id="add-consumer-name" type="text" class="form-control" placeholder="New consumer"
+                  aria-label="New consumer" aria-describedby="worker-add-consumer">
+                <button class="btn btn-primary mx-1" type="button" id="worker-add-consumer">Add</button>
               </div>
             </div>
           </div> <!-- end queues tab -->
@@ -302,50 +286,49 @@
           </div> <!-- end tasks tab -->
 
           <div class="tab-pane fade" id="tab-limits" role="tabpanel" aria-labelledby="tab-limits">
-            <table class="table table-bordered table-striped caption-top">
-              <caption>Task limits</caption>
-              <thead>
-                <tr>
-                  <th>Task name</th>
-                  <th>Rate limit</th>
-                  <th>Timeouts</th>
-                </tr>
-              </thead>
-              <tbody id="limits-table">
-                {% for taskname in worker.get('registered', []) %}
-                <tr>
-                  <td>{{ taskname }}</td>
-                  <td>
-                    <div class="control-group">
-                      <div class="controls">
-                        <div class="input-append">
-                          <input class="input-small" type="text">
-                          <button class="btn btn-primary" type="button" id="task-rate-limit-{{taskname}}">Apply</button>
+            <div class="col-lg-10">
+              <table class="table table-bordered table-striped caption-top">
+                <caption>Task limits</caption>
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th class="text-center">Rate limit</th>
+                    <th class="text-center">Timeouts</th>
+                  </tr>
+                </thead>
+                <tbody id="limits-table">
+                  {% for taskname in worker.get('registered', []) %}
+                  <tr>
+                    <td>{{ taskname }}</td>
+                    <td class="col-lg-2">
+                      <div class="form-group">
+                        <div class="input-group">
+                          <input class="form-control form-control-sm" type="number">
+                          <button class="btn btn-primary btn-sm mx-1" type="button"
+                            id="task-rate-limit-{{taskname}}">Apply</button>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="control-group">
-                      <div class="controls">
-                        <div class="input-append">
-                          <input class="input-small" type="text">
-                          <button class="btn btn-primary" type="button"
+                    </td>
+                    <td class="col-lg-2">
+                      <div class="form-group">
+                        <div class="input-group">
+                          <input class="form-control form-control-sm" type="number">
+                          <button class="btn btn-primary btn-sm mx-1" type="button"
                             id="task-timeout-soft-{{taskname}}">Soft</button>
-                          <button class="btn btn-primary" type="button"
+                          <button class="btn btn-primary btn-sm mx-1" type="button"
                             id="task-timeout-hard-{{taskname}}">Hard</button>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-                {% end %}
-              </tbody>
-            </table>
+                    </td>
+                  </tr>
+                  {% end %}
+                </tbody>
+              </table>
+            </div>
           </div> <!-- end limits tab -->
 
           <div class="tab-pane fade" id="tab-config" role="tabpanel" aria-labelledby="tab-config">
-            <div class="col-8">
+            <div class="col-lg-8">
               <table class="table table-bordered table-striped caption-top">
                 <caption>Configuration options</caption>
                 <tbody>
@@ -365,7 +348,7 @@
           </div> <!-- end config tab -->
 
           <div class="tab-pane fade" id="tab-system" role="tabpanel" aria-labelledby="tab-system">
-            <div class="col-8">
+            <div class="col-lg-8">
               <table class="table table-bordered table-striped caption-top">
                 <caption>System usage statistics</caption>
                 <tbody>
@@ -384,7 +367,7 @@
 
           {% if other %}
           <div class="tab-pane fade" id="tab-other" role="tabpanel" aria-labelledby="tab-other">
-            <div class="col-8">
+            <div class="col-lg-8">
               <table class="table table-bordered table-striped caption-top">
                 <caption>Other statistics</caption>
                 <tbody>

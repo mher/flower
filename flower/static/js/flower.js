@@ -1,30 +1,28 @@
+/*jslint browser: true */
+/*global $, WebSocket, jQuery */
+
 var flower = (function () {
     "use strict";
-    /*jslint browser: true */
-    /*jslint unparam: true, node: true */
-    /*global $, WebSocket, jQuery */
 
-    const alertContainer = document.getElementById('alert-container')
+    var alertContainer = document.getElementById('alert-container');
     function show_alert(message, type) {
-        const wrapper = document.createElement('div')
-        wrapper.innerHTML = [
-          `<div class="alert alert-${type} alert-dismissible" role="alert">`,
-          `   <div>${message}</div>`,
-          '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-          '</div>'
-        ].join('')
-      
-        alertContainer.append(wrapper)
+        var wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible" role="alert">
+                <div>${message}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+        alertContainer.appendChild(wrapper);
     }
 
     function url_prefix() {
-        var url_prefix = $('#url_prefix').val();
-        if (url_prefix) {
-            url_prefix = url_prefix.replace(/\/+$/, '');
-            if (url_prefix.startsWith('/')) {
-                return url_prefix;
+        var prefix = $('#url_prefix').val();
+        if (prefix) {
+            prefix = prefix.replace(/\/+$/, '');
+            if (prefix.startsWith('/')) {
+                return prefix;
             } else {
-                return '/' + url_prefix;
+                return '/' + prefix;
             }
         }
         return '';
@@ -229,9 +227,6 @@ var flower = (function () {
             },
             success: function (data) {
                 show_alert(data.message, "success");
-                setTimeout(function () {
-                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
-                }, 10000);
             },
             error: function (data) {
                 show_alert(data.responseText, "danger");
@@ -260,9 +255,6 @@ var flower = (function () {
             },
             success: function (data) {
                 show_alert(data.message, "success");
-                setTimeout(function () {
-                    $('#tab-queues').load('/worker/' + workername + ' #tab-queues').fadeIn('show');
-                }, 10000);
             },
             error: function (data) {
                 show_alert(data.responseText, "danger");
