@@ -50,9 +50,9 @@ define("keyfile", type=str, default=None,
 define("xheaders", type=bool, default=False,
        help="enable support for the 'X-Real-Ip' and 'X-Scheme' headers.")
 define("auto_refresh", default=True,
-       help="refresh dashboards", type=bool)
+       help="refresh workerss", type=bool)
 define("purge_offline_workers", default=None, type=int,
-       help="time (in seconds) after which offline workers are purged from dashboard")
+       help="time (in seconds) after which offline workers are purged from workers")
 define("cookie_secret", type=str, default=token_urlsafe(64),
        help="secure cookie secret")
 define("conf", default=DEFAULT_CONFIG_FILE,
