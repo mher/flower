@@ -1,10 +1,12 @@
 Flower
 ======
 
-.. image:: https://img.shields.io/pypi/dm/flower
-   :alt: PyPI - Downloads
-.. image:: https://img.shields.io/docker/pulls/mher/flower
-   :alt: Docker Pulls
+.. image:: https://img.shields.io/pypi/dm/flower.svg
+    :target: https://pypi.org/project/flower
+    :alt: PyPI - Downloads
+.. image:: https://img.shields.io/docker/pulls/mher/flower.svg
+    :target: https://hub.docker.com/r/mher/flower
+    :alt: Docker Pulls
 .. image:: https://github.com/mher/flower/workflows/Build/badge.svg
     :target: https://github.com/mher/flower/actions
 .. image:: https://img.shields.io/pypi/v/flower.svg
