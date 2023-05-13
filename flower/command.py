@@ -3,6 +3,7 @@ import sys
 import atexit
 import signal
 import logging
+import distutils
 
 from pprint import pformat
 
@@ -69,7 +70,11 @@ def apply_env_options():
         if option.multiple:
             value = [option.type(i) for i in value.split(',')]
         else:
-            value = option.type(value)
+            if option.type is bool:
+                value = bool(distutils.util.strtobool(value))
+            else:
+                value = option.type(value)
+        print(name, type(value), value)
         setattr(options, name, value)
 
 
