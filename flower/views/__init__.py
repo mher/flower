@@ -5,12 +5,11 @@ import copy
 import logging
 import hmac
 
-from distutils.util import strtobool
 from base64 import b64decode
 
 import tornado
 
-from ..utils import template, bugreport, prepend_url
+from ..utils import template, bugreport, strtobool
 
 logger = logging.getLogger(__name__)
 
