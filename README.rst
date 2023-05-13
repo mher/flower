@@ -2,7 +2,7 @@ Flower
 ======
 
 .. image:: https://img.shields.io/pypi/dm/flower.svg
-    :target: https://pypi.org/project/flower
+    :target: https://pypistats.org/packages/flower
     :alt: PyPI - Downloads
 .. image:: https://img.shields.io/docker/pulls/mher/flower.svg
     :target: https://hub.docker.com/r/mher/flower
