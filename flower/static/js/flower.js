@@ -296,11 +296,6 @@ var flower = (function () {
 
             taskname = taskname.split(' ')[0]; // removes [rate_limit=xxx]
 
-            if (!Number.isInteger(ratelimit)) {
-                show_alert("Invalid rate limit value", "danger");
-                return;
-            }
-
             $.ajax({
                 type: 'POST',
                 url: url_prefix() + '/api/task/rate-limit/' + taskname,
