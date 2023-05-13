@@ -141,7 +141,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         access_token = user['access_token']
 
         response = await self.get_auth_http_client().fetch(
-            f'https://api.{self._OAUTH_DOMAIN}/user/emails'
+            f'https://api.{self._OAUTH_DOMAIN}/user/emails',
             headers={'Authorization': 'token ' + access_token,
                      'User-agent': 'Tornado auth'})
 
