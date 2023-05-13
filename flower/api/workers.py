@@ -155,6 +155,14 @@ List workers
         status = self.get_argument('status', default=False, type=bool)
         workername = self.get_argument('workername', default=None)
 
+        if refresh:
+            try:
+                await asyncio.wait(self.application.update_workers(workername=workername))
+            except Exception as e:
+                msg = "Failed to update workers: %s" % e
+                logger.error(msg)
+                raise web.HTTPError(503, msg)
+
         if status:
             info = {}
             for name, worker in self.application.events.state.workers.items():
@@ -166,14 +174,6 @@ List workers
                 workername in self.application.workers:
             self.write({workername: self.application.workers[workername]})
             return
-
-        if refresh:
-            try:
-                await asyncio.wait(self.application.update_workers(workername=workername))
-            except Exception as e:
-                msg = "Failed to update workers: %s" % e
-                logger.error(msg)
-                raise web.HTTPError(503, msg)
 
         if workername and not self.is_worker(workername):
             raise web.HTTPError(404, "Unknown worker '%s'" % workername)
