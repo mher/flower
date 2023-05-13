@@ -134,7 +134,7 @@ class TestConfOption(AsyncHTTPTestCase):
             return int(subprocess.check_output(
                 'grep "%s" %s|wc -l' % (patter, filename), shell=True))
 
-        defined = grep('^define(', 'flower/options.py') - 4
+        defined = grep('^define(', 'flower/options.py') - 3
         documented = grep('^~~', 'docs/config.rst')
         self.assertEqual(defined, documented,
                          msg='Missing option documentation. Make sure all options '
