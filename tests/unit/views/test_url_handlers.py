@@ -4,8 +4,8 @@ from tornado.web import url
 
 
 class UrlsTests(AsyncHTTPTestCase):
-    def test_dashboard_url(self):
-        r = self.get('/dashboard')
+    def test_workers_url(self):
+        r = self.get('/workers')
         self.assertEqual(200, r.code)
 
     def test_root_url(self):
@@ -23,7 +23,7 @@ class URLPrefixTests(AsyncHTTPTestCase):
             super(URLPrefixTests, self).setUp()
 
     def test_tuple_handler_rewrite(self):
-        r = self.get('/test_root/dashboard')
+        r = self.get('/test_root/workers')
         self.assertEqual(200, r.code)
 
     def test_root_url(self):
@@ -35,7 +35,7 @@ class URLPrefixTests(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
 
     def test_base_url_no_longer_working(self):
-        r = self.get('/dashboard')
+        r = self.get('/workers')
         self.assertNotEqual(200, r.code)
 
 

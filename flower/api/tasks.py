@@ -4,7 +4,6 @@ import logging
 from datetime import datetime
 
 from tornado import web
-from tornado import gen
 from tornado.ioloop import IOLoop
 from tornado.escape import json_decode
 from tornado.web import HTTPError
@@ -15,7 +14,7 @@ from celery.contrib.abortable import AbortableAsyncResult
 from celery.backends.base import DisabledBackend
 
 from ..utils import tasks
-from ..views import BaseHandler
+from . import BaseApiHandler
 from ..utils.broker import Broker
 from ..api.control import ControlHandler
 from collections import OrderedDict
@@ -24,7 +23,7 @@ from collections import OrderedDict
 logger = logging.getLogger(__name__)
 
 
-class BaseTaskHandler(BaseHandler):
+class BaseTaskHandler(BaseApiHandler):
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
     def get_task_args(self):
@@ -85,8 +84,7 @@ class BaseTaskHandler(BaseHandler):
 
 class TaskApply(BaseTaskHandler):
     @web.authenticated
-    @gen.coroutine
-    def post(self, taskname):
+    async def post(self, taskname):
         """
 Execute a task by name and wait results
 
@@ -143,7 +141,7 @@ Execute a task by name and wait results
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
 
-        response = yield IOLoop.current().run_in_executor(
+        response = await IOLoop.current().run_in_executor(
             None, self.wait_results, result, response)
         self.write(response)
 
@@ -366,8 +364,7 @@ Abort a running task
 
 class GetQueueLengths(BaseTaskHandler):
     @web.authenticated
-    @gen.coroutine
-    def get(self):
+    async def get(self):
         """
 Return length of all active queues
 
@@ -418,7 +415,7 @@ Return length of all active queues
             queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
                 set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
 
-        queues = yield broker.queues(sorted(queue_names))
+        queues = await broker.queues(sorted(queue_names))
         self.write({'active_queues': queues})
 
 

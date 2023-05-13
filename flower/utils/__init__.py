@@ -20,7 +20,7 @@ def bugreport(app=None):
         return 'flower   -> flower:%s tornado:%s humanize:%s%s' % (
             __version__,
             tornado.version,
-            humanize.__version__,
+            getattr(humanize, '__version__', None) or getattr(humanize, 'VERSION'),
             app.bugreport()
         )
     except (ImportError, AttributeError) as e:

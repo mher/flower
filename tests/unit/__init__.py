@@ -1,12 +1,11 @@
+from unittest.mock import patch
 from urllib.parse import urlencode
 
 import tornado.testing
 from tornado.options import options
-
-from tornado.concurrent import Future
+from tornado.ioloop import IOLoop
 
 import celery
-import mock
 
 from flower.app import Flower
 from flower.urls import handlers
@@ -23,7 +22,7 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
     def get_app(self, capp=None):
         if not capp:
             capp = self._get_celery_app()
-        events = Events(capp)
+        events = Events(capp, IOLoop.current())
         app = Flower(capp=capp, events=events,
                      options=options, handlers=handlers, **settings)
         return app
@@ -37,4 +36,4 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
         return self.fetch(url, method='POST', **kwargs)
 
     def mock_option(self, name, value):
-        return mock.patch.object(options.mockable(), name, value)
+        return patch.object(options.mockable(), name, value)

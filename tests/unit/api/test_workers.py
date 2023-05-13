@@ -1,8 +1,6 @@
 import json
+from unittest import mock
 
-import mock
-
-from flower.api.control import ControlHandler
 from flower.inspector import Inspector
 
 from tests.unit import AsyncHTTPTestCase

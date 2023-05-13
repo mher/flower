@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{% module Template("navbar.html", active_tab="workers")%}
+{% end %}
+
+{% block container %}
+<div class="container-fluid mt-3">
+  <figure class="table-responsive">
+    <table id="workers-table" class="table table-bordered table-striped table-hover w-100">
+      <thead>
+        <tr>
+          <th>Worker</th>
+          <th class="text-center">Status</th>
+          <th class="text-center">Active</th>
+          <th class="text-center">Processed</th>
+          <th class="text-center">Failed</th>
+          <th class="text-center">Succeeded</th>
+          <th class="text-center">Retried</th>
+          <th class="text-center">Load Average</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name, info in workers.items() %}
+        <tr id="{{ url_escape(name) }}">
+          <td>{{ name }}</td>
+          <td>{{ info.get('status', None) }}</td>
+          <td>{{ info.get('active', 0) or 0 }}</td>
+          <td>{{ info.get('task-received', 0) }}</td>
+          <td>{{ info.get('task-failed', 0) }}</td>
+          <td>{{ info.get('task-succeeded', 0) }}</td>
+          <td>{{ info.get('task-retried', 0) }}</td>
+          <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
+        </tr>
+        {% end %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th>Total</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+      </tfoot>
+    </table>
+  </figure>
+</div>
+{% end %}
+
+{% block extra_scripts %}
+<script type="text/javascript">
+  var autorefresh = {{ autorefresh }};
+</script>
+{% end %}

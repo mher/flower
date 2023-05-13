@@ -2,7 +2,6 @@ import os
 
 from tornado.web import StaticFileHandler, url
 
-from .api import events
 from .api import control
 from .api import tasks
 from .api import workers
@@ -12,7 +11,7 @@ from .views.broker import BrokerView
 from .views.workers import WorkerView
 from .views.tasks import TaskView, TasksView, TasksDataTable
 from .views.error import NotFoundErrorHandler
-from .views.dashboard import DashboardView
+from .views.workers import WorkersView
 from .utils import gen_cookie_secret
 
 
@@ -27,8 +26,8 @@ settings = dict(
 
 handlers = [
     # App
-    url(r"/", DashboardView, name='main'),
-    url(r"/dashboard", DashboardView, name='dashboard'),
+    url(r"/", WorkersView, name='main'),
+    url(r"/workers", WorkersView, name='workers'),
     url(r"/worker/(.+)", WorkerView, name='worker'),
     url(r"/task/(.+)", TaskView, name='task'),
     url(r"/tasks", TasksView, name='tasks'),
@@ -57,15 +56,6 @@ handlers = [
     (r"/api/task/timeout/(.+)", control.TaskTimout),
     (r"/api/task/rate-limit/(.+)", control.TaskRateLimit),
     (r"/api/task/revoke/(.+)", control.TaskRevoke),
-    # Events WebSocket API
-    (r"/api/task/events/task-sent/(.*)", events.TaskSent),
-    (r"/api/task/events/task-received/(.*)", events.TaskReceived),
-    (r"/api/task/events/task-started/(.*)", events.TaskStarted),
-    (r"/api/task/events/task-succeeded/(.*)", events.TaskSucceeded),
-    (r"/api/task/events/task-failed/(.*)", events.TaskFailed),
-    (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
-    (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
-    (r"/api/task/events/task-custom/(.*)", events.TaskCustom),
     # Metrics
     (r"/metrics", monitor.Metrics),
     (r"/healthcheck", monitor.Healthcheck),
