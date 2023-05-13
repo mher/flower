@@ -75,7 +75,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 credentials = b64decode(credentials.encode()).decode()
                 if basic != 'Basic':
                     raise tornado.web.HTTPError(401)
-                for stored_credential in basic_auth.split(','):
+                for stored_credential in basic_auth:
                     if hmac.compare_digest(stored_credential, credentials):
                         break
                 else:
