@@ -177,4 +177,4 @@ class ControlAuthTests(WorkerControlTests):
             app = self._app.capp
             app.control.broadcast = MagicMock()
             r = self.post('/api/worker/shutdown/test', body={})
-            self.assertEqual(405, r.code)
+            self.assertEqual(401, r.code)
