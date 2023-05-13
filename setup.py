@@ -54,6 +54,7 @@ setup(
     url='https://github.com/mher/flower',
     license='BSD',
     classifiers=classifiers,
+    python_requires=">=3.6",
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=get_requirements('default.txt'),
     test_suite="tests",
