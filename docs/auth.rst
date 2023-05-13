@@ -100,6 +100,9 @@ environment variables. ::
 
 .. _gitlab-oauth:
 
+**NOTE:** If you need a custom GitHub Domain, please export it using environment variable:
+`export FLOWER_GITHUB_OAUTH_DOMAIN=github.foobar.com`
+
 GitLab OAuth
 ------------
 
@@ -128,3 +131,6 @@ See `Group and project members API`_ for details.
 
 .. _GitLab OAuth2 API: https://docs.gitlab.com/ee/api/oauth2.html
 .. _Group and project members API: https://docs.gitlab.com/ee/api/members.html
+
+**NOTE:** If you need a custom GitHub Domain, please export it using environment variable:
+`export FLOWER_GITLAB_OAUTH_DOMAIN=gitlab.foobar.com`
