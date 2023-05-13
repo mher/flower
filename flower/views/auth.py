@@ -12,6 +12,7 @@ from tornado.options import options
 from celery.utils.imports import instantiate
 
 from ..views import BaseHandler
+from ..views.error import NotFoundErrorHandler
 
 
 def authenticate(pattern, email):
@@ -85,7 +86,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
 class LoginHandler(BaseHandler):
     def __new__(cls, *args, **kwargs):
-        return instantiate(options.auth_provider, *args, **kwargs)
+        return instantiate(options.auth_provider or NotFoundErrorHandler, *args, **kwargs)
 
 
 class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):

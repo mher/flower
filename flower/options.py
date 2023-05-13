@@ -66,8 +66,7 @@ define("natural_time", type=bool, default=False,
 define("tasks_columns", type=str,
        default="name,uuid,state,args,kwargs,result,received,started,runtime,worker",
        help="slugs of columns on /tasks/ page, delimited by comma")
-define("auth_provider", default='flower.views.auth.GoogleAuth2LoginHandler',
-       help="auth handler class")
+define("auth_provider", default=None, type=str, help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
 define("task_runtime_metric_buckets", type=float, default=Histogram.DEFAULT_BUCKETS,
        multiple=True, help="histogram latency bucket value")
