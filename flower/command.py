@@ -16,7 +16,7 @@ from celery.bin.base import CeleryCommand
 
 from .app import Flower
 from .urls import settings
-from .utils import abs_path, prepend_url
+from .utils import abs_path, prepend_url, strtobool
 from .options import DEFAULT_CONFIG_FILE, default_options
 from .views.auth import validate_auth_option
 
@@ -69,7 +69,11 @@ def apply_env_options():
         if option.multiple:
             value = [option.type(i) for i in value.split(',')]
         else:
-            value = option.type(value)
+            if option.type is bool:
+                value = bool(strtobool(value))
+            else:
+                value = option.type(value)
+        print(name, type(value), value)
         setattr(options, name, value)
 
 
@@ -161,7 +165,7 @@ def print_banner(app, ssl):
 
         logger.info(
             "Visit me at http%s://%s:%s%s", 's' if ssl else '',
-            options.address or 'localhost', options.port,
+            options.address or '0.0.0.0', options.port,
             prefix_str
         )
     else:

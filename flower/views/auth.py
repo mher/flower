@@ -12,6 +12,7 @@ from tornado.options import options
 from celery.utils.imports import instantiate
 
 from ..views import BaseHandler
+from ..views.error import NotFoundErrorHandler
 
 
 def authenticate(pattern, email):
@@ -85,13 +86,15 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
 
 class LoginHandler(BaseHandler):
     def __new__(cls, *args, **kwargs):
-        return instantiate(options.auth_provider, *args, **kwargs)
+        return instantiate(options.auth_provider or NotFoundErrorHandler, *args, **kwargs)
 
 
 class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
-    _OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
-    _OAUTH_ACCESS_TOKEN_URL = "https://github.com/login/oauth/access_token"
+    _OAUTH_DOMAIN = os.getenv(
+        "FLOWER_GITLAB_OAUTH_DOMAIN", "github.com")
+    _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/authorize'
+    _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/access_token'
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
 
@@ -139,7 +142,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         access_token = user['access_token']
 
         response = await self.get_auth_http_client().fetch(
-            'https://api.github.com/user/emails',
+            f'https://api.{self._OAUTH_DOMAIN}/user/emails',
             headers={'Authorization': 'token ' + access_token,
                      'User-agent': 'Tornado auth'})
 
@@ -163,8 +166,10 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
 class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
-    _OAUTH_AUTHORIZE_URL = 'https://gitlab.com/oauth/authorize'
-    _OAUTH_ACCESS_TOKEN_URL = 'https://gitlab.com/oauth/token'
+    _OAUTH_GITLAB_DOMAIN = os.getenv(
+        "FLOWER_GITLAB_AUTH_DOMAIN", "gitlab.com")
+    _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_GITLAB_DOMAIN}/oauth/authorize'
+    _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_GITLAB_DOMAIN}/oauth/token'
     _OAUTH_NO_CALLBACKS = False
 
     async def get_authenticated_user(self, redirect_uri, code):
@@ -213,7 +218,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         # Check user email address against regexp
         try:
             response = await self.get_auth_http_client().fetch(
-                'https://gitlab.com/api/v4/user',
+                f'https://{self._OAUTH_GITLAB_DOMAIN}/api/v4/user',
                 headers={'Authorization': 'Bearer ' + access_token,
                          'User-agent': 'Tornado auth'}
             )
@@ -228,7 +233,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         if allowed_groups:
             min_access_level = os.environ.get('FLOWER_GITLAB_MIN_ACCESS_LEVEL', '20')
             response = await self.get_auth_http_client().fetch(
-                'https://gitlab.com/api/v4/groups?min_access_level=%s' % (min_access_level,),
+                f'https://{self._OAUTH_GITLAB_DOMAIN}/api/v4/groups?min_access_level={min_access_level}',
                 headers={
                     'Authorization': 'Bearer ' + access_token,
                     'User-agent': 'Tornado auth'
