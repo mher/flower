@@ -415,7 +415,8 @@ Return length of all active queues
         queue_names = self.get_active_queue_names()
 
         if not queue_names:
-            queue_names = set(self.capp.amqp.queues)
+            queue_names = set([self.capp.conf.task_default_queue]) |\
+                set([q.name for q in self.capp.conf.task_queues or [] if q.name])
 
         queues = yield broker.queues(sorted(queue_names))
         self.write({'active_queues': queues})
