@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 class BrokerView(BaseHandler):
     @web.authenticated
-    @gen.coroutine
-    def get(self):
+    async def get(self):
         app = self.application
         broker_options = self.capp.conf.BROKER_TRANSPORT_OPTIONS
 
@@ -40,7 +39,7 @@ class BrokerView(BaseHandler):
                 queue_names = set([self.capp.conf.CELERY_DEFAULT_QUEUE]) |\
                         set([q.name for q in self.capp.conf.CELERY_QUEUES or [] if q.name])
 
-            queues = yield broker.queues(sorted(queue_names))
+            queues = await broker.queues(sorted(queue_names))
         except Exception as e:
             logger.error("Unable to get queues: '%s'", e)
 
