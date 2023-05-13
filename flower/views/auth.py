@@ -37,17 +37,16 @@ def validate_auth_option(pattern):
 class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
     _OAUTH_SETTINGS_KEY = 'oauth'
 
-    @tornado.gen.coroutine
-    def get(self):
+    async def get(self):
         redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
         if self.get_argument('code', False):
-            user = yield self.get_authenticated_user(
+            user = await self.get_authenticated_user(
                 redirect_uri=redirect_uri,
                 code=self.get_argument('code'),
             )
-            yield self._on_auth(user)
+            await self._on_auth(user)
         else:
-            yield self.authorize_redirect(
+            await self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['profile', 'email'],
@@ -55,14 +54,13 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
                 extra_params={'approval_prompt': ''}
             )
 
-    @tornado.gen.coroutine
-    def _on_auth(self, user):
+    async def _on_auth(self, user):
         if not user:
             raise tornado.web.HTTPError(403, 'Google auth failed')
         access_token = user['access_token']
 
         try:
-            response = yield self.get_auth_http_client().fetch(
+            response = await self.get_auth_http_client().fetch(
                 'https://www.googleapis.com/userinfo/v2/me',
                 headers={'Authorization': 'Bearer %s' % access_token})
         except Exception as e:
@@ -99,8 +97,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
 
-    @tornado.gen.coroutine
-    def get_authenticated_user(self, redirect_uri, code):
+    async def get_authenticated_user(self, redirect_uri, code):
         body = urlencode({
             "redirect_uri": redirect_uri,
             "code": code,
@@ -109,7 +106,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             "grant_type": "authorization_code",
         })
 
-        response = yield self.get_auth_http_client().fetch(
+        response = await self.get_auth_http_client().fetch(
             self._OAUTH_ACCESS_TOKEN_URL,
             method="POST",
             headers={'Content-Type': 'application/x-www-form-urlencoded',
@@ -119,19 +116,18 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             raise tornado.auth.AuthError(
                 'OAuth authenticator error: %s' % str(response))
 
-        raise tornado.gen.Return(json.loads(response.body.decode('utf-8')))
+        return json.loads(response.body.decode('utf-8'))
 
-    @tornado.gen.coroutine
-    def get(self):
+    async def get(self):
         redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
         if self.get_argument('code', False):
-            user = yield self.get_authenticated_user(
+            user = await self.get_authenticated_user(
                 redirect_uri=redirect_uri,
                 code=self.get_argument('code'),
             )
-            yield self._on_auth(user)
+            await self._on_auth(user)
         else:
-            yield self.authorize_redirect(
+            await self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['user:email'],
@@ -139,14 +135,13 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 extra_params={'approval_prompt': ''}
             )
 
-    @tornado.gen.coroutine
-    def _on_auth(self, user):
+    async def _on_auth(self, user):
         if not user:
             raise tornado.web.HTTPError(500, 'OAuth authentication failed')
         access_token = user['access_token']
 
-        response = yield self.get_auth_http_client().fetch(
-            f'https://api.{self._OAUTH_DOMAIN}/user/emails',
+        response = await self.get_auth_http_client().fetch(
+            f'https://api.{self._OAUTH_DOMAIN}/user/emails'
             headers={'Authorization': 'token ' + access_token,
                      'User-agent': 'Tornado auth'})
 
@@ -176,8 +171,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_GITLAB_DOMAIN}/oauth/token'
     _OAUTH_NO_CALLBACKS = False
 
-    @tornado.gen.coroutine
-    def get_authenticated_user(self, redirect_uri, code):
+    async def get_authenticated_user(self, redirect_uri, code):
         body = urlencode({
             'redirect_uri': redirect_uri,
             'code': code,
@@ -185,7 +179,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             'client_secret': self.settings['oauth']['secret'],
             'grant_type': 'authorization_code',
         })
-        response = yield self.get_auth_http_client().fetch(
+        response = await self.get_auth_http_client().fetch(
             self._OAUTH_ACCESS_TOKEN_URL,
             method='POST',
             headers={'Content-Type': 'application/x-www-form-urlencoded',
@@ -194,19 +188,18 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         )
         if response.error:
             raise tornado.auth.AuthError('OAuth authenticator error: %s' % str(response))
-        raise tornado.gen.Return(json.loads(response.body.decode('utf-8')))
+        return json.loads(response.body.decode('utf-8'))
 
-    @tornado.gen.coroutine
-    def get(self):
+    async def get(self):
         redirect_uri = self.settings['oauth']['redirect_uri']
         if self.get_argument('code', False):
-            user = yield self.get_authenticated_user(
+            user = await self.get_authenticated_user(
                 redirect_uri=redirect_uri,
                 code=self.get_argument('code'),
             )
-            yield self._on_auth(user)
+            await self._on_auth(user)
         else:
-            yield self.authorize_redirect(
+            await self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings['oauth']['key'],
                 scope=['read_api'],
@@ -214,8 +207,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 extra_params={'approval_prompt': ''},
             )
 
-    @tornado.gen.coroutine
-    def _on_auth(self, user):
+    async def _on_auth(self, user):
         if not user:
             raise tornado.web.HTTPError(500, 'OAuth authentication failed')
         access_token = user['access_token']
@@ -224,7 +216,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
         # Check user email address against regexp
         try:
-            response = yield self.get_auth_http_client().fetch(
+            response = await self.get_auth_http_client().fetch(
                 f'https://{self._OAUTH_GITLAB_DOMAIN}/api/v4/user',
                 headers={'Authorization': 'Bearer ' + access_token,
                          'User-agent': 'Tornado auth'}
@@ -239,7 +231,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         matching_groups = []
         if allowed_groups:
             min_access_level = os.environ.get('FLOWER_GITLAB_MIN_ACCESS_LEVEL', '20')
-            response = yield self.get_auth_http_client().fetch(
+            response = await self.get_auth_http_client().fetch(
                 f'https://{self._OAUTH_GITLAB_DOMAIN}/api/v4/groups?min_access_level={min_access_level}',
                 headers={
                     'Authorization': 'Bearer ' + access_token,
@@ -283,8 +275,7 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     def _OAUTH_USER_INFO_URL(self):
         return "{}/v1/userinfo".format(self.base_url)
 
-    @tornado.gen.coroutine
-    def get_access_token(self, redirect_uri, code):
+    async def get_access_token(self, redirect_uri, code):
         body = urlencode({
             "redirect_uri": redirect_uri,
             "code": code,
@@ -293,7 +284,7 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             "grant_type": "authorization_code",
         })
 
-        response = yield self.get_auth_http_client().fetch(
+        response = await self.get_auth_http_client().fetch(
             self._OAUTH_ACCESS_TOKEN_URL,
             method="POST",
             headers={'Content-Type': 'application/x-www-form-urlencoded',
@@ -303,10 +294,9 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             raise tornado.auth.AuthError(
                 'OAuth authenticator error: %s' % str(response))
 
-        raise tornado.gen.Return(json.loads(response.body.decode('utf-8')))
+        return json.loads(response.body.decode('utf-8'))
 
-    @tornado.gen.coroutine
-    def get(self):
+    async def get(self):
         redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
         if self.get_argument('code', False):
             expected_state = (self.get_secure_cookie('oauth_state') or b'').decode('utf-8')
@@ -316,15 +306,15 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 raise tornado.auth.AuthError(
                     'OAuth authenticator error: State tokens do not match')
 
-            access_token_response = yield self.get_access_token(
+            access_token_response = await self.get_access_token(
                 redirect_uri=redirect_uri,
                 code=self.get_argument('code'),
             )
-            yield self._on_auth(access_token_response)
+            await self._on_auth(access_token_response)
         else:
             state = str(uuid.uuid4())
             self.set_secure_cookie("oauth_state", state)
-            yield self.authorize_redirect(
+            await self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['openid email'],
@@ -332,13 +322,12 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 extra_params={'state': state}
             )
 
-    @tornado.gen.coroutine
-    def _on_auth(self, access_token_response):
+    async def _on_auth(self, access_token_response):
         if not access_token_response:
             raise tornado.web.HTTPError(500, 'OAuth authentication failed')
         access_token = access_token_response['access_token']
 
-        response = yield self.get_auth_http_client().fetch(
+        response = await self.get_auth_http_client().fetch(
             self._OAUTH_USER_INFO_URL,
             headers={'Authorization': 'Bearer ' + access_token,
                      'User-agent': 'Tornado auth'})

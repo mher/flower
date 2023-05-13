@@ -1,7 +1,7 @@
 import logging
+import asyncio
 
 from tornado import web
-from tornado import gen
 
 from .control import ControlHandler
 
@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ListWorkers(ControlHandler):
     @web.authenticated
-    @gen.coroutine
-    def get(self):
+    async def get(self):
         """
 List workers
 
@@ -170,7 +169,7 @@ List workers
 
         if refresh:
             try:
-                yield self.application.update_workers(workername=workername)
+                await asyncio.wait(self.application.update_workers(workername=workername))
             except Exception as e:
                 msg = "Failed to update workers: %s" % e
                 logger.error(msg)

@@ -74,7 +74,7 @@ For more info see :ref:`authentication`.
 auto_refresh
 ~~~~~~~~~~~~
 
-Refresh dashboards automatically (by default, `auto_refresh=True`)
+Refresh workers automatically (by default, `auto_refresh=True`)
 
 .. _basic_auth:
 

@@ -8,8 +8,8 @@ from celery import Celery
 app = Celery("tasks",
              broker=os.environ.get('CELERY_BROKER_URL', 'redis://'),
              backend=os.environ.get('CELERY_RESULT_BACKEND', 'redis'))
-app.conf.CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
-app.conf.CELERY_WORKER_SEND_TASK_EVENTS = True
+app.conf.accept_content = ['pickle', 'json', 'msgpack', 'yaml']
+app.conf.worker_send_task_events = True
 
 
 @app.task

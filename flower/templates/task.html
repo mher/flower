@@ -5,24 +5,23 @@
 {% end %}
 
 {% block container %}
-  <div id='task-page' class="container-fluid">
+  <div id='task-page' class="container-fluid mt-3">
     <div class="row-fluid">
-      <div class="span12">
+      <div class="col-lg-12">
         <div class="page-header">
-          <p id="taskid" class="hidden">{{ task.uuid }}</p>
+          <p id="taskid" class="d-none">{{ task.uuid }}</p>
           <h2>{{ getattr(task, 'name', None) }}
-            <small>{{ task.uuid }}</small>
+            <small class="text-muted fs-5">{{ task.uuid }}</small>
             {% if task.state == "STARTED" %}
-                <button style="float: right" class="btn btn-danger" onclick="flower.on_task_terminate(event)">Terminate</button>
+                <button class="btn btn-danger float-end" id="task-terminate">Terminate</button>
             {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
-                <button  style="float: right" class="btn btn-danger" onclick="flower.on_task_revoke(event)">Revoke</button>
+                <button class="btn btn-danger float-end" id="task-revoke">Revoke</button>
             {% end %}
           </h2>
         </div>
         <div class="row-fluid">
-          <div class="span6">
+          <div class="col-lg-6">
             <table class="table table-bordered table-striped">
-              <caption>Basic task options</caption>
               <tbody>
               <tr>
                 <td>Name</td>
@@ -36,11 +35,11 @@
                 <td>State</td>
                 <td>
                   {% if task.state == "SUCCESS" %}
-                  <span class="label label-success">{{ task.state }}</span>
+                  <span class="badge bg-success">{{ task.state }}</span>
                   {% elif task.state == "FAILURE" %}
-                  <span class="label label-important">{{ task.state }}</span>
+                  <span class="badge bg-danger">{{ task.state }}</span>
                   {% else %}
-                  <span class="label label-default">{{ task.state }}</span>
+                  <span class="badge bg-secondary">{{ task.state }}</span>
                   {% end %}
                 </td>
               </tr>
@@ -56,14 +55,6 @@
                 <td>Result</td>
                 <td>{{ getattr(task, 'result', '') }}</td>
               </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="span6">
-            <table class="table table-bordered table-striped">
-              <caption>Advanced task options</caption>
-              <tbody>
               {% for name in task._fields %}
                 {% if name not in ['name', 'uuid', 'state', 'args', 'kwargs', 'result'] and getattr(task, name, None) is not None %}
                 <tr>

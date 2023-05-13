@@ -2,7 +2,7 @@
 
 {% block container %}
     {% if debug %}
-    <div class="span12">
+    <div class="col-12">
         <p>It looks like you have found a bug! You can help to improve
         Flower by opening an issue in <a href="https://github.com/mher/flower/issues">https://github.com/mher/flower/issues</a>
         </p>
@@ -13,7 +13,7 @@
         </pre>
     </div>
     {% else %}
-    <div class="span12">
+    <div class="col-12">
         Error {{ status_code }}
     </div>
     {% end %}
