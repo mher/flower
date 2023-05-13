@@ -161,7 +161,7 @@ def print_banner(app, ssl):
 
         logger.info(
             "Visit me at http%s://%s:%s%s", 's' if ssl else '',
-            options.address or 'localhost', options.port,
+            options.address or '0.0.0.0', options.port,
             prefix_str
         )
     else:
