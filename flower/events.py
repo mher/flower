@@ -122,13 +122,13 @@ class EventsState(State):
 class Events(threading.Thread):
     events_enable_interval = 5000
 
-    def __init__(self, capp, db=None, persistent=False,
-                 enable_events=True, io_loop=None, state_save_interval=0,
+    def __init__(self, capp, io_loop, db=None, persistent=False,
+                 enable_events=True, state_save_interval=0,
                  **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
 
-        self.io_loop = io_loop or IOLoop.instance()
+        self.io_loop = io_loop
         self.capp = capp
 
         self.db = db

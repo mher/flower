@@ -2,7 +2,6 @@ import time
 import logging
 
 from tornado import web
-from tornado import gen
 
 from ..views import BaseHandler
 from ..api.workers import ListWorkers
@@ -13,8 +12,7 @@ logger = logging.getLogger(__name__)
 
 class WorkerView(BaseHandler):
     @web.authenticated
-    @gen.coroutine
-    def get(self, name):
+    async def get(self, name):
         try:
             self.application.update_workers(workername=name)
         except Exception as e:
@@ -34,8 +32,7 @@ class WorkerView(BaseHandler):
 
 class WorkersView(BaseHandler):
     @web.authenticated
-    @gen.coroutine
-    def get(self):
+    async def get(self):
         refresh = self.get_argument('refresh', default=False, type=bool)
         json = self.get_argument('json', default=False, type=bool)
 

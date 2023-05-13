@@ -1,7 +1,5 @@
 import sys
-import time
 import logging
-import collections
 
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
@@ -14,7 +12,6 @@ from tornado.concurrent import run_on_executor
 from tornado.httpserver import HTTPServer
 from tornado.web import url
 
-from .api import control
 from .urls import handlers as default_handlers
 from .events import Events
 from .inspector import Inspector
