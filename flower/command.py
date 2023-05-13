@@ -3,7 +3,6 @@ import sys
 import atexit
 import signal
 import logging
-import distutils
 
 from pprint import pformat
 
@@ -17,7 +16,7 @@ from celery.bin.base import CeleryCommand
 
 from .app import Flower
 from .urls import settings
-from .utils import abs_path, prepend_url
+from .utils import abs_path, prepend_url, strtobool
 from .options import DEFAULT_CONFIG_FILE, default_options
 from .views.auth import validate_auth_option
 
@@ -71,7 +70,7 @@ def apply_env_options():
             value = [option.type(i) for i in value.split(',')]
         else:
             if option.type is bool:
-                value = bool(distutils.util.strtobool(value))
+                value = bool(strtobool(value))
             else:
                 value = option.type(value)
         print(name, type(value), value)
