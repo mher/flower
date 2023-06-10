@@ -201,7 +201,7 @@ conf
 
 Default: flowerconfig.py
 
-Sets  the configuration file to be used by Flower.
+Sets the configuration file to be used by Flower.
 
 Example::
 
