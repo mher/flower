@@ -199,13 +199,13 @@ If not specified, SSL/TLS encryption will not be used.
 conf
 ~~~~
 
-Default: flowerconfig
+Default: flowerconfig.py
 
-Sets the Python module name of the configuration file to be used by Flower.
+Sets  the configuration file to be used by Flower.
 
 Example::
 
-    $ celery flower --conf="myproject.config"
+    $ celery flower --conf="./examples/celeryconfig.py"
 
 .. _db:
 
