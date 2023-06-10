@@ -47,7 +47,7 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
             )
             await self._on_auth(user)
         else:
-            await self.authorize_redirect(
+            self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['profile', 'email'],
@@ -128,7 +128,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             )
             await self._on_auth(user)
         else:
-            await self.authorize_redirect(
+            self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['user:email'],
@@ -200,7 +200,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             )
             await self._on_auth(user)
         else:
-            await self.authorize_redirect(
+            self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings['oauth']['key'],
                 scope=['read_api'],
@@ -315,7 +315,7 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         else:
             state = str(uuid.uuid4())
             self.set_secure_cookie("oauth_state", state)
-            await self.authorize_redirect(
+            self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
                 scope=['openid email'],
