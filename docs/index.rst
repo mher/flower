@@ -1,31 +1,27 @@
-===============================
-Flower - Celery monitoring tool
-===============================
+======
+Flower
+======
 
-Flower is a web based tool for monitoring and administrating `Celery`_ clusters
+Flower is an open-source web application for monitoring and managing `Celery`_ clusters.
+It provides real-time information about the status of Celery workers and tasks.
 
 .. _Celery: https://docs.celeryq.dev/en/stable/#
-
-.. include:: features.rst
 
 Contents
 ========
 
 .. toctree::
-    :maxdepth: 2
 
    features
-   screenshots
    install
    config
    tasks_filter
-   api
    auth
    reverse-proxy
-   docker
    prometheus-integration
+   api
 
-Flower is Open Source and licensed under the `BSD License`_.
+Flower is licensed under BSD 3-Clause License.
+See the `License`_ file for the full license text.
 
-.. _`BSD License`: http://www.opensource.org/licenses/BSD-3-Clause
-
+.. _`License`: https://github.com/mher/flower/blob/master/LICENSE

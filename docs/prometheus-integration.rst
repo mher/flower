@@ -8,7 +8,7 @@ By default on your local machine Flower's metrics are available at: ``localhost:
 
 Read further for more information about configuration and available metrics please.
 
-Complete guide on integration of Celery, Flower, Prometheus and Grafana is here: `Celery -> Flower -> Prometheus -> Grafana Integration Guide`_.
+Complete guide on integration of Celery, Flower, Prometheus and Grafana is here: `Grafana Integration Guide`_.
 
 Configure Prometheus to scrape Flower metrics
 ---------------------------------------------
@@ -95,8 +95,8 @@ You can import it easily in Grafana.
 Hover over the + button in the side bar menu -> Import -> Upload JSON file.
 The dashboard should give you a nice starting point for monitoring of your celery cluster.
 
-Celery -> Flower -> Prometheus -> Grafana Integration Guide
-===========================================================
+Grafana Integration Guide
+=========================
 
 In this guide you will learn how to setup each part of the stack to make it talk to the next one and achieve Celery
 monitoring solution with help of Flower.

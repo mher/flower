@@ -12,19 +12,16 @@ Flower
 .. image:: https://img.shields.io/pypi/v/flower.svg
     :target: https://pypi.python.org/pypi/flower
 
-Flower is a web based tool for monitoring and administrating Celery clusters.
+Flower is an open-source web application for monitoring and managing Celery clusters.
+It provides real-time information about the status of Celery workers and tasks.
 
 Features
 --------
 
 - Real-time monitoring using Celery Events
-
-    - Task progress and history
-    - Ability to show task details (arguments, start time, runtime, and more)
-    - Graphs and statistics
-
+    - View task progress and history
+    - View task details (arguments, start time, runtime, and more)
 - Remote Control
-
     - View worker status and statistics
     - Shutdown and restart worker instances
     - Control worker pool size and autoscale settings
@@ -33,17 +30,12 @@ Features
     - View scheduled tasks (ETA/countdown)
     - View reserved and revoked tasks
     - Apply time and rate limits
-    - Configuration viewer
     - Revoke or terminate tasks
-
 - Broker monitoring
-
     - View statistics for all Celery queues
-    - Queue length graphs
-
-- HTTP API
-- Basic Auth, Google, Github, Gitlab and Okta OAuth
+- HTTP Basic Auth, Google, Github, Gitlab and Okta OAuth
 - Prometheus integration
+- API
 
 Installation
 ------------
@@ -52,61 +44,35 @@ Installing `flower` with `pip <http://www.pip-installer.org/>`_ is simple ::
 
     $ pip install flower
 
-Development version can be installed with ::
+The development version can be installed from Github ::
 
     $ pip install https://github.com/mher/flower/zipball/master#egg=flower
 
 Usage
 -----
 
-**Important** Please note that from version 1.0.1 Flower uses Celery 5 and has to be invoked in the same style as celery
-commands do.
+To run Flower, you need to provide the broker URL ::
 
-The key takeaway here is that the Celery app's arguments have to be specified after the `celery` command and Flower's
-arguments have to be specified after the `flower` sub-command.
+    $ celery --broker=amqp://guest:guest@localhost:5672// flower
 
-This is the template to follow::
+Or use the configuration of `celery application <https://docs.celeryq.dev/en/stable/userguide/application.html>`_  ::
 
-    celery [celery args] flower [flower args]
+    $ celery -A tasks.app flower
 
-Core Celery args that you may want to set::
+By default, flower runs on port 5555, which can be modified with the :ref:`port` option ::
 
-    -A, --app
-    -b, --broker
-    --result-backend
+    $ celery -A tasks.app flower --port=5001
 
-More info on available `Celery command args <https://docs.celeryq.dev/en/stable/reference/cli.html#celery>`_.
+You can also run Flower using the docker image ::
 
-For Flower command args `see here <https://flower.readthedocs.io/en/latest/config.html#options>`_.
+    $ docker run -v examples:/data -p 5555:5555 mher/flower celery --app=tasks.app flower
 
-Usage Examples
---------------
-
-Launch the Flower server at specified port other than default 5555 (open the UI at http://localhost:5566): ::
-
-    $ celery flower --port=5566
-
-Specify Celery application path with address and port for Flower: ::
-
-    $ celery -A proj flower --address=127.0.0.6 --port=5566
-
-Launch using docker: ::
-
-    $ docker run -p 5555:5555 mher/flower
-
-Launch with unix socket file: ::
-
-    $ celery flower --unix-socket=/tmp/flower.sock
-
-Broker URL and other configuration options can be passed through the standard Celery options (notice that they are after
-Celery command and before Flower sub-command): ::
-
-    $ celery -A proj --broker=amqp://guest:guest@localhost:5672// flower
+In this example, Flower is using the `tasks.app` defined in the `examples/tasks.py <https://github.com/mher/flower/blob/master/examples/tasks.py>`_ file
 
 API
 ---
 
-Flower API enables to manage the cluster via REST API.
+Flower API enables to manage the cluster via HTTP `REST API.
 
 For example you can restart worker's pool by: ::
 
@@ -120,21 +86,21 @@ Or terminate executing task by: ::
 
     $ curl -X POST -d 'terminate=True' http://localhost:5555/api/task/revoke/8a4da87b-e12b-4547-b89a-e92e4d1f8efd
 
-For more info checkout `API Reference`_ and `examples`_.
+For more info checkout `API Reference`_
 
 .. _API Reference: https://flower.readthedocs.io/en/latest/api.html
-.. _examples: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
 Documentation
 -------------
 
-Documentation is available at `Read the Docs`_ and `IPython Notebook Viewer`_
+Documentation is available at `Read the Docs`_
 
 .. _Read the Docs: https://flower.readthedocs.io
-.. _IPython Notebook Viewer: http://nbviewer.ipython.org/urls/raw.github.com/mher/flower/master/docs/api.ipynb
 
 License
 -------
 
-Flower is licensed under BSD 3-Clause License. See the LICENSE file
-in the top distribution directory for the full license text.
+Flower is licensed under BSD 3-Clause License.
+See the `License`_ file for the full license text.
+
+.. _`License`: https://github.com/mher/flower/blob/master/LICENSE
