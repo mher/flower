@@ -4,9 +4,6 @@ Tasks filtering
 By now, tasks can be filtered by worker, type, state, received and started datetime.
 Also, filtering by args/kwargs/result/state value available.
 
-Task filter syntax
-------------------
-
 Flower uses github-style syntax for args/kwargs/result filtering.
 
  - `foo` find all tasks containing foo in args, kwargs or result

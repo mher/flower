@@ -8,18 +8,18 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
-        celery-version: [5.0]
-        tornado-version: [5.0, 5.1, 6.0]
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        celery-version: ['5.0']
+        tornado-version: ['6.0']
         exclude:
-          - celery-version: 5.0
-            python-version: 3.9
+          - celery-version: '5.0'
+            python-version: '3.9'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
 

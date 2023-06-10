@@ -101,6 +101,12 @@ class TestRedis(unittest.TestCase):
         self.assertEqual('user', b.username)
         self.assertEqual('pass', b.password)
 
+    def test_ipv6(self):
+        b = Broker('redis://[::1]')
+        self.assertEqual('::1', b.host)
+        self.assertEqual(6379, b.port)
+        self.assertEqual(0, b.vhost)
+
 
 class TestRedisSentinel(unittest.TestCase):
     def test_init(self):

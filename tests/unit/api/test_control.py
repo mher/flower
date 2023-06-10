@@ -1,24 +1,25 @@
+import os
 from unittest.mock import MagicMock, patch
 from flower.api.control import ControlHandler
 
-from tests.unit import AsyncHTTPTestCase
 from tornado.options import options
+from . import BaseApiTestCase
 
 
-class UnknownWorkerControlTests(AsyncHTTPTestCase):
+class UnknownWorkerControlTests(BaseApiTestCase):
     def test_unknown_worker(self):
         r = self.post('/api/worker/shutdown/test', body={})
         self.assertEqual(404, r.code)
 
 
-class WorkerControlTests(AsyncHTTPTestCase):
+class WorkerControlTests(BaseApiTestCase):
     def setUp(self):
-        AsyncHTTPTestCase.setUp(self)
+        BaseApiTestCase.setUp(self)
         self.is_worker = ControlHandler.is_worker
         ControlHandler.is_worker = lambda *args: True
 
     def tearDown(self):
-        AsyncHTTPTestCase.tearDown(self)
+        BaseApiTestCase.tearDown(self)
         ControlHandler.is_worker = self.is_worker
 
     def test_shutdown(self):
@@ -141,7 +142,7 @@ class WorkerControlTests(AsyncHTTPTestCase):
             arguments={'queue': 'foo&amp;bar'})
 
 
-class TaskControlTests(AsyncHTTPTestCase):
+class TaskControlTests(BaseApiTestCase):
     def test_revoke(self):
         celery = self._app.capp
         celery.control.revoke = MagicMock()
@@ -177,4 +178,11 @@ class ControlAuthTests(WorkerControlTests):
             app = self._app.capp
             app.control.broadcast = MagicMock()
             r = self.post('/api/worker/shutdown/test', body={})
-            self.assertEqual(405, r.code)
+            self.assertEqual(401, r.code)
+
+    @patch.dict(os.environ, {'FLOWER_UNAUTHENTICATED_API': ''})
+    def test_auth_without_env_var(self):
+        app = self._app.capp
+        app.control.broadcast = MagicMock()
+        r = self.post('/api/worker/shutdown/test', body={})
+        self.assertEqual(401, r.code)

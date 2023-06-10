@@ -3,9 +3,9 @@ import json
 import socket
 import logging
 import numbers
+import asyncio
 
 from tornado import ioloop
-from tornado import gen
 from tornado import httpclient
 
 
@@ -62,8 +62,7 @@ class RabbitMQ(BrokerBase):
 
         self.http_api = http_api
 
-    @gen.coroutine
-    def queues(self, names):
+    async def queues(self, names):
         url = urljoin(self.http_api, 'queues/' + self.vhost)
         api_url = urlparse(self.http_api)
         username = unquote(api_url.username or '') or self.username
@@ -71,19 +70,19 @@ class RabbitMQ(BrokerBase):
 
         http_client = httpclient.AsyncHTTPClient()
         try:
-            response = yield http_client.fetch(
+            response = await http_client.fetch(
                 url, auth_username=username, auth_password=password,
                 connect_timeout=1.0, request_timeout=2.0,
                 validate_cert=False)
         except (socket.error, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)
-            raise gen.Return([])
+            return []
         finally:
             http_client.close()
 
         if response.code == 200:
             info = json.loads(response.body.decode())
-            raise gen.Return([x for x in info if x['name'] in names])
+            return [x for x in info if x['name'] in names]
         else:
             response.rethrow()
 
@@ -116,8 +115,7 @@ class RedisBase(BrokerBase):
             raise ValueError('Priority not in priority steps')
         return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
 
-    @gen.coroutine
-    def queues(self, names):
+    async def queues(self, names):
         queue_stats = []
         for name in names:
             priority_names = [self.broker_prefix + self._q_for_pri(
@@ -126,7 +124,7 @@ class RedisBase(BrokerBase):
                 'name': name,
                 'messages': sum([self.redis.llen(x) for x in priority_names])
             })
-        raise gen.Return(queue_stats)
+        return queue_stats
 
 
 class Redis(RedisBase):
@@ -262,8 +260,7 @@ class Broker(object):
         raise NotImplementedError
 
 
-@gen.coroutine
-def main():
+async def main():
     broker_url = sys.argv[1] if len(sys.argv) > 1 else 'amqp://'
     queue_name = sys.argv[2] if len(sys.argv) > 2 else 'celery'
     if len(sys.argv) > 3:
@@ -272,13 +269,10 @@ def main():
         http_api = 'http://guest:guest@localhost:15672/api/'
 
     broker = Broker(broker_url, http_api=http_api)
-    queues = yield broker.queues([queue_name])
+    queues = await broker.queues([queue_name])
     if queues:
         print(queues)
-    io_loop.stop()
 
 
 if __name__ == "__main__":
-    io_loop = ioloop.IOLoop.instance()
-    io_loop.add_callback(main)
-    io_loop.start()
+    asyncio.run(main())

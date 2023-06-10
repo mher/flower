@@ -22,9 +22,9 @@ class TestFlowerCommand(AsyncHTTPTestCase):
         self.assertEqual(Histogram.DEFAULT_BUCKETS, options.task_runtime_metric_buckets)
 
     def test_task_runtime_metric_buckets_read_from_env(self):
-        os.environ["FLOWER_TASK_RUNTIME_METRIC_BUCKETS"] = "2,5,inf"
-        apply_env_options()
-        self.assertEqual([2.0, 5.0, float('inf')], options.task_runtime_metric_buckets)
+        with patch.dict(os.environ, {"FLOWER_TASK_RUNTIME_METRIC_BUCKETS": "2,5,inf"}):
+            apply_env_options()
+            self.assertEqual([2.0, 5.0, float('inf')], options.task_runtime_metric_buckets)
 
     def test_task_runtime_metric_buckets_no_env_value_provided(self):
         apply_env_options()
@@ -39,6 +39,32 @@ class TestFlowerCommand(AsyncHTTPTestCase):
         with self.mock_option('address', '127.0.0.1'):
             apply_options('flower', argv=['--address=foo'])
             self.assertEqual('foo', options.address)
+
+    def test_auto_refresh(self):
+        with patch.dict(os.environ, {"FLOWER_AUTO_REFRESH": "false"}):
+            apply_env_options()
+            self.assertFalse(options.auto_refresh)
+
+        with patch.dict(os.environ, {"FLOWER_AUTO_REFRESH": "true"}):
+            apply_env_options()
+            self.assertTrue(options.auto_refresh)
+
+        with patch.dict(os.environ, {"FLOWER_AUTO_REFRESH": "0"}):
+            apply_env_options()
+            self.assertFalse(options.auto_refresh)
+
+        with patch.dict(os.environ, {"FLOWER_AUTO_REFRESH": "1"}):
+            apply_env_options()
+            self.assertTrue(options.auto_refresh)
+
+        with patch.dict(os.environ, {"FLOWER_AUTO_REFRESH": "False"}):
+            apply_env_options()
+            self.assertFalse(options.auto_refresh)
+
+        with patch.dict(os.environ, {"FLOWER_AUTO_REFRESH": "True"}):
+            apply_env_options()
+            self.assertTrue(options.auto_refresh)
+
 
     def test_autodiscovery(self):
         """
@@ -134,7 +160,7 @@ class TestConfOption(AsyncHTTPTestCase):
             return int(subprocess.check_output(
                 'grep "%s" %s|wc -l' % (patter, filename), shell=True))
 
-        defined = grep('^define(', 'flower/options.py') - 4
+        defined = grep('^define(', 'flower/options.py')
         documented = grep('^~~', 'docs/config.rst')
         self.assertEqual(defined, documented,
                          msg='Missing option documentation. Make sure all options '

@@ -1,130 +1,135 @@
 .. _authentication:
+
 Authentication
 ==============
 
-Protecting your Flower instance from unwarranted access is important
-if it runs in an untrusted environment. Below, we outline the various
-forms of authentication supported by Flower.
+Flower supports a variety of authentication methods, including Basic Authentication, Google, GitHub,
+GitLab, and Okta OAuth. You can also customize and use your own authentication method.
 
-**NOTE:** The following endpoints are exempt from authentication:
+The following endpoints are exempt from authentication:
 
 - /healthcheck
 - /metrics
 
-.. _basic-auth:
+.. _basic-authentication:
 
 HTTP Basic Authentication
 -------------------------
 
-Securing Flower with Basic Authentication is easy.
+Flower supports Basic Authentication as a built-in authentication method, allowing you to secure access to the
+Flower using simple username and password credentials. This authentication method is commonly used for
+straightforward authentication requirements.
 
-The `--basic_auth` option accepts `user:password` pairs separated by
-a comma. If configured, any client trying to access this
-Flower instance will be prompted to provide the credentials specified in
-this argument: ::
+To enable basic authentication, use :ref:`basic_auth` option. This option allows you to specify a list of
+username and password pairs for authentication.
 
-    $ celery flower --basic_auth=user1:password1,user2:password2
+For example, running Flower with the following :ref:`basic_auth` option will protect the Flower UI and
+only allow access to users providing the username user and the password pswd::
+
+    $ celery flower --basic-auth=user:pswd
 
 See also :ref:`reverse-proxy`
 
 .. _google-oauth:
 
-Google OAuth 2.0
-----------------
+Google OAuth
+------------
 
-Flower supports Google OAuth 2.0. This way you can authenticate any user
-with a Google account. Google OAuth 2.0 authentication is enabled using the
-`--auth`, `--oauth2_key`, `--oauth2_secret` and `--oauth2_redirect_uri` options.
+Flower provides authentication support using Google OAuth, enabling you to authenticate users through their Google accounts.
+This integration simplifies the authentication process and offers a seamless experience for users who are already logged into Google.
 
-`--auth` is a regular expression, for granting access only to the specified email pattern.
-`--oauth2_key` and `--oauth2_secret` are your credentials from your `Google Developer Console`_.
-`--oauth2_redirect_uri` is there to specify what is the redirect_uri associated to your key and secret
+Follow the steps below to configure and use Google OAuth authentication:
 
-For instance, if you want to grant access to `me@gmail.com` and `you@gmail.com`: ::
+1. Go to the `Google Developer Console`_
+2. Select a project, or create a new one.
+3. In the sidebar on the left, select Credentials.
+4. Click CREATE CREDENTIALS and click OAuth client ID.
+5. Under Application type, select Web application.
+6. Name OAuth 2.0 client and click Create.
+7. Copy the "Client secret" and "Client ID"
+8. Add redirect URI to the list of Authorized redirect URIs
 
-    $ celery flower --auth="me@gmail.com|you@gmail.com" --oauth2_key=... --oauth2_secret=... --oauth2_redirect_uri=http://flower.example.com/login
+Here's an example configuration file with the Google OAuth options:
 
-Alternatively, you can set environment variables instead of command line arguments: ::
+.. code-block:: python
 
-    $ export FLOWER_OAUTH2_KEY=...
-    $ export FLOWER_OAUTH2_SECRET=...
-    $ export FLOWER_OAUTH2_REDIRECT_URI=http://flower.example.com/login
-    $ celery flower --auth=.*@example\.com
+    auth_provider="flower.views.auth.GoogleAuth2LoginHandler"
+    auth="allowed-emails.*@gmail.com"
+    oauth2_key="<your_client_id>"
+    oauth2_secret="<your_client_secret>"
+    oauth2_redirect_uri="http://localhost:5555/login"
+
+Replace `<your_client_id>` and `<your_client_secret>` with the actual  Client ID and secret obtained from
+the Google Developer Console.
 
 .. _Google Developer Console: https://console.developers.google.com
 
 .. _github-oauth:
 
-Okta OAuth
-------------
-
-Flower also supports Okta OAuth. Flower should be registered in
-<https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/register-app-in-okta/>
-before getting started. See `Okta OAuth API`_ docs for more info.
-
-Okta OAuth should be activated using `--auth_provider` option.
-The client id, secret and redirect uri should be provided using
-`--oauth2_key`, `--oauth2_secret`, `--oauth2_redirect_uri` options or using
-`FLOWER_OAUTH2_KEY`, `FLOWER_OAUTH2_SECRET`, `FLOWER_OAUTH2_REDIRECT_URI` environment variables.
-
- The URL from which OAuth2 API URLs will be built should be set using `FLOWER_OAUTH2_OKTA_BASE_URL`
-  environment variable: ::
-
-    $ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
-    $ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
-    $ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
-    $ export FLOWER_OAUTH2_OKTA_BASE_URL=https://my-company.okta.com/oauth2
-    $ celery flower --auth_provider=flower.views.auth.OktaLoginHandler --auth=.*@example\.com
-
-.. _Okta OAuth API: https://developer.okta.com/docs/reference/api/oidc/
-
 GitHub OAuth
 ------------
 
-Flower also supports GitHub OAuth. Flower should be registered in
-<https://github.com/settings/applications/new> before getting started.
+Flower also supports GitHub OAuth. Before getting started, Flower should be registered in
+`Github Settings`_.
+
+Github OAuth is activated by setting :ref:`auth_provider` to `flower.views.auth.GithubLoginHandler`.
+Here's an example configuration file with the Github OAuth options:
+
+.. code-block:: python
+
+    auth_provider="flower.views.auth.GithubLoginHandler"
+    auth="allowed-emails.*@gmail.com"
+    oauth2_key="<your_client_id>"
+    oauth2_secret="<your_client_secret>"
+    oauth2_redirect_uri="http://localhost:5555/login"
+
+Replace `<your_client_id>` and `<your_client_secret>` with the actual  Client ID and secret obtained from
+the Github Settings.
+
 See `GitHub OAuth API`_ docs for more info.
 
-GitHub OAuth should be activated using `--auth_provider` option.
-The client id, secret and redirect uri should be provided using
-`--oauth2_key`, `--oauth2_secret` and `--oauth2_redirect_uri` options or using
-`FLOWER_OAUTH2_KEY`, `FLOWER_OAUTH2_SECRET` and `FLOWER_OAUTH2_REDIRECT_URI`
-environment variables. ::
-
-    $ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
-    $ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
-    $ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
-    $ celery flower --auth_provider=flower.views.auth.GithubLoginHandler --auth=.*@example\.com
-
+.. _Github Settings: https://github.com/settings/applications/new
 .. _GitHub OAuth API: https://developer.github.com/v3/oauth/
+
+.. _okta-oauth:
+
+Okta OAuth
+----------
+
+Flower also supports Okta OAuth. Before getting started, you need to register Flower in `Okta`_.
+Okta OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.OktaLoginHandler`.
+
+Okta OAuth requires `oauth2_key`, `oauth2_secret` and `oauth2_redirect_uri` options which should be obtained from Okta.
+Okta OAuth also uses `FLOWER_OAUTH2_OKTA_BASE_URL` environment variable.
+
+See Okta `Okta OAuth API`_ docs for more info.
+
+.. _Okta: https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/main/
+.. _Okta OAuth API: https://developer.okta.com/docs/reference/api/oidc/
 
 .. _gitlab-oauth:
 
 GitLab OAuth
 ------------
 
-Flower also supports GitLab OAuth. Flower should be registered in
-<https://gitlab.com/profile/applications> before getting started.
-See `GitLab OAuth2 API`_ docs for more info.
+Flower also supports GitLab OAuth for authentication. To enable GitLab OAuth, follow the steps below:
 
-GitLab OAuth should be activated using `--auth_provider` option.
-The client id, secret and redirect uri should be provided using
-`--oauth2_key`, `--oauth2_secret` and `--oauth2_redirect_uri` options or using
-`FLOWER_OAUTH2_KEY`, `FLOWER_OAUTH2_SECRET` and `FLOWER_OAUTH2_REDIRECT_URI`
-environment variables.
+1. Register Flower as an application at GitLab. You can refer to the `GitLab OAuth documentation`_ for detailed instructions on how to do this.
+2. Once registered, you will obtain the credentials for Flower configuration.
+3. In your Flower configuration, set the following options to activate GitLab OAuth:
+    - :ref:`auth_provider` to `flower.views.auth.GitlabLoginHandler`.
+    - :ref:`oauth2_key` to the "Application ID" obtained from GitLab.
+    - :ref:`oauth2_secret` to the "Secret" obtained from GitLab.
+    - :ref:`oauth2_redirect_uri`: Set this to the redirect URI configured in GitLab.
+4. (Optional) To restrict access to specific GitLab groups, you can utilize the `FLOWER_GITLAB_AUTH_ALLOWED_GROUPS` environment variable. Set it to a comma-separated list of allowed groups. You can include subgroups by using the `/` character. For example: `group1,group2/subgroup`.
+5. (Optional) The default minimum required group access level can be adjusted using the `FLOWER_GITLAB_MIN_ACCESS_LEVEL` environment variable.
+6. (Optional) The custom GitHub Domain can be adjusted using the `FLOWER_GITLAB_OAUTH_DOMAIN` environment variable.
 
-A list of allowed GitLab groups can be specified using the
- `FLOWER_GITLAB_AUTH_ALLOWED_GROUPS` environment variable (e.g. ``group1,group2/subgroup``).
+For further details on GitLab OAuth and its implementation, refer to the `Group and project members API`_ documentation.
+It provides comprehensive information and guidelines on working with GitLab's OAuth functionality.
 
-The default minimum required group access level can be changes by
-`FLOWER_GITLAB_MIN_ACCESS_LEVEL` environment variable.
-See `Group and project members API`_ for details.
+See also `GitLab OAuth2 API`_ documentation for more info.
 
-    $ export FLOWER_OAUTH2_KEY=7956724aafbf5e1a93ac
-    $ export FLOWER_OAUTH2_SECRET=f9155f764b7e466c445931a6e3cc7a42c4ce47be
-    $ export FLOWER_OAUTH2_REDIRECT_URI=http://localhost:5555/login
-    $ export FLOWER_GITLAB_AUTH_ALLOWED_GROUPS=group1,group2/subgroup
-    $ celery flower --auth_provider=flower.views.auth.GitLabLoginHandler --auth=.*@example\.com
-
+.. _GitLab OAuth documentation: https://docs.gitlab.com/ee/integration/oauth_provider.htm
 .. _GitLab OAuth2 API: https://docs.gitlab.com/ee/api/oauth2.html
 .. _Group and project members API: https://docs.gitlab.com/ee/api/members.html
