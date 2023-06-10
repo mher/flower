@@ -31,7 +31,7 @@ define("oauth2_redirect_uri", type=str, default=None,
        help="OAuth2 redirect uri (requires --auth)")
 define("max_workers", type=int, default=5000,
        help="maximum number of workers to keep in memory")
-define("max_tasks", type=int, default=10000,
+define("max_tasks", type=int, default=100000,
        help="maximum number of tasks to keep in memory")
 define("db", type=str, default='flower',
        help="flower database file")
