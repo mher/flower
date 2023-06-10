@@ -190,3 +190,31 @@ class TaskTests(BaseApiTestCase):
         self.assertEqual("task2", firstFetchedTaskName)
         self.assertEqual("task3", lastFetchedTaskName)
 
+        # Test limit 4 with search
+        params = dict(limit=4, offset=0, sort_by='name', search='task')
+
+        r = self.get('/api/tasks?' + '&'.join(
+                        map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
+
+        self.assertEqual(200, r.code)
+        self.assertEqual(4, len(table))
+        firstFetchedTaskName = table[list(table)[0]]['name']
+        lastFetchedTaskName =  table[list(table)[-1]]['name']
+        self.assertEqual("task1", firstFetchedTaskName)
+        self.assertEqual("task4", lastFetchedTaskName)
+
+        # Test limit 4 with search
+        params = dict(limit=4, offset=0, sort_by='name', search='task1')
+
+        r = self.get('/api/tasks?' + '&'.join(
+                        map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
+
+        self.assertEqual(200, r.code)
+        self.assertEqual(1, len(table))
+        firstFetchedTaskName = table[list(table)[0]]['name']
+        self.assertEqual("task1", firstFetchedTaskName)
+
