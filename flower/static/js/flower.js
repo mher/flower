@@ -430,8 +430,6 @@ var flower = (function () {
             rowId: 'name',
             searching: true,
             select: false,
-            scrollX: true,
-            scrollY: true,
             paging: true,
             scrollCollapse: true,
             lengthMenu: [15, 30, 50, 100],
