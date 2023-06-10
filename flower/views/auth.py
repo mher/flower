@@ -92,7 +92,7 @@ class LoginHandler(BaseHandler):
 class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
     _OAUTH_DOMAIN = os.getenv(
-        "FLOWER_GITLAB_OAUTH_DOMAIN", "github.com")
+        "FLOWER_GITHUB_OAUTH_DOMAIN", "github.com")
     _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/authorize'
     _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/access_token'
     _OAUTH_NO_CALLBACKS = False
@@ -167,7 +167,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
     _OAUTH_GITLAB_DOMAIN = os.getenv(
-        "FLOWER_GITLAB_AUTH_DOMAIN", "gitlab.com")
+        "FLOWER_GITLAB_OAUTH_DOMAIN", "gitlab.com")
     _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_GITLAB_DOMAIN}/oauth/authorize'
     _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_GITLAB_DOMAIN}/oauth/token'
     _OAUTH_NO_CALLBACKS = False
