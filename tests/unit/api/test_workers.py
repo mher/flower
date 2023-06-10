@@ -3,8 +3,7 @@ from unittest import mock
 
 from flower.inspector import Inspector
 
-from tests.unit import AsyncHTTPTestCase
-
+from . import BaseApiTestCase
 
 inspect_response = {
     'celery@worker1':  [
@@ -21,7 +20,7 @@ empty_inspect_response = {
 @mock.patch.object(Inspector, 'methods',
                    new_callable=mock.PropertyMock,
                    return_value=['inspect_method'])
-class ListWorkersTest(AsyncHTTPTestCase):
+class ListWorkersTest(BaseApiTestCase):
 
     def test_refresh_cache(self, m_inspect):
         celery = self._app.capp

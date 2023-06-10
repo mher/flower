@@ -1,3 +1,5 @@
+import os
+from unittest.mock import patch
 from tests.unit import AsyncHTTPTestCase
 from flower.app import rewrite_handler
 from tornado.web import url
@@ -13,8 +15,9 @@ class UrlsTests(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
 
     def test_tasks_api_url(self):
-        r = self.get('/api/tasks')
-        self.assertEqual(200, r.code)
+        with patch.dict(os.environ, {"FLOWER_UNAUTHENTICATED_API": "true"}):
+            r = self.get('/api/tasks')
+            self.assertEqual(200, r.code)
 
 
 class URLPrefixTests(AsyncHTTPTestCase):
@@ -31,8 +34,9 @@ class URLPrefixTests(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
 
     def test_tasks_api_url(self):
-        r = self.get('/test_root/api/tasks')
-        self.assertEqual(200, r.code)
+        with patch.dict(os.environ, {"FLOWER_UNAUTHENTICATED_API": "true"}):
+            r = self.get('/test_root/api/tasks')
+            self.assertEqual(200, r.code)
 
     def test_base_url_no_longer_working(self):
         r = self.get('/workers')

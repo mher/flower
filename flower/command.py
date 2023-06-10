@@ -177,5 +177,3 @@ def print_banner(app, ssl):
         pformat(sorted(app.tasks.keys()))
     )
     logger.debug('Settings: %s', pformat(settings))
-    if not (options.basic_auth or options.auth):
-        logger.warning('Running without authentication')

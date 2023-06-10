@@ -1,10 +1,16 @@
+import os
 import tornado.web
 from ..views import BaseHandler
+from ..utils import strtobool
+
 
 class BaseApiHandler(BaseHandler):
     def prepare(self):
-        if self.application.options.auth:
-            raise tornado.web.HTTPError(405, "api is not available when auth is enabled")
+        enable_api = strtobool(os.environ.get(
+            'FLOWER_UNAUTHENTICATED_API') or "false")
+        if not (self.application.options.basic_auth or self.application.options.auth) and not enable_api:
+            raise tornado.web.HTTPError(
+                401, "FLOWER_UNAUTHENTICATED_API flag is required to enable API without authentication")
 
     def write_error(self, status_code, **kwargs):
         exc_info = kwargs.get('exc_info')
