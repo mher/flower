@@ -406,6 +406,12 @@ Available columns are:
   - `expires`
   - `eta`
 
+Example::
+
+    $ celery flower --tasks-columns='name,uuid,state,args,kwargs,result,received,started,runtime,worker,retries,revoked,exception,expires,eta'
+
+In the above example, all available columns are displayed.
+
 .. _url_prefix:
 
 url_prefix
