@@ -5,7 +5,7 @@ from celery.events import Event
 
 from flower.events import EventsState
 from tests.unit import AsyncHTTPTestCase
-from tests.unit.utils import task_succeeded_events, task_failed_events
+from tests.unit.utils import task_failed_events, task_succeeded_events
 
 
 class TaskTest(AsyncHTTPTestCase):
@@ -17,10 +17,10 @@ class TaskTest(AsyncHTTPTestCase):
 
 class TasksTest(AsyncHTTPTestCase):
     def setUp(self):
-        self.app = super(TasksTest, self).get_app()
-        super(TasksTest, self).setUp()
+        self.app = super().get_app()
+        super().setUp()
 
-    def get_app(self):
+    def get_app(self, capp=None):
         return self.app
 
     def test_no_task(self):
@@ -48,7 +48,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -80,7 +80,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -118,7 +118,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -166,7 +166,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -209,7 +209,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['length'] = '1'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -227,7 +227,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['length'] = '1'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)

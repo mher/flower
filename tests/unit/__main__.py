@@ -1,7 +1,7 @@
 import unittest
-import tornado.testing
-
 from glob import glob
+
+import tornado.testing
 
 
 def all():

@@ -1,7 +1,8 @@
 import unittest
 from collections import namedtuple
 
-from flower.utils.search import parse_search_terms, stringified_dict_contains_value, satisfies_search_terms
+from flower.utils.search import (parse_search_terms, satisfies_search_terms,
+                                 stringified_dict_contains_value)
 
 
 class TestSearchParser(unittest.TestCase):
@@ -81,7 +82,6 @@ class TestStringfiedDictChecker(unittest.TestCase):
             stringified_dict_contains_value('foo', 'bar', None)
         )
 
-
     def test_works_for_nonexisting_kwargs(self):
         self.assertEqual(
             False,
@@ -140,7 +140,6 @@ class TestTaskFiltering(unittest.TestCase):
             False,
             satisfies_search_terms(self.task, dict(args=['arg']))
         )
-
 
     def test_result_search_handles_none(self):
         self.assertEqual(

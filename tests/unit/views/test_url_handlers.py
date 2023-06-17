@@ -1,8 +1,10 @@
 import os
 from unittest.mock import patch
-from tests.unit import AsyncHTTPTestCase
-from flower.app import rewrite_handler
+
 from tornado.web import url
+
+from flower.app import rewrite_handler
+from tests.unit import AsyncHTTPTestCase
 
 
 class UrlsTests(AsyncHTTPTestCase):
@@ -23,7 +25,7 @@ class UrlsTests(AsyncHTTPTestCase):
 class URLPrefixTests(AsyncHTTPTestCase):
     def setUp(self):
         with self.mock_option('url_prefix', 'test_root'):
-            super(URLPrefixTests, self).setUp()
+            super().setUp()
 
     def test_tuple_handler_rewrite(self):
         r = self.get('/test_root/workers')

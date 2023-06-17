@@ -6,16 +6,16 @@ from celery.events import Event
 from kombu import uuid
 
 from flower.events import EventsState
-from tests.unit.utils import task_succeeded_events, task_failed_events
 from tests.unit import AsyncHTTPTestCase
+from tests.unit.utils import task_failed_events, task_succeeded_events
 
 
 class PrometheusTests(AsyncHTTPTestCase):
     def setUp(self):
-        self.app = super(PrometheusTests, self).get_app()
-        super(PrometheusTests, self).setUp()
+        self.app = super().get_app()
+        super().setUp()
 
-    def get_app(self):
+    def get_app(self, capp=None):
         return self.app
 
     def test_metrics(self):
@@ -200,10 +200,10 @@ class PrometheusTests(AsyncHTTPTestCase):
 
 class HealthcheckTests(AsyncHTTPTestCase):
     def setUp(self):
-        self.app = super(HealthcheckTests, self).get_app()
-        super(HealthcheckTests, self).setUp()
+        self.app = super().get_app()
+        super().setUp()
 
-    def get_app(self):
+    def get_app(self, capp=None):
         return self.app
 
     def test_healthcheck_route(self):

@@ -1,8 +1,10 @@
 import os
 from unittest.mock import MagicMock, patch
-from flower.api.control import ControlHandler
 
 from tornado.options import options
+
+from flower.api.control import ControlHandler
+
 from . import BaseApiTestCase
 
 

@@ -1,17 +1,15 @@
 from unittest.mock import patch
 from urllib.parse import urlencode
 
-import tornado.testing
-from tornado.options import options
-from tornado.ioloop import IOLoop
-
 import celery
+import tornado.testing
+from tornado.ioloop import IOLoop
+from tornado.options import options
 
-from flower.app import Flower
-from flower.urls import handlers
-from flower.events import Events
-from flower.urls import settings
 from flower import command  # noqa: F401 side effect - define options
+from flower.app import Flower
+from flower.events import Events
+from flower.urls import handlers, settings
 
 
 class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):

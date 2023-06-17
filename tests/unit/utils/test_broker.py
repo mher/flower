@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import MagicMock
 
 from flower.utils import broker
-from flower.utils.broker import RabbitMQ, Redis, RedisBase, RedisSocket, Broker, RedisSentinel
-
+from flower.utils.broker import (Broker, RabbitMQ, Redis, RedisBase,
+                                 RedisSentinel, RedisSocket)
 
 broker.requests = MagicMock()
 broker.redis = MagicMock()
@@ -48,6 +48,11 @@ class TestRabbitMQ(unittest.TestCase):
             self.assertEqual(0, b.vhost)
             self.assertEqual(None, b.username)
             self.assertEqual(None, b.password)
+
+    def test_invalid_http_api(self):
+        with self.assertLogs('', level='ERROR') as cm:
+            RabbitMQ('amqp://user:pass@host:10000/vhost', http_api='ftp://')
+            self.assertEqual(['ERROR:flower.utils.broker:Invalid broker api url: ftp://'], cm.output)
 
 
 class TestRedis(unittest.TestCase):

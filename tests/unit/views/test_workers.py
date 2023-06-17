@@ -1,25 +1,23 @@
+import json
 import time
 import unittest
 from unittest.mock import patch
-import sys
-
-from tests.unit import AsyncHTTPTestCase
-from tests.unit.utils import task_succeeded_events, task_failed_events
-from tests.unit.utils import HtmlTableParser
 
 from celery.events import Event
 from celery.utils import uuid
 
 from flower.events import EventsState
-from flower.options import options
+from tests.unit import AsyncHTTPTestCase
+from tests.unit.utils import (HtmlTableParser, task_failed_events,
+                              task_succeeded_events)
 
 
 class WorkersTests(AsyncHTTPTestCase):
     def setUp(self):
-        self.app = super(WorkersTests, self).get_app()
-        super(WorkersTests, self).setUp()
+        self.app = super().get_app()
+        super().setUp()
 
-    def get_app(self):
+    def get_app(self, capp=None):
         return self.app
 
     def test_default_page(self):
@@ -35,9 +33,10 @@ class WorkersTests(AsyncHTTPTestCase):
 
     @unittest.skip('disable temporarily')
     def test_unknown_worker(self):
-        r = self.get('/worker/unknown')
-        self.assertEqual(404, r.code)
-        self.assertIn('Unknown worker', str(r.body))
+        with self.mock_option("inspect_timeout", 1.0):
+            r = self.get('/worker/unknown')
+            self.assertEqual(404, r.code)
+            self.assertIn('Unknown worker', str(r.body))
 
     def test_single_workers_offline(self):
         state = EventsState()
@@ -288,3 +287,47 @@ class WorkersTests(AsyncHTTPTestCase):
                          table.get_row('worker2'))
         self.assertEqual(['worker3', 'True', '0', '23', '13', '10', '0', None],
                          table.get_row('worker3'))
+
+    def test_workers_view_json(self):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        state.event(Event('worker-online', hostname='worker1',
+                          local_received=time.time()))
+        self.app.events.state = state
+
+        res = self.get('/workers?json=1')
+        self.assertEqual(200, res.code)
+        data = json.loads(res.body)
+        self.assertTrue("data" in data)
+
+    def test_workers_view_refresh(self):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        state.event(Event('worker-online', hostname='worker1',
+                          local_received=time.time()))
+        self.app.events.state = state
+
+        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+            res = self.get('/workers?refresh=1')
+            self.assertEqual(200, res.code)
+            update_workers_mock.assert_called()
+
+    def test_workers_page(self):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        state.event(Event('worker-online', hostname='worker1',
+                          local_received=time.time()))
+        self.app.events.state = state
+        self.app.inspector.workers['worker1'] = {'registeres': [], 'active_queues': [],
+                                                 'stats': {'total': {'tasks.add': 10, 'tasks.sleep': 1, 'tasks.error': 1},
+                                                           'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
+
+        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+            res = self.get('/worker/worker1')
+            self.assertEqual(200, res.code)
+            update_workers_mock.assert_called_once_with(workername='worker1')
+
+        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+            res = self.get('/worker/worker2')
+            self.assertEqual(404, res.code)
+            update_workers_mock.assert_called_once_with(workername='worker2')

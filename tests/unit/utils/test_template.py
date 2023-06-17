@@ -1,10 +1,13 @@
+import time
 import unittest
 
-from flower.utils.template import humanize, format_time
+from pytz import utc
+
+from flower.utils.template import format_time, humanize
 
 
 class TestHumanize(unittest.TestCase):
-    def test_None(self):
+    def test_none(self):
         self.assertEqual('', humanize(None))
 
     def test_bool(self):
@@ -46,10 +49,15 @@ class TestHumanize(unittest.TestCase):
         self.assertEqual([4, {1: 1}], humanize([4, {1: 1}]))
 
     def test_time(self):
-        from pytz import utc
         self.assertEqual(1343911558.305793, humanize(1343911558.305793))
         self.assertEqual(format_time(1343911558.305793, utc),
                          humanize(1343911558.305793, type='time'))
+
+    def test_natural_time(self):
+        self.assertEqual(humanize(time.time()-1, type='natural-time-utc'),
+                         'a second ago')
+        self.assertEqual(humanize(time.time()-1, type='natural-time'),
+                         'a second ago')
 
     def test_strings(self):
         self.assertEqual('Max tasks per child',
@@ -57,6 +65,5 @@ class TestHumanize(unittest.TestCase):
         self.assertEqual('URI prefix', humanize('uri_prefix'))
         self.assertEqual('Max concurrency', humanize('max-concurrency'))
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_truncate(self):
+        self.assertEqual(humanize("1234567", length=6), '12 ...')

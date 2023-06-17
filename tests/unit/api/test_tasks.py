@@ -1,22 +1,21 @@
-from unittest.mock import Mock, patch, PropertyMock
-from datetime import datetime, timedelta
-
-from celery.result import AsyncResult
-import celery.states as states
-
-from flower.events import EventsState
-from celery.events import Event
-
-from tests.unit.utils import task_succeeded_events
 import json
 import time
 from collections import OrderedDict
+from datetime import datetime, timedelta
+from unittest.mock import Mock, PropertyMock, patch
+
+import celery.states as states
+from celery.events import Event
+from celery.result import AsyncResult
+
+from flower.events import EventsState
+from tests.unit.utils import task_succeeded_events
+
 from . import BaseApiTestCase
+
 
 class ApplyTests(BaseApiTestCase):
     def test_apply(self):
-        import json
-
         result = 'result'
         with patch('celery.result.AsyncResult.state', new_callable=PropertyMock) as mock_state:
             with patch('celery.result.AsyncResult.result', new_callable=PropertyMock) as mock_result:
@@ -99,10 +98,10 @@ class MockTasks:
 
 class TaskTests(BaseApiTestCase):
     def setUp(self):
-        self.app = super(TaskTests, self).get_app()
-        super(TaskTests, self).setUp()
+        self.app = super().get_app()
+        super().setUp()
 
-    def get_app(self):
+    def get_app(self, capp=None):
         return self.app
 
     @patch('flower.api.tasks.tasks', new=MockTasks)
@@ -121,9 +120,9 @@ class TaskTests(BaseApiTestCase):
                                         id='789')
         events += task_succeeded_events(worker='worker1', name='task4',
                                         id='666')
-                                        
+
         # for i, e in enumerate(sorted(events, key=lambda event: event['uuid'])):
-        
+
         for i, e in enumerate(events):
             e['clock'] = i
             e['local_received'] = time.time()
@@ -134,14 +133,14 @@ class TaskTests(BaseApiTestCase):
         params = dict(limit=4, offset=0, sort_by='name')
 
         r = self.get('/api/tasks?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
-        lastFetchedTaskName =  table[list(table)[-1]]['name']
+        lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
         self.assertEqual("task4", lastFetchedTaskName)
 
@@ -149,14 +148,14 @@ class TaskTests(BaseApiTestCase):
         params = dict(limit=4, offset=1, sort_by='name')
 
         r = self.get('/api/tasks?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(3, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
-        lastFetchedTaskName =  table[list(table)[-1]]['name']
+        lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task2", firstFetchedTaskName)
         self.assertEqual("task4", lastFetchedTaskName)
 
@@ -164,14 +163,14 @@ class TaskTests(BaseApiTestCase):
         params = dict(limit=4, offset=-1, sort_by="name")
 
         r = self.get('/api/tasks?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
-        lastFetchedTaskName =  table[list(table)[-1]]['name']
+        lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
         self.assertEqual("task4", lastFetchedTaskName)
 
@@ -179,14 +178,14 @@ class TaskTests(BaseApiTestCase):
         params = dict(limit=2, offset=1, sort_by='name')
 
         r = self.get('/api/tasks?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
-        lastFetchedTaskName =  table[list(table)[-1]]['name']
+        lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task2", firstFetchedTaskName)
         self.assertEqual("task3", lastFetchedTaskName)
 
@@ -194,14 +193,14 @@ class TaskTests(BaseApiTestCase):
         params = dict(limit=4, offset=0, sort_by='name', search='task')
 
         r = self.get('/api/tasks?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
-        lastFetchedTaskName =  table[list(table)[-1]]['name']
+        lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
         self.assertEqual("task4", lastFetchedTaskName)
 
@@ -209,7 +208,7 @@ class TaskTests(BaseApiTestCase):
         params = dict(limit=4, offset=0, sort_by='name', search='task1')
 
         r = self.get('/api/tasks?' + '&'.join(
-                        map(lambda x: '%s=%s' % x, params.items())))
+            map(lambda x: '%s=%s' % x, params.items())))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
@@ -217,4 +216,3 @@ class TaskTests(BaseApiTestCase):
         self.assertEqual(1, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
-

@@ -1,9 +1,8 @@
-from celery.utils import uuid
-from celery.events import Event
-
-
-from html.parser import HTMLParser
 import xml.etree.ElementTree as ET
+from html.parser import HTMLParser
+
+from celery.events import Event
+from celery.utils import uuid
 
 
 class HtmlTableParser(HTMLParser):

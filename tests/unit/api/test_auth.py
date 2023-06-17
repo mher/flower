@@ -1,5 +1,5 @@
 from tests.unit import AsyncHTTPTestCase
-from flower.views.auth import authenticate, validate_auth_option
+
 
 class BasicAuthTests(AsyncHTTPTestCase):
     def test_auth(self):

@@ -1,14 +1,16 @@
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
-import subprocess
 from unittest.mock import Mock, patch
 
+import celery
 from prometheus_client import Histogram
-
-from flower.command import apply_options, warn_about_celery_args_used_in_flower_command, apply_env_options
 from tornado.options import options
+
+from flower.command import (apply_env_options, apply_options, print_banner,
+                            warn_about_celery_args_used_in_flower_command)
 from tests.unit import AsyncHTTPTestCase
 
 
@@ -65,7 +67,6 @@ class TestFlowerCommand(AsyncHTTPTestCase):
             apply_env_options()
             self.assertTrue(options.auto_refresh)
 
-
     def test_autodiscovery(self):
         """
         Simulate basic Django setup:
@@ -80,6 +81,31 @@ class TestFlowerCommand(AsyncHTTPTestCase):
             self.get_app(capp=celery_app)
 
             self.assertTrue(autodiscover.called)
+
+
+class TestPrintBanner(AsyncHTTPTestCase):
+    def test_print_banner(self):
+        celery_app = celery.Celery()
+        with self.assertLogs('', level='INFO') as cm:
+            print_banner(celery_app, False)
+
+            self.assertTrue('INFO:flower.command:Visit me at http://0.0.0.0:5555' in cm.output)
+            self.assertTrue('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//' in cm.output)
+
+    def test_print_banner_with_ssl(self):
+        celery_app = celery.Celery()
+        with self.assertLogs('', level='INFO') as cm:
+            print_banner(celery_app, True)
+
+            self.assertTrue('INFO:flower.command:Visit me at https://0.0.0.0:5555' in cm.output)
+            self.assertTrue('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//' in cm.output)
+
+    def test_print_banner_unix_socket(self):
+        celery_app = celery.Celery()
+        with self.assertLogs('', level='INFO') as cm, self.mock_option('unix_socket', 'foo'):
+            print_banner(celery_app, True)
+
+            self.assertTrue('INFO:flower.command:Visit me via unix socket file: foo' in cm.output)
 
 
 class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
@@ -115,8 +141,8 @@ class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
 
         mock_warning.assert_called_once_with(
             "You have incorrectly specified the following celery arguments after flower command: "
-            "[\'--app\', \'-b\']. Please specify them after celery command instead following"
-            " this template: celery [celery args] flower [flower args]."
+            "%s. Please specify them after celery command instead following"
+            " this template: celery [celery args] flower [flower args].", ['--app', '-b']
         )
 
 
