@@ -1,28 +1,28 @@
 import json
-import re
 import os
+import re
 import uuid
-
 from urllib.parse import urlencode
+
+import tornado.auth
 import tornado.gen
 import tornado.web
-import tornado.auth
-
-from tornado.options import options
 from celery.utils.imports import instantiate
+from tornado.options import options
 
 from ..views import BaseHandler
 from ..views.error import NotFoundErrorHandler
+
+# pylint: disable=invalid-name
 
 
 def authenticate(pattern, email):
     if '|' in pattern:
         return email in pattern.split('|')
-    elif '*' in pattern:
-        pattern = re.escape(pattern).replace('\.\*', "[A-Za-z0-9!#$%&'*+/=?^_`{|}~.\-]*")
+    if '*' in pattern:
+        pattern = re.escape(pattern).replace(r'\.\*', r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~.\-]*")
         return re.fullmatch(pattern, email)
-    else:
-        return pattern == email
+    return pattern == email
 
 
 def validate_auth_option(pattern):
@@ -63,16 +63,13 @@ class GoogleAuth2LoginHandler(BaseHandler, tornado.auth.GoogleOAuth2Mixin):
         try:
             response = await self.get_auth_http_client().fetch(
                 'https://www.googleapis.com/userinfo/v2/me',
-                headers={'Authorization': 'Bearer %s' % access_token})
+                headers={'Authorization': f'Bearer {access_token}'})
         except Exception as e:
-            raise tornado.web.HTTPError(403, 'Google auth failed: %s' % e)
+            raise tornado.web.HTTPError(403, f'Google auth failed: {e}')
 
         email = json.loads(response.body.decode('utf-8'))['email']
         if not authenticate(self.application.options.auth, email):
-            message = (
-                "Access denied to '{email}'. Please use another account or "
-                "ask your admin to add your email to flower --auth."
-            ).format(email=email)
+            message = f"Access denied to '{email}'. Please use another account or ask your admin to add your email to flower --auth."
             raise tornado.web.HTTPError(403, message)
 
         self.set_secure_cookie("user", str(email))
@@ -114,8 +111,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                      'Accept': 'application/json'}, body=body)
 
         if response.error:
-            raise tornado.auth.AuthError(
-                'OAuth authenticator error: %s' % str(response))
+            raise tornado.auth.AuthError(f'OAuth authenticator error: {response}')
 
         return json.loads(response.body.decode('utf-8'))
 
@@ -188,7 +184,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             body=body
         )
         if response.error:
-            raise tornado.auth.AuthError('OAuth authenticator error: %s' % str(response))
+            raise tornado.auth.AuthError(f'OAuth authenticator error: {response}')
         return json.loads(response.body.decode('utf-8'))
 
     async def get(self):
@@ -223,7 +219,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                          'User-agent': 'Tornado auth'}
             )
         except Exception as e:
-            raise tornado.web.HTTPError(403, 'GitLab auth failed: %s' % e)
+            raise tornado.web.HTTPError(403, f'GitLab auth failed: {e}')
 
         user_email = json.loads(response.body.decode('utf-8'))['email']
         email_allowed = authenticate(self.application.options.auth, user_email)
@@ -266,15 +262,15 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
     @property
     def _OAUTH_AUTHORIZE_URL(self):
-        return "{}/v1/authorize".format(self.base_url)
+        return f"{self.base_url}/v1/authorize"
 
     @property
     def _OAUTH_ACCESS_TOKEN_URL(self):
-        return "{}/v1/token".format(self.base_url)
+        return f"{self.base_url}/v1/token"
 
     @property
     def _OAUTH_USER_INFO_URL(self):
-        return "{}/v1/userinfo".format(self.base_url)
+        return f"{self.base_url}/v1/userinfo"
 
     async def get_access_token(self, redirect_uri, code):
         body = urlencode({
@@ -292,8 +288,7 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                      'Accept': 'application/json'}, body=body)
 
         if response.error:
-            raise tornado.auth.AuthError(
-                'OAuth authenticator error: %s' % str(response))
+            raise tornado.auth.AuthError(f'OAuth authenticator error: {response}')
 
         return json.loads(response.body.decode('utf-8'))
 

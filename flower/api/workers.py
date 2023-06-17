@@ -1,10 +1,9 @@
-import logging
 import asyncio
+import logging
 
 from tornado import web
 
 from .control import ControlHandler
-
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +158,7 @@ List workers
             try:
                 await asyncio.wait(self.application.update_workers(workername=workername))
             except Exception as e:
-                msg = "Failed to update workers: %s" % e
+                msg = f"Failed to update workers: {e}"
                 logger.error(msg)
                 raise web.HTTPError(503, msg)
 
@@ -176,7 +175,7 @@ List workers
             return
 
         if workername and not self.is_worker(workername):
-            raise web.HTTPError(404, "Unknown worker '%s'" % workername)
+            raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
         if workername:
             self.write({workername: self.application.workers[workername]})

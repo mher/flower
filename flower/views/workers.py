@@ -1,11 +1,10 @@
-import time
 import logging
+import time
 
 from tornado import web
 
-from ..views import BaseHandler
-from ..api.workers import ListWorkers
 from ..options import options
+from ..views import BaseHandler
 
 logger = logging.getLogger(__name__)
 
@@ -21,14 +20,12 @@ class WorkerView(BaseHandler):
         worker = self.application.workers.get(name)
 
         if worker is None:
-            raise web.HTTPError(404, "Unknown worker '%s'" % name)
+            raise web.HTTPError(404, f"Unknown worker '{name}'")
         if 'stats' not in worker:
-            raise web.HTTPError(
-                404,
-                "Unable to get stats for '%s' worker" % name
-            )
+            raise web.HTTPError(404, f"Unable to get stats for '{name}' worker")
 
         self.render("worker.html", worker=dict(worker, name=name))
+
 
 class WorkersView(BaseHandler):
     @web.authenticated
@@ -80,9 +77,8 @@ class WorkersView(BaseHandler):
     @classmethod
     def _as_dict(cls, worker):
         if hasattr(worker, '_fields'):
-            return dict((k, worker.__getattribute__(k)) for k in worker._fields)
-        else:
-            return cls._info(worker)
+            return dict((k, getattr(worker, k)) for k in worker._fields)
+        return cls._info(worker)
 
     @classmethod
     def _info(cls, worker):

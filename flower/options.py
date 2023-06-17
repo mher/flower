@@ -2,9 +2,7 @@ import types
 from secrets import token_urlsafe
 
 from prometheus_client import Histogram
-from tornado.options import define
-from tornado.options import options
-
+from tornado.options import define, options
 
 DEFAULT_CONFIG_FILE = 'flowerconfig.py'
 
@@ -17,7 +15,7 @@ define("unix_socket", default='',
        help="path to unix socket to bind", type=str)
 define("debug", default=False,
        help="run in debug mode", type=bool)
-define("inspect_timeout", default=1000, type=float,
+define("inspect_timeout", default=1000.0, type=float,
        help="inspect timeout (in milliseconds)")
 define("auth", default='', type=str,
        help="regexp of emails to grant access")

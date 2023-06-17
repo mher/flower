@@ -1,14 +1,12 @@
-import time
-import logging
 import collections
-
+import logging
+import time
 from functools import partial
-
 
 logger = logging.getLogger(__name__)
 
 
-class Inspector(object):
+class Inspector:
     methods = ('stats', 'active_queues', 'registered', 'scheduled',
                'active', 'reserved', 'revoked', 'conf')
 
@@ -41,11 +39,10 @@ class Inspector(object):
             else getattr(inspect, method)(safe=True)
         )
         logger.debug("Inspect command %s took %.2fs to complete", method, time.time() - start)
-        
+
         if result is None or 'error' in result:
             logger.warning("Inspect method %s failed", method)
             return
         for worker, response in result.items():
             if response is not None:
                 self.io_loop.add_callback(partial(self._on_update, worker, method, response))
-

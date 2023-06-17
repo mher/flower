@@ -1,14 +1,12 @@
 import sys
 import logging
 
-from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 
 import celery
 import tornado.web
 
 from tornado import ioloop
-from tornado.concurrent import run_on_executor
 from tornado.httpserver import HTTPServer
 from tornado.web import url
 
@@ -21,15 +19,15 @@ from .options import default_options
 logger = logging.getLogger(__name__)
 
 
-if sys.version_info[0]==3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
     import asyncio
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-
+# pylint: disable=consider-using-f-string
 def rewrite_handler(handler, url_prefix):
-    if type(handler) is url:
+    if isinstance(handler, url):
         return url("/{}{}".format(url_prefix.strip("/"), handler.regex.pattern),
-                handler.handler_class, handler.kwargs, handler.name)
+                   handler.handler_class, handler.kwargs, handler.name)
     return ("/{}{}".format(url_prefix.strip("/"), handler[0]), handler[1])
 
 
@@ -43,7 +41,7 @@ class Flower(tornado.web.Application):
         if options is not None and options.url_prefix:
             handlers = [rewrite_handler(h, options.url_prefix) for h in handlers]
         kwargs.update(handlers=handlers)
-        super(Flower, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.ssl_options = kwargs.get('ssl_options', None)

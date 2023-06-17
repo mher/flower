@@ -1,6 +1,6 @@
-import uuid
 import base64
 import os.path
+import uuid
 
 from .. import __version__
 
@@ -12,11 +12,12 @@ def gen_cookie_secret():
 def bugreport(app=None):
     try:
         import celery
-        import tornado
         import humanize
+        import tornado
 
         app = app or celery.Celery()
 
+		# pylint: disable=consider-using-f-string
         return 'flower   -> flower:%s tornado:%s humanize:%s%s' % (
             __version__,
             tornado.version,
@@ -49,7 +50,6 @@ def strtobool(val):
     val = val.lower()
     if val in ('y', 'yes', 't', 'true', 'on', '1'):
         return 1
-    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+    if val in ('n', 'no', 'f', 'false', 'off', '0'):
         return 0
-    else:
-        raise ValueError("invalid truth value %r" % (val,))
+    raise ValueError(f"invalid truth value {val!r}")

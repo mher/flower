@@ -1,9 +1,9 @@
 import sys
+from celery.bin.celery import main as _main, celery
+from flower.command import flower
 
 
 def main():
-    from celery.bin.celery import main as _main, celery
-    from flower.command import flower
     celery.add_command(flower)
     sys.exit(_main())
 

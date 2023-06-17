@@ -2,18 +2,13 @@ import os
 
 from tornado.web import StaticFileHandler, url
 
-from .api import control
-from .api import tasks
-from .api import workers
-from .views import auth
-from .views import monitor
-from .views.broker import BrokerView
-from .views.workers import WorkerView
-from .views.tasks import TaskView, TasksView, TasksDataTable
-from .views.error import NotFoundErrorHandler
-from .views.workers import WorkersView
+from .api import control, tasks, workers
 from .utils import gen_cookie_secret
-
+from .views import auth, monitor
+from .views.broker import BrokerView
+from .views.error import NotFoundErrorHandler
+from .views.tasks import TasksDataTable, TasksView, TaskView
+from .views.workers import WorkersView, WorkerView
 
 settings = dict(
     template_path=os.path.join(os.path.dirname(__file__), "templates"),

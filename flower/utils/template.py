@@ -1,16 +1,9 @@
 import re
+from datetime import datetime, timedelta
 
 from celery import current_app
-from datetime import datetime
-from datetime import timedelta
-try:
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlencode
-
 from humanize import naturaltime
 from pytz import timezone, utc
-
 
 KEYWORDS_UP = ('ssl', 'uri', 'url', 'uuid', 'eta')
 KEYWORDS_DOWN = ('args', 'kwargs')
@@ -49,26 +42,3 @@ def humanize(obj, type=None, length=None):
     if length is not None and len(obj) > length:
         obj = obj[:length - 4] + ' ...'
     return obj
-
-
-def sort_url(name, key, sort_by, params=None, class_name='sort'):
-    new_params = {}
-    extra_class = ''
-    title = 'Order by %s DESC' % name
-    if params:
-        new_params.update(params)
-
-    if sort_by == key:
-        extra_class = 'asc'
-    if sort_by == '-' + key:
-        extra_class = 'desc'
-        title = 'Order by %s ASC' % name
-    if not sort_by or sort_by == key or sort_by.lstrip('-') != key:
-        new_params.update({'sort': '-' + key})
-    else:
-        new_params.update({'sort': key})
-
-    return '<a class="%s %s" href="?%s" title="%s">%s</a>' % (
-        class_name, extra_class, urlencode(new_params),
-        title, name
-    )

@@ -1,11 +1,10 @@
 import datetime
 import time
 
-from .search import satisfies_search_terms, parse_search_terms
-
-from celery.events.state import Task
+from .search import parse_search_terms, satisfies_search_terms
 
 
+# pylint: disable=too-many-branches,too-many-locals,too-many-arguments
 def iter_tasks(events, limit=None, offset=0, type=None, worker=None, state=None,
                sort_by=None, received_start=None, received_end=None,
                started_start=None, started_end=None, search=None):
@@ -43,7 +42,7 @@ def iter_tasks(events, limit=None, offset=0, type=None, worker=None, state=None,
         if i >= offset:
             yield uuid, task
         i += 1
-        if limit != None:
+        if limit is not None:
             if i == limit + offset:
                 break
 
@@ -65,20 +64,8 @@ def sort_tasks(tasks, sort_by):
 
 
 def get_task_by_id(events, task_id):
-    if hasattr(Task, '_fields'):  # Old version
-        return events.state.tasks.get(task_id)
-    else:
-        _fields = Task._defaults.keys()
-        task = events.state.tasks.get(task_id)
-        if task is not None:
-            task._fields = _fields
-        return task
+    return events.state.tasks.get(task_id)
 
 
 def as_dict(task):
-    # as_dict is new in Celery 3.1.7
-    if hasattr(Task, 'as_dict'):
-        return task.as_dict()
-    # old version
-    else:
-        return task.info(fields=task._defaults.keys())
+    return task.as_dict()

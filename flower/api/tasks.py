@@ -1,24 +1,20 @@
 import json
 import logging
-
+from collections import OrderedDict
 from datetime import datetime
 
+from celery import states
+from celery.backends.base import DisabledBackend
+from celery.contrib.abortable import AbortableAsyncResult
+from celery.result import AsyncResult
 from tornado import web
-from tornado.ioloop import IOLoop
 from tornado.escape import json_decode
+from tornado.ioloop import IOLoop
 from tornado.web import HTTPError
 
-from celery import states
-from celery.result import AsyncResult
-from celery.contrib.abortable import AbortableAsyncResult
-from celery.backends.base import DisabledBackend
-
 from ..utils import tasks
-from . import BaseApiHandler
 from ..utils.broker import Broker
-from ..api.control import ControlHandler
-from collections import OrderedDict
-
+from . import BaseApiHandler
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +27,7 @@ class BaseTaskHandler(BaseApiHandler):
             body = self.request.body
             options = json_decode(body) if body else {}
         except ValueError as e:
-            raise HTTPError(400, str(e))
+            raise HTTPError(400, str(e)) from e
 
         if not isinstance(options, dict):
             raise HTTPError(400, 'invalid options')
@@ -78,8 +74,7 @@ class BaseTaskHandler(BaseApiHandler):
             json.dumps(result)
         except TypeError:
             return repr(result)
-        else:
-            return result
+        return result
 
 
 class TaskApply(BaseTaskHandler):
@@ -130,13 +125,13 @@ Execute a task by name and wait results
 
         try:
             task = self.capp.tasks[taskname]
-        except KeyError:
-            raise HTTPError(404, "Unknown task '%s'" % taskname)
+        except KeyError as exc:
+            raise HTTPError(404, f"Unknown task '{taskname}'") from exc
 
         try:
             self.normalize_options(options)
-        except ValueError:
-            raise HTTPError(400, 'Invalid option')
+        except ValueError as exc:
+            raise HTTPError(400, 'Invalid option') from exc
 
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
@@ -205,13 +200,13 @@ Execute a task
 
         try:
             task = self.capp.tasks[taskname]
-        except KeyError:
-            raise HTTPError(404, "Unknown task '%s'" % taskname)
+        except KeyError as exc:
+            raise HTTPError(404, f"Unknown task '{taskname}'") from exc
 
         try:
             self.normalize_options(options)
-        except ValueError:
-            raise HTTPError(400, 'Invalid option')
+        except ValueError as exc:
+            raise HTTPError(400, 'Invalid option') from exc
 
         result = task.apply_async(args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
@@ -359,7 +354,7 @@ Abort a running task
 
         result.abort()
 
-        self.write(dict(message="Aborted '%s'" % taskid))
+        self.write(dict(message=f"Aborted '{taskid}'"))
 
 
 class GetQueueLengths(BaseTaskHandler):
@@ -396,26 +391,16 @@ Return length of all active queues
 :statuscode 503: result backend is not configured
         """
         app = self.application
-        broker_options = self.capp.conf.broker_transport_options
 
         http_api = None
         if app.transport == 'amqp' and app.options.broker_api:
             http_api = app.options.broker_api
 
-        broker_use_ssl = None
-        if self.capp.conf.broker_use_ssl:
-            broker_use_ssl = self.capp.conf.broker_use_ssl
-
         broker = Broker(app.capp.connection().as_uri(include_password=True),
-                        http_api=http_api, broker_options=broker_options, broker_use_ssl=broker_use_ssl)
+                        http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
+                        broker_use_ssl=self.capp.conf.broker_use_ssl)
 
-        queue_names = self.get_active_queue_names()
-
-        if not queue_names:
-            queue_names = set([self.capp.conf.task_default_queue]) |\
-                set([q.name for q in self.capp.conf.task_queues or [] if q.name])
-
-        queues = await broker.queues(sorted(queue_names))
+        queues = await broker.queues(self.get_active_queue_names())
         self.write({'active_queues': queues})
 
 
@@ -644,7 +629,7 @@ Get a task info
 
         task = tasks.get_task_by_id(self.application.events, taskid)
         if not task:
-            raise HTTPError(404, "Unknown task '%s'" % taskid)
+            raise HTTPError(404, f"Unknown task '{taskid}'")
 
         response = task.as_dict()
         if task.worker is not None:

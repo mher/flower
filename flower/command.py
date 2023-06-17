@@ -40,18 +40,18 @@ def flower(ctx, tornado_argv):
     setup_logging()
 
     app = ctx.obj.app
-    flower = Flower(capp=app, options=options, **settings)
+    flower_app = Flower(capp=app, options=options, **settings)
 
-    atexit.register(flower.stop)
+    atexit.register(flower_app.stop)
 
-    def sigterm_handler(signal, frame):
-        logger.info('SIGTERM detected, shutting down')
+    def sig_handler(signalnum, _):
+        logger.info('%s detected, shutting down', signalnum)
         sys.exit(0)
 
-    signal.signal(signal.SIGTERM, sigterm_handler)
+    signal.signal(signal.SIGTERM, sig_handler)
     print_banner(app, 'ssl_options' in settings)
     try:
-        flower.start()
+        flower_app.start()
     except (KeyboardInterrupt, SystemExit):
         pass
 
@@ -63,9 +63,9 @@ def apply_env_options():
         name = env_var_name.replace(ENV_VAR_PREFIX, '', 1).lower()
         value = os.environ[env_var_name]
         try:
-            option = options._options[name]
+            option = options._options[name]  # pylint: disable=protected-access
         except KeyError:
-            option = options._options[name.replace('_', '-')]
+            option = options._options[name.replace('_', '-')]  # pylint: disable=protected-access
         if option.multiple:
             value = [option.type(i) for i in value.split(',')]
         else:
@@ -73,7 +73,6 @@ def apply_env_options():
                 value = bool(strtobool(value))
             else:
                 value = option.type(value)
-        print(name, type(value), value)
         setattr(options, name, value)
 
 
@@ -101,10 +100,10 @@ def warn_about_celery_args_used_in_flower_command(ctx, flower_args):
 
     if incorrectly_used_args:
         logger.warning(
-            f'You have incorrectly specified the following celery arguments after flower command:'
-            f' {incorrectly_used_args}. '
-            f'Please specify them after celery command instead following this template: '
-            f'celery [celery args] flower [flower args].'
+            'You have incorrectly specified the following celery arguments after flower command:'
+            ' %s. '
+            'Please specify them after celery command instead following this template: '
+            'celery [celery args] flower [flower args].', incorrectly_used_args
         )
 
 
@@ -153,7 +152,7 @@ def is_flower_option(arg):
 
 def is_flower_envvar(name):
     return name.startswith(ENV_VAR_PREFIX) and \
-           name[len(ENV_VAR_PREFIX):].lower() in default_options
+        name[len(ENV_VAR_PREFIX):].lower() in default_options
 
 
 def print_banner(app, ssl):

@@ -1,12 +1,11 @@
-from functools import total_ordering
 import copy
 import logging
-
+from functools import total_ordering
 
 from tornado import web
 
+from ..utils.tasks import as_dict, get_task_by_id, iter_tasks
 from ..views import BaseHandler
-from ..utils.tasks import iter_tasks, get_task_by_id, as_dict
 
 logger = logging.getLogger(__name__)
 
@@ -17,13 +16,13 @@ class TaskView(BaseHandler):
         task = get_task_by_id(self.application.events, task_id)
 
         if task is None:
-            raise web.HTTPError(404, "Unknown task '%s'" % task_id)
+            raise web.HTTPError(404, f"Unknown task '{task_id}'")
         task = self.format_task(task)
         self.render("task.html", task=task)
 
 
 @total_ordering
-class Comparable(object):
+class Comparable:
     """
     Compare two objects, one or more of which may be None.  If one of the
     values is None, the other will be deemed greater.
@@ -52,7 +51,7 @@ class TasksDataTable(BaseHandler):
         search = self.get_argument('search[value]', type=str)
 
         column = self.get_argument('order[0][column]', type=int)
-        sort_by = self.get_argument('columns[%s][data]' % column, type=str)
+        sort_by = self.get_argument(f'columns[{column}][data]', type=str)
         sort_order = self.get_argument('order[0][dir]', type=str) == 'desc'
 
         def key(item):
@@ -95,16 +94,16 @@ class TasksDataTable(BaseHandler):
     def post(self):
         return self.get()
 
-    def format_task(self, args):
-        uuid, task = args
+    def format_task(self, task):
+        uuid, args = task
         custom_format_task = self.application.options.format_task
 
         if custom_format_task:
             try:
-                task = custom_format_task(copy.copy(task))
+                args = custom_format_task(copy.copy(args))
             except Exception:
                 logger.exception("Failed to format '%s' task", uuid)
-        return uuid, task
+        return uuid, args
 
 
 class TasksView(BaseHandler):

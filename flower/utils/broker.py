@@ -1,16 +1,12 @@
-import sys
+import asyncio
 import json
-import socket
 import logging
 import numbers
-import asyncio
+import socket
+import sys
+from urllib.parse import quote, unquote, urljoin, urlparse
 
-from tornado import ioloop
-from tornado import httpclient
-
-
-from urllib.parse import urlparse, urljoin, quote, unquote
-
+from tornado import httpclient, ioloop
 
 try:
     import redis
@@ -21,8 +17,8 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class BrokerBase(object):
-    def __init__(self, broker_url, *args, **kwargs):
+class BrokerBase:
+    def __init__(self, broker_url, *_, **__):
         purl = urlparse(broker_url)
         self.host = purl.hostname
         self.port = purl.port
@@ -34,13 +30,13 @@ class BrokerBase(object):
         self.username = unquote(username) if username else username
         self.password = unquote(password) if password else password
 
-    def queues(self, names):
+    async def queues(self, names):
         raise NotImplementedError
 
 
 class RabbitMQ(BrokerBase):
-    def __init__(self, broker_url, http_api, io_loop=None, **kwargs):
-        super(RabbitMQ, self).__init__(broker_url)
+    def __init__(self, broker_url, http_api, io_loop=None, **__):
+        super().__init__(broker_url)
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
@@ -50,15 +46,12 @@ class RabbitMQ(BrokerBase):
         self.password = self.password or 'guest'
 
         if not http_api:
-            http_api = "http://{username}:{password}@{host}:{port}/api/{vhost}".format(
-                username=self.username, password=self.password,
-                host=self.host, port=self.port, vhost=self.vhost
-            )
+            http_api = f"http://{self.username}:{self.password}@{self.host}:{self.port}/api/{self.vhost}"
 
         try:
             self.validate_http_api(http_api)
-        except Exception:
-            logger.error("Invalid broker api url:%s", http_api)
+        except ValueError:
+            logger.error("Invalid broker api url: %s", http_api)
 
         self.http_api = http_api
 
@@ -83,22 +76,21 @@ class RabbitMQ(BrokerBase):
         if response.code == 200:
             info = json.loads(response.body.decode())
             return [x for x in info if x['name'] in names]
-        else:
-            response.rethrow()
+        response.rethrow()
 
     @classmethod
     def validate_http_api(cls, http_api):
         url = urlparse(http_api)
         if url.scheme not in ('http', 'https'):
-            raise ValueError("Invalid http api schema: %s" % url.scheme)
+            raise ValueError(f"Invalid http api schema: {url.scheme}")
 
 
 class RedisBase(BrokerBase):
     DEFAULT_SEP = '\x06\x16'
     DEFAULT_PRIORITY_STEPS = [0, 3, 6, 9]
 
-    def __init__(self, broker_url, *args, **kwargs):
-        super(RedisBase, self).__init__(broker_url)
+    def __init__(self, broker_url, *_, **kwargs):
+        super().__init__(broker_url)
         self.redis = None
 
         if not redis:
@@ -113,6 +105,7 @@ class RedisBase(BrokerBase):
     def _q_for_pri(self, queue, pri):
         if pri not in self.priority_steps:
             raise ValueError('Priority not in priority steps')
+        # pylint: disable=consider-using-f-string
         return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
 
     async def queues(self, names):
@@ -122,7 +115,7 @@ class RedisBase(BrokerBase):
                 name, pri) for pri in self.priority_steps]
             queue_stats.append({
                 'name': name,
-                'messages': sum([self.redis.llen(x) for x in priority_names])
+                'messages': sum((self.redis.llen(x) for x in priority_names))
             })
         return queue_stats
 
@@ -130,7 +123,7 @@ class RedisBase(BrokerBase):
 class Redis(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
-        super(Redis, self).__init__(broker_url, *args, **kwargs)
+        super().__init__(broker_url, *args, **kwargs)
         self.host = self.host or 'localhost'
         self.port = self.port or 6379
         self.vhost = self._prepare_virtual_host(self.vhost)
@@ -144,11 +137,8 @@ class Redis(RedisBase):
                 vhost = vhost[1:]
             try:
                 vhost = int(vhost)
-            except ValueError:
-                raise ValueError(
-                    'Database is int between 0 and limit - 1, not {0}'.format(
-                        vhost,
-                    ))
+            except ValueError as exc:
+                raise ValueError(f'Database is int between 0 and limit - 1, not {vhost}') from exc
         return vhost
 
     def _get_redis_client_args(self):
@@ -167,7 +157,7 @@ class Redis(RedisBase):
 class RedisSentinel(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
-        super(RedisSentinel, self).__init__(broker_url, *args, **kwargs)
+        super().__init__(broker_url, *args, **kwargs)
         broker_options = kwargs.get('broker_options', {})
         self.host = self.host or 'localhost'
         self.port = self.port or 26379
@@ -183,20 +173,15 @@ class RedisSentinel(RedisBase):
                 vhost = vhost[1:]
             try:
                 vhost = int(vhost)
-            except ValueError:
-                raise ValueError(
-                    'Database is int between 0 and limit - 1, not {0}'.format(
-                        vhost,
-                    ))
+            except ValueError as exc:
+                raise ValueError('Database is int between 0 and limit - 1, not {vhost}') from exc
         return vhost
 
     def _prepare_master_name(self, broker_options):
         try:
             master_name = broker_options['master_name']
-        except KeyError:
-            raise ValueError(
-                'master_name is required for Sentinel broker'
-            )
+        except KeyError as exc:
+            raise ValueError('master_name is required for Sentinel broker') from exc
         return master_name
 
     def _get_redis_client(self, broker_options):
@@ -204,7 +189,7 @@ class RedisSentinel(RedisBase):
             'password': self.password,
             'sentinel_kwargs': broker_options.get('sentinel_kwargs')
         }
-        # TODO: get all sentinel hosts from Celery App config and use them to initialize Sentinel
+        # get all sentinel hosts from Celery App config and use them to initialize Sentinel
         sentinel = redis.sentinel.Sentinel(
             [(self.host, self.port)], **connection_kwargs)
         redis_client = sentinel.master_for(self.master_name)
@@ -214,7 +199,7 @@ class RedisSentinel(RedisBase):
 class RedisSocket(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
-        super(RedisSocket, self).__init__(broker_url, *args, **kwargs)
+        super().__init__(broker_url, *args, **kwargs)
         self.redis = redis.Redis(unix_socket_path='/' + self.vhost,
                                  password=self.password)
 
@@ -230,33 +215,32 @@ class RedisSsl(Redis):
         if 'broker_use_ssl' not in kwargs:
             raise ValueError('rediss broker requires broker_use_ssl')
         self.broker_use_ssl = kwargs.get('broker_use_ssl', {})
-        super(RedisSsl, self).__init__(broker_url, *args, **kwargs)
+        super().__init__(broker_url, *args, **kwargs)
 
     def _get_redis_client_args(self):
-        client_args = super(RedisSsl, self)._get_redis_client_args()
+        client_args = super()._get_redis_client_args()
         client_args['ssl'] = True
         if isinstance(self.broker_use_ssl, dict):
             client_args.update(self.broker_use_ssl)
         return client_args
 
 
-class Broker(object):
+class Broker:
     def __new__(cls, broker_url, *args, **kwargs):
         scheme = urlparse(broker_url).scheme
         if scheme == 'amqp':
             return RabbitMQ(broker_url, *args, **kwargs)
-        elif scheme == 'redis':
+        if scheme == 'redis':
             return Redis(broker_url, *args, **kwargs)
-        elif scheme == 'rediss':
+        if scheme == 'rediss':
             return RedisSsl(broker_url, *args, **kwargs)
-        elif scheme == 'redis+socket':
+        if scheme == 'redis+socket':
             return RedisSocket(broker_url, *args, **kwargs)
-        elif scheme == 'sentinel':
+        if scheme == 'sentinel':
             return RedisSentinel(broker_url, *args, **kwargs)
-        else:
-            raise NotImplementedError
+        raise NotImplementedError
 
-    def queues(self, names):
+    async def queues(self, names):
         raise NotImplementedError
 
 
