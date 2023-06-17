@@ -1,0 +1,16 @@
+[MASTER]
+disable=
+    C0114, # missing-module-docstring
+    C0115, # missing-class-docstring
+    C0116, # missing-function-docstring
+    C0301, # line-too-long
+    W0223, # abstract-method
+    R0903, # too-few-public-methods
+    R0902, # too-many-instance-attributes
+    W0622, # redefined-builtin
+    C0415, # import-outside-toplevel
+    W0718, # broad-exception-caught
+    R1735, # use-dict-literal
+
+[BASIC]
+good-names=i,e,n,x,logger,tz,db,dt
