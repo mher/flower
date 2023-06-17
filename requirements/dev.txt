@@ -1,3 +1,4 @@
 -r default.txt
 -r test.txt
 redis>=4.3.6
+pylint
