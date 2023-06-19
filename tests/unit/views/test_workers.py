@@ -81,8 +81,40 @@ class WorkersTests(AsyncHTTPTestCase):
         state = EventsState()
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
-                          local_received=time.time()))
+                          local_received=time.time(),
+                          ))
         self.app.events.state = state
+        self.app.inspector.workers['worker1'] = {'registeres': [],
+                                                 'active_queues': [{
+                                                     'name': 'default_queue',
+                                                     'exchange': {
+                                                        'name': 'default',
+                                                        'type': 'direct',
+                                                        'arguments': None,
+                                                        'durable': True,
+                                                        'passive': False,
+                                                        'auto_delete': False,
+                                                        'delivery_mode': None,
+                                                        'no_declare': False
+                                                 },
+                                                 'routing_key': 'default',
+                                                 'queue_arguments': None,
+                                                 'binding_arguments': None,
+                                                 'consumer_arguments': None,
+                                                 'durable': True,
+                                                 'exclusive': False,
+                                                 'auto_delete': False,
+                                                 'no_ack': False,
+                                                 'alias': None,
+                                                 'bindings': [],
+                                                 'no_declare': None,
+                                                 'expires': None,
+                                                 'message_ttl': None,
+                                                 'max_length': None,
+                                                 'max_length_bytes': None,
+                                                 'max_priority': None}],
+                                                 'stats': {'total': {'tasks.add': 10, 'tasks.sleep': 1, 'tasks.error': 1},
+                                                           'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
 
         r = self.get('/workers')
 
@@ -92,7 +124,7 @@ class WorkersTests(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
         self.assertEqual(1, len(table.rows()))
         self.assertTrue(table.get_row('worker1'))
-        self.assertEqual(['worker1', None, 'True', '0', '0', '0', '0', '0', None],
+        self.assertEqual(['worker1', 'default_queue', 'True', '0', '0', '0', '0', '0', None],
                          table.get_row('worker1'))
         self.assertFalse(table.get_row('worker2'))
 
