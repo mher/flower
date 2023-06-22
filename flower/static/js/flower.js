@@ -450,11 +450,8 @@ var flower = (function () {
                     var total = api.column(column).data().reduce(sum, 0);
                     var footer = total;
                     if (total !== 0) {
-                        footer = '<a href="/tasks';
-                        if (state !== "") {
-                            footer += '?state=' + state;
-                        }
-                        footer += '">' + total + '</a>';
+                        let queryParams = (state !== '' ? `?state=${state}` : '');
+                        footer = '<a href="' + url_prefix() + '/tasks' + queryParams + '">' + total + '</a>';
                     }
                     $(api.column(column).footer()).html(footer);
                 }
