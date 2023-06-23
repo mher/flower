@@ -33,6 +33,7 @@ div.dataTables_wrapper .dataTables_filter input {
 
 .overflow-auto {
   max-width: 400px;
+  text-overflow: ellipsis;
 }
 
 .overflow-auto::-webkit-scrollbar {
