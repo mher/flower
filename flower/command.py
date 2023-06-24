@@ -24,6 +24,11 @@ logger = logging.getLogger(__name__)
 ENV_VAR_PREFIX = 'FLOWER_'
 
 
+def sigterm_handler(signum, _):
+    logger.info('%s detected, shutting down', signum)
+    sys.exit(0)
+
+
 @click.command(cls=CeleryCommand,
                context_settings={
                    'ignore_unknown_options': True
@@ -43,13 +48,11 @@ def flower(ctx, tornado_argv):
     flower_app = Flower(capp=app, options=options, **settings)
 
     atexit.register(flower_app.stop)
+    signal.signal(signal.SIGTERM, sigterm_handler)
 
-    def sig_handler(signalnum, _):
-        logger.info('%s detected, shutting down', signalnum)
-        sys.exit(0)
+    if not ctx.obj.quiet:
+        print_banner(app, 'ssl_options' in settings)
 
-    signal.signal(signal.SIGTERM, sig_handler)
-    print_banner(app, 'ssl_options' in settings)
     try:
         flower_app.start()
     except (KeyboardInterrupt, SystemExit):
