@@ -36,5 +36,5 @@ jobs:
     - name: Run unit tests
       run: |
         python -m flower --version
-        python -m tests.unit.__main__
+        python -m tests.unit
 
