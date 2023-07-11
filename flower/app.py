@@ -30,6 +30,12 @@ def rewrite_handler(handler, url_prefix):
                    handler.handler_class, handler.kwargs, handler.name)
     return ("/{}{}".format(url_prefix.strip("/"), handler[0]), handler[1])
 
+def rewrite_handler_censor_config(handler):
+    if type(handler) is url:
+        if handler.name == "config":
+            return url(handler.regex.pattern, handler.handler_class, {"censor_config": True}, handler.name)
+    return handler
+
 
 class Flower(tornado.web.Application):
     pool_executor_cls = ThreadPoolExecutor
@@ -41,6 +47,12 @@ class Flower(tornado.web.Application):
         if options is not None and options.url_prefix:
             handlers = [rewrite_handler(h, options.url_prefix) for h in handlers]
         kwargs.update(handlers=handlers)
+
+        if options.censor_config:
+            logging.debug("Censoring config from web interface")
+            handlers = [rewrite_handler_censor_config(h) for h in handlers]
+        kwargs.update(handlers=handlers)
+
         super().__init__(**kwargs)
         self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
