@@ -334,7 +334,6 @@
                 <tbody>
                   {% for name,value in sorted(worker.get('conf', {}).items()) %}
                     {% if value is not None %}
-                      {% if name == "config" %}
                       <tr>
                         <td><a href="http://docs.celeryproject.org/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
                         {% if censor_config == True %}
@@ -396,4 +395,3 @@
       </div>
     </div>
   </div>
-  {% end %}
