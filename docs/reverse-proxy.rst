@@ -5,22 +5,34 @@ Running behind reverse proxy
 
 To run `Flower` behind a reverse proxy, remember to set the correct `Host` 
 header to the request to make sure Flower can generate correct URLs.
-The following is a minimal `nginx` configuration:
+
+The following block represents the minimal `nginx` configuration:
 
 .. code-block:: nginx
 
     server {
         listen 80;
         server_name flower.example.com;
-        charset utf-8;
 
         location / {
             proxy_pass http://localhost:5555;
-            proxy_set_header Host $host;
-            proxy_redirect off;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
+        }
+    }
+
+If you run Flower behind custom location, make sure :ref:`url_prefix` option
+value equals to the location path.
+
+For instance, for `url_prefix` = **flower** (or **/flower**) you need the following
+`nginx` configuration:
+
+.. code-block:: nginx
+
+    server {
+        listen 80;
+        server_name flower.example.com;
+
+        location /flower/ {
+            proxy_pass http://localhost:5555;
         }
     }
 

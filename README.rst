@@ -59,7 +59,7 @@ Or use the configuration of `celery application <https://docs.celeryq.dev/en/sta
 
     $ celery -A tasks.app flower
 
-By default, flower runs on port 5555, which can be modified with the :ref:`port` option ::
+By default, flower runs on port 5555, which can be modified with the `port` option ::
 
     $ celery -A tasks.app flower --port=5001
 
@@ -72,7 +72,7 @@ In this example, Flower is using the `tasks.app` defined in the `examples/tasks.
 API
 ---
 
-Flower API enables to manage the cluster via HTTP `REST API.
+Flower API enables to manage the cluster via HTTP `REST API`.
 
 For example you can restart worker's pool by: ::
 

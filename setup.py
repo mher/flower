@@ -48,6 +48,7 @@ setup(
     version=get_package_version(),
     description='Celery Flower',
     long_description=open('README.rst').read(),
+    long_description_content_type="text/x-rst",
     author='Mher Movsisyan',
     author_email='mher.movsisyan@gmail.com',
     url='https://github.com/mher/flower',

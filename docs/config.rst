@@ -47,7 +47,7 @@ Environment variables
 Flower configuration options can also be passed through environment variables.
 All Flower options must be prefixed with `FLOWER_`.
 For example, to set the basic_auth option to foo:bar, you would set the
-`FLOWER_BROKER_API` environment variable to `foo:bar` ::
+`FLOWER_BASIC_AUTH` environment variable to `foo:bar` ::
 
     export FLOWER_BASIC_AUTH=foo:bar
     celery flower
@@ -537,6 +537,6 @@ oauth2_redirect_uri
 
 Default: None
 
-Sets the URI to which an OAuth 2.0 server redirects the user after successful authentication and authorization. 
+Sets the URI to which an OAuth 2.0 server redirects the user after successful authentication and authorization.
 
 `oauth2_redirect_uri` option should be used with :ref:`auth`, :ref:`auth_provider`, :ref:`oauth2_key` and :ref:`oauth2_secret` options.
