@@ -141,7 +141,7 @@ var flower = (function () {
         event.stopPropagation();
 
         var workername = $('#workername').text(),
-            grow_size = $('#pool-size option:selected').html();
+            grow_size = $('#pool-size').val();
 
         $.ajax({
             type: 'POST',
@@ -165,7 +165,7 @@ var flower = (function () {
         event.stopPropagation();
 
         var workername = $('#workername').text(),
-            shrink_size = $('#pool-size option:selected').html();
+            shrink_size = $('#pool-size').val();
 
         $.ajax({
             type: 'POST',
