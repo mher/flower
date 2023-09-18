@@ -117,7 +117,7 @@ Flower also supports GitLab OAuth for authentication. To enable GitLab OAuth, fo
 1. Register Flower as an application at GitLab. You can refer to the `GitLab OAuth documentation`_ for detailed instructions on how to do this.
 2. Once registered, you will obtain the credentials for Flower configuration.
 3. In your Flower configuration, set the following options to activate GitLab OAuth:
-    - :ref:`auth_provider` to `flower.views.auth.GitlabLoginHandler`.
+    - :ref:`auth_provider` to `flower.views.auth.GitLabLoginHandler`.
     - :ref:`oauth2_key` to the "Application ID" obtained from GitLab.
     - :ref:`oauth2_secret` to the "Secret" obtained from GitLab.
     - :ref:`oauth2_redirect_uri`: Set this to the redirect URI configured in GitLab.
