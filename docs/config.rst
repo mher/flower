@@ -221,7 +221,7 @@ to be used by Flower for storing task results, events, or other persistent data.
 
 Example::
 
-    $ celery flower persistent=True --db ="flower_db"
+    $ celery flower --persistent=True --db="flower_db"
 
 .. _debug:
 
