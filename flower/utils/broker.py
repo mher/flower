@@ -159,7 +159,7 @@ class RedisSentinel(RedisBase):
     def __init__(self, broker_url, *args, **kwargs):
         super().__init__(broker_url, *args, **kwargs)
         broker_options = kwargs.get('broker_options', {})
-        broker_use_ssl = kwargs.get('broker_use_ssl', {})
+        broker_use_ssl = kwargs.get('broker_use_ssl', None)
         self.host = self.host or 'localhost'
         self.port = self.port or 26379
         self.vhost = self._prepare_virtual_host(self.vhost)
