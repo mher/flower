@@ -546,6 +546,7 @@ var flower = (function () {
             colReorder: true,
             lengthMenu: [15, 30, 50, 100],
             pageLength: 15,
+            stateSave: true,
             language: {
                 lengthMenu: 'Show _MENU_ tasks',
                 info: 'Showing _START_ to _END_ of _TOTAL_ tasks',
