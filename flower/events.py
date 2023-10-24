@@ -98,7 +98,7 @@ class EventsState(State):
 
             if options.persist_only_failed_tasks:
                 if event_type in ['task-succeeded', 'task-revoked']:
-                    del self.tasks[task_id]               
+                    del self.tasks[task_id]
 
         if event_type == 'worker-online':
             self.metrics.worker_online.labels(worker_name).set(1)
