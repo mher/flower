@@ -541,9 +541,13 @@ Sets the URI to which an OAuth 2.0 server redirects the user after successful au
 
 `oauth2_redirect_uri` option should be used with :ref:`auth`, :ref:`auth_provider`, :ref:`oauth2_key` and :ref:`oauth2_secret` options.
 
+.. _persist_only_failed_tasks:
+
 persist_only_failed_tasks
 ~~~~~~~~~~~~~~~~~~~
 
 Default: False
 
 Config to persist only failed tasks
+
+.. Note:: When persist_only_failed_tasks mode is enabled, Flower only show failed tasks, but still count number of other tasks.
