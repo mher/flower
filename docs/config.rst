@@ -476,6 +476,7 @@ To enable authentication and specify an authentication provider, set the `auth_p
   - GitHub `flower.views.auth.GithubLoginHandler`
   - GitLab `flower.views.auth.GitLabLoginHandler`
   - Okta `flower.views.auth.OktaLoginHandler`
+  - Auth0 `flower.views.auth.Auth0LoginHandler`
 
 See also :ref:`Authentication` for usage examples
 

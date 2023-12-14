@@ -19,7 +19,7 @@ Features
 - Broker monitoring
     - View statistics for all Celery queues
 
-- HTTP Basic Auth, Google, Github, Gitlab and Okta OAuth
+- HTTP Basic Auth, Google, Github, Gitlab, Okta and Auth0 OAuth
 
 - Prometheus integration
 

@@ -4,7 +4,7 @@ Authentication
 ==============
 
 Flower supports a variety of authentication methods, including Basic Authentication, Google, GitHub,
-GitLab, and Okta OAuth. You can also customize and use your own authentication method.
+GitLab, Okta and Auth0 OAuth. You can also customize and use your own authentication method.
 
 The following endpoints are exempt from authentication:
 
@@ -97,7 +97,7 @@ Okta OAuth
 ----------
 
 Flower also supports Okta OAuth. Before getting started, you need to register Flower in `Okta`_.
-Okta OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.OktaLoginHandler`.
+Okta OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.OktaLoginHandler`.
 
 Okta OAuth requires `oauth2_key`, `oauth2_secret` and `oauth2_redirect_uri` options which should be obtained from Okta.
 Okta OAuth also uses `FLOWER_OAUTH2_OKTA_BASE_URL` environment variable.
@@ -106,6 +106,22 @@ See Okta `Okta OAuth API`_ docs for more info.
 
 .. _Okta: https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/main/
 .. _Okta OAuth API: https://developer.okta.com/docs/reference/api/oidc/
+
+.. _auth0-oauth:
+
+Auth0 OAuth
+----------
+
+Flower also supports Auth0 OAuth. Before getting started, you need to register Flower in `Auth0`_ as a "Regular Web Application".
+Auth0 OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.Auth0LoginHandler`.
+
+Auth0 OAuth requires `oauth2_key`, `oauth2_secret` and `oauth2_redirect_uri` options which should be obtained from Auth0.
+Auth0 OAuth also uses `FLOWER_OAUTH2_AUTH0_BASE_URL` environment variable.
+
+See Auth0 `Auth0 OAuth API`_ docs for more info.
+
+.. _Auth0: https://auth0.com/docs/get-started/auth0-overview/create-applications/regular-web-apps
+.. _Auth0 OAuth API: https://auth0.com/docs/api/authentication
 
 .. _gitlab-oauth:
 
@@ -130,6 +146,6 @@ It provides comprehensive information and guidelines on working with GitLab's OA
 
 See also `GitLab OAuth2 API`_ documentation for more info.
 
-.. _GitLab OAuth documentation: https://docs.gitlab.com/ee/integration/oauth_provider.htm
+.. _GitLab OAuth documentation: https://docs.gitlab.com/ee/integration/oauth_provider.html
 .. _GitLab OAuth2 API: https://docs.gitlab.com/ee/api/oauth2.html
 .. _Group and project members API: https://docs.gitlab.com/ee/api/members.html
