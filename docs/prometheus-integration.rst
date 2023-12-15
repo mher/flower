@@ -185,7 +185,7 @@ Prometheus's GUI. Go to `Graph` tab and start typing `flower` - the autocomplete
 Start Grafana
 -------------
 
-You can use `Grafana Pycharm run configuration <https://github.com/mher/flower/tree/master/examples/pycharm-configurations/Grafna.run.xml>`_.
+You can use `Grafana Pycharm run configuration <https://github.com/mher/flower/tree/master/examples/pycharm-configurations/Grafana.run.xml>`_.
 
 Or run it from the terminal::
 
