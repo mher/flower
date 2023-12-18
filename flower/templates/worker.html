@@ -333,14 +333,22 @@
                 <caption>Configuration options</caption>
                 <tbody>
                   {% for name,value in sorted(worker.get('conf', {}).items()) %}
-                  {% if value is not None %}
-                  <tr>
-                    <td><a
-                        href="https://docs.celeryq.dev/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}"
-                        target="_blank">{{ name }}</a></td>
-                    <td>{{ value }}</td>
-                  </tr>
-                  {% end %}
+                    {% if value is not None %}
+                      <tr>
+                        <td><a href="http://docs.celeryproject.org/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
+                        {% if censor_config == True %}
+                        <td><em>Censored</em></td>
+                        {% else %}
+                        <td>{{ value }}</td>
+                        {% end %}
+                      </tr>
+                      {% else %}
+                      <tr>
+                        <td><a href="http://docs.celeryproject.org/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}" target="_blank">{{ name }}</a></td>
+                        <td>{{ value }}</td>
+                      </tr>
+                      {% end %}
+                    {% end %}
                   {% end %}
                 </tbody>
               </table>
@@ -387,4 +395,3 @@
       </div>
     </div>
   </div>
-  {% end %}
