@@ -1,7 +1,10 @@
 import json
 import time
+from datetime import datetime
 
+import pytz
 from celery.events import Event
+from tzlocal import get_localzone
 
 from flower.events import EventsState
 from tests.unit import AsyncHTTPTestCase
@@ -240,3 +243,59 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('task2', tasks[0]['name'])
         self.assertEqual('456', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
+
+
+class TasksTimeZoneTest(AsyncHTTPTestCase):
+
+    def test_config_time_zone_is_utc(self):
+        del self._app.capp.timezone  # clear cached property
+        self._app.capp.conf.timezone = 'UTC'
+        self._app.capp.conf.enable_utc = False  # should be ignored
+        self._app.options.browser_local_time = False
+
+        r = self.get('/tasks')
+        self.assertEqual(200, r.code)
+        body = r.body.decode()
+        self.assertIn('time-UTC', body)
+
+    def test_config_time_zone_is_celery_local(self):
+        del self._app.capp.timezone  # clear cached property
+        self._app.capp.conf.timezone = 'Pacific/Chatham'
+        self._app.capp.conf.enable_utc = True  # should be ignored
+        self._app.options.browser_local_time = False
+
+        r = self.get('/tasks')
+        self.assertEqual(200, r.code)
+        body = r.body.decode()
+
+        self.assertIn(f'time-Pacific/Chatham', body)
+
+    def test_default_time_zone_is_utc(self):
+        del self._app.capp.timezone  # clear cached property
+        self._app.capp.conf.enable_utc = True
+        self._app.options.browser_local_time = False
+
+        r = self.get('/tasks')
+        self.assertEqual(200, r.code)
+        body = r.body.decode()
+        self.assertIn('time-UTC', body)
+
+    def test_default_time_zone_is_system_local(self):
+        del self._app.capp.timezone  # clear cached property
+        self._app.capp.conf.enable_utc = False
+        self._app.options.browser_local_time = False
+
+        r = self.get('/tasks')
+        self.assertEqual(200, r.code)
+        body = r.body.decode()
+        self.assertIn(f'time-{get_localzone()}', body)
+
+    def test_browser_local_time(self):
+        del self._app.capp.timezone  # clear cached property
+        self._app.capp.conf.timezone = 'Pacific/Chatham'
+        self._app.options.browser_local_time = True
+
+        r = self.get('/tasks')
+        self.assertEqual(200, r.code)
+        body = r.body.decode()
+        self.assertIn(f'time', body)

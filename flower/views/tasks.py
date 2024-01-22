@@ -1,8 +1,12 @@
 import copy
 import logging
+from datetime import datetime
 from functools import total_ordering
 
+import pytz
 from tornado import web
+from tzlocal import get_localzone
+from celery.utils.time import LocalTimezone
 
 from ..utils.tasks import as_dict, get_task_by_id, iter_tasks
 from ..views import BaseHandler
@@ -113,8 +117,18 @@ class TasksView(BaseHandler):
         capp = self.application.capp
 
         time = 'natural-time' if app.options.natural_time else 'time'
-        if capp.conf.timezone:
-            time += '-' + str(capp.conf.timezone)
+
+        if not app.options.browser_local_time:
+            # Append Celery app timezone in IANA format
+            if capp.timezone:
+                if isinstance(capp.timezone, LocalTimezone):
+                    timezone = get_localzone()
+                else:
+                    timezone = capp.timezone
+            else:
+                timezone = pytz.utc
+
+            time = f'{time}-{timezone}'
 
         self.render(
             "tasks.html",
