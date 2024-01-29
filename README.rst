@@ -48,6 +48,10 @@ The development version can be installed from Github ::
 
     $ pip install https://github.com/mher/flower/zipball/master#egg=flower
 
+Installing `flower` with `poetry <https://python-poetry.org/>` ::
+
+    $ poetry install flower
+
 Usage
 -----
 
