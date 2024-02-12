@@ -50,7 +50,7 @@ The development version can be installed from Github ::
 
 Installing `flower` with `poetry <https://python-poetry.org/>` ::
 
-    $ poetry install
+    $ poetry add flower && poetry install
 
 Usage
 -----
