@@ -85,11 +85,12 @@ class EventsState(State):
 
             task_started = task.started
             task_received = task.received
-
+            task_revoked = task.revoked
+            
             if event_type == 'task-received' and not task.eta and task_received:
                 self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).inc()
 
-            if event_type == 'task-started' and not task.eta and task_started and task_received:
+            if event_type == 'task-started' and not task.eta and (task_started or task_revoked) and task_received:
                 self.metrics.prefetch_time.labels(worker_name, task_name).set(task_started - task_received)
                 self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).dec()
 
