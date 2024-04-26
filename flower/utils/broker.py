@@ -230,6 +230,8 @@ class Broker:
         scheme = urlparse(broker_url).scheme
         if scheme == 'amqp':
             return RabbitMQ(broker_url, *args, **kwargs)
+        if scheme == 'amqps':
+            return RabbitMQ(broker_url, *args, **kwargs)
         if scheme == 'redis':
             return Redis(broker_url, *args, **kwargs)
         if scheme == 'rediss':

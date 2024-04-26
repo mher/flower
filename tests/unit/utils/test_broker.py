@@ -9,7 +9,7 @@ broker.requests = MagicMock()
 broker.redis = MagicMock()
 
 
-class TestRabbitMQ(unittest.TestCase):
+class TestRabbitMQwithAMQP(unittest.TestCase):
     def test_init(self):
         b = Broker('amqp://', '')
         self.assertTrue(isinstance(b, RabbitMQ))
@@ -40,18 +40,46 @@ class TestRabbitMQ(unittest.TestCase):
             self.assertEqual('guest', b.username)
             self.assertEqual('guest', b.password)
 
-    def test_url_defaults_redis(self):
-        for url in ['redis://', 'redis://localhost', 'redis://localhost/0']:
-            b = Redis(url, '')
-            self.assertEqual('localhost', b.host)
-            self.assertEqual(6379, b.port)
-            self.assertEqual(0, b.vhost)
-            self.assertEqual(None, b.username)
-            self.assertEqual(None, b.password)
-
     def test_invalid_http_api(self):
         with self.assertLogs('', level='ERROR') as cm:
             RabbitMQ('amqp://user:pass@host:10000/vhost', http_api='ftp://')
+            self.assertEqual(['ERROR:flower.utils.broker:Invalid broker api url: ftp://'], cm.output)
+
+
+class TestRabbitMQwithAMQPS(unittest.TestCase):
+    def test_init(self):
+        b = Broker('amqps://', '')
+        self.assertTrue(isinstance(b, RabbitMQ))
+        self.assertFalse(isinstance(b, Redis))
+
+    def test_url(self):
+        b = RabbitMQ('amqps://user:pass@host:10000/vhost', '')
+        self.assertEqual('host', b.host)
+        self.assertEqual(10000, b.port)
+        self.assertEqual('vhost', b.vhost)
+        self.assertEqual('user', b.username)
+        self.assertEqual('pass', b.password)
+
+    def test_url_vhost_slash(self):
+        b = RabbitMQ('amqps://user:pass@host:10000//', '')
+        self.assertEqual('host', b.host)
+        self.assertEqual(10000, b.port)
+        self.assertEqual('/', b.vhost)
+        self.assertEqual('user', b.username)
+        self.assertEqual('pass', b.password)
+
+    def test_url_defaults_rabbitmq(self):
+        for url in ['amqps://', 'amqp://localhost']:
+            b = RabbitMQ(url, '')
+            self.assertEqual('localhost', b.host)
+            self.assertEqual(15672, b.port)
+            self.assertEqual('/', b.vhost)
+            self.assertEqual('guest', b.username)
+            self.assertEqual('guest', b.password)
+
+    def test_invalid_http_api(self):
+        with self.assertLogs('', level='ERROR') as cm:
+            RabbitMQ('amqps://user:pass@host:10000/vhost', http_api='ftp://')
             self.assertEqual(['ERROR:flower.utils.broker:Invalid broker api url: ftp://'], cm.output)
 
 
