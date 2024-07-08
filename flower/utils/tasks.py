@@ -56,11 +56,10 @@ def sort_tasks(tasks, sort_by):
     if sort_by.startswith('-'):
         sort_by = sort_by.lstrip('-')
         reverse = True
-    for task in sorted(
+    yield from sorted(
             tasks,
             key=lambda x: getattr(x[1], sort_by) or sort_keys[sort_by](),
-            reverse=reverse):
-        yield task
+            reverse=reverse)
 
 
 def get_task_by_id(events, task_id):
