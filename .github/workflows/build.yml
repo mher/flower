@@ -26,8 +26,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install celery==${{ matrix.celery-version }} \
                     tornado==${{ matrix.tornado-version }} \
-                    -r requirements/default.txt \
-                    -r requirements/test.txt \
                     -r requirements/dev.txt
 
     - name: Lint with pylint
