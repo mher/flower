@@ -12,6 +12,9 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         celery-version: ['5.2.*', '5.3.*']
         tornado-version: ['6.0']
+        exclude:  # https://docs.celeryq.dev/en/v5.2.1/whatsnew-5.2.html#step-5-upgrade-to-celery-5-2
+          - python-version: '3.12'
+            celery-version: '5.2.*'
 
     steps:
     - uses: actions/checkout@v3
