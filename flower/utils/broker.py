@@ -47,7 +47,9 @@ class RabbitMQ(BrokerBase):
         self.password = self.password or 'guest'
 
         if not http_api:
-            http_api = f"http://{self.username}:{self.password}@{self.host}:{self.port}/api/{self.vhost}"
+            http_scheme = 'https' if self.scheme == 'amqps' else 'http'
+            http_port = 15671 if self.scheme == 'amqps' else 15672
+            http_api = f"{http_scheme}://{self.username}:{self.password}@{self.host}:{http_port}/api/{self.vhost}"
 
         try:
             self.validate_http_api(http_api)
