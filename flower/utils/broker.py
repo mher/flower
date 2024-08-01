@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 class BrokerBase:
     def __init__(self, broker_url, *_, **__):
         purl = urlparse(broker_url)
+        self.scheme = purl.scheme
         self.host = purl.hostname
         self.port = purl.port
         self.vhost = purl.path[1:]
@@ -40,7 +41,7 @@ class RabbitMQ(BrokerBase):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
-        self.port = self.port or 15672
+        self.port = self.port or (5671 if self.scheme == 'amqps' else 5672)
         self.vhost = quote(self.vhost, '') or '/' if self.vhost != '/' else self.vhost
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
@@ -228,7 +229,7 @@ class RedisSsl(Redis):
 class Broker:
     def __new__(cls, broker_url, *args, **kwargs):
         scheme = urlparse(broker_url).scheme
-        if scheme == 'amqp':
+        if scheme in ('amqp','amqps'):
             return RabbitMQ(broker_url, *args, **kwargs)
         if scheme == 'redis':
             return Redis(broker_url, *args, **kwargs)
