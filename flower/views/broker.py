@@ -14,7 +14,7 @@ class BrokerView(BaseHandler):
         app = self.application
 
         http_api = None
-        if app.transport == 'amqp' and app.options.broker_api:
+        if app.transport in ('amqp','amqps') and app.options.broker_api:
             http_api = app.options.broker_api
 
         try:
