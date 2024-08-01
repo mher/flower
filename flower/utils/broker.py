@@ -41,15 +41,14 @@ class RabbitMQ(BrokerBase):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
-        self.port = self.port or (5671 if self.scheme == 'amqps' else 5672)
+        self.port = self.port or (15671 if self.scheme == 'amqps' else 15672)
         self.vhost = quote(self.vhost, '') or '/' if self.vhost != '/' else self.vhost
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
         if not http_api:
             http_scheme = 'https' if self.scheme == 'amqps' else 'http'
-            http_port = 15671 if self.scheme == 'amqps' else 15672
-            http_api = f"{http_scheme}://{self.username}:{self.password}@{self.host}:{http_port}/api/{self.vhost}"
+            http_api = f"{http_scheme}://{self.username}:{self.password}@{self.host}:{self.port}/api/{self.vhost}"
 
         try:
             self.validate_http_api(http_api)
