@@ -68,3 +68,11 @@ def task_failed_events(worker, id=None, name=None):
             Event('task-started', uuid=id, hostname=worker),
             Event('task-failed', uuid=id, exception="KeyError('foo')",
                   traceback='line 1 at main', hostname=worker)]
+
+def task_revoked_events(worker, id=None, name=None):
+    id = id or uuid()
+    name = name or 'sometask'
+    return [Event('task-received', uuid=id, name=name,
+                  args='(2, 2)', kwargs="{'foo': 'bar'}",
+                  retries=0, eta=None, hostname=worker),
+            Event('task-revoked', uuid=id, hostname=worker)]
