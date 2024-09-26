@@ -1,5 +1,6 @@
 import collections
 import logging
+import pickle
 import shelve
 import threading
 import time
@@ -12,6 +13,11 @@ from prometheus_client import Counter as PrometheusCounter
 from prometheus_client import Gauge, Histogram
 from tornado.ioloop import PeriodicCallback
 from tornado.options import options
+
+try:
+    import redis
+except ImportError:
+    redis = None
 
 logger = logging.getLogger(__name__)
 
@@ -125,20 +131,32 @@ class Events(threading.Thread):
 
         self.db = db
         self.persistent = persistent
+        self.redis_client = None
+        if self.persistent and self.db.startswith("redis://"):
+            if not redis:
+                raise ImportError('redis library is required')
+            self.redis_client = redis.Redis.from_url(self.db)
         self.enable_events = enable_events
         self.state = None
         self.state_save_timer = None
 
         if self.persistent:
-            logger.debug("Loading state from '%s'...", self.db)
-            state = shelve.open(self.db)
-            if state:
-                self.state = state['events']
-            state.close()
-
             if state_save_interval:
                 self.state_save_timer = PeriodicCallback(self.save_state,
                                                          state_save_interval)
+
+            if self.redis_client:
+                logger.debug("Loading state from Redis...")
+                state = self.redis_client.get('flower_events')
+                if state:
+                    self.state = pickle.loads(state)
+
+            if not self.redis_client:
+                logger.debug("Loading state from '%s'...", self.db)
+                state = shelve.open(self.db)
+                if state:
+                    self.state = state['events']
+                state.close()
 
         if not self.state:
             self.state = EventsState(**kwargs)
@@ -195,10 +213,14 @@ class Events(threading.Thread):
                 time.sleep(try_interval)
 
     def save_state(self):
-        logger.debug("Saving state to '%s'...", self.db)
-        state = shelve.open(self.db, flag='n')
-        state['events'] = self.state
-        state.close()
+        if self.redis_client:
+            logger.debug("Saving state to Redis...")
+            self.redis_client.set('flower_events', pickle.dumps(self.state))
+        else:
+            logger.debug("Saving state to '%s'...", self.db)
+            state = shelve.open(self.db, flag='n')
+            state['events'] = self.state
+            state.close()
 
     def on_enable_events(self):
         # Periodically enable events for workers
