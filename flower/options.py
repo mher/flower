@@ -31,7 +31,7 @@ define("max_workers", type=int, default=5000,
        help="maximum number of workers to keep in memory")
 define("max_tasks", type=int, default=100000,
        help="maximum number of tasks to keep in memory")
-define("db", type=str, default='flower',
+define("db", type=str, default='flower_db_file',
        help="flower database file")
 define("persistent", type=bool, default=False,
        help="enable persistent mode")

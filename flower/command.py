@@ -21,7 +21,7 @@ from .options import DEFAULT_CONFIG_FILE, default_options
 from .views.auth import validate_auth_option
 
 logger = logging.getLogger(__name__)
-ENV_VAR_PREFIX = 'FLOWER_'
+ENV_VAR_PREFIX = 'FLOWER_SERVER_'
 
 
 def sigterm_handler(signum, _):
@@ -62,6 +62,7 @@ def flower(ctx, tornado_argv):
 def apply_env_options():
     "apply options passed through environment variables"
     env_options = filter(is_flower_envvar, os.environ)
+    print(os.environ)
     for env_var_name in env_options:
         name = env_var_name.replace(ENV_VAR_PREFIX, '', 1).lower()
         value = os.environ[env_var_name]
@@ -75,6 +76,7 @@ def apply_env_options():
             if option.type is bool:
                 value = bool(strtobool(value))
             else:
+                print(name, value)
                 value = option.type(value)
         setattr(options, name, value)
 
@@ -179,3 +181,4 @@ def print_banner(app, ssl):
         pformat(sorted(app.tasks.keys()))
     )
     logger.debug('Settings: %s', pformat(settings))
+

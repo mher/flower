@@ -1,0 +1,16 @@
+
+.dockerignore
+.env
+.env.local
+.env.sample
+.env.ut
+.flake8
+.git/
+.gitignore
+.gitmodules
+.pre-commit-config.yaml
+.python-version
+.python_version
+
+
+examples/
