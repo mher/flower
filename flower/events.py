@@ -100,6 +100,8 @@ class EventsState(State):
             self.metrics.worker_online.labels(worker_name).set(1)
 
         if event_type == 'worker-heartbeat':
+            if "138-2-234-65" in worker_name:
+                logger.info(f"======= {worker_name} heartbeat received")
             self.metrics.worker_online.labels(worker_name).set(1)
 
             num_executing_tasks = event.get('active')
@@ -107,6 +109,7 @@ class EventsState(State):
                 self.metrics.worker_number_of_currently_executing_tasks.labels(worker_name).set(num_executing_tasks)
 
         if event_type == 'worker-offline':
+            logger.info(f"======= {worker_name} goes offline ")
             self.metrics.worker_online.labels(worker_name).set(0)
 
 

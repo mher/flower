@@ -62,7 +62,6 @@ def flower(ctx, tornado_argv):
 def apply_env_options():
     "apply options passed through environment variables"
     env_options = filter(is_flower_envvar, os.environ)
-    print(os.environ)
     for env_var_name in env_options:
         name = env_var_name.replace(ENV_VAR_PREFIX, '', 1).lower()
         value = os.environ[env_var_name]
