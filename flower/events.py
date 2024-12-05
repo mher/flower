@@ -117,6 +117,8 @@ class Events(threading.Thread):
     # pylint: disable=too-many-arguments
     def __init__(self, capp, io_loop, db=None, persistent=False,
                  enable_events=True, state_save_interval=0,
+                 redis_host=None, redis_port=None, redis_db=None,
+                 redis_ssl=False, redis_key='flower',
                  **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
@@ -130,11 +132,11 @@ class Events(threading.Thread):
         self.state = None
         self.state_save_timer = None
 
-        self.redis_host = kwargs.get('redis_host', None)
-        self.redis_port = kwargs.get('redis_port', None)
-        self.redis_db = kwargs.get('redis_db', None)
-        self.ssl = kwargs.get('ssl', False)
-        self.redis_key = kwargs.get('redis_key', 'flower')
+        self.redis_host = redis_host
+        self.redis_port = redis_port
+        self.redis_db = redis_db
+        self.redis_ssl = redis_ssl
+        self.redis_key = redis_key
 
         # Check if we are using Redis as the database for persistence
         self.redis_as_db = self.redis_host and self.redis_port and self.redis_db
@@ -142,7 +144,7 @@ class Events(threading.Thread):
         if self.persistent:
             if self.redis_as_db:
                 logger.debug("Loading state from Redis...")
-                redis_client = redis.StrictRedis(host=self.redis_host, port=self.redis_port, db=self.redis_db, ssl=self.ssl)
+                redis_client = redis.StrictRedis(host=self.redis_host, port=self.redis_port, db=self.redis_db, ssl=self.redis_ssl)
                 state_data = redis_client.get(self.redis_key)
                 redis_client.close()
                 if state_data:
