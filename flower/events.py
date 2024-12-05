@@ -220,7 +220,7 @@ class Events(threading.Thread):
     def save_state(self):
         logger.debug("Saving state...")
         if self.redis_as_db:
-            redis_client = redis.StrictRedis(host=self.redis_host, port=self.redis_port, db=self.redis_db, ssl=self.ssl)
+            redis_client = redis.StrictRedis(host=self.redis_host, port=self.redis_port, db=self.redis_db, ssl=self.redis_ssl)
             state_data = pickle.dumps(self.state)
             redis_client.set(self.redis_key, state_data)
             redis_client.close()
