@@ -144,7 +144,7 @@ class Events(threading.Thread):
         if self.persistent:
             if self.redis_as_db:
                 logger.debug("Loading state from Redis...")
-                redis_client = redis.StrictRedis(host=self.redis_host, port=self.redis_port, db=self.redis_db, ssl=self.redis_ssl)
+                redis_client = redis.Redis(host=self.redis_host, port=self.redis_port, db=self.redis_db, ssl=self.redis_ssl)
                 state_data = redis_client.get(self.redis_key)
                 redis_client.close()
                 if state_data:
