@@ -1,5 +1,6 @@
 import datetime
 import time
+import json
 
 from .search import parse_search_terms, satisfies_search_terms
 
@@ -68,3 +69,54 @@ def get_task_by_id(events, task_id):
 
 def as_dict(task):
     return task.as_dict()
+
+def parse_args(args):
+    """
+    Parse and process the `args` of the task.
+    """
+    if not args:
+        return []
+    try:
+        # Attempt to parse JSON
+        parsed_args = json.loads(args)
+        if isinstance(parsed_args, str) and parsed_args.startswith('(') and parsed_args.endswith(')'):
+            return eval(parsed_args)  # Handle stringified tuples
+        return parsed_args
+    except (json.JSONDecodeError, SyntaxError):
+        # Fallback for stringified tuples or ellipsis
+        if args == '...':
+            return [...]
+        if args.startswith('(') and args.endswith(')'):
+            return eval(args)
+        return [args]
+
+def parse_kwargs(kwargs):
+    """
+    Parse and process the `kwargs` of the task.
+    """
+    if not kwargs:
+        return {}
+    try:
+        # Attempt to parse JSON
+        return json.loads(kwargs)
+    except json.JSONDecodeError:
+        try:
+            # Fallback for stringified dictionaries
+            import ast
+            if kwargs.startswith('{') and kwargs.endswith('}'):
+                return ast.literal_eval(kwargs)
+        except (ValueError, SyntaxError):
+            return {}
+    return {}
+
+def make_json_serializable(obj):
+    """
+    Recursively replace non-serializable types with JSON-serializable alternatives.
+    """
+    if isinstance(obj, list):
+        return [make_json_serializable(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {key: make_json_serializable(value) for key, value in obj.items()}
+    elif obj is Ellipsis:
+        return None  # Replace `...` with `null`
+    return obj  # Return the object if it's already serializable

@@ -14,6 +14,7 @@ from tornado.web import HTTPError
 
 from ..utils import tasks
 from ..utils.broker import Broker
+from ..utils.tasks import parse_args, parse_kwargs, make_json_serializable
 from . import BaseApiHandler
 
 logger = logging.getLogger(__name__)
@@ -636,3 +637,50 @@ Get a task info
             response['worker'] = task.worker.hostname
 
         self.write(response)
+
+class TaskReapply(BaseTaskHandler):
+    @web.authenticated
+    async def post(self, taskid):
+        """
+        Get task info and reapply the task with the same arguments.
+
+        :param taskid: ID of the task to reapply.
+        """
+        # Get original task info
+        task = tasks.get_task_by_id(self.application.events, taskid)
+        if not task:
+            raise HTTPError(404, f"Unknown task '{taskid}'")
+
+        # Get task name
+        taskname = task.name
+        if not taskname:
+            raise HTTPError(400, "Cannot reapply task with no name")
+
+        try:
+            # Get the task object from registered tasks
+            task_obj = self.capp.tasks[taskname]
+        except KeyError as exc:
+            raise HTTPError(404, f"Unknown task '{taskname}'") from exc
+
+        # Parse args and kwargs from the original task
+        try:
+            args = parse_args(task.args)
+            kwargs = parse_kwargs(task.kwargs)
+        except Exception as exc:
+            logger.error("Error parsing task arguments: %s", exc)
+            raise HTTPError(400, f"Invalid task arguments: {str(exc)}") from exc
+
+        # Apply the task with original arguments
+        try:
+            # Ensure args and kwargs are JSON serializable
+            args = make_json_serializable(args)
+            kwargs = make_json_serializable(kwargs)
+
+            result = task_obj.apply_async(args=args, kwargs=kwargs)
+            response = {'task-id': result.task_id}
+            if self.backend_configured(result):
+                response.update(state=result.state)
+            self.write(response)
+        except Exception as exc:
+            logger.error("Error reapplying task with args=%s, kwargs=%s: %s", args, kwargs, str(exc))
+            raise HTTPError(500, f"Error reapplying task: {str(exc)}") from exc

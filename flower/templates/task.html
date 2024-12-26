@@ -16,6 +16,11 @@
                 <button class="btn btn-danger float-end" id="task-terminate">Terminate</button>
             {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
                 <button class="btn btn-danger float-end" id="task-revoke">Revoke</button>
+                {% elif task.state == "FAILURE" %}
+                <button class="btn btn-warning float-end" id="task-retry" data-bs-toggle="button">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    Retry
+                </button>
             {% end %}
           </h2>
         </div>
