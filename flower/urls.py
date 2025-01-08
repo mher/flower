@@ -61,7 +61,6 @@ handlers = [
     (r"/api/task/rate-limit/(.+)", control.TaskRateLimit),
     (r"/api/task/revoke/(.+)", control.TaskRevoke),
     # Metrics
-    # WebSocket Updates
     (r"/update-dashboard", DashboardUpdateHandler),
     # Monitors
     url(r"/monitor", monitor.Monitor, name='monitor'),
