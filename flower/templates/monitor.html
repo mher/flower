@@ -3,6 +3,13 @@
 {% block navbar %}
   {% module Template("navbar.html", active_tab="monitor") %}
 {% end %}
+{% block extra_scripts %}
+    <script src="{{ static_url('js/jquery-ui-1-8-15.min.js') }}"></script>
+    <script src="{{ static_url('js/d3.min.js') }}"></script>
+    <script src="{{ static_url('js/d3.layout.min.js') }}"></script>
+    <script src="{{ static_url('js/rickshaw.min.js') }}"></script>
+
+{% end %}
 
 {% block container %}
 
