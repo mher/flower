@@ -52,6 +52,21 @@ handlers = [
     (r"/api/task/rate-limit/(.+)", control.TaskRateLimit),
     (r"/api/task/revoke/(.+)", control.TaskRevoke),
     # Metrics
+    # Events WebSocket API
+    (r"/api/task/events/task-sent/(.*)", events.TaskSent),
+    (r"/api/task/events/task-received/(.*)", events.TaskReceived),
+    (r"/api/task/events/task-started/(.*)", events.TaskStarted),
+    (r"/api/task/events/task-succeeded/(.*)", events.TaskSucceeded),
+    (r"/api/task/events/task-failed/(.*)", events.TaskFailed),
+    (r"/api/task/events/task-revoked/(.*)", events.TaskRevoked),
+    (r"/api/task/events/task-retried/(.*)", events.TaskRetried),
+    (r"/api/task/events/task-custom/(.*)", events.TaskCustom),
+    # Monitors
+    url(r"/monitor", monitor.Monitor, name='monitor'),
+    (r"/monitor/succeeded-tasks", monitor.SucceededTaskMonitor),
+    (r"/monitor/failed-tasks", monitor.FailedTaskMonitor),
+    (r"/monitor/completion-time", monitor.TimeToCompletionMonitor),
+    (r"/monitor/broker", monitor.BrokerMonitor),
     (r"/metrics", monitor.Metrics),
     (r"/healthcheck", monitor.Healthcheck),
     # Static
