@@ -1,6 +1,7 @@
 import datetime
 import time
 import json
+import ast
 
 from .search import parse_search_terms, satisfies_search_terms
 
@@ -80,14 +81,14 @@ def parse_args(args):
         # Attempt to parse JSON
         parsed_args = json.loads(args)
         if isinstance(parsed_args, str) and parsed_args.startswith('(') and parsed_args.endswith(')'):
-            return eval(parsed_args)  # Handle stringified tuples
+            return ast.literal_eval(parsed_args)  # Handle stringified tuples safely
         return parsed_args
     except (json.JSONDecodeError, SyntaxError):
         # Fallback for stringified tuples or ellipsis
         if args == '...':
             return [...]
         if args.startswith('(') and args.endswith(')'):
-            return eval(args)
+            return ast.literal_eval(args)  
         return [args]
 
 def parse_kwargs(kwargs):
@@ -102,7 +103,6 @@ def parse_kwargs(kwargs):
     except json.JSONDecodeError:
         try:
             # Fallback for stringified dictionaries
-            import ast
             if kwargs.startswith('{') and kwargs.endswith('}'):
                 return ast.literal_eval(kwargs)
         except (ValueError, SyntaxError):
