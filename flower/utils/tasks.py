@@ -88,7 +88,7 @@ def parse_args(args):
         if args == '...':
             return [...]
         if args.startswith('(') and args.endswith(')'):
-            return ast.literal_eval(args)  
+            return ast.literal_eval(args)
         return [args]
 
 def parse_kwargs(kwargs):
