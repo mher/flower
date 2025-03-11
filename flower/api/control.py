@@ -260,7 +260,7 @@ Autoscale worker pool
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=f"Autoscaling '{workername}' worker "
-                                    "(min={min}, max={max})"))
+                                    f"(min={min}, max={max})"))
         else:
             logger.error(response)
             self.set_status(403)
