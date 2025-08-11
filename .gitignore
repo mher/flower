@@ -30,3 +30,4 @@ venv
 Pipfile*
 .vscode/
 data/
+.python-version
