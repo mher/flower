@@ -1,7 +1,12 @@
+import sys
 import copy
 import logging
-from zoneinfo import ZoneInfo
 from functools import total_ordering
+
+if sys.version_info >= (3, 9):
+    from zoneinfo import ZoneInfo
+else:
+    from backports.zoneinfo import ZoneInfo
 
 from tornado import web
 from tzlocal import get_localzone
