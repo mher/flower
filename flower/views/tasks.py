@@ -124,12 +124,19 @@ class TasksView(BaseHandler):
 
         if not app.options.browser_local_time:
             # Append Celery app timezone in IANA format
+
+            timezone = None
+
             if capp.timezone:
                 if isinstance(capp.timezone, LocalTimezone):
-                    timezone = get_localzone()
+                    try:
+                        timezone = get_localzone()
+                    except Exception as ex:
+                        logger.warning("Failed to retrieve local timezone (%s): %s", type(ex).__name__, ex)
                 else:
                     timezone = capp.timezone
-            else:
+
+            if timezone is None:
                 timezone = ZoneInfo("UTC")
 
             time = f'{time}-{timezone}'

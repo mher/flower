@@ -285,10 +285,17 @@ class TasksTimeZoneTest(AsyncHTTPTestCase):
         self._app.capp.conf.enable_utc = False
         self._app.options.browser_local_time = False
 
+        try:
+            expected_tz = get_localzone()
+        except Exception:
+            expected_tz = None
+        if expected_tz is None:
+            expected_tz = 'UTC'
+
         r = self.get('/tasks')
         self.assertEqual(200, r.code)
         body = r.body.decode()
-        self.assertIn(f'time-{get_localzone()}', body)
+        self.assertIn(f'time-{expected_tz}', body)
 
     def test_browser_local_time(self):
         del self._app.capp.timezone  # clear cached property
