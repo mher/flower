@@ -268,7 +268,7 @@ class TasksTimeZoneTest(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
         body = r.body.decode()
 
-        self.assertIn(f'time-Pacific/Chatham', body)
+        self.assertIn('time-Pacific/Chatham', body)
 
     def test_default_time_zone_is_utc(self):
         del self._app.capp.timezone  # clear cached property
@@ -298,4 +298,4 @@ class TasksTimeZoneTest(AsyncHTTPTestCase):
         r = self.get('/tasks')
         self.assertEqual(200, r.code)
         body = r.body.decode()
-        self.assertIn(f'time', body)
+        self.assertIn('time', body)

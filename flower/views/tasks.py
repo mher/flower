@@ -1,9 +1,8 @@
 import copy
 import logging
-from datetime import datetime
+from zoneinfo import ZoneInfo
 from functools import total_ordering
 
-import pytz
 from tornado import web
 from tzlocal import get_localzone
 from celery.utils.time import LocalTimezone
@@ -126,7 +125,7 @@ class TasksView(BaseHandler):
                 else:
                     timezone = capp.timezone
             else:
-                timezone = pytz.utc
+                timezone = ZoneInfo("UTC")
 
             time = f'{time}-{timezone}'
 
