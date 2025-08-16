@@ -11,12 +11,6 @@ from tests.unit.utils import task_failed_events, task_succeeded_events
 
 
 class PrometheusTests(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
 
     def test_metrics(self):
         state = EventsState()
@@ -32,7 +26,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
         events = dict(re.findall('flower_events_total{task="task1",type="(task-.*)",worker="worker1"} (.*)', metrics))
@@ -61,7 +55,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -86,7 +80,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -111,7 +105,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -132,7 +126,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -149,7 +143,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -189,7 +183,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -199,12 +193,6 @@ class PrometheusTests(AsyncHTTPTestCase):
 
 
 class HealthcheckTests(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
 
     def test_healthcheck_route(self):
         response = self.get('/healthcheck').body.decode('utf-8')
