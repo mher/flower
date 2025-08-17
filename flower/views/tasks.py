@@ -3,17 +3,17 @@ import copy
 import logging
 from functools import total_ordering
 
-if sys.version_info >= (3, 9):
-    from zoneinfo import ZoneInfo
-else:
-    from backports.zoneinfo import ZoneInfo
-
 from tornado import web
 from tzlocal import get_localzone
 from celery.utils.time import LocalTimezone
 
 from ..utils.tasks import as_dict, get_task_by_id, iter_tasks
 from ..views import BaseHandler
+
+if sys.version_info >= (3, 9):
+    from zoneinfo import ZoneInfo
+else:
+    from backports.zoneinfo import ZoneInfo
 
 logger = logging.getLogger(__name__)
 
