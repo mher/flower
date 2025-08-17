@@ -25,7 +25,7 @@ def parse_search_terms(raw_search_value, find_time_keys=False):
                 parsed_search['taskname'] = []
             parsed_search['taskname'].append(preprocess_search_value(query_part[len('taskname:'):]))
         elif query_part.startswith('kwargs:'):
-            if 'kwargs'not in parsed_search:
+            if 'kwargs' not in parsed_search:
                 parsed_search['kwargs'] = {}
             try:
                 key, value = [p.strip() for p in query_part[len('kwargs:'):].split('=')]
