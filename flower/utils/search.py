@@ -69,7 +69,7 @@ def parse_search_terms(raw_search_value, find_time_keys=False):
                     )
                 except ValueError:
                     return ""
-            if query_part.startswith('received_start'):
+            if query_part.startswith('received_start:'):
                 received_start = preprocess_search_value(query_part[len('received_start:'):])
                 if received_start:
                     parsed_search['received_start'] = convert(received_start)
