@@ -11,9 +11,10 @@ broker.redis = MagicMock()
 
 class TestRabbitMQ(unittest.TestCase):
     def test_init(self):
-        b = Broker('amqp://', '')
-        self.assertTrue(isinstance(b, RabbitMQ))
-        self.assertFalse(isinstance(b, Redis))
+        for url in ['amqp://', 'amqps://']:
+            b = Broker(url, '')
+            self.assertTrue(isinstance(b, RabbitMQ))
+            self.assertFalse(isinstance(b, Redis))
 
     def test_url(self):
         b = RabbitMQ('amqp://user:pass@host:10000/vhost', '')
@@ -32,7 +33,7 @@ class TestRabbitMQ(unittest.TestCase):
         self.assertEqual('pass', b.password)
 
     def test_url_defaults_rabbitmq(self):
-        for url in ['amqp://', 'amqp://localhost']:
+        for url in ['amqp://', 'amqp://localhost', 'amqps://', 'amqps://localhost']:
             b = RabbitMQ(url, '')
             self.assertEqual('localhost', b.host)
             self.assertEqual(15672, b.port)
