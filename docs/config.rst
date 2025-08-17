@@ -340,6 +340,7 @@ Enables persistent mode in Flower.
 When persistent mode is enabled, Flower saves its current state and reloads it upon restart.
 This ensures that Flower retains its state and configuration across restarts.
 Flower stores its state in a database file specified by the `db`_ option.
+If `db` starts with `redis://`, Flower will use Redis as a backend for storing its state.
 
 .. _port:
 
