@@ -33,7 +33,7 @@ class MatchAll:
 
 @dataclass(frozen=True)
 class Term:
-    field: str
+    field: str | None
     value: str
 
 
@@ -195,7 +195,7 @@ def _combine(node_type, children):
 
 
 def _parse_term(token):
-    field = None
+    field: str | None = None
     value = token.value
     if ':' in value:
         candidate, candidate_value = value.split(':', 1)
@@ -211,7 +211,7 @@ def _parse_term(token):
         raise QuerySyntaxError(
             f'Substring search terms must contain at least '
             f'{MIN_SUBSTRING_LENGTH} characters', token.position)
-    return Term(field or '', value)
+    return Term(field, value)
 
 
 def parse_query(raw_query):
@@ -601,7 +601,7 @@ def parse_search_terms(raw_search_value, find_time_keys=False):
                     )
                 except ValueError:
                     return ""
-            if query_part.startswith('received_start'):
+            if query_part.startswith('received_start:'):
                 received_start = preprocess_search_value(query_part[len('received_start:'):])
                 if received_start:
                     parsed_search['received_start'] = convert(received_start)
