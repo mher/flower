@@ -255,6 +255,7 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
+    _OAUTH_SCOPE = 'openid email'
 
     @property
     def base_url(self):
@@ -313,10 +314,16 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             self.authorize_redirect(
                 redirect_uri=redirect_uri,
                 client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
-                scope=['openid email'],
+                scope=[self._OAUTH_SCOPE],
                 response_type='code',
                 extra_params={'state': state}
             )
+
+    def email_authenticate(self, decoded_body: dict, email: str):
+        return (
+            decoded_body.get("email_verified") and
+            authenticate(self.application.options.auth, email)
+        )
 
     async def _on_auth(self, access_token_response):
         if not access_token_response:
@@ -330,10 +337,7 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
         decoded_body = json.loads(response.body.decode('utf-8'))
         email = (decoded_body.get('email') or '').strip()
-        email_verified = (
-            decoded_body.get('email_verified') and
-            authenticate(self.application.options.auth, email)
-        )
+        email_verified = self.email_authenticate(decoded_body, email)
 
         if not email_verified:
             message = (
@@ -349,3 +353,53 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         if self.application.options.url_prefix and next_[0] != '/':
             next_ = '/' + next_
         self.redirect(next_)
+
+class CustomOauth2LoginHandler(OktaLoginHandler):
+    _OAUTH_SCOPE = os.environ.get("FLOWER_CUSTOM_OAUTH_SCOPE", "profile email")
+
+
+    @property
+    def base_url(self):
+        return os.environ.get("FLOWER_CUSTOM_OAUTH_BASE_URL")
+
+    @property
+    def _OAUTH_AUTHORIZE_URL(self):
+        authorize_url = os.environ.get("FLOWER_CUSTOM_OAUTH_AUTHORIZE_URL")
+        if authorize_url:
+            return authorize_url
+        else:
+            if self.base_url is None:
+                raise tornado.web.HTTPError(
+                    403,
+                    "OAuth authorize url not config. set env 'FLOWER_CUSTOM_OAUTH_BASE_URL' or 'FLOWER_CUSTOM_OAUTH_AUTHORIZE_URL'"
+                )
+            return f"{self.base_url}/authorize"
+
+    @property
+    def _OAUTH_ACCESS_TOKEN_URL(self):
+        access_token_url = os.environ.get("FLOWER_CUSTOM_OAUTH_ACCESS_TOKEN_URL")
+        if access_token_url:
+            return access_token_url
+        else:
+            if self.base_url is None:
+                raise tornado.web.HTTPError(
+                    403,
+                    "OAuth access token url not config. set env 'FLOWER_CUSTOM_OAUTH_BASE_URL' or 'FLOWER_CUSTOM_OAUTH_ACCESS_TOKEN_URL'"
+                )
+            return f"{self.base_url}/token"
+
+    @property
+    def _OAUTH_USER_INFO_URL(self):
+        user_info_url = os.environ.get("FLOWER_CUSTOM_OAUTH_USER_INFO_URL")
+        if user_info_url:
+            return user_info_url
+        else:
+            if self.base_url is None:
+                raise tornado.web.HTTPError(
+                    403,
+                    "OAuth user info url not config. set env 'FLOWER_CUSTOM_OAUTH_BASE_URL' or 'FLOWER_CUSTOM_OAUTH_USER_INFO_URL'"
+                )
+            return f"{self.base_url}/userinfo"
+
+    def email_authenticate(self, decoded_body: dict, email: str):
+        return authenticate(self.application.options.auth, email)
