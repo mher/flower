@@ -8,16 +8,20 @@ import tornado.web
 
 from tornado import ioloop
 from tornado.httpserver import HTTPServer
+from tornado.ioloop import PeriodicCallback, IOLoop
 from tornado.web import url
 
 from .urls import handlers as default_handlers
-from .events import Events
+from .events import Events, get_prometheus_metrics
 from .inspector import Inspector
 from .options import default_options
-
+from .utils.broker import get_active_queue_lengths
 
 logger = logging.getLogger(__name__)
-
+# TODO: does this need to be configuration from options?
+BROKER_METRICS_UPDATE_INTERVAL_SECONDS = 10
+# Main dashboard view is updated regardless of this, because it subscribes to live events from celery.
+WORKER_DETAILS_UPDATE_INTERVAL = 120
 
 if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
     import asyncio
@@ -79,7 +83,9 @@ class Flower(tornado.web.Application):
             server.add_socket(socket)
 
         self.started = True
-        self.update_workers()
+        self.io_loop.spawn_callback(self.update_broker_metrics)
+        # otherwise self.workers are only updated on UI events and metrics get outdated after some time
+        self.io_loop.spawn_callback(self.update_worker_details)
         self.io_loop.start()
 
     def stop(self):
@@ -101,3 +107,42 @@ class Flower(tornado.web.Application):
 
     def update_workers(self, workername=None):
         return self.inspector.inspect(workername)
+
+    async def update_broker_metrics(self):
+        logger.debug("Updating broker metrics.")
+
+        def is_worker_alive(worker_name):
+            worker = self.events.state.workers.data.get(worker_name)
+            if not worker:
+                return None
+            return worker.alive
+        while True:
+            next_call = tornado.gen.sleep(BROKER_METRICS_UPDATE_INTERVAL_SECONDS)
+            try:
+                active_queues = await get_active_queue_lengths(self)
+                metrics = get_prometheus_metrics()
+                # clear old data to not leave metrics for queues no longer active
+                metrics.queue_online_workers.clear()
+                metrics.queue_length.clear()
+                for queue_entry in active_queues:
+                    queue = queue_entry["name"]
+                    metrics.queue_length.labels(queue).set(queue_entry["messages"])
+                    nr_of_workers = sum(
+                        1 for name, data in self.workers.items() if
+                        is_worker_alive(name) and any(q["name"] == queue for q in data.get("active_queues", []))
+                    )
+                    metrics.queue_online_workers.labels(queue).set(nr_of_workers)
+            except Exception as e:
+                logger.warning("Updating broker metrics failed with %s", repr(e))
+            else:
+                logger.debug("Done updating metrics.")
+            await next_call
+
+    async def update_worker_details(self):
+        while True:
+            next_call = tornado.gen.sleep(WORKER_DETAILS_UPDATE_INTERVAL)
+            try:
+                self.update_workers()
+            except Exception as e:
+                logger.warning("Failed to update workers list from celery %s", repr(e))
+            await next_call
