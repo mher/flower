@@ -1,5 +1,6 @@
 import sys
 import logging
+from urllib.parse import quote
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -37,20 +38,20 @@ class Flower(tornado.web.Application):
 
     def __init__(self, options=None, capp=None, events=None,
                  io_loop=None, **kwargs):
+
         handlers = default_handlers
         if options is not None and options.url_prefix:
             handlers = [rewrite_handler(h, options.url_prefix) for h in handlers]
         kwargs.update(handlers=handlers)
+
         super().__init__(**kwargs)
+
         self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.ssl_options = kwargs.get('ssl_options', None)
 
         self.capp = capp or celery.Celery()
         self.capp.loader.import_default_modules()
-
-        self.executor = self.pool_executor_cls(max_workers=self.max_workers)
-        self.io_loop.set_default_executor(self.executor)
 
         self.inspector = Inspector(self.io_loop, self.capp, self.options.inspect_timeout / 1000.0)
 
@@ -63,33 +64,85 @@ class Flower(tornado.web.Application):
             io_loop=self.io_loop,
             max_workers_in_memory=self.options.max_workers,
             max_tasks_in_memory=self.options.max_tasks)
-        self.started = False
 
-    def start(self):
+        self._http_server = None
+        self._executor = None
+
+    def _start_executor(self):
+        if self._executor is None:
+            logging.debug("Starting executor...")
+            ctx = self.pool_executor_cls(max_workers=self.max_workers)
+            self._executor = ctx.__enter__()  # pylint: disable=unnecessary-dunder-call
+            self.io_loop.set_default_executor(self._executor)
+
+    def _stop_executor(self):
+        if self._executor is not None:
+            logging.debug("Stop executor...")
+            self._executor.__exit__(None, None, None)
+            self._executor = None
+
+    def _start_events(self):
         self.events.start()
 
+    def _stop_events(self):
+        self.events.stop()
+
+    def _start_http_server(self):
+        logging.debug("Starting HTTP server...")
         if not self.options.unix_socket:
-            self.listen(self.options.port, address=self.options.address,
-                        ssl_options=self.ssl_options,
-                        xheaders=self.options.xheaders)
+            http_server = self.listen(
+                self.options.port,
+                address=self.options.address,
+                ssl_options=self.ssl_options,
+                xheaders=self.options.xheaders
+            )
         else:
             from tornado.netutil import bind_unix_socket
-            server = HTTPServer(self)
-            socket = bind_unix_socket(self.options.unix_socket, mode=0o777)
-            server.add_socket(socket)
 
-        self.started = True
-        self.update_workers()
+            http_server = HTTPServer(self)
+            socket = bind_unix_socket(self.options.unix_socket, mode=0o777)
+            http_server.add_socket(socket)
+        self._http_server = http_server
+
+    def _stop_http_server(self):
+        logging.debug("Stopping HTTP server...")
+        self.io_loop.run_sync(
+            self._http_server.close_all_connections, timeout=5
+        )
+        self._http_server.stop()
+        self._http_server = None
+
+    def start_server(self):
+        if self._http_server is not None:
+            logging.debug("Flower server already started.")
+            return
+        logging.debug("Starting Flower server...")
+        self._start_executor()
+        self._start_events()
+        self._start_http_server()
+        logging.debug("Flower server started.")
+
+    def stop_server(self):
+        if self._http_server is None:
+            logging.debug("Flower server already stopped.")
+            return
+        logging.debug("Stopping Flower server...")
+        self._stop_events()
+        self._stop_http_server()
+        self._stop_executor()
+        logging.debug("Flower server stopped.")
+
+    def serve_forever(self):
+        if not self._http_server:
+            raise RuntimeError("The server is not running")
+        logging.debug("Starting event loop...")
         self.io_loop.start()
 
-    def stop(self):
-        if self.started:
-            self.events.stop()
-            logging.debug("Stopping executors...")
-            self.executor.shutdown(wait=False)
-            logging.debug("Stopping event loop...")
-            self.io_loop.stop()
-            self.started = False
+    def shutdown(self):
+        if self._http_server:
+            raise RuntimeError("The server is still running")
+        logging.debug("Stopping event loop...")
+        self.io_loop.stop()
 
     @property
     def transport(self):
@@ -101,3 +154,82 @@ class Flower(tornado.web.Application):
 
     def update_workers(self, workername=None):
         return self.inspector.inspect(workername)
+
+    def _get_scheme(self):
+        if self.options.unix_socket:
+            return "http+unix"
+        if self.ssl_options:
+            return "https"
+        return "http"
+
+    def _get_socket(self):
+        sockets = getattr(self._http_server, "_sockets", None)  # pylint: disable=protected-access
+        if sockets:
+            return list(sockets.values())[0]
+        return None
+
+    def _get_domain(self):
+        if self.options.unix_socket:
+            raise RuntimeError("UNIX socket")
+
+        sock = self._get_socket()
+        if sock is not None:
+            return sock.getsockname()[0]
+
+        return self.options.address or "0.0.0.0"
+
+    def _get_port(self):
+        if self.options.unix_socket:
+            raise RuntimeError("UNIX socket")
+
+        sock = self._get_socket()
+        if sock is not None:
+            return sock.getsockname()[1]
+
+        return self.options.port
+
+    def _get_authority(self):
+        if self.options.unix_socket:
+            return quote(self.options.unix_socket)
+
+        return f"{self._get_domain()}:{self._get_port()}"
+
+    def _get_url_path(self, path=None):
+        path = path or ""
+        if not self.options.url_prefix:
+            return path
+
+        prefix = self.options.url_prefix.strip("/")
+        return f"/{prefix}{path}"
+
+    def get_url(self, path=None):
+        path = self._get_url_path(path)
+        return f"{self._get_scheme()}://{self._get_authority()}{path}"
+
+    #
+    # For backward compatibility
+    #
+
+    def start(self):
+        self.start_server()
+        self.update_workers()
+        self.serve_forever()
+
+    def stop(self):
+        self.stop_server()
+        self.shutdown()
+
+    @property
+    def started(self):
+        return self._http_server is not None
+
+    @started.setter
+    def started(self, value):
+        if value:
+            self.start_server()
+        else:
+            self.stop_server()
+
+    @property
+    def executor(self):
+        return self._executor
