@@ -95,7 +95,6 @@ INDICES_CLIENT = ES_CLIENT.indices
 
 def get_index_name(current_date: date) -> str:
     return f'task-{current_date.isoformat()}'
-
 body = {
     'properties': {
         'hostname': {'type': 'keyword', },
