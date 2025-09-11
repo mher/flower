@@ -312,7 +312,8 @@ class TasksDataTable(BaseHandler):
             records_filtered = sorted_tasks.total
             if start + length > 10000:
                 # may be a bug in here --> last_task may be `None` by mistake
-                self.query_cache[(start, length, sort_by, sort_order)] = last_task.get('sort')
+                if last_task is not None:
+                    self.query_cache[(start, length, sort_by, sort_order)] = last_task.get('sort')
         except TransportError:
             logger.exception('Issue getting elastic search task data; falling back to in memory')
             use_es = False
