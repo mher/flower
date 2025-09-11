@@ -3,7 +3,7 @@ import time
 
 from celery.events.state import Task
 
-from .search import parse_search_terms, satisfies_search_terms
+
 
 
 # pylint: disable=too-many-branches,too-many-locals,too-many-arguments

@@ -425,11 +425,13 @@ class TaskSearchEngine:
         offset = max(offset, 0)
         end = None if limit is None else offset + max(limit, 0)
         if sort_by:
-            sort_key_func = lambda task_id: _task_sort_key(task_map[task_id], sort_by, task_id)
+            def sort_key_func(task_id):
+                return _task_sort_key(task_map[task_id], sort_by, task_id)
         else:
-            sort_key_func = lambda task_id: (
-                getattr(task_map[task_id], 'timestamp', None) or 0,
-                task_id)
+            def sort_key_func(task_id):
+                return (
+                    getattr(task_map[task_id], 'timestamp', None) or 0,
+                    task_id)
             descending = True
 
         if end is not None and end < filtered_count:

@@ -12,7 +12,7 @@ from tornado import web
 
 from ..events import Events
 from ..options import options as runtime_options
-from ..utils.search import parse_search_terms
+from ..utils.search import parse_search_terms, QuerySyntaxError
 from ..utils.tasks import as_dict, get_task_by_id, iter_tasks
 from ..views import BaseHandler
 
@@ -157,40 +157,48 @@ class TasksDataTable(BaseHandler):
         draw = self.get_argument('draw', type=int)
         start = self.get_argument('start', type=int)
         length = self.get_argument('length', type=int)
-        search = self.get_argument('search[value]', type=str)
+        search = self.get_argument('search[value]', type=str, escape=False)
         use_es = bool(self.use_es)
         column = self.get_argument('order[0][column]', type=int)
         sort_by = self.get_argument(f'columns[{column}][data]', type=str)
         sort_order = self.get_argument('order[0][dir]', type=str) == 'desc'
         total_records = 0
         records_filtered = []
-        if use_es:
-            use_es, sort_by, filtered_tasks, records_filtered, total_records = self.sort_by_with_elastic_search(search, sort_by, sort_order, start, length)
-        if not use_es:
-            def key(item):
-                return Comparable(getattr(item[1], sort_by))
+        try:
+            if use_es:
+                use_es, sort_by, filtered_tasks, records_filtered, total_records = self.sort_by_with_elastic_search(search, sort_by, sort_order, start, length)
+            if not use_es:
+                def key(item):
+                    return Comparable(getattr(item[1], sort_by))
 
-            self.maybe_normalize_for_sort(self.application.events.state.tasks_by_timestamp(), sort_by)
-            sorted_tasks = sorted(
-                iter_tasks(self.application.events, search=search),
-                key=key,
-                reverse=sort_order
-            )
-            total_records = len(sorted_tasks)
+                self.maybe_normalize_for_sort(self.application.events.state.tasks_by_timestamp(), sort_by)
+                sorted_tasks = sorted(
+                    iter_tasks(self.application.events, search=search),
+                    key=key,
+                    reverse=sort_order
+                )
+                total_records = len(sorted_tasks)
 
-            filtered_tasks = []
-            records_filtered = len(sorted_tasks)
+                filtered_tasks = []
+                records_filtered = len(sorted_tasks)
 
-            for task in sorted_tasks[start:start + length]:
-                task_dict = as_dict(self.format_task(task)[1])
-                if task_dict.get('worker'):
-                    task_dict['worker'] = task_dict['worker'].hostname
+                for task in sorted_tasks[start:start + length]:
+                    task_dict = as_dict(self.format_task(task)[1])
+                    if task_dict.get('worker'):
+                        task_dict['worker'] = task_dict['worker'].hostname
 
-                filtered_tasks.append(task_dict)
+                    filtered_tasks.append(task_dict)
 
-        self.write(dict(draw=draw, data=filtered_tasks,
-                        recordsTotal=total_records,
-                        recordsFiltered=records_filtered))  # bug?
+            self.write(dict(draw=draw, data=filtered_tasks,
+                            recordsTotal=total_records,
+                            recordsFiltered=records_filtered))  # bug?
+        except QuerySyntaxError as exc:
+            self.write({
+                "draw": draw,
+                "data": [],
+                "recordsTotal": len(self.application.events.state.tasks),
+                "recordsFiltered": 0,
+                "searchError": str(exc)})
 
     # pylint: disable=too-many-branches,too-many-locals,too-many-arguments,too-many-statements,too-many-nested-blocks
     def sort_by_with_elastic_search(self, search, sort_by, sort_order, start, length):
@@ -341,7 +349,8 @@ class TasksDataTable(BaseHandler):
             records_filtered = sorted_tasks.total
             if start + length > 10000:
                 # may be a bug in here --> last_task may be `None` by mistake
-                self.query_cache[(start, length, sort_by, sort_order)] = last_task.get('sort')
+                if last_task is not None:
+                    self.query_cache[(start, length, sort_by, sort_order)] = last_task.get('sort')
         except TransportError:
             logger.exception('Issue getting elastic search task data; falling back to in memory')
             use_es = False
