@@ -280,7 +280,13 @@ def send_to_elastic_search(state, event):
             info=task.info(),
             received=received_time,
             started=start_time,
-            succeeded=succeeded_time,
+            task.name,
+            task.uuid,
+            task.hostname,
+            received_time,
+            start_time,
+            succeeded_time,
+            task.info(),
         )
 
 
