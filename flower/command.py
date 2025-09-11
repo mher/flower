@@ -55,7 +55,6 @@ def flower(ctx, tornado_argv):
             time.tzset()
         flower_app = Flower(capp=app, options=options, **settings)
 
-
     flower_app = Flower(capp=app, options=options, **settings)
 
     atexit.register(flower_app.stop)
