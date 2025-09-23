@@ -132,7 +132,7 @@ class Events(threading.Thread):
         self.db = db
         self.persistent = persistent
         self.redis_client = None
-        if self.persistent and self.db and (self.db.startswith("redis://")  or self.db.startswith("rediss://")):
+        if self.persistent and self.db and (self.db.startswith("redis://") or self.db.startswith("rediss://")):
             if not redis:
                 raise ImportError('redis library is required')
             self.redis_client = redis.Redis.from_url(self.db)
