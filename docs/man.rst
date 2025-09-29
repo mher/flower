@@ -69,7 +69,7 @@ OPTIONS
   --max_workers                     maximum number of workers to keep in memory
                                    (default *5000*)
   --max_tasks                      maximum number of tasks to keep in memory
-                                   (default *10000*)
+                                   (default *100000*)
   --natural_time                   show time in relative format (default *False*)
   --persistent                     enable persistent mode (default *False*)
   --port                           run on the given port (default *5555*)
