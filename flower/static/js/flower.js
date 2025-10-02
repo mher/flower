@@ -45,6 +45,38 @@ var flower = (function () {
         }
     }
 
+    function applyTheme(theme) {
+        var htmlEl = document.documentElement;
+        var resolved = theme;
+        if (!resolved || resolved === 'system') {
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            resolved = prefersDark ? 'dark' : 'light';
+        }
+        htmlEl.setAttribute('data-bs-theme', resolved);
+        localStorage.setItem('flower-theme', theme || 'system');
+    }
+
+    function initTheme() {
+        var stored = localStorage.getItem('flower-theme') || 'system';
+        applyTheme(stored);
+        if (window.matchMedia) {
+            var mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            if (mediaQuery) {
+                var syncSystemTheme = function () {
+                    var current = localStorage.getItem('flower-theme') || 'system';
+                    if (current === 'system') {
+                        applyTheme('system');
+                    }
+                };
+                if (typeof mediaQuery.addEventListener === 'function') {
+                    mediaQuery.addEventListener('change', syncSystemTheme);
+                } else if (typeof mediaQuery.addListener === 'function') {
+                    mediaQuery.addListener(syncSystemTheme);
+                }
+            }
+        }
+    }
+
     $('#worker-refresh').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -407,6 +439,12 @@ var flower = (function () {
 
         // Make bootstrap tabs persistent
         $(document).ready(function () {
+            initTheme();
+            $(document).on('click', '.theme-choice', function (e) {
+                e.preventDefault();
+                var choice = $(this).data('theme');
+                applyTheme(choice);
+            });
             if (location.hash !== '') {
                 $('a[href="' + location.hash + '"]').tab('show');
             }
@@ -536,7 +574,211 @@ var flower = (function () {
             return;
         }
 
-        $('#tasks-table').DataTable({
+        var stateFilterControl = $('#state-filter-control');
+        var statusToggleButton = stateFilterControl.find('#status-filter-toggle');
+        var statusOptionsContainer = stateFilterControl.find('#status-filter-options');
+        var statusDropdownElement = statusToggleButton.length ? statusToggleButton[0] : null;
+        var statusDropdownInstance = null;
+        stateFilterControl = stateFilterControl.detach();
+        var statusIdCounter = 0;
+        var selectionLockedFromUrl = false;
+
+        var defaultStates = [
+            'FAILURE', 'IGNORED', 'PENDING', 'QUEUED', 'RECEIVED',
+            'REJECTED', 'RETRY', 'REVOKED', 'SCHEDULED', 'SENT',
+            'STARTED', 'SUCCESS', 'UNKNOWN'
+        ];
+
+        var knownStates = defaultStates.slice();
+        var selectedStates = new Set(knownStates);
+
+        function normalizeState(value) {
+            if (!value) {
+                return 'UNKNOWN';
+            }
+            return value.toString().trim().toUpperCase();
+        }
+
+        function updateStatusSummary() {
+            var label;
+            if (selectedStates.size === 0) {
+                label = 'None';
+            } else if (selectedStates.size === knownStates.length) {
+                label = 'All';
+            } else if (selectedStates.size === 1) {
+                label = Array.from(selectedStates)[0];
+            } else {
+                label = selectedStates.size + ' selected';
+            }
+            statusToggleButton.text(label);
+            statusToggleButton.attr('aria-label', 'Filter task states. Currently: ' + label + '.');
+        }
+
+        function buildOption(state) {
+            var safeState = normalizeState(state);
+            var optionId = 'status-filter-' + (safeState.replace(/[^a-z0-9_-]/gi, '').toLowerCase() || ('state-' + statusIdCounter));
+            statusIdCounter += 1;
+
+            var option = $('<div>', {
+                'class': 'status-filter-option d-flex align-items-center',
+                'data-state': safeState
+            });
+
+            var checkbox = $('<input>', {
+                type: 'checkbox',
+                'class': 'form-check-input status-filter-checkbox me-2',
+                id: optionId,
+                value: safeState
+            }).prop('checked', selectedStates.has(safeState));
+
+            var label = $('<label>', {
+                'class': 'status-filter-option-label flex-grow-1 mb-0',
+                for: optionId,
+                text: safeState
+            });
+
+            var onlyButton = $('<button>', {
+                type: 'button',
+                'class': 'btn btn-link btn-sm p-0 status-only',
+                'data-state': safeState,
+                text: 'Only'
+            });
+
+            option.append(checkbox, label, onlyButton);
+            statusOptionsContainer.append(option);
+        }
+
+        function rebuildStatusOptions() {
+            statusOptionsContainer.empty();
+            statusIdCounter = 0;
+            knownStates.forEach(function (state) {
+                buildOption(state);
+            });
+            updateStatusSummary();
+        }
+
+        function ensureKnownStates(states) {
+            var addedStates = [];
+            states.forEach(function (raw) {
+                var state = normalizeState(raw);
+                if (knownStates.indexOf(state) === -1) {
+                    knownStates.push(state);
+                    addedStates.push(state);
+                }
+            });
+            if (addedStates.length) {
+                knownStates.sort();
+                rebuildStatusOptions();
+            }
+            return addedStates;
+        }
+
+        function setSelectedStates(values) {
+            selectedStates = new Set(Array.from(values));
+            statusOptionsContainer.find('.status-filter-checkbox').each(function () {
+                this.checked = selectedStates.has(this.value);
+            });
+            updateStatusSummary();
+        }
+
+        function getSelectedStates() {
+            return Array.from(selectedStates);
+        }
+
+        var rawStateParam = $.urlParam('state');
+        if (typeof rawStateParam === 'string' && rawStateParam !== '') {
+            var initialState = normalizeState(rawStateParam);
+            var addedInitialStates = ensureKnownStates([initialState]);
+            var initialSelection = new Set([initialState]);
+            addedInitialStates.forEach(function (state) {
+                initialSelection.add(state);
+            });
+            setSelectedStates(initialSelection);
+            selectionLockedFromUrl = true;
+        }
+        rebuildStatusOptions();
+
+        function extractStatesFromSearch(rawSearch) {
+            if (!rawSearch) {
+                return null;
+            }
+            var pattern = /(\s*)(?:state|status):(?:"([^"]+)"|([^\s]+))/gi;
+            var cleaned = rawSearch;
+            var states = [];
+            var match;
+            while ((match = pattern.exec(rawSearch)) !== null) {
+                var value = match[2] || match[3];
+                if (value) {
+                    states.push(normalizeState(value));
+                }
+                cleaned = cleaned.replace(match[0], ' ');
+            }
+            cleaned = cleaned.replace(/\s+/g, ' ').trim();
+            if (!states.length) {
+                return null;
+            }
+            return {
+                states: states,
+                cleaned: cleaned
+            };
+        }
+
+        statusOptionsContainer.on('change', '.status-filter-checkbox', function () {
+            var value = normalizeState(this.value);
+            if (this.checked) {
+                selectedStates.add(value);
+            } else {
+                selectedStates.delete(value);
+            }
+            updateStatusSummary();
+            dt.ajax.reload();
+        });
+
+        stateFilterControl.on('click', '.status-filter-dropdown', function (event) {
+            event.stopPropagation();
+        });
+
+        stateFilterControl.on('click', '.status-filter-dropdown .dropdown-menu', function (event) {
+            event.stopPropagation();
+        });
+
+        statusToggleButton.on('click', function (event) {
+            event.stopPropagation();
+        });
+
+        statusOptionsContainer.on('click', function (event) {
+            event.stopPropagation();
+        });
+
+        stateFilterControl.on('click', '.status-select-all', function (event) {
+            event.preventDefault();
+            setSelectedStates(knownStates);
+            dt.ajax.reload();
+            if (statusDropdownInstance) {
+                statusDropdownInstance.hide();
+            }
+        });
+
+        stateFilterControl.on('click', '.status-select-none', function (event) {
+            event.preventDefault();
+            setSelectedStates([]);
+            dt.ajax.reload();
+            if (statusDropdownInstance) {
+                statusDropdownInstance.hide();
+            }
+        });
+
+        statusOptionsContainer.on('click', '.status-only', function (event) {
+            event.preventDefault();
+            var value = normalizeState($(this).data('state'));
+            setSelectedStates([value]);
+            if (statusDropdownInstance) {
+                statusDropdownInstance.hide();
+            }
+            dt.ajax.reload();
+        });
+
+        var dt = $('#tasks-table').DataTable({
             rowId: 'uuid',
             searching: true,
             scrollX: true,
@@ -554,14 +796,22 @@ var flower = (function () {
             },
             ajax: {
                 type: 'POST',
-                url: url_prefix() + '/tasks/datatable'
+                url: url_prefix() + '/tasks/datatable',
+                data: function(d) {
+                    var states = getSelectedStates();
+                    if (states.length === 0) {
+                        d.include_states = '__none__';
+                    } else if (states.length === knownStates.length) {
+                        d.include_states = '';
+                    } else {
+                        d.include_states = states.join(',');
+                    }
+                }
             },
             order: [
                 [7, "desc"]
             ],
-            oSearch: {
-                "sSearch": $.urlParam('state') ? 'state:' + $.urlParam('state') : ''
-            },
+            oSearch: { "sSearch": '' },
             columnDefs: [{
                 targets: 0,
                 data: 'name',
@@ -687,6 +937,65 @@ var flower = (function () {
                 visible: isColumnVisible('eta')
             }, ],
         });
+
+        var filterContainer = $('#tasks-table_filter');
+        if (filterContainer.length && stateFilterControl.length) {
+            filterContainer.prepend(stateFilterControl.removeClass('d-none'));
+        }
+
+        if (statusDropdownElement && window.bootstrap && window.bootstrap.Dropdown) {
+            statusDropdownInstance = window.bootstrap.Dropdown.getOrCreateInstance(
+                statusDropdownElement,
+                { autoClose: 'outside' }
+            );
+        }
+
+        // Improve search placeholder to hint advanced usage
+        var searchInput = $('#tasks-table_filter input');
+        searchInput.attr('placeholder', 'Search tasks...');
+
+        if (!selectionLockedFromUrl) {
+            var savedState = dt.state.loaded && dt.state.loaded();
+            if (savedState && savedState.search && typeof savedState.search.search === 'string') {
+                var extraction = extractStatesFromSearch(savedState.search.search);
+                if (extraction) {
+                    ensureKnownStates(extraction.states);
+                    setSelectedStates(extraction.states);
+                    if (extraction.cleaned !== savedState.search.search) {
+                        dt.search(extraction.cleaned);
+                        if (searchInput.length) {
+                            searchInput.val(extraction.cleaned);
+                        }
+                    }
+                }
+            }
+        }
+
+        function triggerFilterReload() {
+            dt.ajax.reload();
+        }
+
+        dt.on('xhr', function (event, settings, json) {
+            if (!json || !Array.isArray(json.data)) {
+                return;
+            }
+            var observedStates = [];
+            json.data.forEach(function (task) {
+                if (task && task.state) {
+                    observedStates.push(task.state);
+                }
+            });
+            if (observedStates.length) {
+                var previousSelection = new Set(selectedStates);
+                var newStates = ensureKnownStates(observedStates);
+                newStates.forEach(function (state) {
+                    previousSelection.add(normalizeState(state));
+                });
+                setSelectedStates(previousSelection);
+            }
+        });
+
+        triggerFilterReload();
 
     });
 
