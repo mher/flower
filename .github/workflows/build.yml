@@ -10,17 +10,17 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        celery-version: ['5.2.*', '5.3.*', '5.4.*']
+        celery-version: ['5.2.*', '5.3.*', '5.4.*', '5.5.*']
         tornado-version: ['6.0']
         exclude:  # https://docs.celeryq.dev/en/v5.2.7/whatsnew-5.2.html#step-5-upgrade-to-celery-5-2
           - python-version: '3.12'
             celery-version: '5.2.*'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -31,12 +31,13 @@ jobs:
                     tornado==${{ matrix.tornado-version }} \
                     -r requirements/dev.txt
 
-    - name: Lint with pylint
-      run: |
-        pylint flower --rcfile .pylintrc
 
     - name: Run unit tests
       run: |
         python -m flower --version
         python -m tests.unit
+
+    - name: Lint with pylint
+      run: |
+        pylint flower --rcfile .pylintrc
 

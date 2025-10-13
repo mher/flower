@@ -230,9 +230,19 @@ class RedisSsl(Redis):
 
 
 class Broker:
+    """Factory returning the appropriate broker client based on URL scheme.
+
+    Supported schemes:
+    ``amqp`` or ``amqps``  -> :class:`RabbitMQ`
+    ``redis``              -> :class:`Redis`
+    ``rediss``             -> :class:`RedisSsl`
+    ``redis+socket``       -> :class:`RedisSocket`
+    ``sentinel``           -> :class:`RedisSentinel`
+    """
+
     def __new__(cls, broker_url, *args, **kwargs):
         scheme = urlparse(broker_url).scheme
-        if scheme == 'amqp':
+        if scheme in ('amqp', 'amqps'):
             return RabbitMQ(broker_url, *args, **kwargs)
         if scheme == 'redis':
             return Redis(broker_url, *args, **kwargs)
