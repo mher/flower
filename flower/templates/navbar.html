@@ -26,16 +26,12 @@
 
     <ul class="navbar-nav flex-row flex-wrap ms-md-auto">
       <li class="nav-item col-6 col-lg-auto me-2 d-flex align-items-center">
-        <div class="dropdown">
-          <button class="btn btn-outline-secondary btn-sm dropdown-toggle align-middle" type="button" id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            Theme
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeDropdown">
-            <li><button type="button" class="dropdown-item theme-choice" data-theme="system">System</button></li>
-            <li><button type="button" class="dropdown-item theme-choice" data-theme="light">Light</button></li>
-            <li><button type="button" class="dropdown-item theme-choice" data-theme="dark">Dark</button></li>
-          </ul>
-        </div>
+        <label class="me-2 mb-0 small text-muted" for="theme-select">Theme: </label>
+        <select id="theme-select" class="form-select form-select-sm" aria-label="Select application theme">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
       </li>
       <li class="nav-item col-6 col-lg-auto">
         <a class="nav-link py-2 px-0 px-lg-2" href="https://github.com/mher/flower" target="_blank" rel="noopener">

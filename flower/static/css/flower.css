@@ -235,13 +235,10 @@ div.dataTables_wrapper .dataTables_filter input {
   gap: 0.5rem;
 }
 
-.state-filter-label {
-  font-size: 0.875rem;
-  color: #6c757d;
-}
-
-:root[data-bs-theme='dark'] .state-filter-label {
-  color: #adb5bd;
+.state-filter-dropdown-button {
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  color: inherit;
 }
 
 .status-filter-dropdown .dropdown-menu {
@@ -261,18 +258,11 @@ div.dataTables_wrapper .dataTables_filter input {
 .status-filter-checkbox {
   flex: 0 0 auto;
   margin: 0;
+  width: 16px !important;
 }
 
 .status-filter-option-label {
   flex: 1 1 auto;
-  margin: 0;
-}
-
-div.dataTables_wrapper .dataTables_filter .status-filter-options > .status-filter-option > input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  min-height: 20px;
   margin: 0;
 }
 

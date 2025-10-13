@@ -45,6 +45,18 @@ var flower = (function () {
         }
     }
 
+    function updateThemeSelector(theme) {
+        var select = document.getElementById('theme-select');
+        if (!select) {
+            return;
+        }
+        var allowed = ['system', 'light', 'dark'];
+        var value = allowed.indexOf(theme) !== -1 ? theme : 'system';
+        if (select.value !== value) {
+            select.value = value;
+        }
+    }
+
     function applyTheme(theme) {
         var htmlEl = document.documentElement;
         var resolved = theme;
@@ -54,6 +66,7 @@ var flower = (function () {
         }
         htmlEl.setAttribute('data-bs-theme', resolved);
         localStorage.setItem('flower-theme', theme || 'system');
+        updateThemeSelector(theme || 'system');
     }
 
     function initTheme() {
@@ -440,11 +453,12 @@ var flower = (function () {
         // Make bootstrap tabs persistent
         $(document).ready(function () {
             initTheme();
-            $(document).on('click', '.theme-choice', function (e) {
-                e.preventDefault();
-                var choice = $(this).data('theme');
-                applyTheme(choice);
-            });
+            var themeSelect = document.getElementById('theme-select');
+            if (themeSelect) {
+                themeSelect.addEventListener('change', function (event) {
+                    applyTheme(event.target.value);
+                });
+            }
             if (location.hash !== '') {
                 $('a[href="' + location.hash + '"]').tab('show');
             }
@@ -626,7 +640,7 @@ var flower = (function () {
 
             var checkbox = $('<input>', {
                 type: 'checkbox',
-                'class': 'form-check-input status-filter-checkbox me-2',
+                'class': 'status-filter-checkbox me-2',
                 id: optionId,
                 value: safeState
             }).prop('checked', selectedStates.has(safeState));
