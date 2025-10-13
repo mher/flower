@@ -9,6 +9,31 @@
 <input type="hidden" value="{{ time }}" id='time'>
 <input type="hidden" value="{{ columns }}" id='columns'>
 
+<div id="state-filter-control" class="d-none">
+  <div class="state-filter-wrapper">
+    <label class="state-filter-label">Filter by state:</label>
+    <div class="dropdown state-filter-dropdown" data-bs-auto-close="outside">
+      <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+              id="status-filter-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+              aria-haspopup="true">
+        All
+      </button>
+      <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="status-filter-toggle">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small fw-semibold">Filter states</span>
+          <div class="btn-group btn-group-sm" role="group" aria-label="State quick actions">
+            <button type="button" class="btn btn-link px-1 status-select-all">All</button>
+            <button type="button" class="btn btn-link px-1 status-select-none">None</button>
+          </div>
+        </div>
+        <div id="status-filter-options" class="status-filter-options" role="group" aria-label="Available task states">
+          <!-- populated by flower.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="container-fluid mt-3">
   <table id="tasks-table" class="table table-bordered table-striped table-hover w-100">
     <thead>
