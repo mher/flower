@@ -12,6 +12,8 @@
         <tr>
           <th>Worker</th>
           <th class="text-center">Status</th>
+          <th class="text-center">Max Concurrencies</th>
+          <th class="text-center">Available</th>
           <th class="text-center">Active</th>
           <th class="text-center">Processed</th>
           <th class="text-center">Failed</th>
@@ -24,6 +26,8 @@
         {% for name, info in workers.items() %}
         <tr id="{{ url_escape(name) }}">
           <td>{{ name }}</td>
+          <td>{{ info.get('stats', {}).get('pool', {}).get('max_concurrency', 0) }}</td>
+          <td>{{ info.get('stats', {}).get('pool', {}).get('available_slots', 0) }}</td>
           <td>{{ info.get('status', None) }}</td>
           <td>{{ info.get('active', 0) or 0 }}</td>
           <td>{{ info.get('task-received', 0) }}</td>
@@ -37,6 +41,8 @@
       <tfoot>
         <tr>
           <th>Total</th>
+          <th></th>
+          <th></th>
           <th></th>
           <th></th>
           <th></th>

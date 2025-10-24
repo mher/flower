@@ -49,7 +49,24 @@ class WorkersView(BaseHandler):
             info = dict(values)
             info.update(self._as_dict(worker))
             info.update(status=worker.alive)
+
+            try:
+                worker_data = self.application.workers.get(name, {})
+                worker_stats = worker_data.get('stats', {})
+                max_concurrency = worker_stats.get('pool', {}).get('max-concurrency', 0)
+                active = info.get('active', 0) or 0
+
+                available_slots = max(0, max_concurrency - active)
+
+                info['max_concurrency'] = max_concurrency
+                info['available_slots'] = available_slots
+
+                logger.info(f"[Flower] {name} max concurrency = {max_concurrency}")
+            except Exception as e:
+                logger.warning(f"Failed to get max concurrency for {name}: {e}")
+
             workers[name] = info
+
 
         if options.purge_offline_workers is not None:
             timestamp = int(time.time())
