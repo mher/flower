@@ -68,6 +68,8 @@ define("auth_provider", default=None, type=str, help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
 define("task_runtime_metric_buckets", type=float, default=Histogram.DEFAULT_BUCKETS,
        multiple=True, help="histogram latency bucket value")
+define("unprocessed_tasks_window_minutes", type=int, default=0,
+       help="time window in minutes for tracking unprocessed tasks (e.g., 5, 10, 15, 30, 60). Set to 0 to disable.")
 
 
 default_options = options
