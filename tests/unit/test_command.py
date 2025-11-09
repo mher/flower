@@ -184,7 +184,7 @@ class TestConfOption(AsyncHTTPTestCase):
     def test_all_options_documented(self):
         def grep(patter, filename):
             return int(subprocess.check_output(
-                'grep "{}" {}|wc -l'.format(patter, filename), shell=True))
+                f'grep "{patter}" {filename}|wc -l', shell=True))
 
         defined = grep('^define(', 'flower/options.py')
         documented = grep('^~~', 'docs/config.rst')
