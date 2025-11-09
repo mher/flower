@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import numbers
-import socket
 import sys
 from urllib.parse import quote, unquote, urljoin, urlparse
 
@@ -67,7 +66,7 @@ class RabbitMQ(BrokerBase):
                 url, auth_username=username, auth_password=password,
                 connect_timeout=1.0, request_timeout=2.0,
                 validate_cert=False)
-        except (socket.error, httpclient.HTTPError) as e:
+        except (OSError, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)
             return []
         finally:
@@ -106,7 +105,7 @@ class RedisBase(BrokerBase):
         if pri not in self.priority_steps:
             raise ValueError('Priority not in priority steps')
         # pylint: disable=consider-using-f-string
-        return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
+        return '{}{}{}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
 
     async def queues(self, names):
         queue_stats = []
@@ -115,7 +114,7 @@ class RedisBase(BrokerBase):
                 name, pri) for pri in self.priority_steps]
             queue_stats.append({
                 'name': name,
-                'messages': sum((self.redis.llen(x) for x in priority_names))
+                'messages': sum(self.redis.llen(x) for x in priority_names)
             })
         return queue_stats
 
