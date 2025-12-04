@@ -119,6 +119,9 @@ Execute a task by name and wait results
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task
         """
+        if self.application.options.read_only:
+            raise web.HTTPError(403, "Read only mode is enabled")
+        
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking a task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -194,6 +197,9 @@ Execute a task
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task
         """
+        if self.application.options.read_only:
+            raise web.HTTPError(403, "Read only mode is enabled")
+        
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking a task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -256,6 +262,9 @@ Execute a task by name (doesn't require task sources)
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task
         """
+        if self.application.options.read_only:
+            raise web.HTTPError(403, "Read only mode is enabled")
+        
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -346,6 +355,9 @@ Abort a running task
 :statuscode 401: unauthorized request
 :statuscode 503: result backend is not configured
         """
+        if self.application.options.read_only:
+            raise web.HTTPError(403, "Read only mode is enabled")
+        
         logger.info("Aborting task '%s'", taskid)
 
         result = AbortableAsyncResult(taskid)
