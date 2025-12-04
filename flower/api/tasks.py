@@ -117,6 +117,7 @@ Execute a task by name and wait results
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown task
         """
         if self.application.options.read_only:
@@ -195,6 +196,7 @@ Execute a task
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown task
         """
         if self.application.options.read_only:
@@ -260,6 +262,7 @@ Execute a task by name (doesn't require task sources)
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown task
         """
         if self.application.options.read_only:
@@ -307,6 +310,7 @@ Get a task result
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 503: result backend is not configured
         """
         timeout = self.get_argument('timeout', None)
@@ -353,6 +357,7 @@ Abort a running task
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 503: result backend is not configured
         """
         if self.application.options.read_only:

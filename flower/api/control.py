@@ -51,6 +51,7 @@ Shut down a worker
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown worker
         """
         if self.application.options.read_only:
@@ -93,7 +94,7 @@ Restart worker's pool
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
-:statuscode 403: pool restart is not enabled (see CELERYD_POOL_RESTARTS)
+:statuscode 403: pool restart is not enabled (see CELERYD_POOL_RESTARTS) or read only mode is enabled
 :statuscode 404: unknown worker
         """
         if self.application.options.read_only:
@@ -145,7 +146,7 @@ Grow worker's pool
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
-:statuscode 403: failed to grow
+:statuscode 403: failed to grow or read only mode is enabled
 :statuscode 404: unknown worker
         """
 
@@ -199,7 +200,7 @@ Shrink worker's pool
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
-:statuscode 403: failed to shrink
+:statuscode 403: failed to shrink or read only mode is enabled
 :statuscode 404: unknown worker
         """
         
@@ -255,7 +256,7 @@ Autoscale worker pool
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
-:statuscode 403: autoscaling is not enabled (see CELERYD_AUTOSCALER)
+:statuscode 403: autoscaling is not enabled (see CELERYD_AUTOSCALER) or read only mode is enabled
 :statuscode 404: unknown worker
         """
         if self.application.options.read_only:
@@ -313,7 +314,7 @@ Start consuming from a queue
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
-:statuscode 403: failed to add consumer
+:statuscode 403: failed to add consumer or read only mode is enabled
 :statuscode 404: unknown worker
         """
         if self.application.options.read_only:
@@ -369,7 +370,7 @@ Stop consuming from a queue
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
-:statuscode 403: failed to cancel consumer
+:statuscode 403: failed to cancel consumer or read only mode is enabled
 :statuscode 404: unknown worker
         """
         if self.application.options.read_only:
@@ -426,6 +427,7 @@ Revoke a task
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
@@ -470,6 +472,7 @@ Change soft and hard time limits for a task
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown task/worker
         """
         if self.application.options.read_only:
@@ -533,6 +536,7 @@ Change rate limit for a task
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown task/worker
         """
         if self.application.options.read_only:
