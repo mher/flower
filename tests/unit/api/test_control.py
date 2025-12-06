@@ -101,7 +101,6 @@ class WorkerControlTests(BaseApiTestCase):
             'autoscale',
             reply=True, destination=['test'],
             arguments={'min': 2, 'max': 5})
-    
     def test_pool_autoscale_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
