@@ -31,7 +31,6 @@ class WorkerControlTests(BaseApiTestCase):
         self.assertEqual(200, r.code)
         celery.control.broadcast.assert_called_once_with('shutdown',
                                                          destination=['test'])
-    
     def test_shutdown_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
