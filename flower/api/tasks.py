@@ -310,7 +310,6 @@ Get a task result
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
-:statuscode 403: read only mode is enabled
 :statuscode 503: result backend is not configured
         """
         timeout = self.get_argument('timeout', None)

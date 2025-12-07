@@ -50,7 +50,7 @@ class WorkerControlTests(BaseApiTestCase):
             destination=['test'],
             reply=True,
         )
-    
+
     def test_pool_restart_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -66,7 +66,7 @@ class WorkerControlTests(BaseApiTestCase):
         self.assertEqual(200, r.code)
         celery.control.pool_grow.assert_called_once_with(
             n=3, reply=True, destination=['test'])
-        
+
     def test_pool_grow_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -82,7 +82,7 @@ class WorkerControlTests(BaseApiTestCase):
         self.assertEqual(200, r.code)
         celery.control.pool_shrink.assert_called_once_with(
             n=1, reply=True, destination=['test'])
-    
+
     def test_pool_shrink_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -121,7 +121,7 @@ class WorkerControlTests(BaseApiTestCase):
             'add_consumer',
             reply=True, destination=['test'],
             arguments={'queue': 'foo'})
-        
+
     def test_add_consumer_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -142,7 +142,7 @@ class WorkerControlTests(BaseApiTestCase):
             'cancel_consumer',
             reply=True, destination=['test'],
             arguments={'queue': 'foo'})
-    
+
     def test_cancel_consumer_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -165,7 +165,7 @@ class WorkerControlTests(BaseApiTestCase):
         celery.control.time_limit.assert_called_once_with(
             'celery.map', hard=3.1, soft=1.2, destination=['foo'],
             reply=True)
-    
+
     def test_task_timeout_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -185,7 +185,7 @@ class WorkerControlTests(BaseApiTestCase):
         self.assertEqual(200, r.code)
         celery.control.rate_limit.assert_called_once_with(
             'celery.map', '20', destination=['foo'], reply=True)
-    
+
     def test_task_ratelimit_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -228,7 +228,7 @@ class TaskControlTests(BaseApiTestCase):
         celery.control.revoke.assert_called_once_with('test',
                                                       terminate=False,
                                                       signal='SIGTERM')
-    
+
     def test_revoke_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -245,7 +245,7 @@ class TaskControlTests(BaseApiTestCase):
         celery.control.revoke.assert_called_once_with('test',
                                                       terminate=True,
                                                       signal='SIGTERM')
-    
+
     def test_terminate_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp

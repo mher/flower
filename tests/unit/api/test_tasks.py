@@ -35,7 +35,7 @@ class ApplyTests(BaseApiTestCase):
         body = bytes.decode(r.body)
         self.assertEqual(result, json.loads(body)['result'])
         task.apply_async.assert_called_once_with(args=[], kwargs={})
-    
+
     def test_apply_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -96,7 +96,7 @@ class AsyncApplyTests(BaseApiTestCase):
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
             args=[], kwargs={}, expires=tomorrow)
-    
+
     def test_async_apply_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
