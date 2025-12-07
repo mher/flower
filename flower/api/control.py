@@ -56,7 +56,7 @@ Shut down a worker
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         if not self.is_worker(workername):
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
@@ -99,7 +99,7 @@ Restart worker's pool
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         if not self.is_worker(workername):
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
@@ -152,7 +152,7 @@ Grow worker's pool
 
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         if not self.is_worker(workername):
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
@@ -203,7 +203,7 @@ Shrink worker's pool
 :statuscode 403: failed to shrink or read only mode is enabled
 :statuscode 404: unknown worker
         """
-        
+
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
 
@@ -319,7 +319,7 @@ Start consuming from a queue
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         if not self.is_worker(workername):
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
@@ -375,7 +375,7 @@ Stop consuming from a queue
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         if not self.is_worker(workername):
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
@@ -431,7 +431,7 @@ Revoke a task
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         logger.info("Revoking task '%s'", taskid)
         terminate = self.get_argument('terminate', default=False, type=bool)
         signal = self.get_argument('signal', default='SIGTERM', type=str)
@@ -477,7 +477,7 @@ Change soft and hard time limits for a task
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         workername = self.get_argument('workername')
         hard = self.get_argument('hard', default=None, type=float)
         soft = self.get_argument('soft', default=None, type=float)
@@ -541,7 +541,7 @@ Change rate limit for a task
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         workername = self.get_argument('workername')
         ratelimit = self.get_argument('ratelimit')
 

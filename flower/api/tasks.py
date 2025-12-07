@@ -122,7 +122,7 @@ Execute a task by name and wait results
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking a task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -201,7 +201,7 @@ Execute a task
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking a task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -267,7 +267,7 @@ Execute a task by name (doesn't require task sources)
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -362,7 +362,7 @@ Abort a running task
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
-        
+
         logger.info("Aborting task '%s'", taskid)
 
         result = AbortableAsyncResult(taskid)
