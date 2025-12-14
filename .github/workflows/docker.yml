@@ -5,14 +5,14 @@ on:
     branches:
       - master
     tags:
-      - '*'
+      - "*"
   pull_request:
     branches:
       - master
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
@@ -23,7 +23,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v5
         with:
-          images: mher/flower
+          images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/flower
           tags: |
             type=ref,event=branch
             type=ref,event=pr
