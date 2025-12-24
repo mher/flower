@@ -31,3 +31,8 @@ Pipfile*
 .vscode/
 data/
 .python-version
+
+# Local environment variables (secrets)
+.env
+.env.*
+!.env.example

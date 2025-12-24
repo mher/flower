@@ -1,0 +1,38 @@
+ [project]
+ name = "frontend"
+ version = "0.0.0"
+description = "Flower frontend as a Python package"
+authors = [
+	{name = "Itay Bittan", email = "itay.bittan@gmail.com"}
+]
+readme = "README.md"
+ requires-python = ">=3.12"
+
+ [build-system]
+ requires = ["hatchling"]
+ build-backend = "hatchling.build"
+
+ [tool.hatch.build.targets.wheel]
+ packages = ["frontend"]
+
+ [tool.hatch.build.targets.wheel.force-include]
+	# Copy the Vite/React build output directory into the Python package.
+	# Source path is the frontend build output (web-dist) relative to this pyproject.
+	# Destination path lives inside the `frontend` package in the wheel.
+	"web-dist" = "frontend/web-dist"
+
+ [tool.hatch.build.targets.sdist]
+ # Ensure the built assets are present in the source distribution so
+ # the wheel build (which runs from sdist in uv) can find them.
+ [tool.hatch.build.targets.sdist.force-include]
+	"web-dist" = "web-dist"
+
+ [tool.hatch.build]
+ # Keep the wheel clean; only include what we need.
+ exclude = [
+	 ".*",
+	 "node_modules/**",
+	 "src/**",
+	 "public/**",
+	 "frontend.egg-info/**",
+ ]

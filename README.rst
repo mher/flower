@@ -97,6 +97,18 @@ Documentation is available at `Read the Docs`_
 
 .. _Read the Docs: https://flower.readthedocs.io
 
+Frontend (repo development)
+--------------------------
+
+If you're working on the bundled frontend in this repository, you can rebuild it and reinstall
+the updated wheel with a single command::
+
+    $ bash scripts/update_frontend.sh --install
+
+Or just build the wheel (without installing it into your local virtualenv)::
+
+    $ bash scripts/update_frontend.sh
+
 License
 -------
 
