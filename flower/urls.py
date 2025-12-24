@@ -1,5 +1,5 @@
 import os
-
+from importlib.resources import files as resource_files
 from tornado.web import StaticFileHandler, url
 
 from .api import control, tasks, workers
@@ -13,6 +13,7 @@ from .views.workers import WorkersView, WorkerView
 settings = dict(
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
     static_path=os.path.join(os.path.dirname(__file__), "static"),
+    frontend_path=resource_files("frontend").joinpath("web-dist"),
     cookie_secret=gen_cookie_secret(),
     static_url_prefix='/static/',
     login_url='/login',
@@ -55,11 +56,10 @@ handlers = [
     (r"/metrics", monitor.Metrics),
     (r"/healthcheck", monitor.Healthcheck),
     # Static
-    (r"/static/(.*)", StaticFileHandler,
-     {"path": settings['static_path']}),
+    (r"/static/(.*)", StaticFileHandler, {"path": settings["static_path"]}),
+    (r"/(.*)", StaticFileHandler, {"path": settings["frontend_path"]}),
     # Auth
     (r"/login", auth.LoginHandler),
-
     # Error
     (r".*", NotFoundErrorHandler),
 ]
