@@ -1,0 +1,4 @@
+# Frontend: exclude everything except the built wheel(s)
+frontend/**
+!frontend/dist/
+!frontend/dist/*.whl

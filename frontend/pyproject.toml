@@ -1,6 +1,6 @@
  [project]
  name = "frontend"
- version = "0.0.0"  # this will be replaced by GitHub Actions
+ version = "0.0.0"
 description = "Flower frontend as a Python package"
 authors = [
 	{name = "Itay Bittan", email = "itay.bittan@gmail.com"}

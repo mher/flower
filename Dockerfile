@@ -14,7 +14,12 @@ COPY README.rst /flower/README.rst
 COPY requirements/ /flower/requirements/
 
 # Install the required packages
-RUN pip install --no-cache-dir -r /flower/requirements/default.txt \
+RUN pip install --no-cache-dir -r /flower/requirements/default.txt
+
+# Install the frontend Python package from the prebuilt wheel.
+# The wheel is expected to be created by scripts/update_frontend.sh before `docker build`.
+COPY frontend/dist/*.whl /tmp/frontend-wheels/
+RUN pip install --no-cache-dir /tmp/frontend-wheels/*.whl \
     && pip install --no-cache-dir /flower
 
 # PYTHONUNBUFFERED: Force stdin, stdout and stderr to be totally unbuffered. (equivalent to `python -u`)
