@@ -527,8 +527,16 @@ List tasks
             if worker is not None:
                 task['worker'] = worker.hostname
             result.append((task_id, task))
-        self.write(OrderedDict(result))
+        if isinstance(self, ListTasksV2):
+            self.write({
+                    "tasks": OrderedDict(result),
+                    "total": len(app.events.state.tasks),
+            })
+        else:
+            self.write(OrderedDict(result))
 
+class ListTasksV2(ListTasks):
+    pass
 
 class ListTaskTypes(BaseTaskHandler):
     @web.authenticated
