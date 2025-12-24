@@ -2,8 +2,11 @@ import { Layout } from "./components/Layout";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import type { FC } from "react";
-import { useEffect, useState } from "react";
-import { TasksPage } from "./pages/TasksPage";
+import { lazy, Suspense, useEffect, useState } from "react";
+
+const TasksPage = lazy(() =>
+  import("./pages/TasksPage").then((mod) => ({ default: mod.TasksPage }))
+);
 
 type Route = "home" | "workers" | "tasks" | "broker";
 
@@ -30,7 +33,9 @@ const App: FC = () => {
   return (
     <Layout>
       {route === "tasks" ? (
-        <TasksPage />
+        <Suspense fallback={null}>
+          <TasksPage />
+        </Suspense>
       ) : (
         <Container maxWidth={false} sx={{ my: 2 }}>
           <Typography variant="h6" component="h1">
