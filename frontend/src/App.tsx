@@ -8,7 +8,7 @@ const TasksPage = lazy(() =>
   import("./pages/TasksPage").then((mod) => ({ default: mod.TasksPage }))
 );
 
-type Route = "home" | "workers" | "tasks" | "broker";
+type Route = "workers" | "tasks" | "broker";
 
 function getRouteFromHash(hash: string): Route {
   const h = (hash || "").replace(/^#/, "");
@@ -16,7 +16,7 @@ function getRouteFromHash(hash: string): Route {
   if (path.startsWith("/tasks")) return "tasks";
   if (path.startsWith("/workers")) return "workers";
   if (path.startsWith("/broker")) return "broker";
-  return "home";
+  return "tasks";
 }
 
 const App: FC = () => {
@@ -46,9 +46,7 @@ const App: FC = () => {
               : "Flower"}
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
-            {route === "home"
-              ? "Select a page from the navbar."
-              : "Not implemented yet."}
+            {"Not implemented yet."}
           </Typography>
         </Container>
       )}

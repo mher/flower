@@ -15,7 +15,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { AUTO_REFRESH_OPTIONS, useAutoRefresh } from "../lib/autoRefresh";
 import { getApiInFlightCount, subscribeApiInFlight } from "../api/client";
 
-type Route = "home" | "workers" | "tasks" | "broker";
+type Route = "workers" | "tasks" | "broker";
 
 function getRouteFromHash(hash: string): Route {
   const h = (hash || "").replace(/^#/, "");
@@ -23,7 +23,7 @@ function getRouteFromHash(hash: string): Route {
   if (path.startsWith("/tasks")) return "tasks";
   if (path.startsWith("/workers")) return "workers";
   if (path.startsWith("/broker")) return "broker";
-  return "home";
+  return "tasks";
 }
 
 type NavbarProps = {
