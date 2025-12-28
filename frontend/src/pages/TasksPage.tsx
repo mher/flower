@@ -7,11 +7,14 @@ import Typography from "@mui/material/Typography";
 import {
   type GridColDef,
   type GridRenderCellParams,
+  type GridRowClassNameParams,
+  type GridSortModel,
   DataGrid,
 } from "@mui/x-data-grid";
 import { buildApiUrl, fetchJson } from "../api/client";
 import { getUrlPrefix, joinWithPrefix } from "../lib/urlPrefix";
 import { useAutoRefresh } from "../lib/autoRefresh";
+import { useLocalStorageState } from "../lib/useLocalStorageState";
 
 type ApiTask = {
   uuid?: string;
@@ -71,8 +74,39 @@ export const TasksPage: FC = () => {
   const urlPrefix = getUrlPrefix();
   const { option: autoRefreshOption } = useAutoRefresh();
 
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useLocalStorageState<number>(
+    "flower:tasks.pageSize",
+    10,
+    {
+      validate: (v) =>
+        typeof v === "number" &&
+        Number.isFinite(v) &&
+        [10, 15, 25, 50, 100].includes(v),
+    }
+  );
   const [page, setPage] = useState<number>(0);
+  const [sortModel, setSortModel] = useLocalStorageState<GridSortModel>(
+    "flower:tasks.sortModel",
+    [{ field: "started", sort: "desc" }],
+    {
+      validate: (v): v is GridSortModel => {
+        if (!Array.isArray(v)) return false;
+        if (v.length === 0) return true;
+        if (v.length > 1) return false;
+        const item = v[0] as unknown;
+        if (typeof item !== "object" || item === null) return false;
+        const maybe = item as { field?: unknown; sort?: unknown };
+        if (
+          maybe.field !== "name" &&
+          maybe.field !== "state" &&
+          maybe.field !== "started"
+        ) {
+          return false;
+        }
+        return maybe.sort === "asc" || maybe.sort === "desc";
+      },
+    }
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<TaskRow[]>([]);
@@ -80,6 +114,18 @@ export const TasksPage: FC = () => {
   const [refreshTick, setRefreshTick] = useState<number>(0);
 
   const offset = useMemo(() => page * pageSize, [page, pageSize]);
+
+  const sortBy = useMemo(() => {
+    const first = sortModel[0];
+    if (!first) return "-started";
+    const field = first.field;
+    const direction = first.sort;
+    if (field !== "name" && field !== "state" && field !== "started") {
+      return "-started";
+    }
+    if (direction !== "asc" && direction !== "desc") return "-started";
+    return `${direction === "desc" ? "-" : ""}${field}`;
+  }, [sortModel]);
 
   useEffect(() => {
     if (autoRefreshOption.intervalMs <= 0) return;
@@ -98,7 +144,7 @@ export const TasksPage: FC = () => {
       {
         limit: pageSize,
         offset,
-        sort_by: "-received",
+        sort_by: sortBy,
       },
       urlPrefix
     );
@@ -125,18 +171,18 @@ export const TasksPage: FC = () => {
       });
 
     return () => controller.abort();
-  }, [offset, pageSize, urlPrefix, refreshTick]);
+  }, [offset, pageSize, sortBy, urlPrefix, refreshTick]);
 
   const taskLinkBase = joinWithPrefix(urlPrefix, "/task/");
 
   const columns = useMemo<Array<GridColDef<TaskRow>>>(
     () => [
       {
-        field: "task",
+        field: "name",
         headerName: "Task",
         minWidth: 360,
         flex: 1,
-        sortable: false,
+        sortable: true,
         valueGetter: (_value, row) => row.name || row.uuid || row.id,
         renderCell: (params: GridRenderCellParams<TaskRow>) => {
           const name = params.row.name || "-";
@@ -163,7 +209,7 @@ export const TasksPage: FC = () => {
         minWidth: 115,
         align: "center",
         headerAlign: "center",
-        sortable: false,
+        sortable: true,
         renderCell: (
           params: GridRenderCellParams<TaskRow, string | undefined>
         ) => {
@@ -256,7 +302,8 @@ export const TasksPage: FC = () => {
         field: "started",
         headerName: "Started / Received",
         minWidth: 185,
-        sortable: false,
+        sortable: true,
+        valueGetter: (_value, row) => row.started,
         renderCell: (params: GridRenderCellParams<TaskRow>) => {
           const startedLine = formatUnixSeconds(params.row.started);
           const receivedLine = formatUnixSeconds(params.row.received);
@@ -316,6 +363,16 @@ export const TasksPage: FC = () => {
         columns={columns}
         loading={loading}
         disableRowSelectionOnClick
+        getRowClassName={(params: GridRowClassNameParams<TaskRow>) =>
+          params.indexRelativeToCurrentPage % 2 === 1 ? "odd" : ""
+        }
+        sortingMode="server"
+        sortModel={sortModel}
+        onSortModelChange={(model) => {
+          const next = model.slice(0, 1);
+          setPage(0);
+          setSortModel(next);
+        }}
         pagination
         paginationMode="server"
         rowCount={rowCount}
@@ -329,7 +386,12 @@ export const TasksPage: FC = () => {
           setPage(model.page);
         }}
         pageSizeOptions={[10, 15, 25, 50, 100]}
-        sx={{ minWidth: 1200 }}
+        sx={{
+          minWidth: 1200,
+          "& .MuiDataGrid-row.odd:not(:hover):not(.Mui-selected)": {
+            bgcolor: "#f0ffeb",
+          },
+        }}
       />
     </Container>
   );
