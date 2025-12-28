@@ -2,10 +2,29 @@ import { getUrlPrefix, joinWithPrefix } from "../lib/urlPrefix";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 import type { FC } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { AUTO_REFRESH_OPTIONS, useAutoRefresh } from "../lib/autoRefresh";
+import { getApiInFlightCount, subscribeApiInFlight } from "../api/client";
+
+type Route = "home" | "workers" | "tasks" | "broker";
+
+function getRouteFromHash(hash: string): Route {
+  const h = (hash || "").replace(/^#/, "");
+  const path = h.startsWith("/") ? h : `/${h}`;
+  if (path.startsWith("/tasks")) return "tasks";
+  if (path.startsWith("/workers")) return "workers";
+  if (path.startsWith("/broker")) return "broker";
+  return "home";
+}
 
 type NavbarProps = {
   urlPrefix?: string;
@@ -14,6 +33,28 @@ type NavbarProps = {
 export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
   const prefix = urlPrefix ?? getUrlPrefix();
   const appRoot = joinWithPrefix(prefix, "/index.html");
+
+  const { option: autoRefreshOption, setOption: setAutoRefreshOption } =
+    useAutoRefresh();
+
+  const [route, setRoute] = useState<Route>(() =>
+    getRouteFromHash(window.location.hash)
+  );
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(getRouteFromHash(window.location.hash));
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  const activeButtonSx = useMemo(() => ({ fontWeight: "bold" }), []);
+
+  const apiInFlightCount = useSyncExternalStore(
+    subscribeApiInFlight,
+    getApiInFlightCount,
+    getApiInFlightCount
+  );
+  const isRefreshing = apiInFlightCount > 0;
 
   return (
     <AppBar
@@ -46,13 +87,28 @@ export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
         </Box>
 
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-          <Button color="inherit" component="a" href={`${appRoot}#/workers`}>
+          <Button
+            color="inherit"
+            component="a"
+            href={`${appRoot}#/workers`}
+            sx={route === "workers" ? activeButtonSx : undefined}
+          >
             Workers
           </Button>
-          <Button color="inherit" component="a" href={`${appRoot}#/tasks`}>
+          <Button
+            color="inherit"
+            component="a"
+            href={`${appRoot}#/tasks`}
+            sx={route === "tasks" ? activeButtonSx : undefined}
+          >
             Tasks
           </Button>
-          <Button color="inherit" component="a" href={`${appRoot}#/broker`}>
+          <Button
+            color="inherit"
+            component="a"
+            href={`${appRoot}#/broker`}
+            sx={route === "broker" ? activeButtonSx : undefined}
+          >
             Broker
           </Button>
           <Button
@@ -67,6 +123,43 @@ export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
         </Box>
 
         <Box sx={{ flexGrow: 1 }} />
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {isRefreshing ? (
+            <CircularProgress
+              size={14}
+              thickness={5}
+              color="inherit"
+              aria-label="Refreshing"
+            />
+          ) : null}
+          <Typography component="div">Refresh</Typography>
+          <FormControl
+            size="small"
+            variant="standard"
+            sx={{ minWidth: 60, pt: 0.5, pl: 0.5 }}
+          >
+            <Select
+              id="auto-refresh"
+              value={autoRefreshOption.label}
+              inputProps={{ "aria-label": "Auto refresh" }}
+              onChange={(e: SelectChangeEvent) => {
+                const nextLabel = e.target
+                  .value as typeof autoRefreshOption.label;
+                const next =
+                  AUTO_REFRESH_OPTIONS.find((opt) => opt.label === nextLabel) ??
+                  AUTO_REFRESH_OPTIONS[0];
+                setAutoRefreshOption(next);
+              }}
+            >
+              {AUTO_REFRESH_OPTIONS.map((opt) => (
+                <MenuItem key={opt.label} value={opt.label}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
 
         <IconButton
           color="inherit"

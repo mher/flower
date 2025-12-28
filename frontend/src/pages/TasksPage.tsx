@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@mui/x-data-grid";
 import { buildApiUrl, fetchJson } from "../api/client";
 import { getUrlPrefix, joinWithPrefix } from "../lib/urlPrefix";
+import { useAutoRefresh } from "../lib/autoRefresh";
 
 type ApiTask = {
   uuid?: string;
@@ -48,17 +50,46 @@ function formatRuntime(value?: number): string {
   return `${value.toFixed(3)}s`;
 }
 
+function getStateChipColor(
+  state?: string
+): "default" | "success" | "error" | "info" | "warning" {
+  switch (state) {
+    case "SUCCESS":
+      return "success";
+    case "FAILURE":
+      return "error";
+    case "STARTED":
+      return "info";
+    case "RETRY":
+      return "warning";
+    default:
+      return "default";
+  }
+}
+
 export const TasksPage: FC = () => {
   const urlPrefix = getUrlPrefix();
+  const { option: autoRefreshOption } = useAutoRefresh();
 
-  const [pageSize, setPageSize] = useState<number>(25);
+  const [pageSize, setPageSize] = useState<number>(15);
   const [page, setPage] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<TaskRow[]>([]);
   const [rowCount, setRowCount] = useState<number>(0);
+  const [refreshTick, setRefreshTick] = useState<number>(0);
 
   const offset = useMemo(() => page * pageSize, [page, pageSize]);
+
+  useEffect(() => {
+    if (autoRefreshOption.intervalMs <= 0) return;
+
+    const id = window.setInterval(() => {
+      setRefreshTick((v) => v + 1);
+    }, autoRefreshOption.intervalMs);
+
+    return () => window.clearInterval(id);
+  }, [autoRefreshOption.intervalMs]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -94,32 +125,34 @@ export const TasksPage: FC = () => {
       });
 
     return () => controller.abort();
-  }, [offset, pageSize, urlPrefix]);
+  }, [offset, pageSize, urlPrefix, refreshTick]);
 
   const taskLinkBase = joinWithPrefix(urlPrefix, "/task/");
 
   const columns = useMemo<Array<GridColDef<TaskRow>>>(
     () => [
       {
-        field: "name",
-        headerName: "Name",
-        minWidth: 220,
+        field: "task",
+        headerName: "Task",
+        minWidth: 360,
         flex: 1,
         sortable: false,
-        valueGetter: (_value, row) => row.name || "-",
-      },
-      {
-        field: "uuid",
-        headerName: "UUID",
-        minWidth: 320,
-        flex: 1,
-        sortable: false,
+        valueGetter: (_value, row) => row.name || row.uuid || row.id,
         renderCell: (params: GridRenderCellParams<TaskRow>) => {
+          const name = params.row.name || "-";
           const uuid = params.row.uuid || params.row.id;
           const detailsHref = `${taskLinkBase}${encodeURIComponent(uuid)}`;
+
           return (
-            <Box component="a" href={detailsHref} sx={{ color: "inherit" }}>
-              {uuid}
+            <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <Typography variant="body2" noWrap title={name}>
+                {name}
+              </Typography>
+              <Typography variant="body2" noWrap>
+                <Box component="a" href={detailsHref} sx={{ color: "gray" }}>
+                  {uuid}
+                </Box>
+              </Typography>
             </Box>
           );
         },
@@ -128,8 +161,38 @@ export const TasksPage: FC = () => {
         field: "state",
         headerName: "State",
         minWidth: 120,
+        align: "center",
+        headerAlign: "center",
         sortable: false,
-        valueGetter: (_value, row) => row.state || "-",
+        renderCell: (
+          params: GridRenderCellParams<TaskRow, string | undefined>
+        ) => {
+          const state = params.value;
+          const color = getStateChipColor(state);
+
+          return (
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Chip
+                size="small"
+                label={state || "-"}
+                color={color}
+                sx={
+                  color === "default"
+                    ? { bgcolor: "grey.300", color: "text.primary" }
+                    : undefined
+                }
+              />
+            </Box>
+          );
+        },
       },
       {
         field: "args",
@@ -210,20 +273,6 @@ export const TasksPage: FC = () => {
 
   return (
     <Container maxWidth={false} sx={{ my: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 2,
-        }}
-      >
-        <Typography variant="h6" component="h1">
-          Tasks
-        </Typography>
-      </Box>
-
       {error && (
         <Typography
           variant="body2"
@@ -252,7 +301,7 @@ export const TasksPage: FC = () => {
           }
           setPage(model.page);
         }}
-        pageSizeOptions={[10, 25, 50, 100]}
+        pageSizeOptions={[15, 25, 50, 100]}
         sx={{ minWidth: 1200 }}
       />
     </Container>
