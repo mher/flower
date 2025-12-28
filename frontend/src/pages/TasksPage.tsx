@@ -13,6 +13,7 @@ import {
 import { buildApiUrl, fetchJson } from "../api/client";
 import { getUrlPrefix, joinWithPrefix } from "../lib/urlPrefix";
 import { useAutoRefresh } from "../lib/autoRefresh";
+import { useLocalStorageState } from "../lib/useLocalStorageState";
 
 type ApiTask = {
   uuid?: string;
@@ -72,7 +73,16 @@ export const TasksPage: FC = () => {
   const urlPrefix = getUrlPrefix();
   const { option: autoRefreshOption } = useAutoRefresh();
 
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useLocalStorageState<number>(
+    "flower:tasks.pageSize",
+    10,
+    {
+      validate: (v) =>
+        typeof v === "number" &&
+        Number.isFinite(v) &&
+        [10, 15, 25, 50, 100].includes(v),
+    }
+  );
   const [page, setPage] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
