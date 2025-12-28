@@ -119,25 +119,27 @@ export const TasksPage: FC = () => {
   const columns = useMemo<Array<GridColDef<TaskRow>>>(
     () => [
       {
-        field: "name",
-        headerName: "Name",
-        minWidth: 220,
+        field: "task",
+        headerName: "Task",
+        minWidth: 360,
         flex: 1,
         sortable: false,
-        valueGetter: (_value, row) => row.name || "-",
-      },
-      {
-        field: "uuid",
-        headerName: "UUID",
-        minWidth: 320,
-        flex: 1,
-        sortable: false,
+        valueGetter: (_value, row) => row.name || row.uuid || row.id,
         renderCell: (params: GridRenderCellParams<TaskRow>) => {
+          const name = params.row.name || "-";
           const uuid = params.row.uuid || params.row.id;
           const detailsHref = `${taskLinkBase}${encodeURIComponent(uuid)}`;
+
           return (
-            <Box component="a" href={detailsHref} sx={{ color: "inherit" }}>
-              {uuid}
+            <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <Typography variant="body2" noWrap title={name}>
+                {name}
+              </Typography>
+              <Typography variant="body2" noWrap>
+                <Box component="a" href={detailsHref} sx={{ color: "gray" }}>
+                  {uuid}
+                </Box>
+              </Typography>
             </Box>
           );
         },
