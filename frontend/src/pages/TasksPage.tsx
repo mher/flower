@@ -6,6 +6,7 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import {
   type GridColDef,
+  type GridFilterModel,
   type GridRenderCellParams,
   type GridRowClassNameParams,
   type GridSortModel,
@@ -70,6 +71,25 @@ function getStateChipColor(
   }
 }
 
+function getSearchFromFilterModel(model: GridFilterModel): string {
+  const values: string[] = [];
+
+  for (const item of model.items ?? []) {
+    const raw = (item as { value?: unknown }).value;
+    if (raw === undefined || raw === null) continue;
+    const s = String(raw).trim();
+    if (s) values.push(s);
+  }
+
+  for (const raw of model.quickFilterValues ?? []) {
+    if (raw === undefined || raw === null) continue;
+    const s = String(raw).trim();
+    if (s) values.push(s);
+  }
+
+  return Array.from(new Set(values)).join(" ").trim();
+}
+
 export const TasksPage: FC = () => {
   const urlPrefix = getUrlPrefix();
   const { option: autoRefreshOption } = useAutoRefresh();
@@ -107,6 +127,9 @@ export const TasksPage: FC = () => {
       },
     }
   );
+  const [filterModel, setFilterModel] = useState<GridFilterModel>({
+    items: [],
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<TaskRow[]>([]);
@@ -127,6 +150,11 @@ export const TasksPage: FC = () => {
     return `${direction === "desc" ? "-" : ""}${field}`;
   }, [sortModel]);
 
+  const search = useMemo(
+    () => getSearchFromFilterModel(filterModel),
+    [filterModel]
+  );
+
   useEffect(() => {
     if (autoRefreshOption.intervalMs <= 0) return;
 
@@ -145,6 +173,7 @@ export const TasksPage: FC = () => {
         limit: pageSize,
         offset,
         sort_by: sortBy,
+        ...(search ? { search } : null),
       },
       urlPrefix
     );
@@ -171,7 +200,7 @@ export const TasksPage: FC = () => {
       });
 
     return () => controller.abort();
-  }, [offset, pageSize, sortBy, urlPrefix, refreshTick]);
+  }, [offset, pageSize, sortBy, search, urlPrefix, refreshTick]);
 
   const taskLinkBase = joinWithPrefix(urlPrefix, "/task/");
 
@@ -366,6 +395,12 @@ export const TasksPage: FC = () => {
         getRowClassName={(params: GridRowClassNameParams<TaskRow>) =>
           params.indexRelativeToCurrentPage % 2 === 1 ? "odd" : ""
         }
+        filterMode="server"
+        filterModel={filterModel}
+        onFilterModelChange={(model) => {
+          setPage(0);
+          setFilterModel(model);
+        }}
         sortingMode="server"
         sortModel={sortModel}
         onSortModelChange={(model) => {
