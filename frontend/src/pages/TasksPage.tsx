@@ -195,32 +195,34 @@ export const TasksPage: FC = () => {
         },
       },
       {
-        field: "args",
-        headerName: "Args",
-        minWidth: 220,
+        field: "args_kwargs",
+        headerName: "Args / Kwargs",
+        minWidth: 280,
         flex: 1,
         sortable: false,
-        renderCell: (
-          params: GridRenderCellParams<TaskRow, string | undefined>
-        ) => (
-          <Typography variant="body2" noWrap title={params.value || ""}>
-            {params.value || "-"}
-          </Typography>
-        ),
-      },
-      {
-        field: "kwargs",
-        headerName: "Kwargs",
-        minWidth: 220,
-        flex: 1,
-        sortable: false,
-        renderCell: (
-          params: GridRenderCellParams<TaskRow, string | undefined>
-        ) => (
-          <Typography variant="body2" noWrap title={params.value || ""}>
-            {params.value || "-"}
-          </Typography>
-        ),
+        valueGetter: (_value, row) =>
+          `${row.args || "-"}\n${row.kwargs || "-"}`,
+        renderCell: (params: GridRenderCellParams<TaskRow, string>) => {
+          const argsLine = params.row.args || "-";
+          const kwargsLine = params.row.kwargs || "-";
+          const title = `${argsLine}\n${kwargsLine}`;
+
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <Typography variant="body2" noWrap title={title}>
+                {argsLine}
+              </Typography>
+              <Typography
+                variant="body2"
+                noWrap
+                title={title}
+                sx={{ color: "gray" }}
+              >
+                {kwargsLine}
+              </Typography>
+            </Box>
+          );
+        },
       },
       {
         field: "result",
