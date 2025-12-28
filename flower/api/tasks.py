@@ -528,10 +528,12 @@ List tasks
                 task['worker'] = worker.hostname
             result.append((task_id, task))
         if isinstance(self, ListTasksV2):
-            self.write({
+            self.write(
+                {
                     "tasks": OrderedDict(result),
-                    "total": len(app.events.state.tasks),
-            })
+                    "total": len(result),
+                }
+            )
         else:
             self.write(OrderedDict(result))
 
