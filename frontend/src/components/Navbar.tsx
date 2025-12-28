@@ -9,9 +9,11 @@ import Select from "@mui/material/Select";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 import type { FC } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { AUTO_REFRESH_OPTIONS, useAutoRefresh } from "../lib/autoRefresh";
+import { getApiInFlightCount, subscribeApiInFlight } from "../api/client";
 
 type Route = "home" | "workers" | "tasks" | "broker";
 
@@ -46,6 +48,13 @@ export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
   }, []);
 
   const activeButtonSx = useMemo(() => ({ fontWeight: "bold" }), []);
+
+  const apiInFlightCount = useSyncExternalStore(
+    subscribeApiInFlight,
+    getApiInFlightCount,
+    getApiInFlightCount
+  );
+  const isRefreshing = apiInFlightCount > 0;
 
   return (
     <AppBar
@@ -116,11 +125,19 @@ export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
         <Box sx={{ flexGrow: 1 }} />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {isRefreshing ? (
+            <CircularProgress
+              size={14}
+              thickness={5}
+              color="inherit"
+              aria-label="Refreshing"
+            />
+          ) : null}
           <Typography component="div">Refresh</Typography>
           <FormControl
             size="small"
             variant="standard"
-            sx={{ minWidth: 60, pt: 0.5, pl: 0.5frontend/src/pages/TasksPage.tsx }}
+            sx={{ minWidth: 60, pt: 0.5, pl: 0.5 }}
           >
             <Select
               id="auto-refresh"

@@ -11,6 +11,7 @@ import {
 } from "@mui/x-data-grid";
 import { buildApiUrl, fetchJson } from "../api/client";
 import { getUrlPrefix, joinWithPrefix } from "../lib/urlPrefix";
+import { useAutoRefresh } from "../lib/autoRefresh";
 
 type ApiTask = {
   uuid?: string;
@@ -68,6 +69,7 @@ function getStateChipColor(
 
 export const TasksPage: FC = () => {
   const urlPrefix = getUrlPrefix();
+  const { option: autoRefreshOption } = useAutoRefresh();
 
   const [pageSize, setPageSize] = useState<number>(15);
   const [page, setPage] = useState<number>(0);
@@ -75,8 +77,19 @@ export const TasksPage: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<TaskRow[]>([]);
   const [rowCount, setRowCount] = useState<number>(0);
+  const [refreshTick, setRefreshTick] = useState<number>(0);
 
   const offset = useMemo(() => page * pageSize, [page, pageSize]);
+
+  useEffect(() => {
+    if (autoRefreshOption.intervalMs <= 0) return;
+
+    const id = window.setInterval(() => {
+      setRefreshTick((v) => v + 1);
+    }, autoRefreshOption.intervalMs);
+
+    return () => window.clearInterval(id);
+  }, [autoRefreshOption.intervalMs]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -112,7 +125,7 @@ export const TasksPage: FC = () => {
       });
 
     return () => controller.abort();
-  }, [offset, pageSize, urlPrefix]);
+  }, [offset, pageSize, urlPrefix, refreshTick]);
 
   const taskLinkBase = joinWithPrefix(urlPrefix, "/task/");
 
