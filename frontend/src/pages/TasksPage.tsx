@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import {
@@ -46,6 +47,23 @@ function formatRuntime(value?: number): string {
   if (value === undefined || value === null) return "-";
   if (!Number.isFinite(value)) return "-";
   return `${value.toFixed(3)}s`;
+}
+
+function getStateChipColor(
+  state?: string
+): "default" | "success" | "error" | "info" | "warning" {
+  switch (state) {
+    case "SUCCESS":
+      return "success";
+    case "FAILURE":
+      return "error";
+    case "STARTED":
+      return "info";
+    case "RETRY":
+      return "warning";
+    default:
+      return "default";
+  }
 }
 
 export const TasksPage: FC = () => {
@@ -128,8 +146,38 @@ export const TasksPage: FC = () => {
         field: "state",
         headerName: "State",
         minWidth: 120,
+        align: "center",
+        headerAlign: "center",
         sortable: false,
-        valueGetter: (_value, row) => row.state || "-",
+        renderCell: (
+          params: GridRenderCellParams<TaskRow, string | undefined>
+        ) => {
+          const state = params.value;
+          const color = getStateChipColor(state);
+
+          return (
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Chip
+                size="small"
+                label={state || "-"}
+                color={color}
+                sx={
+                  color === "default"
+                    ? { bgcolor: "grey.300", color: "text.primary" }
+                    : undefined
+                }
+              />
+            </Box>
+          );
+        },
       },
       {
         field: "args",
