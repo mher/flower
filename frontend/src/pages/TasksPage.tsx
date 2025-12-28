@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import {
   type GridColDef,
   type GridRenderCellParams,
+  type GridRowClassNameParams,
   DataGrid,
 } from "@mui/x-data-grid";
 import { buildApiUrl, fetchJson } from "../api/client";
@@ -316,6 +317,9 @@ export const TasksPage: FC = () => {
         columns={columns}
         loading={loading}
         disableRowSelectionOnClick
+        getRowClassName={(params: GridRowClassNameParams<TaskRow>) =>
+          params.indexRelativeToCurrentPage % 2 === 1 ? "odd" : ""
+        }
         pagination
         paginationMode="server"
         rowCount={rowCount}
@@ -329,7 +333,12 @@ export const TasksPage: FC = () => {
           setPage(model.page);
         }}
         pageSizeOptions={[10, 15, 25, 50, 100]}
-        sx={{ minWidth: 1200 }}
+        sx={{
+          minWidth: 1200,
+          "& .MuiDataGrid-row.odd:not(:hover):not(.Mui-selected)": {
+            bgcolor: "#f0ffeb",
+          },
+        }}
       />
     </Container>
   );
