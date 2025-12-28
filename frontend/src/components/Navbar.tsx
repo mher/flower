@@ -2,11 +2,16 @@ import { getUrlPrefix, joinWithPrefix } from "../lib/urlPrefix";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { AUTO_REFRESH_OPTIONS, useAutoRefresh } from "../lib/autoRefresh";
 
 type Route = "home" | "workers" | "tasks" | "broker";
 
@@ -26,6 +31,9 @@ type NavbarProps = {
 export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
   const prefix = urlPrefix ?? getUrlPrefix();
   const appRoot = joinWithPrefix(prefix, "/index.html");
+
+  const { option: autoRefreshOption, setOption: setAutoRefreshOption } =
+    useAutoRefresh();
 
   const [route, setRoute] = useState<Route>(() =>
     getRouteFromHash(window.location.hash)
@@ -106,6 +114,35 @@ export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
         </Box>
 
         <Box sx={{ flexGrow: 1 }} />
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography component="div">Refresh</Typography>
+          <FormControl
+            size="small"
+            variant="standard"
+            sx={{ minWidth: 60, pt: 0.5, pl: 0.5frontend/src/pages/TasksPage.tsx }}
+          >
+            <Select
+              id="auto-refresh"
+              value={autoRefreshOption.label}
+              inputProps={{ "aria-label": "Auto refresh" }}
+              onChange={(e: SelectChangeEvent) => {
+                const nextLabel = e.target
+                  .value as typeof autoRefreshOption.label;
+                const next =
+                  AUTO_REFRESH_OPTIONS.find((opt) => opt.label === nextLabel) ??
+                  AUTO_REFRESH_OPTIONS[0];
+                setAutoRefreshOption(next);
+              }}
+            >
+              {AUTO_REFRESH_OPTIONS.map((opt) => (
+                <MenuItem key={opt.label} value={opt.label}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
 
         <IconButton
           color="inherit"
