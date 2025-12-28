@@ -6,6 +6,18 @@ import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import type { FC } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+type Route = "home" | "workers" | "tasks" | "broker";
+
+function getRouteFromHash(hash: string): Route {
+  const h = (hash || "").replace(/^#/, "");
+  const path = h.startsWith("/") ? h : `/${h}`;
+  if (path.startsWith("/tasks")) return "tasks";
+  if (path.startsWith("/workers")) return "workers";
+  if (path.startsWith("/broker")) return "broker";
+  return "home";
+}
 
 type NavbarProps = {
   urlPrefix?: string;
@@ -14,6 +26,18 @@ type NavbarProps = {
 export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
   const prefix = urlPrefix ?? getUrlPrefix();
   const appRoot = joinWithPrefix(prefix, "/index.html");
+
+  const [route, setRoute] = useState<Route>(() =>
+    getRouteFromHash(window.location.hash)
+  );
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(getRouteFromHash(window.location.hash));
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  const activeButtonSx = useMemo(() => ({ fontWeight: "bold" }), []);
 
   return (
     <AppBar
@@ -46,13 +70,28 @@ export const Navbar: FC<NavbarProps> = ({ urlPrefix }) => {
         </Box>
 
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-          <Button color="inherit" component="a" href={`${appRoot}#/workers`}>
+          <Button
+            color="inherit"
+            component="a"
+            href={`${appRoot}#/workers`}
+            sx={route === "workers" ? activeButtonSx : undefined}
+          >
             Workers
           </Button>
-          <Button color="inherit" component="a" href={`${appRoot}#/tasks`}>
+          <Button
+            color="inherit"
+            component="a"
+            href={`${appRoot}#/tasks`}
+            sx={route === "tasks" ? activeButtonSx : undefined}
+          >
             Tasks
           </Button>
-          <Button color="inherit" component="a" href={`${appRoot}#/broker`}>
+          <Button
+            color="inherit"
+            component="a"
+            href={`${appRoot}#/broker`}
+            sx={route === "broker" ? activeButtonSx : undefined}
+          >
             Broker
           </Button>
           <Button

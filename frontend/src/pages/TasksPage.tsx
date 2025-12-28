@@ -210,20 +210,6 @@ export const TasksPage: FC = () => {
 
   return (
     <Container maxWidth={false} sx={{ my: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 2,
-        }}
-      >
-        <Typography variant="h6" component="h1">
-          Tasks
-        </Typography>
-      </Box>
-
       {error && (
         <Typography
           variant="body2"
