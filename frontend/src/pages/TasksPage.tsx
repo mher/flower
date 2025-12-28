@@ -71,7 +71,7 @@ export const TasksPage: FC = () => {
   const urlPrefix = getUrlPrefix();
   const { option: autoRefreshOption } = useAutoRefresh();
 
-  const [pageSize, setPageSize] = useState<number>(15);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [page, setPage] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,7 +160,7 @@ export const TasksPage: FC = () => {
       {
         field: "state",
         headerName: "State",
-        minWidth: 120,
+        minWidth: 115,
         align: "center",
         headerAlign: "center",
         sortable: false,
@@ -195,32 +195,34 @@ export const TasksPage: FC = () => {
         },
       },
       {
-        field: "args",
-        headerName: "Args",
-        minWidth: 220,
+        field: "args_kwargs",
+        headerName: "Args / Kwargs",
+        minWidth: 300,
         flex: 1,
         sortable: false,
-        renderCell: (
-          params: GridRenderCellParams<TaskRow, string | undefined>
-        ) => (
-          <Typography variant="body2" noWrap title={params.value || ""}>
-            {params.value || "-"}
-          </Typography>
-        ),
-      },
-      {
-        field: "kwargs",
-        headerName: "Kwargs",
-        minWidth: 220,
-        flex: 1,
-        sortable: false,
-        renderCell: (
-          params: GridRenderCellParams<TaskRow, string | undefined>
-        ) => (
-          <Typography variant="body2" noWrap title={params.value || ""}>
-            {params.value || "-"}
-          </Typography>
-        ),
+        valueGetter: (_value, row) =>
+          `${row.args || "-"}\n${row.kwargs || "-"}`,
+        renderCell: (params: GridRenderCellParams<TaskRow, string>) => {
+          const argsLine = params.row.args || "-";
+          const kwargsLine = params.row.kwargs || "-";
+          const title = `${argsLine}\n${kwargsLine}`;
+
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <Typography variant="body2" noWrap title={title}>
+                {argsLine}
+              </Typography>
+              <Typography
+                variant="body2"
+                noWrap
+                title={title}
+                sx={{ color: "gray" }}
+              >
+                {kwargsLine}
+              </Typography>
+            </Box>
+          );
+        },
       },
       {
         field: "result",
@@ -233,29 +235,54 @@ export const TasksPage: FC = () => {
         renderCell: (
           params: GridRenderCellParams<TaskRow, string | undefined>
         ) => (
-          <Typography variant="body2" noWrap title={params.value || ""}>
+          <Typography
+            variant="body2"
+            title={params.value || ""}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "normal",
+              wordBreak: "break-word",
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 2,
+            }}
+          >
             {params.value || "-"}
           </Typography>
         ),
       },
       {
-        field: "received",
-        headerName: "Received",
-        minWidth: 180,
-        sortable: false,
-        valueFormatter: (value) => formatUnixSeconds(value as number),
-      },
-      {
         field: "started",
-        headerName: "Started",
-        minWidth: 180,
+        headerName: "Started / Received",
+        minWidth: 185,
         sortable: false,
-        valueFormatter: (value) => formatUnixSeconds(value as number),
+        renderCell: (params: GridRenderCellParams<TaskRow>) => {
+          const startedLine = formatUnixSeconds(params.row.started);
+          const receivedLine = formatUnixSeconds(params.row.received);
+          const title = `Started: ${startedLine}\nReceived: ${receivedLine}`;
+
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <Typography variant="body2" noWrap title={title}>
+                {startedLine}
+              </Typography>
+              <Typography
+                variant="body2"
+                noWrap
+                title={title}
+                sx={{ color: "gray" }}
+              >
+                {receivedLine}
+              </Typography>
+            </Box>
+          );
+        },
       },
       {
         field: "runtime",
         headerName: "Runtime",
-        minWidth: 120,
+        minWidth: 100,
         sortable: false,
         valueFormatter: (value) => formatRuntime(value as number),
       },
@@ -301,7 +328,7 @@ export const TasksPage: FC = () => {
           }
           setPage(model.page);
         }}
-        pageSizeOptions={[15, 25, 50, 100]}
+        pageSizeOptions={[10, 15, 25, 50, 100]}
         sx={{ minWidth: 1200 }}
       />
     </Container>
