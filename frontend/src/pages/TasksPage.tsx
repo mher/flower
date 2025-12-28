@@ -51,7 +51,7 @@ function formatRuntime(value?: number): string {
 export const TasksPage: FC = () => {
   const urlPrefix = getUrlPrefix();
 
-  const [pageSize, setPageSize] = useState<number>(25);
+  const [pageSize, setPageSize] = useState<number>(15);
   const [page, setPage] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -238,7 +238,7 @@ export const TasksPage: FC = () => {
           }
           setPage(model.page);
         }}
-        pageSizeOptions={[10, 25, 50, 100]}
+        pageSizeOptions={[15, 25, 50, 100]}
         sx={{ minWidth: 1200 }}
       />
     </Container>
