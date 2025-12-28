@@ -160,7 +160,7 @@ export const TasksPage: FC = () => {
       {
         field: "state",
         headerName: "State",
-        minWidth: 120,
+        minWidth: 115,
         align: "center",
         headerAlign: "center",
         sortable: false,
@@ -197,7 +197,7 @@ export const TasksPage: FC = () => {
       {
         field: "args_kwargs",
         headerName: "Args / Kwargs",
-        minWidth: 280,
+        minWidth: 300,
         flex: 1,
         sortable: false,
         valueGetter: (_value, row) =>
@@ -235,29 +235,54 @@ export const TasksPage: FC = () => {
         renderCell: (
           params: GridRenderCellParams<TaskRow, string | undefined>
         ) => (
-          <Typography variant="body2" noWrap title={params.value || ""}>
+          <Typography
+            variant="body2"
+            title={params.value || ""}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "normal",
+              wordBreak: "break-word",
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 2,
+            }}
+          >
             {params.value || "-"}
           </Typography>
         ),
       },
       {
-        field: "received",
-        headerName: "Received",
-        minWidth: 180,
-        sortable: false,
-        valueFormatter: (value) => formatUnixSeconds(value as number),
-      },
-      {
         field: "started",
-        headerName: "Started",
-        minWidth: 180,
+        headerName: "Started / Received",
+        minWidth: 185,
         sortable: false,
-        valueFormatter: (value) => formatUnixSeconds(value as number),
+        renderCell: (params: GridRenderCellParams<TaskRow>) => {
+          const startedLine = formatUnixSeconds(params.row.started);
+          const receivedLine = formatUnixSeconds(params.row.received);
+          const title = `Started: ${startedLine}\nReceived: ${receivedLine}`;
+
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+              <Typography variant="body2" noWrap title={title}>
+                {startedLine}
+              </Typography>
+              <Typography
+                variant="body2"
+                noWrap
+                title={title}
+                sx={{ color: "gray" }}
+              >
+                {receivedLine}
+              </Typography>
+            </Box>
+          );
+        },
       },
       {
         field: "runtime",
         headerName: "Runtime",
-        minWidth: 120,
+        minWidth: 100,
         sortable: false,
         valueFormatter: (value) => formatRuntime(value as number),
       },
