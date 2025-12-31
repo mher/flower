@@ -16,6 +16,7 @@ import { buildApiUrl, fetchJson } from "../api/client";
 import { getUrlPrefix, joinWithPrefix } from "../lib/urlPrefix";
 import { useAutoRefresh } from "../lib/autoRefresh";
 import { useLocalStorageState } from "../lib/useLocalStorageState";
+import { Task } from "./Task";
 
 type ApiTask = {
   uuid?: string;
@@ -90,9 +91,37 @@ function getSearchFromFilterModel(model: GridFilterModel): string {
   return Array.from(new Set(values)).join(" ").trim();
 }
 
+function getTaskIdFromHash(hash: string): string | null {
+  const h = (hash || "").replace(/^#/, "");
+  const path = h.startsWith("/") ? h : `/${h}`;
+  if (!path.startsWith("/tasks/")) return null;
+
+  const rest = path.slice("/tasks/".length);
+  const first = rest.split("/")[0] ?? "";
+  const trimmed = first.trim();
+  if (!trimmed) return null;
+
+  try {
+    return decodeURIComponent(trimmed);
+  } catch {
+    return trimmed;
+  }
+}
+
 export const TasksPage: FC = () => {
   const urlPrefix = getUrlPrefix();
   const { option: autoRefreshOption } = useAutoRefresh();
+
+  const [taskId, setTaskId] = useState<string | null>(() =>
+    getTaskIdFromHash(window.location.hash)
+  );
+
+  useEffect(() => {
+    const onHashChange = () =>
+      setTaskId(getTaskIdFromHash(window.location.hash));
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   const [pageSize, setPageSize] = useLocalStorageState<number>(
     "flower:tasks.pageSize",
@@ -156,6 +185,7 @@ export const TasksPage: FC = () => {
   );
 
   useEffect(() => {
+    if (taskId) return;
     if (autoRefreshOption.intervalMs <= 0) return;
 
     const id = window.setInterval(() => {
@@ -166,6 +196,7 @@ export const TasksPage: FC = () => {
   }, [autoRefreshOption.intervalMs]);
 
   useEffect(() => {
+    if (taskId) return;
     const controller = new AbortController();
     const url = buildApiUrl(
       "/api/v2/tasks",
@@ -200,9 +231,10 @@ export const TasksPage: FC = () => {
       });
 
     return () => controller.abort();
-  }, [offset, pageSize, sortBy, search, urlPrefix, refreshTick]);
+  }, [offset, pageSize, sortBy, search, urlPrefix, refreshTick, taskId]);
 
-  const taskLinkBase = joinWithPrefix(urlPrefix, "/task/");
+  const appRoot = joinWithPrefix(urlPrefix, "/index.html");
+  const taskLinkBase = `${appRoot}#/tasks/`;
 
   const columns = useMemo<Array<GridColDef<TaskRow>>>(
     () => [
@@ -373,6 +405,10 @@ export const TasksPage: FC = () => {
     ],
     [taskLinkBase]
   );
+
+  if (taskId) {
+    return <Task taskId={taskId} />;
+  }
 
   return (
     <Container maxWidth={false} sx={{ my: 2 }}>
