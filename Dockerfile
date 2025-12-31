@@ -9,8 +9,8 @@ COPY flower /flower/flower
 COPY setup.py /flower/setup.py
 COPY setup.cfg /flower/setup.cfg
 COPY MANIFEST.in /flower/MANIFEST.in
-# setup.py expects README.rst and the requirements directory to be beside it
-COPY README.rst /flower/README.rst
+# setup.py expects README.md and the requirements directory to be beside it
+COPY README.md /flower/README.md
 COPY requirements/ /flower/requirements/
 
 # Install the required packages

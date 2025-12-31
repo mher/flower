@@ -2,7 +2,7 @@ include AUTHORS
 include CHANGES
 include LICENSE
 include MANIFEST.in
-include README.rst
+include README.md
 recursive-include docs *
 recursive-include flower/static *
 recursive-include flower/templates *
