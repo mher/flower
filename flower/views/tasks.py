@@ -45,14 +45,14 @@ class TasksDataTable(BaseHandler):
     @web.authenticated
     def get(self):
         app = self.application
-        draw = self.get_argument('draw', type=int)
-        start = self.get_argument('start', type=int)
-        length = self.get_argument('length', type=int)
-        search = self.get_argument('search[value]', type=str)
+        draw = self.get_argument("draw", type=int)
+        start = self.get_argument("start", type=int)
+        length = self.get_argument("length", type=int)
+        search = self.get_argument("search[value]", type=str)
 
-        column = self.get_argument('order[0][column]', type=int)
-        sort_by = self.get_argument(f'columns[{column}][data]', type=str)
-        sort_order = self.get_argument('order[0][dir]', type=str) == 'desc'
+        column = self.get_argument("order[0][column]", type=int)
+        sort_by = self.get_argument(f"columns[{column}][data]", type=str)
+        sort_order = self.get_argument("order[0][dir]", type=str) == "desc"
 
         def key(item):
             return Comparable(getattr(item[1], sort_by))
@@ -60,27 +60,36 @@ class TasksDataTable(BaseHandler):
         self.maybe_normalize_for_sort(app.events.state.tasks_by_timestamp(), sort_by)
 
         sorted_tasks = sorted(
-            iter_tasks(app.events, search=search),
-            key=key,
-            reverse=sort_order
+            iter_tasks(app.events, search=search), key=key, reverse=sort_order
         )
 
         filtered_tasks = []
 
-        for task in sorted_tasks[start:start + length]:
+        for task in sorted_tasks[start : start + length]:
             task_dict = as_dict(self.format_task(task)[1])
-            if task_dict.get('worker'):
-                task_dict['worker'] = task_dict['worker'].hostname
+            if task_dict.get("worker"):
+                task_dict["worker"] = task_dict["worker"].hostname
 
             filtered_tasks.append(task_dict)
 
-        self.write(dict(draw=draw, data=filtered_tasks,
-                        recordsTotal=len(sorted_tasks),
-                        recordsFiltered=len(sorted_tasks)))
+        self.write(
+            dict(
+                draw=draw,
+                data=filtered_tasks,
+                recordsTotal=len(sorted_tasks),
+                recordsFiltered=len(sorted_tasks),
+            )
+        )
 
     @classmethod
     def maybe_normalize_for_sort(cls, tasks, sort_by):
-        sort_keys = {'name': str, 'state': str, 'received': float, 'started': float, 'runtime': float}
+        sort_keys = {
+            "name": str,
+            "state": str,
+            "received": float,
+            "started": float,
+            "runtime": float,
+        }
         if sort_by in sort_keys:
             for _, task in tasks:
                 attr_value = getattr(task, sort_by, None)
@@ -112,9 +121,9 @@ class TasksView(BaseHandler):
         app = self.application
         capp = self.application.capp
 
-        time = 'natural-time' if app.options.natural_time else 'time'
+        time = "natural-time" if app.options.natural_time else "time"
         if capp.conf.timezone:
-            time += '-' + str(capp.conf.timezone)
+            time += "-" + str(capp.conf.timezone)
 
         self.render(
             "tasks.html",

@@ -19,15 +19,25 @@ from .options import default_options
 logger = logging.getLogger(__name__)
 
 
-if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+if (
+    sys.version_info[0] == 3
+    and sys.version_info[1] >= 8
+    and sys.platform.startswith("win")
+):
     import asyncio
+
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 
 # pylint: disable=consider-using-f-string
 def rewrite_handler(handler, url_prefix):
     if isinstance(handler, url):
-        return url("/{}{}".format(url_prefix.strip("/"), handler.regex.pattern),
-                   handler.handler_class, handler.kwargs, handler.name)
+        return url(
+            "/{}{}".format(url_prefix.strip("/"), handler.regex.pattern),
+            handler.handler_class,
+            handler.kwargs,
+            handler.name,
+        )
     return ("/{}{}".format(url_prefix.strip("/"), handler[0]), handler[1])
 
 
@@ -35,8 +45,7 @@ class Flower(tornado.web.Application):
     pool_executor_cls = ThreadPoolExecutor
     max_workers = None
 
-    def __init__(self, options=None, capp=None, events=None,
-                 io_loop=None, **kwargs):
+    def __init__(self, options=None, capp=None, events=None, io_loop=None, **kwargs):
         handlers = default_handlers
         if options is not None and options.url_prefix:
             handlers = [rewrite_handler(h, options.url_prefix) for h in handlers]
@@ -44,7 +53,7 @@ class Flower(tornado.web.Application):
         super().__init__(**kwargs)
         self.options = options or default_options
         self.io_loop = io_loop or ioloop.IOLoop.instance()
-        self.ssl_options = kwargs.get('ssl_options', None)
+        self.ssl_options = kwargs.get("ssl_options", None)
 
         self.capp = capp or celery.Celery()
         self.capp.loader.import_default_modules()
@@ -52,7 +61,9 @@ class Flower(tornado.web.Application):
         self.executor = self.pool_executor_cls(max_workers=self.max_workers)
         self.io_loop.set_default_executor(self.executor)
 
-        self.inspector = Inspector(self.io_loop, self.capp, self.options.inspect_timeout / 1000.0)
+        self.inspector = Inspector(
+            self.io_loop, self.capp, self.options.inspect_timeout / 1000.0
+        )
 
         self.events = events or Events(
             self.capp,
@@ -62,18 +73,23 @@ class Flower(tornado.web.Application):
             enable_events=self.options.enable_events,
             io_loop=self.io_loop,
             max_workers_in_memory=self.options.max_workers,
-            max_tasks_in_memory=self.options.max_tasks)
+            max_tasks_in_memory=self.options.max_tasks,
+        )
         self.started = False
 
     def start(self):
         self.events.start()
 
         if not self.options.unix_socket:
-            self.listen(self.options.port, address=self.options.address,
-                        ssl_options=self.ssl_options,
-                        xheaders=self.options.xheaders)
+            self.listen(
+                self.options.port,
+                address=self.options.address,
+                ssl_options=self.ssl_options,
+                xheaders=self.options.xheaders,
+            )
         else:
             from tornado.netutil import bind_unix_socket
+
             server = HTTPServer(self)
             socket = bind_unix_socket(self.options.unix_socket, mode=0o777)
             server.add_socket(socket)
@@ -93,7 +109,7 @@ class Flower(tornado.web.Application):
 
     @property
     def transport(self):
-        return getattr(self.capp.connection().transport, 'driver_type', None)
+        return getattr(self.capp.connection().transport, "driver_type", None)
 
     @property
     def workers(self):

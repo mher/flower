@@ -6,22 +6,19 @@ from flower.inspector import Inspector
 from . import BaseApiTestCase
 
 inspect_response = {
-    'celery@worker1':  [
-        "tasks.add",
-        "tasks.sleep"
-    ],
+    "celery@worker1": ["tasks.add", "tasks.sleep"],
 }
 
-empty_inspect_response = {
-    'celery@worker1': []
-}
+empty_inspect_response = {"celery@worker1": []}
 
 
-@mock.patch.object(Inspector, 'methods',
-                   new_callable=mock.PropertyMock,
-                   return_value=['inspect_method'])
+@mock.patch.object(
+    Inspector,
+    "methods",
+    new_callable=mock.PropertyMock,
+    return_value=["inspect_method"],
+)
 class ListWorkersTest(BaseApiTestCase):
-
     def test_refresh_cache(self, m_inspect):
         celery = self._app.capp
         celery.control.inspect = mock.Mock()
@@ -29,21 +26,17 @@ class ListWorkersTest(BaseApiTestCase):
             return_value=inspect_response
         )
 
-        r = self.get('/api/workers?refresh=1')
-        celery.control.inspect.assert_called_once_with(
-            timeout=1,
-            destination=None
-        )
+        r = self.get("/api/workers?refresh=1")
+        celery.control.inspect.assert_called_once_with(timeout=1, destination=None)
 
         body = json.loads(r.body.decode("utf-8"))
         self.assertEqual(
-            inspect_response['celery@worker1'],
-            body['celery@worker1']['inspect_method']
+            inspect_response["celery@worker1"], body["celery@worker1"]["inspect_method"]
         )
-        self.assertIn('timestamp', body['celery@worker1'])
+        self.assertIn("timestamp", body["celery@worker1"])
         self.assertEqual(
-            inspect_response['celery@worker1'],
-            self._app.workers['celery@worker1']['inspect_method']
+            inspect_response["celery@worker1"],
+            self._app.workers["celery@worker1"]["inspect_method"],
         )
 
     def test_refresh_cache_with_empty_response(self, m_inspect):
@@ -52,21 +45,15 @@ class ListWorkersTest(BaseApiTestCase):
         celery.control.inspect.return_value.inspect_method = mock.Mock(
             return_value=inspect_response
         )
-        r = self.get('/api/workers?refresh=1')
+        r = self.get("/api/workers?refresh=1")
 
         celery.control.inspect.return_value.inspect_method = mock.Mock(
             return_value=empty_inspect_response
         )
 
-        r = self.get('/api/workers?refresh=1')
+        r = self.get("/api/workers?refresh=1")
 
         body = json.loads(r.body.decode("utf-8"))
-        self.assertEqual(
-            [],
-            body['celery@worker1']['inspect_method']
-        )
-        self.assertIn('timestamp', body['celery@worker1'])
-        self.assertEqual(
-            [],
-            self._app.workers['celery@worker1']['inspect_method']
-        )
+        self.assertEqual([], body["celery@worker1"]["inspect_method"])
+        self.assertIn("timestamp", body["celery@worker1"])
+        self.assertEqual([], self._app.workers["celery@worker1"]["inspect_method"])
