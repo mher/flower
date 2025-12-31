@@ -1,10 +1,7 @@
 # Flower
 
-.. image:: https://img.shields.io/docker/pulls/itayb/flower.svg
-:target: https://hub.docker.com/r/mher/flower
-:alt: Docker Pulls
-.. image:: https://github.com/itayB/flower/workflows/Build/badge.svg
-:target: https://github.com/mher/flower/actions
+![Docker Pulls](https://img.shields.io/docker/pulls/itayb/flower.svg)
+[![Build Status](https://github.com/itayB/flower/workflows/Build/badge.svg)](https://github.com/itayB/flower/actions)
 
 This is a fork of the original great [Flower](https://github.com/mher/flower) project that with the following changes:
 
@@ -67,6 +64,4 @@ Or just build the wheel (without installing it into your local virtualenv)::
 ## License
 
 Flower is licensed under BSD 3-Clause License.
-See the `License`\_ file for the full license text.
-
-.. \_`License`: https://github.com/mher/flower/blob/master/LICENSE
+See the [License](https://github.com/itayB/flower/blob/master/LICENSE) file for the full license text.
