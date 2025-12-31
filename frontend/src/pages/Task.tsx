@@ -10,6 +10,7 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { buildApiUrl, fetchJson } from "../api/client";
+import { TaskGraphFlow } from "../components/TaskGraphFlow";
 import { getUrlPrefix, joinWithPrefix } from "../lib/urlPrefix";
 
 type ApiTaskInfo = Record<string, unknown> & {
@@ -336,66 +337,79 @@ export const Task: FC<TaskProps> = ({ taskId }) => {
         ) : null}
       </Box>
 
-      <Table
-        size="small"
+      <Box
         sx={{
-          maxWidth: 900,
-          border: "0.5px solid #c7ecb8",
-          borderCollapse: "separate",
-          "& .MuiTableRow-root:nth-of-type(odd)": {
-            bgcolor: "#f0ffeb",
-          },
-          "& .MuiTableCell-root": {
-            border: 0,
-          },
+          display: "flex",
+          gap: 2,
+          alignItems: "flex-start",
+          flexWrap: "wrap",
         }}
-        aria-label="Task details"
       >
-        <TableBody>
-          <TableRow>
-            <TableCell sx={{ width: 200 }}>Name</TableCell>
-            <TableCell>{task?.name ?? "-"}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>UUID</TableCell>
-            <TableCell>{taskId}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>State</TableCell>
-            <TableCell>
-              <Chip
-                size="small"
-                label={state || "-"}
-                color={getStateChipColor(state)}
-                sx={
-                  getStateChipColor(state) === "default"
-                    ? { bgcolor: "grey.300", color: "text.primary" }
-                    : undefined
-                }
-              />
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>args</TableCell>
-            <TableCell>{task?.args ?? "-"}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>kwargs</TableCell>
-            <TableCell>{task?.kwargs ?? "-"}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Result</TableCell>
-            <TableCell>{renderValue(task?.result ?? "")}</TableCell>
-          </TableRow>
+        <Box sx={{ flex: "0 0 auto", minWidth: 320, maxWidth: 900 }}>
+          <Table
+            size="small"
+            sx={{
+              border: "0.5px solid #c7ecb8",
+              borderCollapse: "separate",
+              "& .MuiTableRow-root:nth-of-type(odd)": {
+                bgcolor: "#f0ffeb",
+              },
+              "& .MuiTableCell-root": {
+                border: 0,
+              },
+            }}
+            aria-label="Task details"
+          >
+            <TableBody>
+              <TableRow>
+                <TableCell sx={{ width: 200 }}>Name</TableCell>
+                <TableCell>{task?.name ?? "-"}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>UUID</TableCell>
+                <TableCell>{taskId}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>State</TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    label={state || "-"}
+                    color={getStateChipColor(state)}
+                    sx={
+                      getStateChipColor(state) === "default"
+                        ? { bgcolor: "grey.300", color: "text.primary" }
+                        : undefined
+                    }
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>args</TableCell>
+                <TableCell>{task?.args ?? "-"}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>kwargs</TableCell>
+                <TableCell>{task?.kwargs ?? "-"}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Result</TableCell>
+                <TableCell>{renderValue(task?.result ?? "")}</TableCell>
+              </TableRow>
 
-          {extraRows.map(({ key, value }) => (
-            <TableRow key={key}>
-              <TableCell>{humanizeKey(key)}</TableCell>
-              <TableCell>{renderCell(key, value)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              {extraRows.map(({ key, value }) => (
+                <TableRow key={key}>
+                  <TableCell>{humanizeKey(key)}</TableCell>
+                  <TableCell>{renderCell(key, value)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+        <Box sx={{ flex: "1 1 480px", minWidth: 320, height: 600 }}>
+          <TaskGraphFlow taskId={taskId} />
+        </Box>
+      </Box>
     </Container>
   );
 };
