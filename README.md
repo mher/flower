@@ -9,10 +9,12 @@ This is a fork of the original great [Flower](https://github.com/mher/flower) pr
 - Docker - move from Alpine to Debian (vulnerabilities elimination & better compatibility)
 - Auto refresh - in tasks view
 - Ruff support - linting & formatting
+- Flow graph - in task view
 
 ## Screenshots
 
 ![Tasks Tab](screenshots/tasks.png)
+![Task Tab](screenshots/task.png)
 
 ## Installation
 
@@ -46,9 +48,7 @@ In this example, Flower is using the `tasks.app` defined in the `examples/tasks.
 
 ## Documentation
 
-Documentation is available at `Read the Docs`\_
-
-.. \_Read the Docs: https://flower.readthedocs.io
+Documentation is available at [Read the Docs](https://flower.readthedocs.io)
 
 ## Frontend (repo development)
 
