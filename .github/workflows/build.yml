@@ -16,23 +16,25 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up python
-        uses: actions/setup-python@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
+          enable-cache: true
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
+        # 'uv sync' installs pyproject.toml base
+        # 'uv pip install' overrides matrix-specific versions
         run: |
-          python -m pip install --upgrade pip
-          pip install celery==${{ matrix.celery-version }} \
-                      tornado==${{ matrix.tornado-version }} \
-                      -r requirements/dev.txt
+          uv sync --all-groups
+          uv pip install "celery==${{ matrix.celery-version }}" \
+                         "tornado==${{ matrix.tornado-version }}"
 
       - name: Run unit tests
         run: |
-          python -m flower --version
-          python -m tests.unit
+          uv run python -m flower --version
+          uv run python -m tests.unit
 
       - name: Lint with pylint
         run: |
-          pylint flower --rcfile .pylintrc
+          uv run pylint flower --rcfile .pylintrc

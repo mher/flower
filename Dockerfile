@@ -1,26 +1,30 @@
 ARG PYTHON_VERSION=3.13.11
 FROM python:${PYTHON_VERSION}-slim-trixie AS builder
 
-# Get latest root certificates
-RUN apt-get update && apt-get install -y ca-certificates tzdata && update-ca-certificates
+# hadolint ignore=DL3008,DL4006
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+     ca-certificates tzdata && update-ca-certificates \
+     curl \
+  && curl -LsSf https://astral.sh/uv/install.sh | sh \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY flower /flower/flower
 # setup tooling files required to install /flower
-COPY setup.py /flower/setup.py
-COPY setup.cfg /flower/setup.cfg
-COPY MANIFEST.in /flower/MANIFEST.in
-# setup.py expects README.md and the requirements directory to be beside it
-COPY README.md /flower/README.md
-COPY requirements/ /flower/requirements/
+COPY pyproject.toml /flower/pyproject.toml
+
+# setup expects README.md and the requirements directory to be beside it
+COPY README.md /flower/README.mkdir
 
 # Install the required packages
-RUN pip install --no-cache-dir -r /flower/requirements/default.txt
+RUN /root/.local/bin/uv pip install . --system --no-cache-dir
 
 # Install the frontend Python package from the prebuilt wheel.
 # The wheel is expected to be created by scripts/update_frontend.sh before `docker build`.
 COPY frontend/dist/*.whl /tmp/frontend-wheels/
-RUN pip install --no-cache-dir /tmp/frontend-wheels/*.whl \
-    && pip install --no-cache-dir /flower
+RUN uv pip install --no-cache-dir /tmp/frontend-wheels/*.whl \
+    && uv pip install --no-cache-dir /flower
 
 # PYTHONUNBUFFERED: Force stdin, stdout and stderr to be totally unbuffered. (equivalent to `python -u`)
 # PYTHONHASHSEED: Enable hash randomization (equivalent to `python -R`)

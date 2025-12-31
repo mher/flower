@@ -1,5 +1,0 @@
--r default.txt
-Sphinx
-sphinxcontrib-fulltoc
-sphinxcontrib-httpdomain
-sphinxcontrib-redoc
