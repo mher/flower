@@ -6,10 +6,11 @@
 This is a fork of the original great [Flower](https://github.com/mher/flower) project that with the following changes:
 
 - Frontend stack with [React](https://react.dev/) & [MUI](https://mui.com/) (on going..)
-- Docker - move from Alpine to Debian (vulnerabilities elimination & better compatibility)
 - Auto refresh - in tasks view
-- Ruff support - linting & formatting
 - Flow graph - in task view
+- Docker - move from Alpine to Debian (vulnerabilities elimination & better compatibility)
+- UV - package and project manager
+- Ruff support - linting & formatting
 
 ## Screenshots
 
