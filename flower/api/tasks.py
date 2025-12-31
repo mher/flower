@@ -538,7 +538,7 @@ class ListTasks(BaseTaskHandler):
             self.write(
                 {
                     "tasks": OrderedDict(result),
-                    "total": len(result),
+                    "total": len(app.events.state.tasks),
                 }
             )
         else:
