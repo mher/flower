@@ -18,10 +18,14 @@ class BaseHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         if not (self.application.options.basic_auth or self.application.options.auth):
             self.set_header("Access-Control-Allow-Origin", "*")
-            self.set_header("Access-Control-Allow-Headers",
-                            "x-requested-with,access-control-allow-origin,authorization,content-type")
-            self.set_header('Access-Control-Allow-Methods',
-                            ' PUT, DELETE, OPTIONS, POST, GET, PATCH')
+            self.set_header(
+                "Access-Control-Allow-Headers",
+                "x-requested-with,access-control-allow-origin,authorization,content-type",
+            )
+            self.set_header(
+                "Access-Control-Allow-Methods",
+                " PUT, DELETE, OPTIONS, POST, GET, PATCH",
+            )
 
     def options(self, *_, **__):
         self.set_status(204)
@@ -37,27 +41,29 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
         if status_code in (404, 403):
-            message = ''
-            if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
-                message = kwargs['exc_info'][1].log_message
-            self.render('404.html', message=message)
+            message = ""
+            if "exc_info" in kwargs and kwargs["exc_info"][0] == tornado.web.HTTPError:
+                message = kwargs["exc_info"][1].log_message
+            self.render("404.html", message=message)
         elif status_code == 500:
-            error_trace = "".join(traceback.format_exception(*kwargs['exc_info']))
+            error_trace = "".join(traceback.format_exception(*kwargs["exc_info"]))
 
-            self.render('error.html',
-                    debug=self.application.options.debug,
-                    status_code=status_code,
-                    error_trace=error_trace,
-                    bugreport=bugreport())
+            self.render(
+                "error.html",
+                debug=self.application.options.debug,
+                status_code=status_code,
+                error_trace=error_trace,
+                bugreport=bugreport(),
+            )
         elif status_code == 401:
             self.set_status(status_code)
-            self.set_header('WWW-Authenticate', 'Basic realm="flower"')
-            self.finish('Access denied')
+            self.set_header("WWW-Authenticate", 'Basic realm="flower"')
+            self.finish("Access denied")
         else:
-            message = ''
-            if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
-                message = kwargs['exc_info'][1].log_message
-                self.set_header('Content-Type', 'text/plain')
+            message = ""
+            if "exc_info" in kwargs and kwargs["exc_info"][0] == tornado.web.HTTPError:
+                message = kwargs["exc_info"][1].log_message
+                self.set_header("Content-Type", "text/plain")
                 self.write(str(message))
             self.set_status(status_code)
             self.finish()
@@ -70,7 +76,7 @@ class BaseHandler(tornado.web.RequestHandler):
             try:
                 basic, credentials = auth_header.split()
                 credentials = b64decode(credentials.encode()).decode()
-                if basic != 'Basic':
+                if basic != "Basic":
                     raise tornado.web.HTTPError(401)
                 for stored_credential in basic_auth:
                     if hmac.compare_digest(stored_credential, credentials):
@@ -83,7 +89,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # OAuth2
         if not self.application.options.auth:
             return True
-        user = self.get_secure_cookie('user')
+        user = self.get_secure_cookie("user")
         if user:
             if not isinstance(user, str):
                 user = user.decode()
@@ -106,8 +112,8 @@ class BaseHandler(tornado.web.RequestHandler):
                 if arg is None and default is None:
                     return arg
                 raise tornado.web.HTTPError(
-                        400,
-                        f"Invalid argument '{arg}' of type '{type.__name__}'") from exc
+                    400, f"Invalid argument '{arg}' of type '{type.__name__}'"
+                ) from exc
         return arg
 
     @property
@@ -127,10 +133,11 @@ class BaseHandler(tornado.web.RequestHandler):
     def get_active_queue_names(self):
         queues = set([])
         for _, info in self.application.workers.items():
-            for queue in info.get('active_queues', []):
-                queues.add(queue['name'])
+            for queue in info.get("active_queues", []):
+                queues.add(queue["name"])
 
         if not queues:
-            queues = set([self.capp.conf.task_default_queue]) |\
-                {q.name for q in self.capp.conf.task_queues or [] if q.name}
+            queues = set([self.capp.conf.task_default_queue]) | {
+                q.name for q in self.capp.conf.task_queues or [] if q.name
+            }
         return sorted(queues)

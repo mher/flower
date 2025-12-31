@@ -15,20 +15,20 @@ settings = dict(
     static_path=os.path.join(os.path.dirname(__file__), "static"),
     frontend_path=resource_files("frontend").joinpath("web-dist"),
     cookie_secret=gen_cookie_secret(),
-    static_url_prefix='/static/',
-    login_url='/login',
+    static_url_prefix="/static/",
+    login_url="/login",
 )
 
 
 handlers = [
     # App
-    url(r"/", WorkersView, name='main'),
-    url(r"/workers", WorkersView, name='workers'),
-    url(r"/worker/(.+)", WorkerView, name='worker'),
-    url(r"/task/(.+)", TaskView, name='task'),
-    url(r"/tasks", TasksView, name='tasks'),
+    url(r"/", WorkersView, name="main"),
+    url(r"/workers", WorkersView, name="workers"),
+    url(r"/worker/(.+)", WorkerView, name="worker"),
+    url(r"/task/(.+)", TaskView, name="task"),
+    url(r"/tasks", TasksView, name="tasks"),
     url(r"/tasks/datatable", TasksDataTable),
-    url(r"/broker", BrokerView, name='broker'),
+    url(r"/broker", BrokerView, name="broker"),
     # Worker API
     (r"/api/workers", workers.ListWorkers),
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),
@@ -37,8 +37,7 @@ handlers = [
     (r"/api/worker/pool/shrink/(.+)", control.WorkerPoolShrink),
     (r"/api/worker/pool/autoscale/(.+)", control.WorkerPoolAutoscale),
     (r"/api/worker/queue/add-consumer/(.+)", control.WorkerQueueAddConsumer),
-    (r"/api/worker/queue/cancel-consumer/(.+)",
-        control.WorkerQueueCancelConsumer),
+    (r"/api/worker/queue/cancel-consumer/(.+)", control.WorkerQueueCancelConsumer),
     # Task API
     (r"/api/tasks", tasks.ListTasks),
     (r"/api/v2/tasks", tasks.ListTasksV2),

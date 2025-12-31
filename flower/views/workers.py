@@ -21,7 +21,7 @@ class WorkerView(BaseHandler):
 
         if worker is None:
             raise web.HTTPError(404, f"Unknown worker '{name}'")
-        if 'stats' not in worker:
+        if "stats" not in worker:
             raise web.HTTPError(404, f"Unable to get stats for '{name}' worker")
 
         self.render("worker.html", worker=dict(worker, name=name))
@@ -30,8 +30,8 @@ class WorkerView(BaseHandler):
 class WorkersView(BaseHandler):
     @web.authenticated
     async def get(self):
-        refresh = self.get_argument('refresh', default=False, type=bool)
-        json = self.get_argument('json', default=False, type=bool)
+        refresh = self.get_argument("refresh", default=False, type=bool)
+        json = self.get_argument("json", default=False, type=bool)
 
         events = self.application.events.state
 
@@ -39,7 +39,7 @@ class WorkersView(BaseHandler):
             try:
                 self.application.update_workers()
             except Exception as e:
-                logger.exception('Failed to update workers: %s', e)
+                logger.exception("Failed to update workers: %s", e)
 
         workers = {}
         for name, values in events.counter.items():
@@ -55,12 +55,15 @@ class WorkersView(BaseHandler):
             timestamp = int(time.time())
             offline_workers = []
             for name, info in workers.items():
-                if info.get('status', True):
+                if info.get("status", True):
                     continue
 
-                heartbeats = info.get('heartbeats', [])
+                heartbeats = info.get("heartbeats", [])
                 last_heartbeat = int(max(heartbeats)) if heartbeats else None
-                if not last_heartbeat or timestamp - last_heartbeat > options.purge_offline_workers:
+                if (
+                    not last_heartbeat
+                    or timestamp - last_heartbeat > options.purge_offline_workers
+                ):
                     offline_workers.append(name)
 
             for name in offline_workers:
@@ -69,22 +72,34 @@ class WorkersView(BaseHandler):
         if json:
             self.write(dict(data=list(workers.values())))
         else:
-            self.render("workers.html",
-                        workers=workers,
-                        broker=self.application.capp.connection().as_uri(),
-                        autorefresh=1 if self.application.options.auto_refresh else 0)
+            self.render(
+                "workers.html",
+                workers=workers,
+                broker=self.application.capp.connection().as_uri(),
+                autorefresh=1 if self.application.options.auto_refresh else 0,
+            )
 
     @classmethod
     def _as_dict(cls, worker):
-        if hasattr(worker, '_fields'):
+        if hasattr(worker, "_fields"):
             return dict((k, getattr(worker, k)) for k in worker._fields)
         return cls._info(worker)
 
     @classmethod
     def _info(cls, worker):
-        _fields = ('hostname', 'pid', 'freq', 'heartbeats', 'clock',
-                   'active', 'processed', 'loadavg', 'sw_ident',
-                   'sw_ver', 'sw_sys')
+        _fields = (
+            "hostname",
+            "pid",
+            "freq",
+            "heartbeats",
+            "clock",
+            "active",
+            "processed",
+            "loadavg",
+            "sw_ident",
+            "sw_ver",
+            "sw_sys",
+        )
 
         def _keys():
             for key in _fields:

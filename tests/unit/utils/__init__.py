@@ -8,22 +8,22 @@ from celery.utils import uuid
 class HtmlTableParser(HTMLParser):
     def __init__(self, *args, **kwargs):
         HTMLParser.__init__(self, *args, **kwargs)
-        self.table = ''
+        self.table = ""
         self.inTable = False
 
     def handle_starttag(self, tag, attrs):
-        if tag == 'table':
+        if tag == "table":
             self.inTable = True
         if self.inTable:
-            self.table += '<%s' % tag
+            self.table += "<%s" % tag
             for attr in attrs:
                 self.table += ' %s="%s"' % attr
-            self.table += '>'
+            self.table += ">"
 
     def handle_endtag(self, tag):
         if self.inTable:
-            self.table += '</%s>' % tag
-            if tag == 'table':
+            self.table += "</%s>" % tag
+            if tag == "table":
                 self.inTable = False
 
     def handle_data(self, data):
@@ -38,33 +38,57 @@ class HtmlTableParser(HTMLParser):
         return root.findall(pattern)
 
     def rows(self):
-        return self.query('tbody/tr')
+        return self.query("tbody/tr")
 
     def get_row(self, row_id):
-        rows = self.query('tbody/tr')
+        rows = self.query("tbody/tr")
         for r in rows:
-            if r.attrib.get('id') == row_id:
-                cells = r.findall('td')
-                return list(map(lambda x: getattr(x, 'text'), cells))
+            if r.attrib.get("id") == row_id:
+                cells = r.findall("td")
+                return list(map(lambda x: getattr(x, "text"), cells))
 
 
-def task_succeeded_events(worker, id=None, name=None, runtime=0.1234, retries=0, eta=None):
+def task_succeeded_events(
+    worker, id=None, name=None, runtime=0.1234, retries=0, eta=None
+):
     id = id or uuid()
-    name = name or 'sometask'
-    return [Event('task-received', uuid=id, name=name,
-                  args='(2, 2)', kwargs="{'foo': 'bar'}",
-                  retries=retries, eta=eta, hostname=worker),
-            Event('task-started', uuid=id, hostname=worker),
-            Event('task-succeeded', uuid=id, result='4',
-                  runtime=runtime, hostname=worker)]
+    name = name or "sometask"
+    return [
+        Event(
+            "task-received",
+            uuid=id,
+            name=name,
+            args="(2, 2)",
+            kwargs="{'foo': 'bar'}",
+            retries=retries,
+            eta=eta,
+            hostname=worker,
+        ),
+        Event("task-started", uuid=id, hostname=worker),
+        Event("task-succeeded", uuid=id, result="4", runtime=runtime, hostname=worker),
+    ]
 
 
 def task_failed_events(worker, id=None, name=None):
     id = id or uuid()
-    name = name or 'sometask'
-    return [Event('task-received', uuid=id, name=name,
-                  args='(2, 2)', kwargs="{'foo': 'bar'}",
-                  retries=0, eta=None, hostname=worker),
-            Event('task-started', uuid=id, hostname=worker),
-            Event('task-failed', uuid=id, exception="KeyError('foo')",
-                  traceback='line 1 at main', hostname=worker)]
+    name = name or "sometask"
+    return [
+        Event(
+            "task-received",
+            uuid=id,
+            name=name,
+            args="(2, 2)",
+            kwargs="{'foo': 'bar'}",
+            retries=0,
+            eta=None,
+            hostname=worker,
+        ),
+        Event("task-started", uuid=id, hostname=worker),
+        Event(
+            "task-failed",
+            uuid=id,
+            exception="KeyError('foo')",
+            traceback="line 1 at main",
+            hostname=worker,
+        ),
+    ]

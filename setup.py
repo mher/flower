@@ -5,7 +5,7 @@ import re
 from setuptools import setup, find_packages
 
 
-version = re.compile(r'VERSION\s*=\s*\((.*?)\)')
+version = re.compile(r"VERSION\s*=\s*\((.*?)\)")
 
 
 def get_package_version():
@@ -20,7 +20,7 @@ def get_package_version():
 
 
 def get_requirements(filename):
-    return open('requirements/' + filename).read().splitlines()
+    return open("requirements/" + filename).read().splitlines()
 
 
 classes = """
@@ -41,30 +41,31 @@ classes = """
     Programming Language :: Python :: Implementation :: PyPy
     Operating System :: OS Independent
 """
-classifiers = [s.strip() for s in classes.split('\n') if s]
+classifiers = [s.strip() for s in classes.split("\n") if s]
 
 
 setup(
-    name='flower',
+    name="flower",
     version=get_package_version(),
-    description='Celery Flower',
-    long_description=open('README.rst').read(),
+    description="Celery Flower",
+    long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
-    author='Mher Movsisyan',
-    author_email='mher.movsisyan@gmail.com',
-    url='https://github.com/mher/flower',
-    license='BSD',
+    author="Mher Movsisyan",
+    author_email="mher.movsisyan@gmail.com",
+    url="https://github.com/mher/flower",
+    license="BSD",
     classifiers=classifiers,
     python_requires=">=3.7",
-    packages=find_packages(exclude=['tests', 'tests.*']),
-    install_requires=get_requirements('default.txt'),
+    packages=find_packages(exclude=["tests", "tests.*"]),
+    install_requires=get_requirements("default.txt"),
     test_suite="tests",
-    tests_require=get_requirements('test.txt'),
-    package_data={'flower': ['templates/*', 'static/*.*',
-                             'static/**/*.*', 'static/**/**/*.*']},
+    tests_require=get_requirements("test.txt"),
+    package_data={
+        "flower": ["templates/*", "static/*.*", "static/**/*.*", "static/**/**/*.*"]
+    },
     entry_points={
-        'celery.commands': [
-            'flower = flower.command:flower',
+        "celery.commands": [
+            "flower = flower.command:flower",
         ],
     },
 )
