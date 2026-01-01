@@ -1,0 +1,94 @@
+[project]
+name = "flower"
+version = "2.0.0.dev0"
+description = "Celery Flower"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Mher Movsisyan", email = "mher.movsisyan@gmail.com" },
+  { name = "Itay Bittan", email = "itay.bittan@gmail.com" }
+]
+maintainers = [
+  { name = "Mher Movsisyan", email = "mher.movsisyan@gmail.com" },
+  { name = "Itay Bittan", email = "itay.bittan@gmail.com" }
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: BSD License",
+  "Topic :: System :: Distributed Computing",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Operating System :: OS Independent"
+]
+requires-python = ">=3.10"
+urls = { "Homepage" = "https://github.com/itayB/flower" }
+
+dependencies = [
+  "celery==5.6.0",
+  "tornado>=5.0.0,<7.0.0",
+  "prometheus_client>=0.8.0",
+  "redis==7.1.0",
+  "humanize",
+  "pytz",
+]
+
+[project.entry-points."celery.commands"]
+flower = "flower.command:flower"
+
+[project.scripts]
+# (no console_scripts defined in setup.py)
+
+[project.optional-dependencies]
+dev = [
+  "redis>=4.3.6",
+  "pylint",
+]
+
+test = [
+  "ruff==0.14.4",
+  "mypy==1.18.2",
+  "pytest==8.4.2",
+  "pytest-asyncio==1.2.0",
+  "pytest-cov==7.0.0",
+  "pytest-mock==3.15.1",
+]
+
+docs = [
+  "Sphinx",
+  "sphinxcontrib-fulltoc",
+  "sphinxcontrib-httpdomain",
+  "sphinxcontrib-redoc",
+]
+
+[tool.setuptools]
+packages = ["flower"]
+include-package-data = true
+
+[build-system]
+requires = ["setuptools>=75.8", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+flower = [
+  "templates/*",
+  "static/*.*",
+  "static/**/*.*",
+  "static/**/**/*.*"
+]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["tests", "tests.*"]
+
+[tool.pytest.ini_options]
+markers = [
+    "settings: Provide custom Settings instance for the test client",
+]
