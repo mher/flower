@@ -14,8 +14,8 @@ This is a fork of the original great [Flower](https://github.com/mher/flower) pr
 
 ## Screenshots
 
-![Tasks Tab](screenshots/tasks.png)
-![Task Tab](screenshots/task.png)
+![Tasks Tab](https://raw.githubusercontent.com/itayB/flower/master/screenshots/tasks.png)
+![Task Tab](https://raw.githubusercontent.com/itayB/flower/master/screenshots/task.png)
 
 ## Installation
 

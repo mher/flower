@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseTaskHandler(BaseApiHandler):
-    DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
+    DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f%z"
 
     def get_task_args(self):
         try:
