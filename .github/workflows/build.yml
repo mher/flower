@@ -31,9 +31,10 @@ jobs:
                          "tornado==${{ matrix.tornado-version }}"
 
       - name: Run unit tests
+        shell: script -q -e -c "bash --noprofile --norc -eo pipefail {0}"
         run: |
           uv run python -m flower --version
-          uv run python -m tests.unit
+          uv run py.test -o junit_family=xunit2 --junitxml result.xml -xv --ff --cov=flower --cov-report=xml --cov-report=term-missing tests
 
       - name: Lint with pylint
         run: |

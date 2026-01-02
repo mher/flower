@@ -1,7 +1,7 @@
 import json
 import time
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import Mock, PropertyMock, patch
 
 import celery.states as states
@@ -52,7 +52,7 @@ class AsyncApplyTests(BaseApiTestCase):
     def test_async_apply_eta(self):
         task = self._app.capp.tasks["foo"] = Mock()
         task.apply_async = Mock(return_value=AsyncResult(123))
-        tomorrow = datetime.utcnow() + timedelta(days=1)
+        tomorrow = datetime.now(UTC) + timedelta(days=1)
         r = self.post("/api/task/async-apply/foo", body='{"eta": "%s"}' % tomorrow)
 
         self.assertEqual(200, r.code)
@@ -77,7 +77,7 @@ class AsyncApplyTests(BaseApiTestCase):
     def test_async_apply_expires_datetime(self):
         task = self._app.capp.tasks["foo"] = Mock()
         task.apply_async = Mock(return_value=AsyncResult(123))
-        tomorrow = datetime.utcnow() + timedelta(days=1)
+        tomorrow = datetime.now(UTC) + timedelta(days=1)
         r = self.post("/api/task/async-apply/foo", body='{"expires": "%s"}' % tomorrow)
 
         self.assertEqual(200, r.code)
