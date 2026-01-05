@@ -43,7 +43,7 @@ It has these features:
 
 
 OPTIONS
-=======
+========
 
   --address                        run on the given address
   --auth                           regexp  of emails to grant access

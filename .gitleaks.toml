@@ -1,0 +1,1127 @@
+# Gitleaks rules are defined by regular expressions and entropy ranges.
+# Some secrets have unique signatures which make detecting those secrets easy.
+# Examples of those secrets would be Gitlab Personal Access Tokens, AWS keys, and Github Access Tokens.
+# All these examples have defined prefixes like `glpat`, `AKIA`, `ghp_`, etc.
+#
+# Other secrets might just be a hash which means we need to write more complex rules to verify
+# that what we are matching is a secret.
+#
+# Here is an example of a semi-generic secret
+#
+#   discord_client_secret = "8dyfuiRyq=vVc3RRr_edRk-fK__JItpZ"
+#
+# We can write a regular expression to capture the variable name (identifier),
+# the assignment symbol (like '=' or ':='), and finally the actual secret.
+# The structure of a rule to match this example secret is below:
+#
+#                                                           Beginning string
+#                                                               quotation
+#                                                                   │            End string quotation
+#                                                                   │                      │
+#                                                                   ▼                      ▼
+#    (?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_\-]{32})['\"]
+#
+#                   ▲                              ▲                                ▲
+#                   │                              │                                │
+#                   │                              │                                │
+#              identifier                  assignment symbol
+#                                                                                Secret
+#
+
+
+title = "gitleaks config"
+
+# ported from https://git.io/J4rOB @ 2022-01-02T08:52:55+0200
+[[rules]]
+  description = "AWS Manager ID"
+  regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+  tags = ["key", "AWS"]
+  [rules.allowlist]
+    regexes = ['''(arn:aws:)''']
+    description = "ignore arns"
+
+[[rules]]
+  description = "AWS Secret Key"
+  regex = '''(?i)aws(.{0,20})?(?-i)['\"][0-9a-zA-Z\/+]{40}['\"]'''
+  tags = ["key", "AWS"]
+
+[[rules]]
+  description = "AWS MWS key"
+  regex = '''amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'''
+  tags = ["key", "AWS", "MWS"]
+
+[[rules]]
+  description = "Facebook Secret Key"
+  regex = '''(?i)(facebook|fb)(.{0,20})?(?-i)['\"][0-9a-f]{32}['\"]'''
+  tags = ["key", "Facebook"]
+
+[[rules]]
+  description = "Facebook Client ID"
+  regex = '''(?i)(facebook|fb)(.{0,20})?['\"][0-9]{13,17}['\"]'''
+  tags = ["key", "Facebook"]
+
+[[rules]]
+  description = "Twitter Secret Key"
+  regex = '''(?i)twitter(.{0,20})?['\"][0-9a-z]{35,44}['\"]'''
+  tags = ["key", "Twitter"]
+
+[[rules]]
+  description = "Twitter Client ID"
+  regex = '''(?i)twitter(.{0,20})?['\"][0-9a-z]{18,25}['\"]'''
+  tags = ["client", "Twitter"]
+  [rules.allowlist]
+    regexes = ['''from [\\w_\\.]+ import [\\w_\\.]+''']
+    description = "Ignore python imports"
+
+[[rules]]
+  description = "Github"
+  regex = '''(?i)github.{0,3}((?i)token|api|key).{0,10}?(?-i)([0-9a-zA-Z]{35,40})'''
+  tags = ["key", "Github"]
+
+[[rules]]
+  description = "LinkedIn Client ID"
+  regex = '''(?i)linkedin(.{0,20})?(?-i)['\"][0-9a-z]{12}['\"]'''
+  tags = ["client", "LinkedIn"]
+
+[[rules]]
+  description = "LinkedIn Secret Key"
+  regex = '''(?i)linkedin(.{0,20})?['\"][0-9a-z]{16}['\"]'''
+  tags = ["secret", "LinkedIn"]
+
+[[rules]]
+  description = "NPM Token"
+  regex= '''//registry.npmjs.org/:_authToken=[0-9a-f-]+'''
+  tags = ["key", "NPM"]
+
+[[rules]]
+  description = "Slack"
+  regex = '''xox[baprs]-([0-9a-zA-Z]{10,48})?'''
+  tags = ["key", "Slack"]
+
+[[rules]]
+  description = "EC"
+  regex = '''-----BEGIN EC PRIVATE KEY-----'''
+  tags = ["key", "EC"]
+
+[[rules]]
+  description = "DSA"
+  regex = '''-----BEGIN DSA PRIVATE KEY-----'''
+  tags = ["key", "DSA"]
+
+[[rules]]
+  description = "OPENSSH"
+  regex = '''-----BEGIN OPENSSH PRIVATE KEY-----'''
+  tags = ["key", "OPENSSH"]
+
+[[rules]]
+  description = "RSA"
+  regex = '''-----BEGIN RSA PRIVATE KEY-----'''
+  tags = ["key", "RSA"]
+
+[[rules]]
+  description = "PGP"
+  regex = '''-----BEGIN PGP PRIVATE KEY BLOCK-----'''
+  tags = ["key", "PGP"]
+
+[[rules]]
+  description = "Google API key"
+  regex = '''AIza[0-9A-Za-z\\-_]{35}'''
+  tags = ["key", "Google"]
+
+[[rules]]
+  description = "Heroku API key"
+  regex = '''(?i)heroku(.{0,20})?['"][0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}['"]'''
+  tags = ["key", "Heroku"]
+
+[[rules]]
+  description = "MailChimp API key"
+  regex = '''(?i)(mailchimp|mc)(.{0,20})?['"][0-9a-f]{32}-us[0-9]{1,2}['"]'''
+  tags = ["key", "Mailchimp"]
+
+[[rules]]
+  description = "Mailgun API key"
+  regex = '''(?i)(mailgun|mg)(.{0,20})?['"][0-9a-z]{32}['"]'''
+  tags = ["key", "Mailgun"]
+
+[[rules]]
+  description = "PayPal Braintree access token"
+  regex = '''access_token\$production\$[0-9a-z]{16}\$[0-9a-f]{32}'''
+  tags = ["key", "Paypal"]
+
+[[rules]]
+  description = "Picatic API key"
+  regex = '''sk_live_[0-9a-z]{32}'''
+  tags = ["key", "Picatic"]
+
+[[rules]]
+  description = "Slack Webhook"
+  regex = '''https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}'''
+  tags = ["key", "slack"]
+
+[[rules]]
+  description = "Stripe API key"
+  regex = '''(?i)stripe(.{0,20})?['\"][sk|rk]_live_[0-9a-zA-Z]{24}'''
+  tags = ["key", "Stripe"]
+
+[[rules]]
+  description = "Square access token"
+  regex = '''sq0atp-[0-9A-Za-z\-_]{22}'''
+  tags = ["key", "square"]
+
+[[rules]]
+  description = "Square OAuth secret"
+  regex = '''sq0csp-[0-9A-Za-z\\-_]{43}'''
+  tags = ["key", "square"]
+
+[[rules]]
+  description = "Twilio API key"
+  regex = '''(?i)twilio(.{0,20})?['\"][0-9a-f]{32}['\"]'''
+  tags = ["key", "twilio"]
+
+[[rules]]
+  description = "Dynatrace token"
+  regex = '''dt0[a-zA-Z]{1}[0-9]{2}\.[A-Z0-9]{24}\.[A-Z0-9]{64}'''
+  tags = ["key", "Dynatrace"]
+
+[[rules]]
+  description = "Shopify shared secret"
+  regex = '''shpss_[a-fA-F0-9]{32}'''
+  tags = ["key", "Shopify"]
+
+[[rules]]
+  description = "Shopify access token"
+  regex = '''shpat_[a-fA-F0-9]{32}'''
+  tags = ["key", "Shopify"]
+
+[[rules]]
+  description = "Shopify custom app access token"
+  regex = '''shpca_[a-fA-F0-9]{32}'''
+  tags = ["key", "Shopify"]
+
+[[rules]]
+  description = "Shopify private app access token"
+  regex = '''shppa_[a-fA-F0-9]{32}'''
+  tags = ["key", "Shopify"]
+
+[[rules]]
+  description = "Env Var"
+  regex = '''(?i)(apikey|secret|password|certificate_osx_p12|certificate_password|codacy_project_token|coveralls_api_token|coveralls_repo_token|coveralls_token|coverity_scan_token|cypress_record_key|database_password|db_password|deploy_password|deploy_token|digitalocean_access_token|docker_hub_password|docker_password|dockerhub_password|sonatype_password|firebase_api_token|firebase_token|firefox_secret|flask_secret_key|fossa_api_key|gcloud_service_key|gcr_password|gh_api_key|gh_next_oauth_client_secret|gh_next_unstable_oauth_client_secret|gh_oauth_client_secret|gpg_private_key|gpg_passphrase|gpg_secret_keys|heroku_api_key|okta_client_token|pypi_password|sonatype_nexus_password|travis_token|refresh_token|client_id|client_secret)(.*)?[(:=](\s)?['\"][0-9a-zA-Z-_!$^%=]{10,120}['\")]'''
+  tags = ["key", "env"]
+  entropy = 4.2
+  [rules.allowlist]
+    regexes = ['''(?i)(expect|assert|Component|Control|passwd|attrgetter|itemgetter|ifloordiv|imatmul|itruediv|yourpassword|foo|bar|serial|mpan|secret_key|grant_type|ngModel)''']
+    description = "ignore default"
+
+[[rules]]
+  description = "Static key"
+  regex = '''(?i)(cookieParser)(.*)?[(](\s)?['\"][0-9a-zA-Z-_!$^%=]{5,20}['\")]'''
+  tags = ["key", "sign"]
+  path = '''\.(js|ts)$'''
+  [rules.allowlist]
+    regexes = ['''(?i)(require|import|expect|assert|Component|Control|passwd|attrgetter|itemgetter|ifloordiv|imatmul|itruediv|yourpassword|foo|bar|serial|mpan|secret_key)''']
+    description = "ignore default"
+
+[[rules]]
+  description = "High Entropy"
+  regex = '''(https://.*/)?([0-9a-zA-Z-_!=+\/]{10,120})'''
+  tags = ["entropy"]
+  entropy = 4.8
+  [rules.allowlist]
+    description = "ignore ssh key, pems, and links"
+    regexes = ['''(ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789|abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890|0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz)''', '''(https://.*/)''']
+    paths = ['''(.*)?(ssh|i18n|locales)''']
+
+[[rules]]
+  description = "WP-Config"
+  regex='''define(.{0,20})?(DB_CHARSET|NONCE_SALT|LOGGED_IN_SALT|AUTH_SALT|NONCE_KEY|DB_HOST|DB_PASSWORD|AUTH_KEY|SECURE_AUTH_KEY|LOGGED_IN_KEY|DB_NAME|DB_USER)(.{0,20})?['|"].{10,120}['|"]'''
+  tags = ["key", "API", "generic"]
+
+[[rules]]
+  description = "ShiftLeft token"
+  regex = '''.'''
+  path = '''shiftleft\.json'''
+  tags = ["file", "ShiftLeft"]
+
+[[rules]]
+  description = "Shell history"
+  regex = '''.'''
+  path = '''\.?(bash_|zsh_|z|mysql_|psql_|irb_)?history$'''
+  tags = ["file", "Shell"]
+
+[[rules]]
+  description = "Postgres password"
+  regex = '''.'''
+  path = '''\.pgpass$'''
+  tags = ["file", "password"]
+
+[[rules]]
+  description = "OpenVPN"
+  regex = '''.'''
+  path = '''\.ovpn$'''
+  tags = ["file", "openvpn"]
+
+[[rules]]
+  description = "Unknown Key"
+  regex = '''.'''
+  path = '''\.key$'''
+  tags = ["file", "key"]
+
+[[rules]]
+  description = "Keychain file"
+  regex = '''.'''
+  path = '''\.(kdb|agilekeychain|keychain|kwallet|git-credentials|proftpdpasswd|dockercfg|credentials)$'''
+  tags = ["file", "keychain"]
+
+[[rules]]
+  description = "s3cfg"
+  regex = '''.'''
+  path = '''\.s3cfg$'''
+  tags = ["file", "s3cfg"]
+
+[[rules]]
+  description = "secret token"
+  regex = '''.'''
+  path = '''(omniauth|secret_token|carrierwave)\.rb$'''
+  tags = ["file", "Ruby"]
+
+[[rules]]
+  description = "CSCAN0210: GitCredential"
+  regex = '''https?://.+:.+@.*'''
+  path = '''\.gitCredentials$'''
+  tags = ["file", "gitCredentials"]
+
+[[rules]]
+  description = "CSCAN0010: KeyStoreFile"
+  regex = '''.'''
+  path = '''\.keystore$'''
+  tags = ["file", "KeyStoreFile"]
+
+[[rules]]
+  description = "CSCAN0020: Base64EncodedCertificateInCode"
+  regex = '''['">;=]MII[a-z0-9/+]{200}'''
+  path = '''\.(?:cs|ini|json|ps1|publishsettings|template|trd|ts|xml)$'''
+  tags = ["key", "Base64EncodedCertificateInCode"]
+
+[[rules]]
+  description = "CSCAN0020: Base64EncodedCertificateInFile"
+  regex = '''MII[A-Za-z0-9/+]{60}'''
+  path = '''\.(?:cert|cer)$'''
+  tags = ["key", "Base64EncodedCertificateInFile"]
+
+[[rules]]
+  description = "CSCAN0030: PublishSettings"
+  regex = '''userPWD="[a-zA-Z0-9\+\/]{60}"'''
+  path = '''(?i)(publishsettings|\.pubxml$)'''
+  tags = ["key", "PublishSettings"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0060: PemFile 1"
+  path = '''\.pem$'''
+  regex = '''-{5}BEGIN(?: (?:[dr]sa|ec|openssh))? PRIVATE KEY-{5}'''
+  tags = ["key", "PemFile"]
+
+[[rules]]
+  description = "CSCAN0091: AspNetMachineKeyInConfig 1"
+  path = '''\.(?:xml|pubxml|definitions|ps1|wadcfgx|ccf|config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''<machineKey[^>]+(?:decryptionKey\s*\=\s*"[a-fA-F0-9]{48,}|validationKey\s*\=\s*"[a-fA-F0-9]{48,})[^>]+>'''
+  tags = ["key", "AspNetMachineKeyInConfig"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0091: AspNetMachineKeyInConfig 2"
+  path = '''\.(?:xml|pubxml|definitions|ps1|wadcfgx|ccf|config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''(?:decryptionKey|validationKey)="[a-zA-Z0-9]+"'''
+  tags = ["key", "AspNetMachineKeyInConfig"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0092: SqlConnectionStringInConfig 1"
+  path = '''\.(?:xml|pubxml|definitions|ps1|wadcfgx|ccf|config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''(?i)(?:connection[sS]tring|connString)[^=]*=["'][^"']*[pP]assword\s*=\s*[^\s;][^"']*(?:'|")'''
+  tags = ["key", "SqlConnectionStringInConfig"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+
+[[rules]]
+  description = "CSCAN0092: SqlConnectionStringInConfig 2 / CSCAN0043 SqlConnectionStringInCode"
+  path = '''\.(?:xml|pubxml|definitions|ps1|wadcfgx|ccf|config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties|policy_and_key\.hpp|AccountConfig\.h)$|hubot'''
+  regex = '''(?i)(?:User ID|uid|UserId).*(?:Password|[^a-z]pwd)=[^'\$%<@'";\[\{][^;/"]{4,128}(?:;|")'''
+  tags = ["key", "SqlConnectionStringInConfig"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:prefix <<|guestaccesstoken|skiptoken|cookie|tsm|fake|example|badlyFormatted|Invalid|sha512|sha256|"input"|ENCRYPTED|"EncodedRequestUri"|looks like|myStorageAccountName|(?:0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0093: StorageAccountKeyInConfig 1"
+  path = '''\.(?:xml|pubxml|definitions|ps1|wadcfgx|ccf|config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''[^a-z0-9/\+\._\-\$,\\][a-z0-9/+]{86}=='''
+  tags = ["key", "StorageAccountKeyInConfig"]
+
+[[rules]]
+  description = "CSCAN0041: StorageAccountKeyInCode 1"
+  path = '''(?:\.(?:cs|js|ts|cpp)|policy_and_key\.hpp|AccountConfig\.h)$'''
+  regex = '''[^a-z0-9/\+\._\-\$,\\][a-z0-9/+]{86}=='''
+  tags = ["key", "StorageAccountKeyInCode"]
+
+[[rules]]
+  description = "CSCAN0094: SharedAccessSignatureInCode 1"
+  path = '''(?:\.(?:cs|js|ts|cpp)|policy_and_key\.hpp|AccountConfig\.h)$'''
+  regex = '''[^a-z0-9/\+\._\-\$,\\][a-z0-9/+]{43}=[^{@]'''
+  tags = ["key", "SharedAccessSignatureInCode"]
+
+[[rules]]
+  description = "CSCAN0094: SharedAccessSignatureInCode 2"
+  path = '''(?:\.(?:cs|js|ts|cpp)|policy_and_key\.hpp|AccountConfig\.h)$'''
+  regex = '''[^a-z0-9/\+\._\-\$,\\][a-z0-9%]{43,53}%3d[^a-z0-9%]'''
+  tags = ["key", "SharedAccessSignatureInCode"]
+
+[[rules]]
+  description = "CSCAN0094: SharedAccessSignatureInConfig 1"
+  path = '''\.(?:xml|pubxml|definitions|ps1|wadcfgx|ccf|config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''[^a-z0-9/\+\._\-\$,\\][a-z0-9/+]{43}=[^{@]'''
+  tags = ["key", "SharedAccessSignatureInConfig"]
+
+[[rules]]
+  description = "CSCAN0094: SharedAccessSignatureInConfig 2"
+  path = '''\.(?:xml|pubxml|definitions|ps1|wadcfgx|ccf|config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''[^a-z0-9/\+\._\-\$,\\][a-z0-9%]{43,53}%3d[^a-z0-9%]'''
+  tags = ["key", "SharedAccessSignatureInConfig"]
+
+[[rules]]
+  description = "CSCAN0095: GeneralSecretInConfig 1"
+  path = '''\.(?:config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''<add\skey="[^"]+(?:key(?:s|[0-9])?|credentials?|secret(?:s|[0-9])?|password|token|KeyPrimary|KeySecondary|KeyOrSas|KeyEncrypted)"\s*value\s*="[^"]+"[^>]*/>'''
+  tags = ["key", "GeneralSecretInConfig"]
+  [[rules.whitelist]]
+    regex = '''key\s*=\s*"[^"]*AppKey[^"]*"\s+value\s*=\s*"[a-z]+"'''
+  [[rules.whitelist]]
+    regex = '''value\s*=\s*"(?:[a-z]+(?: [a-z]+)+"|_+[a-z]+_+"|[a-z]+-[a-z]+-[a-z]+["-]|[a-z]+-[a-z]+"|[a-z]+\\[a-z]+"|\d+"|[^"]*ConnectionString")'''
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''value="(?:true|false|@\(api|ssh\-rsa 2048|invalid|to be|a shared secret|secreturi|clientsecret|Overr?idden by|someValue|SOME\-SIGNING\-KEY|TokenBroker|UNKNOWN|Client Secret of|Junk Credentials|Default\-|__BOOTSTRAPKEY_|CacheSecret|CatalogCert|CosmosCredentials|DeleteServiceCert|EmailCredentials|MetricsConnection|SangamCredentials|SubscriptionConnection|Enter_your_|My_Issuer|ScaleUnitXstoreSharedKey|private_powerapps|TestSecret|foo_|bar_|temp_|__WinfabricTestInfra|configured|SecretFor|Test|XSTORE_KEY|ServiceBusDiagnosticXstoreSharedKey|BoxApplicationKey|googleapps)'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+  [[rules.whitelist]]
+    regex = '''AccountKey\s*=\s*MII[a-z0-9/+]{43,}={0,2}'''
+
+[[rules]]
+  description = "CSCAN0095: GeneralSecretInConfig 2"
+  path = '''\.(?:config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''<add\skey="[^"]+"\s*value="[^"]*EncryptedSecret:[^"]+"\s*/>'''
+  tags = ["key", "GeneralSecretInConfig"]
+  [[rules.whitelist]]
+    regex = '''key\s*=\s*"[^"]*AppKey[^"]*"\s+value\s*=\s*"[a-z]+"'''
+  [[rules.whitelist]]
+    regex = '''value\s*=\s*"(?:[a-z]+(?: [a-z]+)+"|_+[a-z]+_+"|[a-z]+-[a-z]+-[a-z]+["-]|[a-z]+-[a-z]+"|[a-z]+\\[a-z]+"|\d+"|[^"]*ConnectionString")'''
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''value="(?:true|false|@\(api|ssh\-rsa 2048|invalid|to be|a shared secret|secreturi|clientsecret|Overr?idden by|someValue|SOME\-SIGNING\-KEY|TokenBroker|UNKNOWN|Client Secret of|Junk Credentials|Default\-|__BOOTSTRAPKEY_|CacheSecret|CatalogCert|CosmosCredentials|DeleteServiceCert|EmailCredentials|MetricsConnection|SangamCredentials|SubscriptionConnection|Enter_your_|My_Issuer|ScaleUnitXstoreSharedKey|private_powerapps|TestSecret|foo_|bar_|temp_|__WinfabricTestInfra|configured|SecretFor|Test|XSTORE_KEY|ServiceBusDiagnosticXstoreSharedKey|BoxApplicationKey|googleapps)'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+  [[rules.whitelist]]
+    regex = '''AccountKey\s*=\s*MII[a-z0-9/+]{43,}={0,2}'''
+
+[[rules]]
+  description = "CSCAN0095: GeneralSecretInConfig 3"
+  path = '''\.(?:config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''<Credential\sname="[^"]*(?:key(?:s|[0-9])?|credentials?|secret(?:s|[0-9])?|password|token|KeyPrimary|KeySecondary|KeyOrSas|KeyEncrypted)"(\s*value\s*="[^"]+".*?/>|[^>]*>.*?</Credential>)'''
+  tags = ["key", "GeneralSecretInConfig"]
+  [[rules.whitelist]]
+    regex = '''key\s*=\s*"[^"]*AppKey[^"]*"\s+value\s*=\s*"[a-z]+"'''
+  [[rules.whitelist]]
+    regex = '''value\s*=\s*"(?:[a-z]+(?: [a-z]+)+"|_+[a-z]+_+"|[a-z]+-[a-z]+-[a-z]+["-]|[a-z]+-[a-z]+"|[a-z]+\\[a-z]+"|\d+"|[^"]*ConnectionString")'''
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''value="(?:true|false|@\(api|ssh\-rsa 2048|invalid|to be|a shared secret|secreturi|clientsecret|Overr?idden by|someValue|SOME\-SIGNING\-KEY|TokenBroker|UNKNOWN|Client Secret of|Junk Credentials|Default\-|__BOOTSTRAPKEY_|CacheSecret|CatalogCert|CosmosCredentials|DeleteServiceCert|EmailCredentials|MetricsConnection|SangamCredentials|SubscriptionConnection|Enter_your_|My_Issuer|ScaleUnitXstoreSharedKey|private_powerapps|TestSecret|foo_|bar_|temp_|__WinfabricTestInfra|configured|SecretFor|Test|XSTORE_KEY|ServiceBusDiagnosticXstoreSharedKey|BoxApplicationKey|googleapps)'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+  [[rules.whitelist]]
+    regex = '''AccountKey\s*=\s*MII[a-z0-9/+]{43,}={0,2}'''
+
+[[rules]]
+  description = "CSCAN0095: GeneralSecretInConfig 4"
+  path = '''\.(?:config|cscfg|json|js|txt|cpp|sql|dtsx|md|java|FF|template|settings|ini|BF|ste|isml|test|ts|resx|Azure|sample|backup|rd|hpp|psm1|cshtml|htm|bat|waz|yml|Beta|py|sh|m|php|xaml|keys|cmd|rds|loadtest|properties)$|hubot'''
+  regex = '''<setting\sname="[^"]*Password".*[\r?\n]*\s*<value>.+</value>'''
+  tags = ["key", "GeneralSecretInConfig"]
+  [[rules.whitelist]]
+    regex = '''key\s*=\s*"[^"]*AppKey[^"]*"\s+value\s*=\s*"[a-z]+"'''
+  [[rules.whitelist]]
+    regex = '''value\s*=\s*"(?:[a-z]+(?: [a-z]+)+"|_+[a-z]+_+"|[a-z]+-[a-z]+-[a-z]+["-]|[a-z]+-[a-z]+"|[a-z]+\\[a-z]+"|\d+"|[^"]*ConnectionString")'''
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+  [[rules.whitelist]]
+    regex = '''value="(?:true|false|@\(api|ssh\-rsa 2048|invalid|to be|a shared secret|secreturi|clientsecret|Overr?idden by|someValue|SOME\-SIGNING\-KEY|TokenBroker|UNKNOWN|Client Secret of|Junk Credentials|Default\-|__BOOTSTRAPKEY_|CacheSecret|CatalogCert|CosmosCredentials|DeleteServiceCert|EmailCredentials|MetricsConnection|SangamCredentials|SubscriptionConnection|Enter_your_|My_Issuer|ScaleUnitXstoreSharedKey|private_powerapps|TestSecret|foo_|bar_|temp_|__WinfabricTestInfra|configured|SecretFor|Test|XSTORE_KEY|ServiceBusDiagnosticXstoreSharedKey|BoxApplicationKey|googleapps)'''
+  [[rules.whitelist]]
+    regex = '''AccountKey\s*=\s*MII[a-z0-9/+]{43,}={0,2}'''
+
+[[rules]]
+  description = "CSCAN0110: ScriptPassword 1"
+  path = '''(?:\.cmd|\.ps|\.ps1|\.psm1)$'''
+  regex = '''\s-Password\s+(?:"[^"]*"|'[^']*')'''
+  tags = ["key", "ScriptPassword"]
+
+[[rules]]
+  description = "CSCAN0110: ScriptPassword 2"
+  path = '''(?:\.cmd|\.ps|\.ps1|\.psm1)$'''
+  regex = '''\s-Password\s+[^$\(\)\[\{<\-\r?\n]+\s*(?:\r?\n|\-)'''
+  tags = ["key", "ScriptPassword"]
+
+[[rules]]
+  description = "CSCAN0120: ExternalApiSecret"
+  path = '''\.cs$|\.cpp$|\.c$'''
+  regex = '''(private\sconst\sstring\sAccessTokenSecret|private\sconst\sstring\saccessToken|private\sconst\sstring\sconsumerSecret|private\sconst\sstring\sconsumerKey|pageAccessToken|private\sstring\stwilioAccountSid|private\sstring\stwilioAuthToken)\s=\s".*";'''
+  tags = ["key", "ExternalApiSecret"]
+
+[[rules]]
+  description = "CSCAN0220: DefaultPasswordContexts 1"
+  path = '''\.(?:ps1|psm1|)$'''
+  regex = '''ConvertTo-SecureString(?:\s*-String)?\s*"[^"\r?\n]+"'''
+  tags = ["key", "DefaultPasswordContexts"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0220: DefaultPasswordContexts 2"
+  path = '''\.(?:cs|xml|config|json|ts|cfg|txt|ps1|bat|cscfg|publishsettings|cmd|psm1|aspx|asmx|vbs|added_cluster|clean|pubxml|ccf|ini|svd|sql|c|xslt|csv|FF|ExtendedTests|settings|cshtml|template|trd|argfile)$|(config|certificate|publish|UT)\.js$|(commands|user|tests)\.cpp$'''
+  regex = '''new\sX509Certificate2\([^()]*,\s*"[^"\r?\n]+"[^)]*\)'''
+  tags = ["key", "DefaultPasswordContexts"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0220: DefaultPasswordContexts 3"
+  path = '''\.(?:cs|xml|config|json|ts|cfg|txt|ps1|bat|cscfg|publishsettings|cmd|psm1|aspx|asmx|vbs|added_cluster|clean|pubxml|ccf|ini|svd|sql|c|xslt|csv|FF|ExtendedTests|settings|cshtml|template|trd|argfile)$|(config|certificate|publish|UT)\.js$|(commands|user|tests)\.cpp$'''
+  regex = '''AdminPassword\s*=\s*"[^"\r?\n]+"'''
+  tags = ["key", "DefaultPasswordContexts"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0220: DefaultPasswordContexts 4"
+  path = '''\.(?:cs|xml|config|json|ts|cfg|txt|ps1|bat|cscfg|publishsettings|cmd|psm1|aspx|asmx|vbs|added_cluster|clean|pubxml|ccf|ini|svd|sql|c|xslt|csv|FF|ExtendedTests|settings|cshtml|template|trd|argfile)$|(config|certificate|publish|UT)\.js$|(commands|user|tests)\.cpp$'''
+  regex = '''(?i)<password>.+</password>'''
+  tags = ["key", "DefaultPasswordContexts"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0220: DefaultPasswordContexts 5"
+  path = '''\.(?:cs|xml|config|json|ts|cfg|txt|ps1|bat|cscfg|publishsettings|cmd|psm1|aspx|asmx|vbs|added_cluster|clean|pubxml|ccf|ini|svd|sql|c|xslt|csv|FF|ExtendedTests|settings|cshtml|template|trd|argfile)$|(config|certificate|publish|UT)\.js$|(commands|user|tests)\.cpp$'''
+  regex = '''ClearTextPassword"?\s*[:=]\s*"[^"\r?\n]+"'''
+  tags = ["key", "DefaultPasswordContexts"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0220: DefaultPasswordContexts 6"
+  path = '''\.(?:cs|xml|config|json|ts|cfg|txt|ps1|bat|cscfg|publishsettings|cmd|psm1|aspx|asmx|vbs|added_cluster|clean|pubxml|ccf|ini|svd|sql|c|xslt|csv|FF|ExtendedTests|settings|cshtml|template|trd|argfile)$|(config|certificate|publish|UT)\.js$|(commands|user|tests)\.cpp$'''
+  regex = '''certutil.*?\-p\s+("[^"%]+"|'[^'%]+'|[^"']\S*\s)'''
+  tags = ["key", "DefaultPasswordContexts"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0220: DefaultPasswordContexts 7"
+  path = '''\.(?:cs|xml|config|json|cfg|txt|ps1|bat|cscfg|publishsettings|cmd|psm1|aspx|asmx|vbs|added_cluster|clean|pubxml|ccf|ini|svd|sql|c|xslt|csv|FF|ExtendedTests|settings|cshtml|template|trd|argfile)$|(config|certificate|publish|UT)\.js$|(commands|user|tests)\.cpp$'''
+  regex = '''password\s*=\s*N?(["][^"\r?\n]{4,}["]|['][^'\r?\n]{4,}['])'''
+  tags = ["key", "DefaultPasswordContexts"]
+  [[rules.whitelist]]
+    regex = '''Credentials?Type|ConnectionStringKey|notasecret|PartitionKey|notreal|insertkey|LookupKey|IgnoreKeys|SecretsService|SecretsTenantId|(?:Password|pwd|secret|credentials?)(?:Key|Location)|KeyManager'''
+  [[rules.whitelist]]
+    regex = '''(?:_AppKey"|(?:(?:credential|password|token)s?|(?:Account|access)Key=)"[\s\r?\n]*/|Username"|\.dll|(?:Secret|Token|Key|Credential)s?(?:Encryption|From|(?:Signing)?Certificate|Options|Thumbprint|Contacts|String|UserId)|Key(1;value1|word|s?Path|Index|Id|Store|WillDoWithoutValidation|:NamePattern|Name"|Ref")|(Secret|Credential)s?(Name|Path)"|(StrongName|Chaos\s?Mon|Redis|Registry|Registery|User|Insights?|Instrumentation|Match\()Key|(Certificate|cert)(Issuer|Subject)|rollingdate|skuId|HKEY_|AddServicePrincipalCredentials|Password Resets|SecretStore|(0|x|\*){8,})'''
+
+[[rules]]
+  description = "CSCAN0160: DomainPassword"
+  regex = '''new(?:-object)?\s+System.Net.NetworkCredential\(?:.*?,\s*"[^"]+"'''
+  path = '''\.cs$|\.c$|\.cpp$|\.ps1$|\.ps$|\.cmd$|\.bat$|\.log$|\.psd$|\.psm1$'''
+  tags = ["key", "DomainPassword"]
+  [[rules.whitelist]]
+    regex = '''(%1%|\$MIGUSER_PASSWORD|%miguser_pwd%)'''
+    description = "ignore placeholders"
+
+[[rules]]
+  description = "CSCAN0240: VstsPersonalAccessToken 1"
+  path = '''\.(?:cs|ps1|bat|config|xml|json)$'''
+  regex = '''(?i)(?:AccessToken|pat|token).*?[':="][a-z0-9]{52}(?:'|"|\s|[\r?\n]+)'''
+  tags = ["key", "VstsPersonalAccessToken"]
+
+[[rules]]
+  description = "CSCAN0240: VstsPersonalAccessToken 1"
+  path = '''\.(?:cs|ps1|bat|config|xml|json)$'''
+  regex = '''(?i)(?:AccessToken|pat|token).*?[':="][a-z0-9/+]{70}==(?:'|"|\s|[\r?\n]+)'''
+  tags = ["key", "VstsPersonalAccessToken"]
+
+[[rules]]
+  description = "CSCAN0250: OAuthToken 1"
+  path = '''\.(?:config|js|json|txt|cs|xml|java|py)$'''
+  regex = '''eyj[a-z0-9\-_%]+\.eyj[a-z0-9\-_%]+\.[a-z0-9\-_%]+'''
+  tags = ["key", "OAuthToken"]
+
+[[rules]]
+  description = "CSCAN0250: OAuthToken 2"
+  path = '''\.(?:config|js|json|txt|cs|xml|java|py)$'''
+  regex = '''refresh_token["']?\s*[:=]\s*["']?(?:[a-z0-9_]+-)+[a-z0-9_]+["']?'''
+  tags = ["key", "OAuthToken"]
+
+[[rules]]
+  description = "CSCAN0260: AnsibleVault"
+  path = '''\.yml$'''
+  regex = '''\$ANSIBLE_VAULT;[0-9]\.[0-9];AES256[\r?\n]+[0-9]+'''
+  tags = ["key", "AnsibleVault"]
+
+[[rules]]
+  description = "CSCAN0230: SlackToken 1"
+    regex = '''xoxp-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+'''
+  path = '''\.(?:ps1|psm1|js|json|coffee|xml|js|md|html|py|php|java|ipynb|rb)$|hubot'''
+  tags = ["key", "SlackToken"]
+
+[[rules]]
+  description = "CSCAN0230: SlackToken 2"
+  regex = '''xoxb-[a-z0-9]+-[a-z0-9]+'''
+  path = '''\.(?:ps1|psm1|js|json|coffee|xml|js|md|html|py|php|java|ipynb|rb)$|hubot'''
+  tags = ["key", "SlackToken"]
+
+[allowlist]
+  description = "Allowlisted files"
+  regexes = ['''219-09-9999''', '''078-05-1120''', '''(9[0-9]{2}|666)-\d{2}-\d{4}''']
+  paths = ['''(.*?)(png|jpg|gif|doc|docx|pdf|bin|svg|xls|zip|socket)$''', '''buildsearchers.xml''','''(?i)(credscan-config.toml|go.mod|go.sum|yarn.lock|package-lock.json|project.assets.json|.min.js|.dist.js|.terraform.lock.hcl)''', '''gitleaks.toml''','''(?i)(test|reports|node_modules|venv|.venv|.m2|.gradle)''']
+
+
+# ported from https://git.io/Ju05x @ 2022-02-09T11:26:50+0200
+[[rules]]
+  id = "gitlab-pat"
+  description = "GitLab Personal Access Token"
+  regex = '''glpat-[0-9a-zA-Z\-]{20}'''
+
+[[rules]]
+  id = "aws-access-token"
+  description = "AWS"
+  regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+
+# Cryptographic keys
+[[rules]]
+  id = "PKCS8-PK"
+  description = "PKCS8 private key"
+  regex = '''-----BEGIN PRIVATE KEY-----'''
+
+[[rules]]
+  id = "RSA-PK"
+  description = "RSA private key"
+  regex = '''-----BEGIN RSA PRIVATE KEY-----'''
+
+[[rules]]
+  id = "OPENSSH-PK"
+  description = "SSH private key"
+  regex = '''-----BEGIN OPENSSH PRIVATE KEY-----'''
+
+[[rules]]
+  id = "PGP-PK"
+  description = "PGP private key"
+  regex = '''-----BEGIN PGP PRIVATE KEY BLOCK-----'''
+
+[[rules]]
+  id = "github-pat"
+  description = "Github Personal Access Token"
+  regex = '''ghp_[0-9a-zA-Z]{36}'''
+
+[[rules]]
+  id = "github-oauth"
+  description = "Github OAuth Access Token"
+  regex = '''gho_[0-9a-zA-Z]{36}'''
+
+[[rules]]
+  id = "SSH-DSA-PK"
+  description = "SSH (DSA) private key"
+  regex = '''-----BEGIN DSA PRIVATE KEY-----'''
+
+[[rules]]
+  id = "SSH-EC-PK"
+  description = "SSH (EC) private key"
+  regex = '''-----BEGIN EC PRIVATE KEY-----'''
+
+
+[[rules]]
+  id = "github-app-token"
+  description = "Github App Token"
+  regex = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
+
+[[rules]]
+  id = "github-refresh-token"
+  description = "Github Refresh Token"
+  regex = '''ghr_[0-9a-zA-Z]{76}'''
+
+[[rules]]
+  id = "shopify-shared-secret"
+  description = "Shopify shared secret"
+  regex = '''shpss_[a-fA-F0-9]{32}'''
+
+[[rules]]
+  id = "shopify-access-token"
+  description = "Shopify access token"
+  regex = '''shpat_[a-fA-F0-9]{32}'''
+
+[[rules]]
+  id = "shopify-custom-access-token"
+  description = "Shopify custom app access token"
+  regex = '''shpca_[a-fA-F0-9]{32}'''
+
+[[rules]]
+  id = "shopify-private-app-access-token"
+  description = "Shopify private app access token"
+  regex = '''shppa_[a-fA-F0-9]{32}'''
+
+[[rules]]
+  id = "slack-access-token"
+  description = "Slack token"
+  regex = '''xox[baprs]-([0-9a-zA-Z]{10,48})?'''
+
+[[rules]]
+  id = "stripe-access-token"
+  description = "Stripe"
+  regex = '''(?i)(sk|pk)_(test|live)_[0-9a-z]{10,32}'''
+
+[[rules]]
+  id = "pypi-upload-token"
+  description = "PyPI upload token"
+  regex = '''pypi-AgEIcHlwaS5vcmc[A-Za-z0-9-_]{50,1000}'''
+
+[[rules]]
+  id = "gcp-service-account"
+  description = "Google (GCP) Service-account"
+  regex = '''\"type\": \"service_account\"'''
+
+[[rules]]
+  id = "heroku-api-key"
+  description = "Heroku API Key"
+  regex = ''' (?i)(heroku[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "slack-web-hook"
+  description = "Slack Webhook"
+  regex = '''https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8,12}/[a-zA-Z0-9_]{24}'''
+
+[[rules]]
+  id = "twilio-api-key"
+  description = "Twilio API Key"
+  regex = '''SK[0-9a-fA-F]{32}'''
+
+[[rules]]
+  id = "age-secret-key"
+  description = "Age secret key"
+  regex = '''AGE-SECRET-KEY-1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{58}'''
+
+[[rules]]
+  id = "facebook-token"
+  description = "Facebook token"
+  regex = '''(?i)(facebook[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "twitter-token"
+  description = "Twitter token"
+  regex = '''(?i)(twitter[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{35,44})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "adobe-client-id"
+  description = "Adobe Client ID (Oauth Web)"
+  regex = '''(?i)(adobe[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "adobe-client-secret"
+  description = "Adobe Client Secret"
+  regex = '''(p8e-)(?i)[a-z0-9]{32}'''
+
+[[rules]]
+  id = "alibaba-access-key-id"
+  description = "Alibaba AccessKey ID"
+  regex = '''(LTAI)(?i)[a-z0-9]{20}'''
+
+[[rules]]
+  id = "alibaba-secret-key"
+  description = "Alibaba Secret Key"
+  regex = '''(?i)(alibaba[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{30})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "asana-client-id"
+  description = "Asana Client ID"
+  regex = '''(?i)(asana[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9]{16})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "asana-client-secret"
+  description = "Asana Client Secret"
+  regex = '''(?i)(asana[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "atlassian-api-token"
+  description = "Atlassian API token"
+  regex = '''(?i)(atlassian[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{24})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "bitbucket-client-id"
+  description = "Bitbucket client ID"
+  regex = '''(?i)(bitbucket[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "bitbucket-client-secret"
+  description = "Bitbucket client secret"
+  regex = '''(?i)(bitbucket[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9_\-]{64})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "beamer-api-token"
+  description = "Beamer API token"
+  regex = '''(?i)(beamer[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](b_[a-z0-9=_\-]{44})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "clojars-api-token"
+  description = "Clojars API token"
+  regex = '''(CLOJARS_)(?i)[a-z0-9]{60}'''
+
+[[rules]]
+  id = "contentful-delivery-api-token"
+  description = "Contentful delivery API token"
+  regex = '''(?i)(contentful[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{43})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "contentful-preview-api-token"
+  description = "Contentful preview API token"
+  regex = '''(?i)(contentful[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{43})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "databricks-api-token"
+  description = "Databricks API token"
+  regex = '''dapi[a-h0-9]{32}'''
+
+[[rules]]
+  id = "discord-api-token"
+  description = "Discord API key"
+  regex = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{64})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "discord-client-id"
+  description = "Discord client ID"
+  regex = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9]{18})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "discord-client-secret"
+  description = "Discord client secret"
+  regex = '''(?i)(discord[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_\-]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "doppler-api-token"
+  description = "Doppler API token"
+  regex = '''['\"](dp\.pt\.)(?i)[a-z0-9]{43}['\"]'''
+
+[[rules]]
+  id = "dropbox-api-secret"
+  description = "Dropbox API secret/key"
+  regex = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{15})['\"]'''
+
+[[rules]]
+  id = "dropbox--api-key"
+  description = "Dropbox API secret/key"
+  regex = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{15})['\"]'''
+
+[[rules]]
+  id = "dropbox-short-lived-api-token"
+  description = "Dropbox short lived API token"
+  regex = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](sl\.[a-z0-9\-=_]{135})['\"]'''
+
+[[rules]]
+  id = "dropbox-long-lived-api-token"
+  description = "Dropbox long lived API token"
+  regex = '''(?i)(dropbox[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"][a-z0-9]{11}(AAAAAAAAAA)[a-z0-9\-_=]{43}['\"]'''
+
+[[rules]]
+  id = "duffel-api-token"
+  description = "Duffel API token"
+  regex = '''['\"]duffel_(test|live)_(?i)[a-z0-9_-]{43}['\"]'''
+
+[[rules]]
+  id = "dynatrace-api-token"
+  description = "Dynatrace API token"
+  regex = '''['\"]dt0c01\.(?i)[a-z0-9]{24}\.[a-z0-9]{64}['\"]'''
+
+[[rules]]
+  id = "easypost-api-token"
+  description = "EasyPost API token"
+  regex = '''['\"]EZAK(?i)[a-z0-9]{54}['\"]'''
+
+[[rules]]
+  id = "easypost-test-api-token"
+  description = "EasyPost test API token"
+  regex = '''['\"]EZTK(?i)[a-z0-9]{54}['\"]'''
+
+[[rules]]
+  id = "fastly-api-token"
+  description = "Fastly API token"
+  regex = '''(?i)(fastly[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9\-=_]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "finicity-client-secret"
+  description = "Finicity client secret"
+  regex = '''(?i)(finicity[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{20})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "finicity-api-token"
+  description = "Finicity API token"
+  regex = '''(?i)(finicity[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "flutterweave-public-key"
+  description = "Flutterweave public key"
+  regex = '''FLWPUBK_TEST-(?i)[a-h0-9]{32}-X'''
+
+[[rules]]
+  id = "flutterweave-secret-key"
+  description = "Flutterweave secret key"
+  regex = '''FLWSECK_TEST-(?i)[a-h0-9]{32}-X'''
+
+[[rules]]
+  id = "flutterweave-enc-key"
+  description = "Flutterweave encrypted key"
+  regex = '''FLWSECK_TEST[a-h0-9]{12}'''
+
+[[rules]]
+  id = "frameio-api-token"
+  description = "Frame.io API token"
+  regex = '''fio-u-(?i)[a-z0-9-_=]{64}'''
+
+[[rules]]
+  id = "gocardless-api-token"
+  description = "GoCardless API token"
+  regex = '''['\"]live_(?i)[a-z0-9-_=]{40}['\"]'''
+
+[[rules]]
+  id = "grafana-api-token"
+  description = "Grafana API token"
+  regex = '''['\"]eyJrIjoi(?i)[a-z0-9-_=]{72,92}['\"]'''
+
+[[rules]]
+  id = "hashicorp-tf-api-token"
+  description = "Hashicorp Terraform user/org API token"
+  regex = '''['\"](?i)[a-z0-9]{14}\.atlasv1\.[a-z0-9-_=]{60,70}['\"]'''
+
+[[rules]]
+  id = "hubspot-api-token"
+  description = "Hubspot API token"
+  regex = '''(?i)(hubspot[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "intercom-api-token"
+  description = "Intercom API token"
+  regex = '''(?i)(intercom[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9=_]{60})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "intercom-client-secret"
+  description = "Intercom client secret/ID"
+  regex = '''(?i)(intercom[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "ionic-api-token"
+  description = "Ionic API token"
+  regex = '''(?i)(ionic[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](ion_[a-z0-9]{42})['\"]'''
+
+[[rules]]
+  id = "linear-api-token"
+  description = "Linear API token"
+  regex = '''lin_api_(?i)[a-z0-9]{40}'''
+
+[[rules]]
+  id = "linear-client-secret"
+  description = "Linear client secret/ID"
+  regex = '''(?i)(linear[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "lob-api-key"
+  description = "Lob API Key"
+  regex = '''(?i)(lob[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]((live|test)_[a-f0-9]{35})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "lob-pub-api-key"
+  description = "Lob Publishable API Key"
+  regex = '''(?i)(lob[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]((test|live)_pub_[a-f0-9]{31})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "mailchimp-api-key"
+  description = "Mailchimp API key"
+  regex = '''(?i)(mailchimp[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-f0-9]{32}-us20)['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "mailgun-private-api-token"
+  description = "Mailgun private API token"
+  regex = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](key-[a-f0-9]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "mailgun-pub-key"
+  description = "Mailgun public validation key"
+  regex = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"](pubkey-[a-f0-9]{32})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "mailgun-signing-key"
+  description = "Mailgun webhook signing key"
+  regex = '''(?i)(mailgun[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{32}-[a-h0-9]{8}-[a-h0-9]{8})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "mapbox-api-token"
+  description = "Mapbox API token"
+  regex = '''(?i)(pk\.[a-z0-9]{60}\.[a-z0-9]{22})'''
+
+[[rules]]
+  id = "messagebird-api-token"
+  description = "MessageBird API token"
+  regex = '''(?i)(messagebird[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{25})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "messagebird-client-id"
+  description = "MessageBird API client ID"
+  regex = '''(?i)(messagebird[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "new-relic-user-api-key"
+  description = "New Relic user API Key"
+  regex = '''['\"](NRAK-[A-Z0-9]{27})['\"]'''
+
+[[rules]]
+  id = "new-relic-user-api-id"
+  description = "New Relic user API ID"
+  regex = '''(?i)(newrelic[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([A-Z0-9]{64})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "new-relic-browser-api-token"
+  description = "New Relic ingest browser API token"
+  regex = '''['\"](NRJS-[a-f0-9]{19})['\"]'''
+
+[[rules]]
+  id = "npm-access-token"
+  description = "npm access token"
+  regex = '''['\"](npm_(?i)[a-z0-9]{36})['\"]'''
+
+[[rules]]
+  id = "planetscale-password"
+  description = "Planetscale password"
+  regex = '''pscale_pw_(?i)[a-z0-9\-_\.]{43}'''
+
+[[rules]]
+  id = "planetscale-api-token"
+  description = "Planetscale API token"
+  regex = '''pscale_tkn_(?i)[a-z0-9\-_\.]{43}'''
+
+[[rules]]
+  id = "postman-api-token"
+  description = "Postman API token"
+  regex = '''PMAK-(?i)[a-f0-9]{24}\-[a-f0-9]{34}'''
+
+[[rules]]
+  id = "pulumi-api-token"
+  description = "Pulumi API token"
+  regex = '''pul-[a-f0-9]{40}'''
+
+[[rules]]
+  id = "rubygems-api-token"
+  description = "Rubygem API token"
+  regex = '''rubygems_[a-f0-9]{48}'''
+
+[[rules]]
+  id = "sendgrid-api-token"
+  description = "Sendgrid API token"
+  regex = '''SG\.(?i)[a-z0-9_\-\.]{66}'''
+
+[[rules]]
+  id = "sendinblue-api-token"
+  description = "Sendinblue API token"
+  regex = '''xkeysib-[a-f0-9]{64}\-(?i)[a-z0-9]{16}'''
+
+[[rules]]
+  id = "shippo-api-token"
+  description = "Shippo API token"
+  regex = '''shippo_(live|test)_[a-f0-9]{40}'''
+
+[[rules]]
+  id = "linedin-client-secret"
+  description = "Linkedin Client secret"
+  regex = '''(?i)(linkedin[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z]{16})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "linedin-client-id"
+  description = "Linkedin Client ID"
+  regex = '''(?i)(linkedin[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{14})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "twitch-api-token"
+  description = "Twitch API token"
+  regex = '''(?i)(twitch[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([a-z0-9]{30})['\"]'''
+  secretGroup = 3
+
+[[rules]]
+  id = "typeform-api-token"
+  description = "Typeform API token"
+  regex = '''(?i)(typeform[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}(tfp_[a-z0-9\-_\.=]{59})'''
+  secretGroup = 3
+
+[[rules]]
+  id = "generic-api-key"
+  description = "Generic API Key"
+  regex = '''(?i)((key|api|token|secret|password)[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9a-zA-Z\-_=]{8,64})['\"]'''
+  entropy = 3.7
+  secretGroup = 4

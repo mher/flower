@@ -1,0 +1,241 @@
+# yaml-language-server: $schema=https://json.schemastore.org/pre-commit-config.json
+
+minimum_pre_commit_version: 2.20.0
+fail_fast: false
+default_stages:
+- pre-commit
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+  - id: check-added-large-files
+  - id: check-case-conflict
+  - id: check-executables-have-shebangs
+  - id: check-shebang-scripts-are-executable
+  - id: check-merge-conflict
+  - id: check-symlinks
+  - id: detect-private-key
+    exclude: .gitleaks.toml
+  - id: no-commit-to-branch
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+  - id: check-json
+  - id: check-toml
+  - id: check-xml
+  - id: pretty-format-json
+    args:
+    - --autofix
+    - --no-sort-keys
+- repo: https://github.com/jumanjihouse/pre-commit-hooks
+  rev: 3.0.0
+  hooks:
+  - id: forbid-binary
+  - id: git-check
+- repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+  rev: 0.2.3
+  hooks:
+  - id: yamlfmt
+    args:
+    - --mapping
+    - '2'
+    - --sequence
+    - '2'
+    - --offset
+    - '0'
+    - --width
+    - '300'
+    - --implicit_start
+    - --preserve_null
+- repo: https://github.com/adrienverge/yamllint
+  rev: v1.37.1
+  hooks:
+  - id: yamllint
+    name: Lint YAML files
+    args:
+    - --strict
+- repo: https://github.com/sirosen/check-jsonschema
+  rev: 0.35.0
+  hooks:
+  - id: check-jsonschema
+    name: Validate GitHub Workflows
+    files: ^\.github/workflows/.*\.yml
+    types:
+    - yaml
+    args:
+    - --schemafile
+    - https://json.schemastore.org/github-workflow.json
+  - id: check-jsonschema
+    name: Validate GitHub Actions
+    files: >
+      (?x)^(
+        .*/action\.(yml|yaml)|
+        \.github/actions/.*
+      )$
+    types:
+    - yaml
+    args:
+    - --schemafile
+    - https://json.schemastore.org/github-action
+  - id: check-jsonschema
+    name: Validate DependaBot
+    files: ^\.github/dependabot\.yml
+    types:
+    - yaml
+    args:
+    - --schemafile
+    - https://json.schemastore.org/dependabot-2.0.json
+  - id: check-jsonschema
+    name: Validate MarkdownLint
+    files: .*\.markdownlint\.yaml
+    types:
+    - yaml
+    args:
+    - --schemafile
+    - https://json.schemastore.org/markdownlint.json
+  - id: check-jsonschema
+    name: Validate YamlLint
+    files: .*\.yamllint\.yaml
+    types:
+    - yaml
+    args:
+    - --schemafile
+    - https://json.schemastore.org/yamllint.json
+  - id: check-jsonschema
+    name: Validate Pre-commit
+    files: .*\.pre-commit-config\.yaml
+    types:
+    - yaml
+    args:
+    - --schemafile
+    - https://json.schemastore.org/pre-commit-config.json
+  - id: check-jsonschema
+    name: Validate Docker-Compose
+    files: .*docker-compose\.yml
+    types:
+    - yaml
+    args:
+    - --schemafile
+    - https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+  - id: check-jsonschema
+    name: Validate Renovate
+    files: ^\.github/renovate\.json
+    types:
+    - json
+    args:
+    - --schemafile
+    - https://docs.renovatebot.com/renovate-schema.json
+    - --disable-formats
+    - '*'
+  - id: check-jsonschema
+    name: Validate Prettier
+    files: ^\.prettierrc(\.(json|yaml|yml|json5))?
+    types_or:
+    - json
+    - yaml
+    args:
+    - --schemafile
+    - https://json.schemastore.org/prettierrc
+- repo: https://github.com/commitizen-tools/commitizen
+  rev: v4.10.0
+  hooks:
+  - id: commitizen
+    name: Lint commit message
+    stages:
+    - commit-msg
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: v0.11.0.1
+  hooks:
+  - id: shellcheck
+    name: Check sh files (and patch)
+    entry: bash -eo pipefail -c 'shellcheck $@ -f diff | patch -p 1' --
+  - id: shellcheck
+    name: Check sh files (and print violations)
+- repo: meta
+  hooks:
+  - id: check-hooks-apply
+    stages:
+    - manual
+  - id: check-useless-excludes
+  - id: identity
+    stages:
+    - manual
+- repo: https://github.com/igorshubovych/markdownlint-cli
+  rev: v0.45.0
+  hooks:
+  - id: markdownlint-fix
+    name: Lint Markdown files
+    args:
+    - --disable=MD013 # line-length
+- repo: https://github.com/maxwinterstein/shfmt-py
+  rev: v3.12.0.1
+  hooks:
+  - id: shfmt
+    name: Format sh files
+    args:
+    - -w
+    - -s
+    - -i
+    - '2'
+- repo: https://github.com/pre-commit/mirrors-prettier
+  rev: v4.0.0-alpha.8
+  hooks:
+  - id: prettier
+    additional_dependencies:
+    - prettier
+    exclude: CHANGELOG.md      # managed by semantic-release
+    stages:
+    - manual
+- repo: https://github.com/renovatebot/pre-commit-hooks
+  rev: 42.12.0
+  hooks:
+  - id: renovate-config-validator
+    name: Validate Renovate configuration
+- repo: local
+  hooks:
+  - id: hadolint
+    name: Lint Dockerfiles
+    language: docker_image
+    entry: hadolint/hadolint:v2.10.0
+    args:
+    - hadolint
+    types:
+    - dockerfile
+  - id: gitleaks
+    name: Protect hardcoded secrets
+    language: docker_image
+    entry: zricethezav/gitleaks:v8.15.0
+    args:
+    - protect
+    - --staged
+    - --redact
+    - --verbose
+  - id: gitleaks-ci
+    name: Detect hardcoded secrets
+    language: docker_image
+    entry: zricethezav/gitleaks:v8.15.0
+    stages:
+    - manual
+    args:
+    - detect
+    - --redact
+    - --verbose
+    - --log-opts
+    - --left-right --cherry-pick --pretty=format:"%H" remotes/origin/master...
+- repo: https://github.com/pre-commit/mirrors-eslint
+  rev: v10.0.0-alpha.0
+  hooks:
+  - id: eslint
+    files: \.[jt]sx?$      # *.js, *.jsx, *.ts and *.tsx
+    types:
+    - file
+    additional_dependencies:
+    - eslint@8.57.0
+    - eslint-plugin-prettier@5.1.3
+    - eslint-config-prettier@9.1.0
+    - eslint-plugin-react-hooks@4.6.0
+    - eslint-plugin-react-refresh@0.3.4
+    - '@typescript-eslint/eslint-plugin@7.1.1'
+    - '@typescript-eslint/parser@7.1.1'
+    args:
+    - --fix

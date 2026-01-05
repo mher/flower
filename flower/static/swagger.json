@@ -1,9 +1,7 @@
 {
-  "tags": [
-    
-  ],
+  "tags": [],
   "paths": {
-    "\/api\/tasks": {
+    "/api/tasks": {
       "get": {
         "responses": {
           "200": {
@@ -44,7 +42,7 @@
         ]
       }
     },
-    "\/api\/task\/types": {
+    "/api/task/types": {
       "get": {
         "responses": {
           "200": {
@@ -54,7 +52,7 @@
         "description": "List (seen) task types"
       }
     },
-    "\/api\/queues\/length": {
+    "/api/queues/length": {
       "get": {
         "responses": {
           "200": {
@@ -64,7 +62,7 @@
         "description": "Get queue lengths"
       }
     },
-    "\/api\/task\/info\/{taskid}": {
+    "/api/task/info/{taskid}": {
       "get": {
         "responses": {
           "200": {
@@ -74,12 +72,12 @@
         "description": "Get task info",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskid"
+            "$ref": "#/parameters/taskid"
           }
         ]
       }
     },
-    "\/api\/task\/apply\/{taskname}": {
+    "/api/task/apply/{taskname}": {
       "post": {
         "responses": {
           "200": {
@@ -89,7 +87,7 @@
         "description": "Execute a task by name and wait results",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskname"
+            "$ref": "#/parameters/taskname"
           },
           {
             "schema": {
@@ -110,7 +108,7 @@
         ]
       }
     },
-    "\/api\/task\/async-apply\/{taskname}": {
+    "/api/task/async-apply/{taskname}": {
       "post": {
         "responses": {
           "200": {
@@ -120,7 +118,7 @@
         "description": "Execute a task",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskname"
+            "$ref": "#/parameters/taskname"
           },
           {
             "schema": {
@@ -144,7 +142,7 @@
         ]
       }
     },
-    "\/api\/task\/send-task\/{taskname}": {
+    "/api/task/send-task/{taskname}": {
       "post": {
         "responses": {
           "200": {
@@ -154,7 +152,7 @@
         "description": "Execute a task by name (Doesn't require a task source)",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskname"
+            "$ref": "#/parameters/taskname"
           },
           {
             "schema": {
@@ -175,7 +173,7 @@
         ]
       }
     },
-    "\/api\/task\/result\/{taskid}": {
+    "/api/task/result/{taskid}": {
       "get": {
         "responses": {
           "200": {
@@ -185,7 +183,7 @@
         "description": "Get a task result",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskid"
+            "$ref": "#/parameters/taskid"
           },
           {
             "name": "timeout",
@@ -198,7 +196,7 @@
         ]
       }
     },
-    "\/api\/task\/abort\/{taskid}": {
+    "/api/task/abort/{taskid}": {
       "post": {
         "responses": {
           "200": {
@@ -208,12 +206,12 @@
         "description": "Abort a running task",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskid"
+            "$ref": "#/parameters/taskid"
           }
         ]
       }
     },
-    "\/api\/task\/timeout\/{taskname}": {
+    "/api/task/timeout/{taskname}": {
       "post": {
         "responses": {
           "200": {
@@ -223,7 +221,7 @@
         "description": "Change soft and hard time limits for a task",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskname"
+            "$ref": "#/parameters/taskname"
           },
           {
             "name": "workername",
@@ -251,7 +249,7 @@
         ]
       }
     },
-    "\/api\/task\/rate-limit\/{taskname}": {
+    "/api/task/rate-limit/{taskname}": {
       "post": {
         "responses": {
           "200": {
@@ -261,7 +259,7 @@
         "description": "Change rate limit for a task",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskname"
+            "$ref": "#/parameters/taskname"
           },
           {
             "name": "workername",
@@ -281,7 +279,7 @@
         ]
       }
     },
-    "\/api\/task\/revoke\/{taskid}": {
+    "/api/task/revoke/{taskid}": {
       "post": {
         "responses": {
           "200": {
@@ -291,7 +289,7 @@
         "description": "Revoke a task",
         "parameters": [
           {
-            "$ref": "#\/parameters\/taskid"
+            "$ref": "#/parameters/taskid"
           },
           {
             "name": "terminate",
@@ -303,7 +301,7 @@
         ]
       }
     },
-    "\/api\/workers": {
+    "/api/workers": {
       "get": {
         "responses": {
           "200": {
@@ -335,7 +333,7 @@
         ]
       }
     },
-    "\/api\/worker\/shutdown\/{workername}": {
+    "/api/worker/shutdown/{workername}": {
       "post": {
         "responses": {
           "200": {
@@ -345,12 +343,12 @@
         "description": "Shut down a worker",
         "parameters": [
           {
-            "$ref": "#\/parameters\/workername"
+            "$ref": "#/parameters/workername"
           }
         ]
       }
     },
-    "\/api\/worker\/pool\/restart\/{workername}": {
+    "/api/worker/pool/restart/{workername}": {
       "post": {
         "responses": {
           "200": {
@@ -360,12 +358,12 @@
         "description": "Restart a worker's pool",
         "parameters": [
           {
-            "$ref": "#\/parameters\/workername"
+            "$ref": "#/parameters/workername"
           }
         ]
       }
     },
-    "\/api\/worker\/pool\/grow\/{workername}": {
+    "/api/worker/pool/grow/{workername}": {
       "post": {
         "responses": {
           "200": {
@@ -375,7 +373,7 @@
         "description": "Grow a worker's pool",
         "parameters": [
           {
-            "$ref": "#\/parameters\/workername"
+            "$ref": "#/parameters/workername"
           },
           {
             "name": "n",
@@ -388,7 +386,7 @@
         ]
       }
     },
-    "\/api\/worker\/pool\/shrink\/{workername}": {
+    "/api/worker/pool/shrink/{workername}": {
       "post": {
         "responses": {
           "200": {
@@ -398,7 +396,7 @@
         "description": "Shrink a worker's pool",
         "parameters": [
           {
-            "$ref": "#\/parameters\/workername"
+            "$ref": "#/parameters/workername"
           },
           {
             "name": "n",
@@ -411,7 +409,7 @@
         ]
       }
     },
-    "\/api\/worker\/pool\/autoscale\/{workername}": {
+    "/api/worker/pool/autoscale/{workername}": {
       "post": {
         "responses": {
           "200": {
@@ -421,7 +419,7 @@
         "description": "Autoscale a worker pool",
         "parameters": [
           {
-            "$ref": "#\/parameters\/workername"
+            "$ref": "#/parameters/workername"
           },
           {
             "name": "min",
@@ -442,7 +440,7 @@
         ]
       }
     },
-    "\/api\/worker\/queue\/add-consumer\/{workername}": {
+    "/api/worker/queue/add-consumer/{workername}": {
       "post": {
         "responses": {
           "200": {
@@ -452,7 +450,7 @@
         "description": "Start consuming from a queue",
         "parameters": [
           {
-            "$ref": "#\/parameters\/workername"
+            "$ref": "#/parameters/workername"
           },
           {
             "name": "queue",
@@ -464,7 +462,7 @@
         ]
       }
     },
-    "\/api\/worker\/queue\/cancel-consumer\/{workername}": {
+    "/api/worker/queue/cancel-consumer/{workername}": {
       "post": {
         "responses": {
           "200": {
@@ -474,7 +472,7 @@
         "description": "Stop consuming from a queue",
         "parameters": [
           {
-            "$ref": "#\/parameters\/workername"
+            "$ref": "#/parameters/workername"
           },
           {
             "name": "queue",
@@ -515,9 +513,6 @@
     "version": "1.0.0-dev",
     "title": "Flower"
   },
-  "definitions": {
-    
-  },
+  "definitions": {},
   "swagger": "2.0"
 }
-
