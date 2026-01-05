@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://json.schemastore.org/yamllint.json
+
+extends: default
+
+rules:
+  line-length:
+    max: 1000
+  document-start: disable
+  truthy:
+    check-keys: false
+  braces:
+    forbid: non-empty
+  brackets:
+    forbid: non-empty
+  empty-lines:
+    max: 1
+  empty-values: enable
+  indentation:
+    spaces: 2
+    indent-sequences: false
+  quoted-strings:
+    quote-type: single
+    required: only-when-needed
+    extra-required: []
+    extra-allowed: []
+  comments:
+    min-spaces-from-content: 1

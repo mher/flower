@@ -1,35 +1,35 @@
 {% import pprint %}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flower</title>
-  	<link rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}">
-	  <link rel="stylesheet" href="{{ static_url('css/datatables-1.13.4.min.css') }}">
-	  <link href="{{ static_url('css/flower.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ static_url('css/datatables-1.13.4.min.css') }}"
+    />
+    <link href="{{ static_url('css/flower.css') }}" rel="stylesheet" />
   </head>
   <body class="m-2">
-    {% block navbar %}
-      {% module Template("navbar.html", active_tab="") %}
-    {% end %}
+    {% block navbar %} {% module Template("navbar.html", active_tab="") %} {%
+    end %}
 
     <div class="container-fluid my-2">
       <div id="alert-container"></div>
-      <input type="hidden" value="{{ url_prefix or '' }}" id='url_prefix'>
+      <input type="hidden" value="{{ url_prefix or '' }}" id="url_prefix" />
     </div>
 
-    {% block container %}
-    {% end %}
+    {% block container %} {% end %}
 
     <script src="{{ static_url('js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ static_url('js/jquery-3.6.4.min.js') }}"></script>
     <script src="{{ static_url('js/datatables-1.13.4.min.js') }}"></script>
     <script src="{{ static_url('js/moment-2.29.4.min.js') }}"></script>
     <script src="{{ static_url('js/moment-timezone-with-data-2.29.4.min.js') }}"></script>
-	  <script src="{{ static_url('js/flower.js') }}"></script>
+    <script src="{{ static_url('js/flower.js') }}"></script>
 
-    {% block extra_scripts %}
-    {% end %}
+    {% block extra_scripts %} {% end %}
   </body>
 </html>

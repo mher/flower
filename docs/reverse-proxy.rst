@@ -3,7 +3,7 @@
 Running behind reverse proxy
 ============================
 
-To run `Flower` behind a reverse proxy, remember to set the correct `Host` 
+To run `Flower` behind a reverse proxy, remember to set the correct `Host`
 header to the request to make sure Flower can generate correct URLs.
 
 The following block represents the minimal `nginx` configuration:

@@ -50,6 +50,7 @@ flower = "flower.command:flower"
 dev = [
   "redis>=4.3.6",
   "pylint",
+  "pre-commit==4.5.1",
 ]
 
 test = [
