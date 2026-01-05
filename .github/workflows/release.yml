@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Release
+on:
+  push:
+    branches:
+    - master
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: Setup node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: 20
+
+    - name: Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.SEMREL_GITHUB_TOKEN }}
+      run: |
+        npm install @semantic-release/git @semantic-release/changelog conventional-changelog-conventionalcommits@7.0.2 -D
+        npx semantic-release
