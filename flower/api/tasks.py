@@ -666,7 +666,7 @@ class TaskReapply(BaseTaskHandler):
         try:
             args = parse_args(task.args)
             kwargs = parse_kwargs(task.kwargs)
-        except Exception as exc:
+        except (ValueError, json.JSONDecodeError, SyntaxError, TypeError) as exc:
             logger.error("Error parsing task arguments: %s", exc)
             raise HTTPError(400, f"Invalid task arguments: {str(exc)}") from exc
 
