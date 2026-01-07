@@ -100,14 +100,14 @@ def parse_kwargs(kwargs):
     try:
         # Attempt to parse JSON
         return json.loads(kwargs)
-    except json.JSONDecodeError:
-        try:
-            # Fallback for stringified dictionaries
-            if kwargs.startswith('{') and kwargs.endswith('}'):
+    except json.JSONDecodeError as json_err:
+        # Fallback for stringified dictionaries
+        if kwargs.startswith('{') and kwargs.endswith('}'):
+            try:
                 return ast.literal_eval(kwargs)
-        except (ValueError, SyntaxError):
-            return {}
-    return {}
+            except (ValueError, SyntaxError) as literal_err:
+                raise ValueError(f"Could not parse kwargs: {kwargs!r}") from literal_err
+        raise ValueError(f"Could not parse kwargs: {kwargs!r}") from json_err
 
 def make_json_serializable(obj):
     """
