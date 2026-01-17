@@ -1,6 +1,8 @@
 name: Build
 
-on: [push, pull_request]
+on:
+- push
+- pull_request
 
 jobs:
   build:
@@ -9,33 +11,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12", "3.13"]
-        celery-version: ["5.6.*"]
-        tornado-version: ["6.5.4"]
+        python-version:
+        - '3.12'
+        - '3.13'
+        celery-version:
+        - 5.6.*
+        tornado-version:
+        - 6.5.4
 
     steps:
-      - uses: actions/checkout@v5
+    - uses: actions/checkout@v5
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          enable-cache: true
-          python-version: ${{ matrix.python-version }}
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+        python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        # 'uv sync' installs pyproject.toml base + selected extras
-        # 'uv pip install' overrides matrix-specific versions
-        run: |
-          uv sync --extra dev --extra test
-          uv pip install "celery==${{ matrix.celery-version }}" \
-                         "tornado==${{ matrix.tornado-version }}"
+    - name: Install dependencies
+      # 'uv sync' installs pyproject.toml base + selected extras
+      # 'uv pip install' overrides matrix-specific versions
+      run: |
+        uv sync --extra dev --extra test
+        uv pip install "celery==${{ matrix.celery-version }}" \
+                       "tornado==${{ matrix.tornado-version }}"
 
-      - name: Run unit tests
-        shell: script -q -e -c "bash --noprofile --norc -eo pipefail {0}"
-        run: |
-          uv run python -m flower --version
-          uv run py.test -o junit_family=xunit2 --junitxml result.xml -xv --ff --cov=flower --cov-report=xml --cov-report=term-missing tests
+    - name: Run unit tests
+      shell: script -q -e -c "bash --noprofile --norc -eo pipefail {0}"
+      run: |
+        uv run python -m flower --version
+        uv run py.test -o junit_family=xunit2 --junitxml result.xml -xv --ff --cov=flower --cov-report=xml --cov-report=term-missing tests
 
-      - name: Lint with pylint
-        run: |
-          uv run pylint flower --rcfile .pylintrc
+    - name: Lint with pylint
+      run: |
+        uv run pylint flower --rcfile .pylintrc
