@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
   actions: write
 
 jobs:
@@ -31,7 +32,7 @@ jobs:
         python-version: '3.12'
 
     - name: Set up uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v7
       with:
         enable-cache: true
 
