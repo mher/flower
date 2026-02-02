@@ -92,10 +92,12 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         "FLOWER_GITHUB_OAUTH_DOMAIN", "github.com")
     if _OAUTH_DOMAIN == "github.com":
         _OAUTH_API_URL = f'https://api.{_OAUTH_DOMAIN}/user/emails'
+        _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/authorize'
+        _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/access_token'
     else:
         _OAUTH_API_URL = f'https://{_OAUTH_DOMAIN}/api/v3/user/emails'
-    _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/authorize'
-    _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/access_token'
+        _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/oauth/authorize'
+        _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/oauth/access_token'
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
 
