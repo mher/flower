@@ -690,4 +690,37 @@ var flower = (function () {
 
     });
 
+    $('#task-retry').click(function () {
+        const $button = $(this);
+        const $spinner = $button.find('.spinner-border');
+        const taskId = $('#taskid').text();
+    
+        if (!taskId) {
+            show_alert('Task ID is missing. Cannot proceed.', 'danger');
+            return;
+        }
+    
+        // Show loading state
+        $button.prop('disabled', true);
+        $spinner.removeClass('d-none');
+    
+        // Reapply the task using the reapply endpoint
+        $.ajax({
+            type: 'POST',
+            url: url_prefix() + '/api/task/reapply/' + taskId,
+            success: function (response) {
+                show_alert(`Task ${taskId} has been retried (new task ID: ${response['task-id']})`, 'success');
+                // Optionally reload the page after success
+                setTimeout(() => location.reload(), 1500);
+            },
+            error: function (response) {
+                show_alert(response.responseText || 'Failed to retry task', 'danger');
+                // Reset button state on error
+                $button.prop('disabled', false);
+                $spinner.addClass('d-none');
+            }
+        });
+    });
+
+
 }(jQuery));
