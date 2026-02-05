@@ -21,7 +21,7 @@ def parse_search_terms(raw_search_value):
             if 'kwargs'not in parsed_search:
                 parsed_search['kwargs'] = {}
             try:
-                key, value = [p.strip() for p in query_part[len('kwargs:'):].split('=')]
+                key, value = (p.strip() for p in query_part[len('kwargs:'):].split('='))
             except ValueError:
                 continue
             parsed_search['kwargs'][key] = preprocess_search_value(value)
