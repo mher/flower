@@ -69,6 +69,17 @@ You can also run Flower using the docker image ::
 
 In this example, Flower is using the `tasks.app` defined in the `examples/tasks.py <https://github.com/mher/flower/blob/master/examples/tasks.py>`_ file
 
+## Use Redis as a database for Persistence
+To Use Redis as a database for Persistence, you need to pass the following arguments while running Flower:
+    - redis_host: The host of the Redis server. (Default: None)
+    - redis_port: The port of the Redis server. (Default: None)
+    - redis_db: The database number of the Redis server. (Default: 0)
+    - redis_key: The key to use for storing the state data in Redis. (Default: flower)
+    - redis_ssl: Whether to use SSL for the Redis connection. (Default: False)
+
+    $ celery -A tasks.app flower --broker=amqp://guest:guest@localhost:5672// --redis_host=localhost --redis_port=6379 --redis_db=0 --redis_key=flower --redis_ssl=True
+
+
 API
 ---
 
