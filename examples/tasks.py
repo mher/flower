@@ -24,7 +24,7 @@ def sleep(seconds):
 
 @app.task
 def echo(msg, timestamp=False):
-    return "%s: %s" % (datetime.now(), msg) if timestamp else msg
+    return f"{datetime.now()}: {msg}" if timestamp else msg
 
 
 @app.task

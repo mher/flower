@@ -9,9 +9,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         celery-version: ['5.2.*', '5.3.*', '5.4.*', '5.5.*']
-        tornado-version: ['6.0']
+        tornado-version: ['6.5']
         exclude:  # https://docs.celeryq.dev/en/v5.2.7/whatsnew-5.2.html#step-5-upgrade-to-celery-5-2
           - python-version: '3.12'
             celery-version: '5.2.*'
