@@ -16,12 +16,6 @@ class TaskTest(AsyncHTTPTestCase):
 
 
 class TasksTest(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
 
     def test_no_task(self):
         r = self.get('/tasks')
@@ -39,7 +33,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
@@ -71,7 +65,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
@@ -109,7 +103,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
@@ -157,7 +151,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
@@ -198,7 +192,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
