@@ -3,3 +3,4 @@ tornado>=5.0.0,<7.0.0
 prometheus_client>=0.8.0
 humanize
 pytz
+tzlocal
