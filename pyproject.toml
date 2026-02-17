@@ -1,0 +1,52 @@
+[tool.poetry]
+name = "flower"
+version = "2.0.1"
+description = "Celery Flower"
+authors = ["Mher Movsisyan <mher.movsisyan@gmail.com>"]
+license = "BSD"
+readme = "README.rst"
+homepage = "https://github.com/mher/flower"
+repository = "https://github.com/mher/flower"
+include = ["templates/*", "static/*.*", "static/**/*.*", "static/**/**/*.*"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Topic :: System :: Distributed Computing",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8.0,<4.0"
+celery = "^5.3.6"
+tornado = ">=5.0.0,<7.0.0"
+prometheus-client = "^0.19.0"
+humanize = "^4.9.0"
+pytz = "^2023.4"
+
+[tool.poetry.group.dev.dependencies]
+redis = "^5.0.1"
+pylint = "^3.0.3"
+
+[tool.poetry.group.docs.dependencies]
+sphynx = "^0.0.3"
+sphinxcontrib-fulltoc = "^1.2.0"
+sphinxcontrib-httpdomain = "^1.8.1"
+sphinxcontrib-redoc = "^1.6.0"
+
+[tool.poetry.plugins."celery.commands"]
+flower = "flower.command:flower"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
