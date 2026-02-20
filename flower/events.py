@@ -85,16 +85,23 @@ class EventsState(State):
 
             task_started = task.started
             task_received = task.received
+            task_revoked = task.revoked
 
-            if event_type == 'task-received' and not task.eta and task_received:
-                self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).inc()
+        if event_type == 'task-received' and not task.eta and task_received:
+            self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).inc()
 
-            if event_type == 'task-started' and not task.eta and task_started and task_received:
-                self.metrics.prefetch_time.labels(worker_name, task_name).set(task_started - task_received)
-                self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).dec()
+        if event_type == 'task-started' and not task.eta and task_started and task_received:
+            self.metrics.prefetch_time.labels(worker_name, task_name).set(task_started - task_received)
+            self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).dec()
+        elif event_type == 'task-revoked' and not task.eta and task_revoked and task_received:
+            self.metrics.prefetch_time.labels(worker_name, task_name).set(task_revoked - task_received)
+            self.metrics.number_of_prefetched_tasks.labels(worker_name, task_name).dec()
 
-            if event_type in ['task-succeeded', 'task-failed'] and not task.eta and task_started and task_received:
-                self.metrics.prefetch_time.labels(worker_name, task_name).set(0)
+        if event_type in ['task-succeeded', 'task-failed'] and not task.eta and task_started and task_received:
+            self.metrics.prefetch_time.labels(worker_name, task_name).set(0)
+        elif event_type == 'task-revoked' and not task.eta and task_revoked and task_received:
+            self.metrics.prefetch_time.labels(worker_name, task_name).set(0)
+
 
         if event_type == 'worker-online':
             self.metrics.worker_online.labels(worker_name).set(1)
