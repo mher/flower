@@ -31,6 +31,11 @@ def echo(msg, timestamp=False):
 def error(msg):
     raise Exception(msg)
 
+@app.task
+def add_chain(x, y, z):
+    result = (add.s(x, y) | add.s(z)).apply_async()
+    return result
+
 
 if __name__ == "__main__":
     app.start()
