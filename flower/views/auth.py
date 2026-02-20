@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import json
 import os
 import re
@@ -252,25 +253,29 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         self.redirect(next_)
 
 
-class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
+class AuthorizationServerLoginHandlerBase(BaseHandler, tornado.auth.OAuth2Mixin):
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
 
     @property
+    @abstractmethod
     def base_url(self):
-        return os.environ.get('FLOWER_OAUTH2_OKTA_BASE_URL')
+        pass
 
     @property
+    @abstractmethod
     def _OAUTH_AUTHORIZE_URL(self):
-        return f"{self.base_url}/v1/authorize"
+        pass
 
     @property
+    @abstractmethod
     def _OAUTH_ACCESS_TOKEN_URL(self):
-        return f"{self.base_url}/v1/token"
+        pass
 
     @property
+    @abstractmethod
     def _OAUTH_USER_INFO_URL(self):
-        return f"{self.base_url}/v1/userinfo"
+        pass
 
     async def get_access_token(self, redirect_uri, code):
         body = urlencode({
@@ -349,3 +354,41 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         if self.application.options.url_prefix and next_[0] != '/':
             next_ = '/' + next_
         self.redirect(next_)
+
+
+class OktaLoginHandler(AuthorizationServerLoginHandlerBase, tornado.auth.OAuth2Mixin):
+
+    @property
+    def base_url(self):
+        return os.environ.get('FLOWER_OAUTH2_OKTA_BASE_URL')
+
+    @property
+    def _OAUTH_AUTHORIZE_URL(self):
+        return f"{self.base_url}/v1/authorize"
+
+    @property
+    def _OAUTH_ACCESS_TOKEN_URL(self):
+        return f"{self.base_url}/v1/token"
+
+    @property
+    def _OAUTH_USER_INFO_URL(self):
+        return f"{self.base_url}/v1/userinfo"
+
+
+class AutheliaLoginHandler(AuthorizationServerLoginHandlerBase, tornado.auth.OAuth2Mixin):
+
+    @property
+    def base_url(self):
+        return os.environ.get('FLOWER_OAUTH2_AUTHELIA_BASE_URL')
+
+    @property
+    def _OAUTH_AUTHORIZE_URL(self):
+        return f"{self.base_url}/api/oidc/authorization"
+
+    @property
+    def _OAUTH_ACCESS_TOKEN_URL(self):
+        return f"{self.base_url}/api/oidc/token"
+
+    @property
+    def _OAUTH_USER_INFO_URL(self):
+        return f"{self.base_url}/api/oidc/userinfo"
