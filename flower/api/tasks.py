@@ -493,6 +493,8 @@ List tasks
 :query state: filter tasks by state
 :query received_start: filter tasks by received date (must be greater than) format %Y-%m-%d %H:%M
 :query received_end: filter tasks by received date (must be less than) format %Y-%m-%d %H:%M
+:query only_fields: returns only selected fields for tasks (comma-separated)
+:query except_fields: returns all but selected fields for tasks (comma-separated)
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
@@ -507,6 +509,8 @@ List tasks
         received_end = self.get_argument('received_end', None)
         sort_by = self.get_argument('sort_by', None)
         search = self.get_argument('search', None)
+        only_fields = self.get_argument('only_fields', None)
+        except_fields = self.get_argument('except_fields', None)
 
         limit = limit and int(limit)
         offset = max(offset, 0)
@@ -522,7 +526,7 @@ List tasks
                 received_end=received_end,
                 search=search
         ):
-            task = tasks.as_dict(task)
+            task = tasks.as_dict(task, only_fields=only_fields, except_fields=except_fields)
             worker = task.pop('worker', None)
             if worker is not None:
                 task['worker'] = worker.hostname
@@ -621,18 +625,22 @@ Get a task info
       "worker": "celery@worker1"
   }
 
+:query only_fields: returns only selected fields for task (comma-separated)
+:query except_fields: returns all but selected fields for task (comma-separated)
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
 :statuscode 404: unknown task
         """
+        only_fields = self.get_argument('only_fields', None)
+        except_fields = self.get_argument('except_fields', None)
 
         task = tasks.get_task_by_id(self.application.events, taskid)
         if not task:
             raise HTTPError(404, f"Unknown task '{taskid}'")
 
-        response = task.as_dict()
-        if task.worker is not None:
+        response = tasks.as_dict(task, only_fields=only_fields, except_fields=except_fields)
+        if task.worker is not None and 'worker' in response:
             response['worker'] = task.worker.hostname
 
         self.write(response)
