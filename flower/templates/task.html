@@ -45,11 +45,11 @@
               </tr>
               <tr>
                 <td>args</td>
-                <td>{{ task.args }}</td>
+                <td><pre>{{ task.args.replace(', ', ',\n').replace('[', '').replace(']', '').replace('(', '').replace(')', '') }}</pre></td>
               </tr>
               <tr>
                 <td>kwargs</td>
-                <td>{{ task.kwargs }}</td>
+                <td><pre>{{ task.kwargs.replace('{', '').replace('}', '').replace(', ', '\n').replace('\'', '') }}</pre></td>
               </tr>
               <tr>
                 <td>Result</td>
