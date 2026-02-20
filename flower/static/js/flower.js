@@ -443,15 +443,14 @@ var flower = (function () {
             order: [
                 [1, "des"]
             ],
-            footerCallback: function( tfoot, data, start, end, display ) {
+            footerCallback: function(tfoot, data, start, end, display) {
                 var api = this.api();
-                var columns = {2:"STARTED", 3:"", 4:"FAILURE", 5:"SUCCESS", 6:"RETRY"};
+                var columns = {2:"", 3:"", 4:"STARTED", 5:"", 6:"FAILURE", 7:"SUCCESS", 8:"RETRY"};
                 for (const [column, state] of Object.entries(columns)) {
                     var total = api.column(column).data().reduce(sum, 0);
                     var footer = total;
-                    if (total !== 0) {
-                        let queryParams = (state !== '' ? `?state=${state}` : '');
-                        footer = '<a href="' + url_prefix() + '/tasks' + queryParams + '">' + total + '</a>';
+                    if (total !== 0 && state !== '') {
+                        footer = '<a href="' + url_prefix() + '/tasks?state=' + state + '">' + total + '</a>';
                     }
                     $(api.column(column).footer()).html(footer);
                 }
@@ -476,37 +475,47 @@ var flower = (function () {
                     }
                 }
             }, {
-                targets: 2,
+             targets: 2,
+                data: 'max_concurrency',
+                className: "text-center",
+                width: "10%",
+            }, {
+             targets: 3,
+                data: 'available_slots',
+                className: "text-center",
+                width: "10%",
+            }, {
+                targets: 4,
                 data: 'active',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 3,
+                targets: 5,
                 data: 'task-received',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 4,
+                targets: 6,
                 data: 'task-failed',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 5,
+                targets: 7,
                 data: 'task-succeeded',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 6,
+                targets: 8,
                 data: 'task-retried',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 7,
+                targets: 9,
                 data: 'loadavg',
                 width: "10%",
                 className: "text-center text-nowrap",
