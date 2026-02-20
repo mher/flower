@@ -46,9 +46,10 @@ class WorkersView(BaseHandler):
             if name not in events.workers:
                 continue
             worker = events.workers[name]
+            full_worker_info = self.application.workers.get(name, {})
             info = dict(values)
             info.update(self._as_dict(worker))
-            info.update(status=worker.alive)
+            info.update({'status': worker.alive, 'active_queues': full_worker_info.get('active_queues', [])})
             workers[name] = info
 
         if options.purge_offline_workers is not None:

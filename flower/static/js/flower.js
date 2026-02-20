@@ -465,6 +465,17 @@ var flower = (function () {
                 }
             }, {
                 targets: 1,
+                data: 'active_queues',
+                className: "text-center",
+                render: function (data, type, full, meta) {
+                    if (Array.isArray(data)) {
+                        return data.map(x => x['name']).join(', ');
+                    } else {
+                        return '&nbsp';
+                    }
+                }
+            }, {
+                targets: 2,
                 data: 'status',
                 className: "text-center",
                 width: "10%",
@@ -476,37 +487,37 @@ var flower = (function () {
                     }
                 }
             }, {
-                targets: 2,
+                targets: 3,
                 data: 'active',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 3,
+                targets: 4,
                 data: 'task-received',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 4,
+                targets: 5,
                 data: 'task-failed',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 5,
+                targets: 6,
                 data: 'task-succeeded',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 6,
+                targets: 7,
                 data: 'task-retried',
                 className: "text-center",
                 width: "10%",
                 defaultContent: 0
             }, {
-                targets: 7,
+                targets: 8,
                 data: 'loadavg',
                 width: "10%",
                 className: "text-center text-nowrap",
