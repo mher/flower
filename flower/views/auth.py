@@ -1,6 +1,11 @@
+import base64
+import datetime
+import hashlib
 import json
 import os
+import random
 import re
+import string
 import uuid
 from urllib.parse import urlencode
 
@@ -8,6 +13,7 @@ import tornado.auth
 import tornado.gen
 import tornado.web
 from celery.utils.imports import instantiate
+from flower.utils import strtobool
 from tornado.options import options
 
 from ..views import BaseHandler
@@ -253,12 +259,30 @@ class GitLabLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
 
 class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
-    _OAUTH_NO_CALLBACKS = False
-    _OAUTH_SETTINGS_KEY = 'oauth'
 
     @property
     def base_url(self):
-        return os.environ.get('FLOWER_OAUTH2_OKTA_BASE_URL')
+        return self.application.options.oauth2_okta_base_url
+
+    @property
+    def _use_pkce(self):
+        return self.application.options.oauth2_okta_enable_pkce
+
+    @property
+    def _okta_login_timeout_seconds(self):
+        return self.application.options.oauth2_okta_login_timeout
+
+    @property
+    def _client_id(self):
+        return self.application.options.oauth2_key
+
+    @property
+    def _client_secret(self):
+        return self.application.options.oauth2_secret
+
+    @property
+    def _redirect_uri(self):
+        return self.application.options.oauth2_redirect_uri
 
     @property
     def _OAUTH_AUTHORIZE_URL(self):
@@ -269,18 +293,30 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         return f"{self.base_url}/v1/token"
 
     @property
+    def _oauth_okta_scope(self):
+        return self.application.options.oauth2_okta_scope.split()
+
+    @property
     def _OAUTH_USER_INFO_URL(self):
         return f"{self.base_url}/v1/userinfo"
 
-    async def get_access_token(self, redirect_uri, code):
-        body = urlencode({
+    async def _get_tokens(self, redirect_uri, code, pkce_code_verifier):
+        url_params = {
             "redirect_uri": redirect_uri,
             "code": code,
-            "client_id": self.settings[self._OAUTH_SETTINGS_KEY]['key'],
-            "client_secret": self.settings[self._OAUTH_SETTINGS_KEY]['secret'],
+            "client_id": self._client_id,
             "grant_type": "authorization_code",
-        })
+        }
 
+        if self._client_secret:
+            # though not recommended for this application,
+            # it's possible to not use a client secret when PKCE is enabled
+            url_params["client_secret"] = self._client_secret
+
+        if pkce_code_verifier:
+            url_params["code_verifier"] = pkce_code_verifier
+
+        body = urlencode(url_params)
         response = await self.get_auth_http_client().fetch(
             self._OAUTH_ACCESS_TOKEN_URL,
             method="POST",
@@ -292,46 +328,105 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
         return json.loads(response.body.decode('utf-8'))
 
-    async def get(self):
-        redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
-        if self.get_argument('code', False):
-            expected_state = (self.get_secure_cookie('oauth_state') or b'').decode('utf-8')
-            returned_state = self.get_argument('state')
+    @staticmethod
+    def _make_pkce_code_and_challenge():
+        rand = random.SystemRandom()
+        code_verifier = "".join(rand.choices(string.ascii_letters + string.digits, k=128))
+        code_verifier_hash = hashlib.sha256(code_verifier.encode()).digest()
+        code_challenge = base64.urlsafe_b64encode(code_verifier_hash).decode().rstrip("=")
+        return code_verifier, code_challenge
 
-            if returned_state is None or returned_state != expected_state:
-                raise tornado.auth.AuthError(
-                    'OAuth authenticator error: State tokens do not match')
+    def _compare_state(self):
+        expected_state = (self.get_secure_cookie("oauth_state") or b"").decode("utf-8")
+        returned_state = self.get_argument("state")
+        if returned_state is None or returned_state != expected_state:
+            self._clear_oauth_cookies()
+            raise tornado.auth.AuthError(
+                "OAuth authenticator error: State tokens do not match")
 
-            access_token_response = await self.get_access_token(
-                redirect_uri=redirect_uri,
-                code=self.get_argument('code'),
+    async def _handle_redirect(self):
+        """
+        Handle when user is redirected back from OKTA
+        """
+        pkce_code_verifier = (self.get_secure_cookie("oauth_pkce_code") or b"").decode("utf-8")
+        self._compare_state()
+        self._clear_oauth_cookies()
+
+        if self._use_pkce and not pkce_code_verifier:
+            raise tornado.auth.AuthError(
+                "OAuth authenticator error: PKCE code verifier was not set"
             )
-            await self._on_auth(access_token_response)
-        else:
-            state = str(uuid.uuid4())
-            self.set_secure_cookie("oauth_state", state)
-            self.authorize_redirect(
-                redirect_uri=redirect_uri,
-                client_id=self.settings[self._OAUTH_SETTINGS_KEY]['key'],
-                scope=['openid email'],
-                response_type='code',
-                extra_params={'state': state}
-            )
 
-    async def _on_auth(self, access_token_response):
-        if not access_token_response:
-            raise tornado.web.HTTPError(500, 'OAuth authentication failed')
-        access_token = access_token_response['access_token']
+        tokens_response = await self._get_tokens(
+            redirect_uri=self._redirect_uri,
+            code=self.get_argument('code'),
+            pkce_code_verifier=pkce_code_verifier,
+        )
+        await self._on_auth(tokens_response)
 
-        response = await self.get_auth_http_client().fetch(
-            self._OAUTH_USER_INFO_URL,
-            headers={'Authorization': 'Bearer ' + access_token,
-                     'User-agent': 'Tornado auth'})
+    def _set_short_lived_secure_cookie(self, name, value, **kwargs):
+        """
+        set a signed cookie that expires after self._okta_login_timeout_seconds
+        :param name: name of the cookie
+        :param value: value of the cookie
+        :param kwargs: kwargs to pass into self.set_secure_cookie
+        :return: None
+        """
+        expires = (
+            datetime.datetime.now()
+            + datetime.timedelta(seconds=self._okta_login_timeout_seconds)
+        )
+        return self.set_secure_cookie(
+            name,
+            value,
+            expires_days=None,
+            httponly=True,
+            expires=expires,
+        )
 
-        decoded_body = json.loads(response.body.decode('utf-8'))
-        email = (decoded_body.get('email') or '').strip()
+    async def _do_redirect(self):
+        """
+        Redirect user to OKTA
+        """
+        state = str(uuid.uuid4())
+        self._set_short_lived_secure_cookie("oauth_state", state)
+
+        extra_params = {"state": state}
+
+        if self._use_pkce:
+            code, code_challenge = self._make_pkce_code_and_challenge()
+            self._set_short_lived_secure_cookie("oauth_pkce_code", code)
+            extra_params.update({
+                "code_challenge": code_challenge,
+                "code_challenge_method": "S256",
+            })
+
+        self.authorize_redirect(
+            redirect_uri=self._redirect_uri,
+            client_id=self._client_id,
+            scope=self._oauth_okta_scope,
+            response_type="code",
+            extra_params=extra_params
+        )
+
+    async def _handle_oauth_error(self, error, description):
+        self._compare_state()
+        self._clear_oauth_cookies()
+        raise tornado.web.HTTPError(403, f"OAuth failed with this error: {error}, {description}")
+
+    async def _user_passes_test(self, user_payload):
+        """
+        You can override this to perform your own user testing logic
+        raise a tornado.web.HTTPError if test fails (usually HTTP 403)
+        return the username or email address of the user if test passes
+
+        :param user_payload: a dictionary generated by decoding
+        the response body from OKTA's OIDC userinfo endpoint
+        :return: user's email address
+        """
+        email = (user_payload.get('email') or '').strip()
         email_verified = (
-            decoded_body.get('email_verified') and
+            user_payload.get('email_verified') and
             authenticate(self.application.options.auth, email)
         )
 
@@ -342,9 +437,54 @@ class OktaLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             )
             raise tornado.web.HTTPError(403, message)
 
-        self.set_secure_cookie("user", str(email))
-        self.clear_cookie('oauth_state')
+        return email
 
+    async def get(self):
+        if self.get_argument("code", False):
+            await self._handle_redirect()
+        elif self.get_argument("error", False):
+            await self._handle_oauth_error(
+                error=self.get_argument("error"),
+                description=self.get_argument("error_description", "")
+            )
+        else:
+            await self._do_redirect()
+
+    def _clear_oauth_cookies(self):
+        self.clear_cookie("oauth_state")
+        if self._use_pkce:
+            self.clear_cookie("oauth_pkce_code")
+
+    async def _get_userinfo(self, tokens_response):
+        """
+        Returns the user information in a dictionary.
+        The default implementation takes the "access_token" in the token_response,
+        and send it to OKTA's userinfo endpoint, and return the decoded response in a dictionary.
+
+        You can override this to use the "id_token" and avoid sending the extra request to userinfo endpoint
+        however, in that case you must validate the signature, audience and issuer of the token yourself.
+
+        :param tokens_response: response object from OKTA's token endpoint
+        :return: a dictionary containing user information
+        """
+        access_token = tokens_response["access_token"]
+        response = await self.get_auth_http_client().fetch(
+            self._OAUTH_USER_INFO_URL,
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "User-agent": "Tornado auth"
+            }
+        )
+
+        return json.loads(response.body.decode("utf-8"))
+
+    async def _on_auth(self, tokens_response):
+        if not tokens_response:
+            raise tornado.web.HTTPError(500, "OAuth authentication failed")
+
+        userinfo = await self._get_userinfo(tokens_response)
+        user = await self._user_passes_test(userinfo)
+        self.set_secure_cookie("user", str(user))
         next_ = self.get_argument('next', self.application.options.url_prefix or '/')
         if self.application.options.url_prefix and next_[0] != '/':
             next_ = '/' + next_
