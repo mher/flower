@@ -194,6 +194,22 @@ class Events(threading.Thread):
                 logger.debug(e, exc_info=True)
                 time.sleep(try_interval)
 
+    def delete_tasks_by_time(self, to_timestamp):
+        state = shelve.open(self.db, flag='n')
+        state['events'] = self.state
+        for uuid, task in enumerate(state.tasks_by_time()):
+            # if date is less than <filter_date> delete tasks
+            if task.timestamp <= to_timestamp:
+                del state['events']['tasks'][uuid]
+        state.close()
+
+    def delete_all_tasks(self):
+        state = shelve.open(self.db, flag='n')
+        state['events'] = self.state
+        for uuid, task in enumerate(state.tasks_by_time()):
+            del state['events']['tasks'][uuid]
+        state.close()
+
     def save_state(self):
         logger.debug("Saving state to '%s'...", self.db)
         state = shelve.open(self.db, flag='n')
