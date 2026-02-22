@@ -1,0 +1,7 @@
+Handle 403 error when fetching GitHub user emails
+
+The GithubLoginHandler crashes with an unhandled
+tornado.httpclient.HTTPClientError when the GitHub OAuth app doesn't
+have permission to read user emails. Wrap the email fetch request in a
+try/except and raise a clear 403 error message explaining that the app
+needs email read permission.
