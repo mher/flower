@@ -423,7 +423,9 @@ Return length of all active queues
         # Apply pagination
         if offset:
             queues = queues[offset:]
-        if limit is not None and limit > 0:
+        if limit is not None:
+            if limit < 0:
+                raise HTTPError(400, "Query argument 'limit' must be a non-negative integer")
             queues = queues[:limit]
 
         self.write({'active_queues': queues, 'total': total})
