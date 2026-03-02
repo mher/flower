@@ -273,10 +273,11 @@ class Events(threading.Thread):
             self._drop_count += 1
             now = time.monotonic()
             if now - self._last_drop_log_time >= 5.0:
+                window_start = self._last_drop_log_time or now
+                duration = now - window_start
                 logger.warning(
                     "Event queue full (%d), dropped %d event(s) in last %.0fs",
-                    self._BACKPRESSURE_MAXSIZE, self._drop_count,
-                    now - self._last_drop_log_time if self._last_drop_log_time else 0)
+                    self._BACKPRESSURE_MAXSIZE, self._drop_count, duration)
                 self._drop_count = 0
                 self._last_drop_log_time = now
 
