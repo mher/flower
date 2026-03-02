@@ -1,5 +1,6 @@
 import sys
 import logging
+import time
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -8,6 +9,7 @@ import tornado.web
 
 from tornado import ioloop
 from tornado.httpserver import HTTPServer
+from tornado.ioloop import PeriodicCallback
 from tornado.web import url
 
 from .urls import handlers as default_handlers
@@ -64,6 +66,10 @@ class Flower(tornado.web.Application):
             max_workers_in_memory=self.options.max_workers,
             max_tasks_in_memory=self.options.max_tasks)
         self.started = False
+        self._transport = None
+        self._purge_timer = None
+        self._queue_cache = None       # (timestamp, frozenset(names), result)
+        self._queue_cache_ttl = getattr(self.options, 'queue_cache_ttl', 5.0)
 
     def start(self):
         self.events.start()
@@ -80,11 +86,26 @@ class Flower(tornado.web.Application):
 
         self.started = True
         self.update_workers()
+
+        if self.options.purge_offline_workers is not None:
+            interval_ms = max(self.options.purge_offline_workers * 1000, 10000)
+            self._purge_timer = PeriodicCallback(self._purge_offline_workers,
+                                                 interval_ms)
+            self._purge_timer.start()
+
         self.io_loop.start()
 
     def stop(self):
         if self.started:
-            self.events.stop()
+            try:
+                self.events.stop()
+            except Exception:
+                logger.debug("Error stopping events", exc_info=True)
+            if self._purge_timer:
+                try:
+                    self._purge_timer.stop()
+                except Exception:
+                    logger.debug("Error stopping purge timer", exc_info=True)
             logging.debug("Stopping executors...")
             self.executor.shutdown(wait=False)
             logging.debug("Stopping event loop...")
@@ -93,7 +114,10 @@ class Flower(tornado.web.Application):
 
     @property
     def transport(self):
-        return getattr(self.capp.connection().transport, 'driver_type', None)
+        if self._transport is None:
+            with self.capp.connection() as conn:
+                self._transport = getattr(conn.transport, 'driver_type', None)
+        return self._transport
 
     @property
     def workers(self):
@@ -101,3 +125,62 @@ class Flower(tornado.web.Application):
 
     def update_workers(self, workername=None):
         return self.inspector.inspect(workername)
+
+    def get_cached_queue_stats(self, names_key):
+        """Return cached queue stats if still valid, else None.
+
+        Returns a shallow copy to prevent callers from mutating the cache."""
+        if self._queue_cache_ttl <= 0 or self._queue_cache is None:
+            return None
+        ts, cached_key, result = self._queue_cache
+        if cached_key == names_key and (time.time() - ts) < self._queue_cache_ttl:
+            return list(result)
+        return None
+
+    def set_queue_cache(self, names_key, result):
+        """Store queue stats in the cache."""
+        if self._queue_cache_ttl > 0:
+            self._queue_cache = (time.time(), names_key, result)
+
+    def _purge_offline_workers(self):
+        """Purge workers that have been offline beyond the threshold.
+
+        Handles two cases:
+        - Workers present in state.workers: check alive status + heartbeat age
+        - Orphaned entries (in counter/inspector but not state.workers): always purge
+        """
+        threshold = self.options.purge_offline_workers
+        if threshold is None:
+            return
+
+        now = time.time()
+        state = self.events.state
+
+        # Collect all known worker names from state.counter and inspector.workers
+        all_worker_names = set(state.counter.keys()) | set(self.inspector.workers.keys())
+
+        for worker_name in all_worker_names:
+            worker = state.workers.get(worker_name)
+            if worker is not None:
+                # Skip workers that are still alive
+                if worker.alive:
+                    continue
+
+                # Check if the worker has been offline beyond the threshold
+                heartbeats = getattr(worker, 'heartbeats', [])
+                if heartbeats:
+                    last_heartbeat = max(heartbeats)
+                    if now - last_heartbeat <= threshold:
+                        continue
+            # else: worker not in state.workers — orphaned entry, always purge
+
+            # Purge from state.counter
+            state.counter.pop(worker_name, None)
+
+            # Purge Prometheus metrics for this worker
+            state.metrics.remove_worker_metrics(worker_name)
+
+            # Purge from inspector
+            self.inspector.purge_worker(worker_name)
+
+            logger.debug("Purged offline worker: %s", worker_name)

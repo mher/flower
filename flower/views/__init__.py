@@ -13,6 +13,8 @@ from ..utils import template, bugreport, strtobool
 
 logger = logging.getLogger(__name__)
 
+_UNSET = object()
+
 
 class BaseHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
@@ -91,8 +93,9 @@ class BaseHandler(tornado.web.RequestHandler):
                 return user
         return None
 
-    # pylint: disable=dangerous-default-value
-    def get_argument(self, name, default=[], strip=True, type=None):
+    def get_argument(self, name, default=_UNSET, strip=True, type=None):
+        if default is _UNSET:
+            default = []
         arg = super().get_argument(name, default, strip)
         if arg and isinstance(arg, str):
             arg = tornado.escape.xhtml_escape(arg)

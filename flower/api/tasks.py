@@ -391,17 +391,42 @@ Return length of all active queues
 :statuscode 503: result backend is not configured
         """
         app = self.application
+        limit = self.get_argument('limit', default=None, type=int)
+        offset = self.get_argument('offset', default=0, type=int)
+        offset = max(offset, 0)
 
         http_api = None
         if app.transport == 'amqp' and app.options.broker_api:
             http_api = app.options.broker_api
 
-        broker = Broker(app.capp.connection().as_uri(include_password=True),
-                        http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
-                        broker_use_ssl=self.capp.conf.broker_use_ssl)
+        queue_names = self.get_active_queue_names()
+        names_key = frozenset(queue_names)
 
-        queues = await broker.queues(self.get_active_queue_names())
-        self.write({'active_queues': queues})
+        # Check cache first
+        queues = app.get_cached_queue_stats(names_key)
+        if queues is None:
+            with app.capp.connection() as conn:
+                broker_uri = conn.as_uri(include_password=True)
+            broker = Broker(broker_uri,
+                            http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
+                            broker_use_ssl=self.capp.conf.broker_use_ssl)
+
+            try:
+                queues = await broker.queues(queue_names)
+                app.set_queue_cache(names_key, queues)
+            finally:
+                if hasattr(broker, 'close'):
+                    broker.close()
+
+        total = len(queues)
+
+        # Apply pagination
+        if offset:
+            queues = queues[offset:]
+        if limit is not None and limit > 0:
+            queues = queues[:limit]
+
+        self.write({'active_queues': queues, 'total': total})
 
 
 class ListTasks(BaseTaskHandler):

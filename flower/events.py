@@ -1,5 +1,6 @@
 import collections
 import logging
+import queue
 import shelve
 import threading
 import time
@@ -16,6 +17,8 @@ from tornado.options import options
 logger = logging.getLogger(__name__)
 
 PROMETHEUS_METRICS = None
+
+MAX_RETRY_INTERVAL = 60
 
 
 def get_prometheus_metrics():
@@ -52,6 +55,30 @@ class PrometheusMetrics:
             "Number of tasks currently executing at a worker",
             ['worker']
         )
+
+    def remove_worker_metrics(self, worker_name):
+        """Remove all Prometheus metric label series for a given worker."""
+        metrics = [
+            self.events, self.runtime, self.prefetch_time,
+            self.number_of_prefetched_tasks, self.worker_online,
+            self.worker_number_of_currently_executing_tasks,
+        ]
+        for metric in metrics:
+            # _metrics is the internal dict of label-value tuples -> child metrics.
+            # Guard access since it's a private attr that may vary across versions.
+            storage = getattr(metric, '_metrics', None)
+            if storage is None:
+                continue
+            try:
+                keys_to_remove = [
+                    key for key in storage
+                    if key and key[0] == worker_name
+                ]
+                for key in keys_to_remove:
+                    metric.remove(*key)
+            except Exception:
+                logger.debug("Failed to remove metrics for worker %s from %s",
+                             worker_name, metric, exc_info=True)
 
 
 class EventsState(State):
@@ -112,6 +139,9 @@ class EventsState(State):
 
 class Events(threading.Thread):
     events_enable_interval = 5000
+    _BACKPRESSURE_MAXSIZE = 10000
+    _DRAIN_INTERVAL_MS = 100
+    _DRAIN_BATCH_SIZE = 500
 
     # pylint: disable=too-many-arguments
     def __init__(self, capp, io_loop, db=None, persistent=False,
@@ -128,13 +158,21 @@ class Events(threading.Thread):
         self.enable_events = enable_events
         self.state = None
         self.state_save_timer = None
+        self._drain_timer = None
+        self._event_queue = queue.Queue(maxsize=self._BACKPRESSURE_MAXSIZE)
+        self._drop_count = 0
+        self._last_drop_log_time = 0.0
 
         if self.persistent:
             logger.debug("Loading state from '%s'...", self.db)
-            state = shelve.open(self.db)
-            if state:
-                self.state = state['events']
-            state.close()
+            try:
+                with shelve.open(self.db) as state:
+                    if state:
+                        self.state = state['events']
+            except KeyError:
+                logger.debug("No existing state found in '%s'", self.db)
+            except Exception:
+                logger.error("Failed to load state from '%s'", self.db, exc_info=True)
 
             if state_save_interval:
                 self.state_save_timer = PeriodicCallback(self.save_state,
@@ -156,23 +194,42 @@ class Events(threading.Thread):
             logger.debug("Starting state save timer...")
             self.state_save_timer.start()
 
+        self._drain_timer = PeriodicCallback(self._drain_events,
+                                             self._DRAIN_INTERVAL_MS)
+        self._drain_timer.start()
+
     def stop(self):
-        if self.enable_events:
-            logger.debug("Stopping enable events timer...")
-            self.timer.stop()
+        try:
+            if self.enable_events:
+                logger.debug("Stopping enable events timer...")
+                try:
+                    self.timer.stop()
+                except Exception:
+                    logger.debug("Error stopping enable events timer", exc_info=True)
 
-        if self.state_save_timer:
-            logger.debug("Stopping state save timer...")
-            self.state_save_timer.stop()
+            if self.state_save_timer:
+                logger.debug("Stopping state save timer...")
+                try:
+                    self.state_save_timer.stop()
+                except Exception:
+                    logger.debug("Error stopping state save timer", exc_info=True)
 
-        if self.persistent:
-            self.save_state()
+            if self._drain_timer:
+                try:
+                    self._drain_timer.stop()
+                except Exception:
+                    logger.debug("Error stopping drain timer", exc_info=True)
+        finally:
+            if self.persistent:
+                self.save_state()
 
     def run(self):
         try_interval = 1
         while True:
             try:
                 try_interval *= 2
+                if try_interval > MAX_RETRY_INTERVAL:
+                    try_interval = MAX_RETRY_INTERVAL
 
                 with self.capp.connection() as conn:
                     recv = EventReceiver(conn,
@@ -196,9 +253,11 @@ class Events(threading.Thread):
 
     def save_state(self):
         logger.debug("Saving state to '%s'...", self.db)
-        state = shelve.open(self.db, flag='n')
-        state['events'] = self.state
-        state.close()
+        try:
+            with shelve.open(self.db, flag='n') as state:
+                state['events'] = self.state
+        except Exception:
+            logger.error("Failed to save state to '%s'", self.db, exc_info=True)
 
     def on_enable_events(self):
         # Periodically enable events for workers
@@ -206,5 +265,29 @@ class Events(threading.Thread):
         self.io_loop.run_in_executor(None, self.capp.control.enable_events)
 
     def on_event(self, event):
-        # Call EventsState.event in ioloop thread to avoid synchronization
-        self.io_loop.add_callback(partial(self.state.event, event))
+        # Enqueue event with backpressure — drop if queue is full.
+        # Rate-limit drop warnings to avoid flooding logs under sustained load.
+        try:
+            self._event_queue.put_nowait(event)
+        except queue.Full:
+            self._drop_count += 1
+            now = time.monotonic()
+            if now - self._last_drop_log_time >= 5.0:
+                logger.warning(
+                    "Event queue full (%d), dropped %d event(s) in last %.0fs",
+                    self._BACKPRESSURE_MAXSIZE, self._drop_count,
+                    now - self._last_drop_log_time if self._last_drop_log_time else 0)
+                self._drop_count = 0
+                self._last_drop_log_time = now
+
+    def _drain_events(self):
+        """Process up to _DRAIN_BATCH_SIZE events from the backpressure queue."""
+        for _ in range(self._DRAIN_BATCH_SIZE):
+            try:
+                event = self._event_queue.get_nowait()
+            except queue.Empty:
+                break
+            try:
+                self.state.event(event)
+            except Exception:
+                logger.error("Error processing event", exc_info=True)
