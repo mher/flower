@@ -81,12 +81,13 @@ class TestRedisPipeline(unittest.TestCase):
 class TestRedisClose(unittest.TestCase):
     def test_close_with_close_method(self):
         b = Redis('redis://localhost:6379/0')
-        b.redis = MagicMock()
-        b.redis.close = MagicMock()
+        mock_redis = MagicMock()
+        mock_redis.close = MagicMock()
+        b.redis = mock_redis
 
         b.close()
 
-        b.redis is None or b.redis.close.assert_called_once()  # redis set to None
+        mock_redis.close.assert_called_once()
         self.assertIsNone(b.redis)
 
     def test_close_without_close_method(self):
