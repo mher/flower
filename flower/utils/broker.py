@@ -65,18 +65,18 @@ class RabbitMQ(BrokerBase):
         try:
             response = await http_client.fetch(
                 url, auth_username=username, auth_password=password,
-                connect_timeout=1.0, request_timeout=2.0,
+                connect_timeout=5.0, request_timeout=30.0,
                 validate_cert=False)
         except (socket.error, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)
             return []
-        finally:
-            http_client.close()
 
         if response.code == 200:
             info = json.loads(response.body.decode())
-            return [x for x in info if x['name'] in names]
+            names_set = frozenset(names)
+            return [x for x in info if x['name'] in names_set]
         response.rethrow()
+        return []
 
     @classmethod
     def validate_http_api(cls, http_api):
@@ -102,21 +102,53 @@ class RedisBase(BrokerBase):
         self.sep = broker_options.get('sep', self.DEFAULT_SEP)
         self.broker_prefix = broker_options.get('global_keyprefix', '')
 
+    def close(self):
+        """Close the Redis connection and release resources."""
+        if self.redis is not None:
+            try:
+                if hasattr(self.redis, 'close'):
+                    self.redis.close()
+                elif hasattr(self.redis, 'connection_pool'):
+                    self.redis.connection_pool.disconnect()
+            except Exception:
+                logger.debug("Error closing Redis connection", exc_info=True)
+            self.redis = None
+
     def _q_for_pri(self, queue, pri):
         if pri not in self.priority_steps:
             raise ValueError('Priority not in priority steps')
         # pylint: disable=consider-using-f-string
         return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
 
+    _PIPELINE_CHUNK_SIZE = 5000
+
     async def queues(self, names):
-        queue_stats = []
+        if not names:
+            return []
+
+        steps = len(self.priority_steps)
+
+        # Build all Redis key names upfront
+        all_keys = []
         for name in names:
-            priority_names = [self.broker_prefix + self._q_for_pri(
-                name, pri) for pri in self.priority_steps]
-            queue_stats.append({
-                'name': name,
-                'messages': sum((self.redis.llen(x) for x in priority_names))
-            })
+            for pri in self.priority_steps:
+                all_keys.append(self.broker_prefix + self._q_for_pri(name, pri))
+
+        # Execute pipelined LLEN in chunks to avoid overwhelming Redis
+        # with a single huge pipeline for very large queue counts.
+        all_results = []
+        chunk_size = self._PIPELINE_CHUNK_SIZE
+        for start in range(0, len(all_keys), chunk_size):
+            pipe = self.redis.pipeline(transaction=False)
+            for key in all_keys[start:start + chunk_size]:
+                pipe.llen(key)
+            all_results.extend(pipe.execute())
+
+        queue_stats = []
+        for i, name in enumerate(names):
+            offset = i * steps
+            total = sum(all_results[offset:offset + steps])
+            queue_stats.append({'name': name, 'messages': total})
         return queue_stats
 
 

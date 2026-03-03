@@ -68,6 +68,8 @@ define("auth_provider", default=None, type=str, help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
 define("task_runtime_metric_buckets", type=float, default=Histogram.DEFAULT_BUCKETS,
        multiple=True, help="histogram latency bucket value")
+define("queue_cache_ttl", type=float, default=5.0,
+       help="TTL in seconds for caching broker queue stats (0 to disable)")
 
 
 default_options = options
