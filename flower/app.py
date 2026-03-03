@@ -84,7 +84,10 @@ class Flower(tornado.web.Application):
 
     def stop(self):
         if self.started:
-            self.events.stop()
+            try:
+                self.events.stop()
+            except Exception:
+                logger.debug("Error stopping events", exc_info=True)
             logging.debug("Stopping executors...")
             self.executor.shutdown(wait=False)
             logging.debug("Stopping event loop...")
