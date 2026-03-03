@@ -53,6 +53,30 @@ class PrometheusMetrics:
             ['worker']
         )
 
+    def remove_worker_metrics(self, worker_name):
+        """Remove all Prometheus metric label series for a given worker."""
+        metrics = [
+            self.events, self.runtime, self.prefetch_time,
+            self.number_of_prefetched_tasks, self.worker_online,
+            self.worker_number_of_currently_executing_tasks,
+        ]
+        for metric in metrics:
+            # _metrics is the internal dict of label-value tuples -> child metrics.
+            # Guard access since it's a private attr that may vary across versions.
+            storage = getattr(metric, '_metrics', None)
+            if storage is None:
+                continue
+            try:
+                keys_to_remove = [
+                    key for key in storage
+                    if key and key[0] == worker_name
+                ]
+                for key in keys_to_remove:
+                    metric.remove(*key)
+            except Exception:
+                logger.debug("Failed to remove metrics for worker %s from %s",
+                             worker_name, metric, exc_info=True)
+
 
 class EventsState(State):
     # EventsState object is created and accessed only from ioloop thread
