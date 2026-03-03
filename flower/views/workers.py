@@ -69,9 +69,11 @@ class WorkersView(BaseHandler):
         if json:
             self.write(dict(data=list(workers.values())))
         else:
+            with self.application.capp.connection() as conn:
+                broker_url = conn.as_uri()
             self.render("workers.html",
                         workers=workers,
-                        broker=self.application.capp.connection().as_uri(),
+                        broker=broker_url,
                         autorefresh=1 if self.application.options.auto_refresh else 0)
 
     @classmethod
