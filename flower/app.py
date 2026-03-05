@@ -64,6 +64,7 @@ class Flower(tornado.web.Application):
             max_workers_in_memory=self.options.max_workers,
             max_tasks_in_memory=self.options.max_tasks)
         self.started = False
+        self._transport = None
 
     def start(self):
         self.events.start()
@@ -93,7 +94,10 @@ class Flower(tornado.web.Application):
 
     @property
     def transport(self):
-        return getattr(self.capp.connection().transport, 'driver_type', None)
+        if self._transport is None:
+            with self.capp.connection() as conn:
+                self._transport = getattr(conn.transport, 'driver_type', None)
+        return self._transport
 
     @property
     def workers(self):
