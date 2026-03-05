@@ -57,7 +57,7 @@ OPTIONS
   --certfile                       path to SSL certificate file
   --conf                           flower configuration file path (default *flowerconfig.py*)
   --cookie_secret                  secure cookie secret
-  --db                             flower database file (default *flower.db*)
+  --db                             flower database file (default *flower*)
   --debug                          run in debug mode (default *False*)
   --enable_events                  periodically enable Celery events (default *True*)
   --format_task                    use custom task formatter
