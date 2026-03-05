@@ -17,19 +17,35 @@ class BrokerView(BaseHandler):
         if app.transport == 'amqp' and app.options.broker_api:
             http_api = app.options.broker_api
 
-        try:
-            broker = Broker(app.capp.connection(connect_timeout=1.0).as_uri(include_password=True),
-                            http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
-                            broker_use_ssl=self.capp.conf.broker_use_ssl)
-        except NotImplementedError as exc:
-            raise web.HTTPError(
-                404, f"'{app.transport}' broker is not supported") from exc
+        queue_names = self.get_active_queue_names()
+        names_key = frozenset(queue_names)
 
-        try:
-            queues = await broker.queues(self.get_active_queue_names())
-        except Exception as e:
-            logger.error("Unable to get queues: '%s'", e)
+        # Get broker URI once — reuse for both Broker creation and display
+        with app.capp.connection(connect_timeout=1.0) as conn:
+            broker_uri = conn.as_uri(include_password=True)
+            broker_url = conn.as_uri()
+
+        # Check cache first
+        queues = app.get_cached_queue_stats(names_key)
+        if queues is None:
+            try:
+                broker = Broker(broker_uri,
+                                http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
+                                broker_use_ssl=self.capp.conf.broker_use_ssl)
+            except NotImplementedError as exc:
+                raise web.HTTPError(
+                    404, f"'{app.transport}' broker is not supported") from exc
+
+            queues = []
+            try:
+                queues = await broker.queues(queue_names)
+                app.set_queue_cache(names_key, queues)
+            except Exception as e:
+                logger.error("Unable to get queues: '%s'", e)
+            finally:
+                if hasattr(broker, 'close'):
+                    broker.close()
 
         self.render("broker.html",
-                    broker_url=app.capp.connection().as_uri(),
+                    broker_url=broker_url,
                     queues=queues)

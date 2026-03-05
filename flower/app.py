@@ -1,5 +1,7 @@
+import copy
 import sys
 import logging
+import time
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -64,6 +66,8 @@ class Flower(tornado.web.Application):
             max_workers_in_memory=self.options.max_workers,
             max_tasks_in_memory=self.options.max_tasks)
         self.started = False
+        self._queue_cache = None       # (timestamp, frozenset(names), result)
+        self._queue_cache_ttl = getattr(self.options, 'queue_cache_ttl', 5.0)
 
     def start(self):
         self.events.start()
@@ -101,3 +105,19 @@ class Flower(tornado.web.Application):
 
     def update_workers(self, workername=None):
         return self.inspector.inspect(workername)
+
+    def get_cached_queue_stats(self, names_key):
+        """Return cached queue stats if still valid, else None.
+
+        Returns a deep copy to prevent callers from mutating the cache."""
+        if self._queue_cache_ttl <= 0 or self._queue_cache is None:
+            return None
+        ts, cached_key, result = self._queue_cache
+        if cached_key == names_key and (time.time() - ts) < self._queue_cache_ttl:
+            return copy.deepcopy(result)
+        return None
+
+    def set_queue_cache(self, names_key, result):
+        """Store queue stats in the cache."""
+        if self._queue_cache_ttl > 0:
+            self._queue_cache = (time.time(), names_key, result)

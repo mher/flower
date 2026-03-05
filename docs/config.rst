@@ -540,3 +540,14 @@ Default: None
 Sets the URI to which an OAuth 2.0 server redirects the user after successful authentication and authorization.
 
 `oauth2_redirect_uri` option should be used with :ref:`auth`, :ref:`auth_provider`, :ref:`oauth2_key` and :ref:`oauth2_secret` options.
+
+.. _queue_cache_ttl:
+
+queue_cache_ttl
+~~~~~~~~~~~~~~~
+
+Default: 5.0
+
+TTL in seconds for caching broker queue stats. Set to 0 to disable caching.
+When many queues are configured (e.g. 10,000+), caching avoids re-fetching
+queue lengths from the broker on every page load or API call.
