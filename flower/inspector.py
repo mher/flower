@@ -16,6 +16,10 @@ class Inspector:
         self.timeout = timeout
         self.workers = collections.defaultdict(dict)
 
+    def purge_worker(self, worker_name):
+        """Remove a worker from the inspector's cached data."""
+        self.workers.pop(worker_name, None)
+
     def inspect(self, workername=None):
         feutures = []
         for method in self.methods:
