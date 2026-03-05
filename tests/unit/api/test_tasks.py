@@ -6,6 +6,7 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import celery.states as states
 from celery.events import Event
+from celery.events.state import Task
 from celery.result import AsyncResult
 
 from flower.events import EventsState
@@ -94,6 +95,205 @@ class MockTasks:
     def get_task_by_id(events, task_id):
         from celery.events.state import Task
         return Task()
+
+
+class TaskReapplyTests(BaseApiTestCase):
+    def test_reapply_success(self):
+        """Test successfully reapplying a task"""
+        mock_task = Task()
+        mock_task.name = 'tasks.add'
+        mock_task.args = '[1, 2]'
+        mock_task.kwargs = '{"multiply": 2}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.add'] = Mock()
+            task.apply_async = Mock(return_value=AsyncResult('new-task-id'))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(200, r.code)
+        body = json.loads(r.body.decode('utf-8'))
+        self.assertIn('task-id', body)
+        task.apply_async.assert_called_once_with(
+            args=[1, 2], kwargs={"multiply": 2}
+        )
+
+    def test_reapply_task_not_found(self):
+        """Test reapplying a non-existent task returns 404"""
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=None):
+            r = self.post('/api/task/reapply/nonexistent', body='')
+
+        self.assertEqual(404, r.code)
+
+    def test_reapply_task_no_name(self):
+        """Test reapplying a task with no name returns 400"""
+        mock_task = Task()
+        mock_task.name = None
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(400, r.code)
+
+    def test_reapply_unknown_task_name(self):
+        """Test reapplying a task that is not registered returns 404"""
+        mock_task = Task()
+        mock_task.name = 'unknown.task'
+        mock_task.args = '[]'
+        mock_task.kwargs = '{}'
+
+        if 'unknown.task' in self._app.capp.tasks:
+            del self._app.capp.tasks['unknown.task']
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(404, r.code)
+
+    def test_reapply_invalid_args(self):
+        """Test reapplying a task with invalid args returns 400"""
+        mock_task = Task()
+        mock_task.name = 'tasks.add'
+        mock_task.args = 'invalid json'
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            self._app.capp.tasks['tasks.add'] = Mock()
+            with patch('flower.api.tasks.parse_args', side_effect=ValueError("Invalid args")):
+                r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(400, r.code)
+
+    def test_reapply_apply_async_error(self):
+        """Test handling error during apply_async returns 500"""
+        mock_task = Task()
+        mock_task.name = 'tasks.add'
+        mock_task.args = '[1, 2]'
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.add'] = Mock()
+            task.apply_async = Mock(side_effect=Exception("Connection error"))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(500, r.code)
+
+    def test_reapply_with_empty_args(self):
+        """Test reapplying a task with empty args"""
+        mock_task = Task()
+        mock_task.name = 'tasks.simple'
+        mock_task.args = ''
+        mock_task.kwargs = ''
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.simple'] = Mock()
+            task.apply_async = Mock(return_value=AsyncResult('new-task-id'))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(200, r.code)
+        task.apply_async.assert_called_once_with(args=[], kwargs={})
+
+    def test_reapply_with_ellipsis_args(self):
+        """Test reapplying a task with ellipsis in args"""
+        mock_task = Task()
+        mock_task.name = 'tasks.test'
+        mock_task.args = '...'
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.test'] = Mock()
+            task.apply_async = Mock(return_value=AsyncResult('new-task-id'))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(200, r.code)
+        task.apply_async.assert_called_once_with(args=[None], kwargs={})
+
+    def test_reapply_with_nested_json_args(self):
+        """Test reapplying task with nested JSON structures in args"""
+        mock_task = Task()
+        mock_task.name = 'tasks.process'
+        mock_task.args = '[{"user_id": 123, "items": [1, 2, 3]}, "action"]'
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.process'] = Mock()
+            task.apply_async = Mock(return_value=AsyncResult('new-task-id'))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(200, r.code)
+        task.apply_async.assert_called_once_with(
+            args=[{"user_id": 123, "items": [1, 2, 3]}, "action"],
+            kwargs={}
+        )
+
+    def test_reapply_with_complex_kwargs(self):
+        """Test reapplying task with complex JSON in kwargs"""
+        mock_task = Task()
+        mock_task.name = 'tasks.configure'
+        mock_task.args = '[]'
+        mock_task.kwargs = '{"retry": true, "timeout": 30, "options": {"key": "value"}}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.configure'] = Mock()
+            task.apply_async = Mock(return_value=AsyncResult('new-task-id'))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(200, r.code)
+        task.apply_async.assert_called_once_with(
+            args=[],
+            kwargs={"retry": True, "timeout": 30, "options": {"key": "value"}}
+        )
+
+    def test_reapply_with_python_tuple_args(self):
+        """Test reapplying task with Python tuple string in args"""
+        mock_task = Task()
+        mock_task.name = 'tasks.tuple_task'
+        mock_task.args = '(1, 2, 3)'
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.tuple_task'] = Mock()
+            task.apply_async = Mock(return_value=AsyncResult('new-task-id'))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(200, r.code)
+        task.apply_async.assert_called_once_with(args=(1, 2, 3), kwargs={})
+
+    def test_reapply_with_python_dict_kwargs(self):
+        """Test reapplying task with Python dict string in kwargs"""
+        mock_task = Task()
+        mock_task.name = 'tasks.dict_task'
+        mock_task.args = '[]'
+        mock_task.kwargs = "{'count': 5, 'enabled': True}"
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.dict_task'] = Mock()
+            task.apply_async = Mock(return_value=AsyncResult('new-task-id'))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(200, r.code)
+        task.apply_async.assert_called_once_with(
+            args=[],
+            kwargs={'count': 5, 'enabled': True}
+        )
+
+    def test_reapply_json_serialization_in_response(self):
+        """Test that response is properly JSON serialized"""
+        mock_task = Task()
+        mock_task.name = 'tasks.add'
+        mock_task.args = '[1, 2]'
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.add'] = Mock()
+            task.apply_async = Mock(return_value=AsyncResult('test-task-123'))
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(200, r.code)
+        body = json.loads(r.body.decode('utf-8'))
+        self.assertIn('task-id', body)
+        self.assertEqual(body['task-id'], 'test-task-123')
+
+        self.assertIsInstance(body, dict)
 
 
 class TaskTests(BaseApiTestCase):
