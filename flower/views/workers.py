@@ -77,7 +77,7 @@ class WorkersView(BaseHandler):
     @classmethod
     def _as_dict(cls, worker):
         if hasattr(worker, '_fields'):
-            return dict((k, getattr(worker, k)) for k in worker._fields)
+            return {k: getattr(worker, k) for k in worker._fields}
         return cls._info(worker)
 
     @classmethod
