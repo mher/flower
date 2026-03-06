@@ -134,6 +134,7 @@ def extract_settings():
             'key': options.oauth2_key or os.environ.get('FLOWER_OAUTH2_KEY'),
             'secret': options.oauth2_secret or os.environ.get('FLOWER_OAUTH2_SECRET'),
             'redirect_uri': options.oauth2_redirect_uri or os.environ.get('FLOWER_OAUTH2_REDIRECT_URI'),
+            'tenant_id': options.oauth2_tenant_id or os.environ.get('FLOWER_OAUTH2_TENANT_ID'),
         }
 
     if options.certfile and options.keyfile:
