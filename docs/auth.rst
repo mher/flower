@@ -142,7 +142,7 @@ Entra OAuth
 Flower also supports Entra OAuth. Before getting started, you need to create a service principal for Flower in `Entra ID`_.
 Entra OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.EntraLoginHandler`.
 
-Okta OAuth requires `oauth2_key`, `oauth2_secret`, `oauth2_redirect_uri` and `oauth2_tenant_id` options which should be obtained from a service principal.
+Entra OAuth requires `oauth2_key`, `oauth2_secret`, `oauth2_redirect_uri` and `oauth2_tenant_id` options which should be obtained from a service principal.
 
 See `Entra ID OAuth and OIDC authentication flow`_ docs for more info.
 
