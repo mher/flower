@@ -133,3 +133,19 @@ See also `GitLab OAuth2 API`_ documentation for more info.
 .. _GitLab OAuth documentation: https://docs.gitlab.com/ee/integration/oauth_provider.htm
 .. _GitLab OAuth2 API: https://docs.gitlab.com/ee/api/oauth2.html
 .. _Group and project members API: https://docs.gitlab.com/ee/api/members.html
+
+.. _entra-oauth:
+
+Entra OAuth
+----------
+
+Flower also supports Entra OAuth. Before getting started, you need to create a service principal for Flower in `Entra ID`_.
+Entra OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.EntraLoginHandler`.
+
+Okta OAuth requires `oauth2_key`, `oauth2_secret`, `oauth2_redirect_uri` and `oauth2_tenant_id` options which should be obtained from a service principal.
+
+See `Entra ID OAuth and OIDC authentication flow`_ docs for more info.
+
+.. _Entra ID: https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal
+.. _Entra ID OAuth and OIDC authentication flow: https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols
+
