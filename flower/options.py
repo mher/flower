@@ -27,6 +27,15 @@ define("oauth2_secret", type=str, default=None,
        help="OAuth2 secret (requires --auth)")
 define("oauth2_redirect_uri", type=str, default=None,
        help="OAuth2 redirect uri (requires --auth)")
+define("oauth2_okta_base_url", type=str, default=None,
+       help="Base URL for Okta auth (requires --auth)")
+define("oauth2_okta_enable_pkce", type=bool, default=False,
+       help="Use PKCE for Okta auth (requires --auth)")
+define("oauth2_okta_scope", type=str, default="openid email",
+       help="Scope for Okta auth, should be a space separated string (requires --auth)")
+define("oauth2_okta_login_timeout", type=int, default=300,
+       help="Okta authentication timeout, in seconds, "
+            "user must complete authentication within this duration (requires --auth)")
 define("max_workers", type=int, default=5000,
        help="maximum number of workers to keep in memory")
 define("max_tasks", type=int, default=100000,
