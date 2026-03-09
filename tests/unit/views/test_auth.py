@@ -59,4 +59,4 @@ class AuthTests(AsyncHTTPTestCase):
         self.assertTrue(authenticate("one.*@example.com", "one.two@example.com"))
         self.assertFalse(authenticate(".*@example.com", "attacker@example.com.attacker.com"))
         self.assertFalse(authenticate(".*@corp.example.com", "attacker@corpZexample.com"))
-        self.assertFalse(authenticate(".*@corp\.example\.com", "attacker@corpZexample.com"))
+        self.assertFalse(authenticate(r".*@corp\.example\.com", "attacker@corpZexample.com"))
