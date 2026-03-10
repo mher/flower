@@ -61,6 +61,8 @@ define("format_task", type=types.FunctionType, default=None,
        help="use custom task formatter")
 define("natural_time", type=bool, default=False,
        help="show time in relative format")
+define("browser_local_time", type=bool, default=False,
+       help="show time in the browser's local TZ")
 define("tasks_columns", type=str,
        default="name,uuid,state,args,kwargs,result,received,started,runtime,worker",
        help="slugs of columns on /tasks/ page, delimited by comma")
