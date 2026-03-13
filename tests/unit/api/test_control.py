@@ -16,12 +16,12 @@ class UnknownWorkerControlTests(BaseApiTestCase):
 
 class WorkerControlTests(BaseApiTestCase):
     def setUp(self):
-        BaseApiTestCase.setUp(self)
+        super().setUp()
         self.is_worker = ControlHandler.is_worker
         ControlHandler.is_worker = lambda *args: True
 
     def tearDown(self):
-        BaseApiTestCase.tearDown(self)
+        super().tearDown()
         ControlHandler.is_worker = self.is_worker
 
     def test_shutdown(self):
