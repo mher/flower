@@ -44,6 +44,13 @@ classes = """
 classifiers = [s.strip() for s in classes.split('\n') if s]
 
 
+EXTRAS_REQUIRE = {
+    "elasticsearch": ["elasticsearch>=5.4,<6.4", "elasticsearch_dsl>=5.4,<6.4", "requests>=2.13,<3", ],
+}
+
+
+EXTRAS_REQUIRE.update({':python_version == "2.7"': ['futures']})
+
 setup(
     name='flower',
     version=get_package_version(),
@@ -58,6 +65,7 @@ setup(
     python_requires=">=3.7",
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=get_requirements('default.txt'),
+    extras_require=EXTRAS_REQUIRE,
     test_suite="tests",
     tests_require=get_requirements('test.txt'),
     package_data={'flower': ['templates/*', 'static/*.*',
@@ -65,6 +73,11 @@ setup(
     entry_points={
         'celery.commands': [
             'flower = flower.command:flower',
+            'flower-indexer = flower.command:indexer',
+            ],
+        'console_scripts': [
+            'flower = flower.__main__:main',
+            'flower-indexer = flower.__indexer__:main',
         ],
     },
 )
