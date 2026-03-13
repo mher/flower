@@ -86,6 +86,8 @@ Here's an example configuration file with the Github OAuth options:
 Replace `<your_client_id>` and `<your_client_secret>` with the actual  Client ID and secret obtained from
 the Github Settings.
 
+If using Github Enterprise, you can set the `FLOWER_GITHUB_OAUTH_DOMAIN` environment variable to the base URL of your Github Enterprise instance.
+
 See `GitHub OAuth API`_ docs for more info.
 
 .. _Github Settings: https://github.com/settings/applications/new

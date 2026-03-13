@@ -90,8 +90,14 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
     _OAUTH_DOMAIN = os.getenv(
         "FLOWER_GITHUB_OAUTH_DOMAIN", "github.com")
-    _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/authorize'
-    _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/access_token'
+    if _OAUTH_DOMAIN == "github.com":
+        _OAUTH_API_URL = f'https://api.{_OAUTH_DOMAIN}/user/emails'
+        _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/authorize'
+        _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/access_token'
+    else:
+        _OAUTH_API_URL = f'https://{_OAUTH_DOMAIN}/api/v3/user/emails'
+        _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/oauth/authorize'
+        _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/oauth/access_token'
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
 
@@ -138,7 +144,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         access_token = user['access_token']
 
         response = await self.get_auth_http_client().fetch(
-            f'https://api.{self._OAUTH_DOMAIN}/user/emails',
+            self._OAUTH_API_URL,
             headers={'Authorization': 'token ' + access_token,
                      'User-agent': 'Tornado auth'})
 
