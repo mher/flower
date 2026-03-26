@@ -166,7 +166,7 @@ class TestConfOption(AsyncHTTPTestCase):
     def test_conf_abs(self):
         with tempfile.NamedTemporaryFile() as cf:
             with self.mock_option('conf', cf.name), self.mock_option('debug', False):
-                cf.write('debug=True\n'.encode('utf-8'))
+                cf.write(b'debug=True\n')
                 cf.flush()
                 apply_options('flower', argv=['--conf=%s' % cf.name])
                 self.assertEqual(cf.name, options.conf)
@@ -175,7 +175,7 @@ class TestConfOption(AsyncHTTPTestCase):
     def test_conf_relative(self):
         with tempfile.NamedTemporaryFile(dir='.') as cf:
             with self.mock_option('conf', cf.name), self.mock_option('debug', False):
-                cf.write('debug=True\n'.encode('utf-8'))
+                cf.write(b'debug=True\n')
                 cf.flush()
                 apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])
                 self.assertTrue(options.debug)
@@ -184,7 +184,7 @@ class TestConfOption(AsyncHTTPTestCase):
     def test_all_options_documented(self):
         def grep(patter, filename):
             return int(subprocess.check_output(
-                'grep "%s" %s|wc -l' % (patter, filename), shell=True))
+                f'grep "{patter}" {filename}|wc -l', shell=True))
 
         defined = grep('^define(', 'flower/options.py')
         documented = grep('^~~', 'docs/config.rst')
