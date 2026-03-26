@@ -87,7 +87,7 @@ def apply_options(prog_name, argv):
     try:
         parse_config_file(os.path.abspath(options.conf), final=False)
         parse_command_line([prog_name] + argv)
-    except IOError:
+    except OSError:
         if os.path.basename(options.conf) != DEFAULT_CONFIG_FILE:
             raise
 
