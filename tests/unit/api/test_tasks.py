@@ -2,11 +2,12 @@ import json
 import time
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 import celery.states as states
 from celery.events import Event
 from celery.result import AsyncResult
+from tornado.options import options
 
 from flower.events import EventsState
 from tests.unit.utils import task_succeeded_events
@@ -34,6 +35,15 @@ class ApplyTests(BaseApiTestCase):
         body = bytes.decode(r.body)
         self.assertEqual(result, json.loads(body)['result'])
         task.apply_async.assert_called_once_with(args=[], kwargs={})
+
+    def test_apply_read_only(self):
+        with patch.object(options.mockable(), 'read_only', True):
+            celery = self._app.capp
+            celery.tasks['foo'] = Mock()
+            celery.tasks['foo'].apply_async = MagicMock()
+            r = self.post('/api/task/apply/foo', body='')
+            self.assertEqual(403, r.code)
+            celery.tasks['foo'].apply_async.assert_not_called()
 
 
 class AsyncApplyTests(BaseApiTestCase):
@@ -86,6 +96,15 @@ class AsyncApplyTests(BaseApiTestCase):
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
             args=[], kwargs={}, expires=tomorrow)
+
+    def test_async_apply_read_only(self):
+        with patch.object(options.mockable(), 'read_only', True):
+            celery = self._app.capp
+            celery.tasks['foo'] = Mock()
+            celery.tasks['foo'].apply_async = MagicMock()
+            r = self.post('/api/task/async-apply/foo', body={})
+            self.assertEqual(403, r.code)
+            celery.tasks['foo'].apply_async.assert_not_called()
 
 
 class MockTasks:

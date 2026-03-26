@@ -24,7 +24,11 @@ class WorkerView(BaseHandler):
         if 'stats' not in worker:
             raise web.HTTPError(404, f"Unable to get stats for '{name}' worker")
 
-        self.render("worker.html", worker=dict(worker, name=name))
+        self.render(
+            "worker.html",
+            worker=dict(worker, name=name),
+            read_only=self.application.options.read_only,
+        )
 
 
 class WorkersView(BaseHandler):
