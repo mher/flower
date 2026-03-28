@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 class BrokerBase:
     def __init__(self, broker_url, *_, **__):
         purl = urlparse(broker_url)
+        self.scheme = purl.scheme
         self.host = purl.hostname
         self.port = purl.port
         self.vhost = purl.path[1:]
@@ -40,13 +41,14 @@ class RabbitMQ(BrokerBase):
         self.io_loop = io_loop or ioloop.IOLoop.instance()
 
         self.host = self.host or 'localhost'
-        self.port = self.port or 15672
+        self.port = self.port or (15671 if self.scheme == 'amqps' else 15672)
         self.vhost = quote(self.vhost, '') or '/' if self.vhost != '/' else self.vhost
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
         if not http_api:
-            http_api = f"http://{self.username}:{self.password}@{self.host}:{self.port}/api/{self.vhost}"
+            http_scheme = 'https' if self.scheme == 'amqps' else 'http'
+            http_api = f"{http_scheme}://{self.username}:{self.password}@{self.host}:{self.port}/api/{self.vhost}"
 
         try:
             self.validate_http_api(http_api)
