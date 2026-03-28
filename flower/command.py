@@ -50,11 +50,17 @@ def flower(ctx, tornado_argv):
     atexit.register(flower_app.stop)
     signal.signal(signal.SIGTERM, sigterm_handler)
 
-    if not ctx.obj.quiet:
-        print_banner(app, 'ssl_options' in settings)
+    try:
+        flower_app.start_server()
+    finally:
+        # Print the banner even when server failed to start
+        if not ctx.obj.quiet:
+            print_banner(flower_app)
+
+    flower_app.update_workers()
 
     try:
-        flower_app.start()
+        flower_app.serve_forever()
     except (KeyboardInterrupt, SystemExit):
         pass
 
@@ -158,24 +164,18 @@ def is_flower_envvar(name):
         name[len(ENV_VAR_PREFIX):].lower() in default_options
 
 
-def print_banner(app, ssl):
-    if not options.unix_socket:
-        if options.url_prefix:
-            prefix_str = f'/{options.url_prefix}/'
-        else:
-            prefix_str = ''
-
-        logger.info(
-            "Visit me at http%s://%s:%s%s", 's' if ssl else '',
-            options.address or '0.0.0.0', options.port,
-            prefix_str
-        )
+def print_banner(flower_app):
+    if not flower_app.options.unix_socket:
+        url = flower_app.get_url()
+        logger.info("Visit me at %s", url)
     else:
-        logger.info("Visit me via unix socket file: %s", options.unix_socket)
+        unix_socket = flower_app.options.unix_socket
+        logger.info("Visit me via unix socket file: %s", unix_socket)
 
-    logger.info('Broker: %s', app.connection().as_uri())
+    capp = flower_app.capp
+    logger.info('Broker: %s', capp.connection().as_uri())
     logger.info(
         'Registered tasks: \n%s',
-        pformat(sorted(app.tasks.keys()))
+        pformat(sorted(capp.tasks.keys()))
     )
     logger.debug('Settings: %s', pformat(settings))
