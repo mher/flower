@@ -66,5 +66,34 @@ def get_task_by_id(events, task_id):
     return events.state.tasks.get(task_id)
 
 
-def as_dict(task):
-    return task.as_dict()
+def filter_dict(task_dict, only_fields=None, except_fields=None):
+    """
+    Filter a dictionary based on only_fields or except_fields parameters.
+
+    Args:
+        task_dict (dict): The dictionary to filter
+        only_fields (str or list): Fields to include (excludes all others)
+        except_fields (str or list): Fields to exclude (includes all others)
+
+    Returns:
+        dict: The filtered dictionary
+    """
+    if only_fields:
+        # Convert comma-separated string to list if necessary
+        if isinstance(only_fields, str):
+            only_fields = [field.strip() for field in only_fields.split(',')]
+        # Keep only the specified fields
+        return {k: v for k, v in task_dict.items() if k in only_fields}
+    elif except_fields:
+        # Convert comma-separated string to list if necessary
+        if isinstance(except_fields, str):
+            except_fields = [field.strip() for field in except_fields.split(',')]
+        # Remove the specified fields
+        return {k: v for k, v in task_dict.items() if k not in except_fields}
+
+    return task_dict
+
+
+def as_dict(task, only_fields=None, except_fields=None):
+    task_dict = task.as_dict()
+    return filter_dict(task_dict, only_fields, except_fields)
