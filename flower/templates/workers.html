@@ -11,6 +11,7 @@
       <thead>
         <tr>
           <th>Worker</th>
+          <th>Queues</th>
           <th class="text-center">Status</th>
           <th class="text-center">Active</th>
           <th class="text-center">Processed</th>
@@ -24,6 +25,7 @@
         {% for name, info in workers.items() %}
         <tr id="{{ url_escape(name) }}">
           <td>{{ name }}</td>
+          <td>{{ " ,".join(map(lambda queue: queue['name'], info.get('active_queues', []))) }}</td>
           <td>{{ info.get('status', None) }}</td>
           <td>{{ info.get('active', 0) or 0 }}</td>
           <td>{{ info.get('task-received', 0) }}</td>
