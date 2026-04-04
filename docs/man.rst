@@ -71,6 +71,7 @@ OPTIONS
   --max_tasks                      maximum number of tasks to keep in memory
                                    (default *10000*)
   --natural_time                   show time in relative format (default *False*)
+  --browser_local_time             show time in the browser's local TZ (default *False*)
   --persistent                     enable persistent mode (default *False*)
   --port                           run on the given port (default *5555*)
   --purge_offline_workers          time (in seconds) after which offline workers are purged
