@@ -1,4 +1,6 @@
-from flower.views.auth import authenticate, validate_auth_option
+import importlib
+import os
+from flower.views.auth import authenticate, validate_auth_option, GithubLoginHandler, GitLabLoginHandler
 from tests.unit import AsyncHTTPTestCase
 
 
@@ -60,3 +62,36 @@ class AuthTests(AsyncHTTPTestCase):
         self.assertFalse(authenticate(".*@example.com", "attacker@example.com.attacker.com"))
         self.assertFalse(authenticate(".*@corp.example.com", "attacker@corpZexample.com"))
         self.assertFalse(authenticate(".*@corp\.example\.com", "attacker@corpZexample.com"))
+
+
+class OAuthTests(AsyncHTTPTestCase):
+    def test_github_oauth_urls_default(self):
+        # Test default GitHub.com URLs
+        self.assertEqual(GithubLoginHandler._OAUTH_DOMAIN, 'github.com')
+        self.assertEqual(GithubLoginHandler._OAUTH_API_URL, 'https://api.github.com/user/emails')
+        self.assertEqual(GithubLoginHandler._OAUTH_AUTHORIZE_URL, 'https://github.com/login/oauth/authorize')
+        self.assertEqual(GithubLoginHandler._OAUTH_ACCESS_TOKEN_URL, 'https://github.com/login/oauth/access_token')
+
+    def test_github_oauth_urls_enterprise(self):
+        # Test GitHub Enterprise URLs by reloading the module with env set
+        import flower.views.auth as auth_module
+        original_env = os.environ.get('FLOWER_GITHUB_OAUTH_DOMAIN')
+        try:
+            os.environ['FLOWER_GITHUB_OAUTH_DOMAIN'] = 'github.example.com'
+            importlib.reload(auth_module)
+            self.assertEqual(auth_module.GithubLoginHandler._OAUTH_DOMAIN, 'github.example.com')
+            self.assertEqual(auth_module.GithubLoginHandler._OAUTH_API_URL, 'https://github.example.com/api/v3/user/emails')
+            self.assertEqual(auth_module.GithubLoginHandler._OAUTH_AUTHORIZE_URL, 'https://github.example.com/oauth/authorize')
+            self.assertEqual(auth_module.GithubLoginHandler._OAUTH_ACCESS_TOKEN_URL, 'https://github.example.com/oauth/access_token')
+        finally:
+            if original_env is None:
+                os.environ.pop('FLOWER_GITHUB_OAUTH_DOMAIN', None)
+            else:
+                os.environ['FLOWER_GITHUB_OAUTH_DOMAIN'] = original_env
+            importlib.reload(auth_module)  # reset to default
+
+    def test_gitlab_oauth_urls_default(self):
+        # Test default GitLab.com URLs
+        self.assertEqual(GitLabLoginHandler._OAUTH_GITLAB_DOMAIN, 'gitlab.com')
+        self.assertEqual(GitLabLoginHandler._OAUTH_AUTHORIZE_URL, 'https://gitlab.com/oauth/authorize')
+        self.assertEqual(GitLabLoginHandler._OAUTH_ACCESS_TOKEN_URL, 'https://gitlab.com/oauth/token')
