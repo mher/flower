@@ -88,12 +88,36 @@ class LoginHandler(BaseHandler):
 
 class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
-    _OAUTH_DOMAIN = os.getenv(
-        "FLOWER_GITHUB_OAUTH_DOMAIN", "github.com")
-    _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/authorize'
-    _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/access_token'
+    _OAUTH_DOMAIN = "github.com"
+    _OAUTH_API_URL = 'https://api.github.com/user/emails'
+    _OAUTH_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
+    _OAUTH_ACCESS_TOKEN_URL = 'https://github.com/login/oauth/access_token'
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
+
+    @classmethod
+    def _get_oauth_urls(cls, oauth_domain):
+        if oauth_domain == 'github.com':
+            return (
+                f'https://api.{oauth_domain}/user/emails',
+                f'https://{oauth_domain}/login/oauth/authorize',
+                f'https://{oauth_domain}/login/oauth/access_token',
+            )
+        return (
+            f'https://{oauth_domain}/api/v3/user/emails',
+            f'https://{oauth_domain}/oauth/authorize',
+            f'https://{oauth_domain}/oauth/access_token',
+        )
+
+    def initialize(self, *args, **kwargs):
+        super().initialize(*args, **kwargs)
+        oauth_domain = os.getenv('FLOWER_GITHUB_OAUTH_DOMAIN', 'github.com')
+        (
+            self._OAUTH_API_URL,
+            self._OAUTH_AUTHORIZE_URL,
+            self._OAUTH_ACCESS_TOKEN_URL,
+        ) = self._get_oauth_urls(oauth_domain)
+        self._OAUTH_DOMAIN = oauth_domain
 
     async def get_authenticated_user(self, redirect_uri, code):
         body = urlencode({
@@ -138,7 +162,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         access_token = user['access_token']
 
         response = await self.get_auth_http_client().fetch(
-            f'https://api.{self._OAUTH_DOMAIN}/user/emails',
+            self._OAUTH_API_URL,
             headers={'Authorization': 'token ' + access_token,
                      'User-agent': 'Tornado auth'})
 
