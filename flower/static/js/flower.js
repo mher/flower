@@ -690,4 +690,29 @@ var flower = (function () {
 
     });
 
+    (function () {
+        var html = document.documentElement;
+        var btn  = document.getElementById('theme-toggle');
+        var moon = document.getElementById('theme-icon-moon');
+        var sun  = document.getElementById('theme-icon-sun');
+
+        function applyTheme(theme) {
+            html.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('flower-theme', theme);
+            if (moon && sun) {
+                moon.style.display = theme === 'dark' ? 'none' : '';
+                sun.style.display  = theme === 'dark' ? ''     : 'none';
+            }
+        }
+
+        // Sync icon with whatever theme was restored from localStorage in <head>
+        applyTheme(html.getAttribute('data-bs-theme') || 'light');
+
+        if (btn) {
+            btn.addEventListener('click', function () {
+                applyTheme(html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+            });
+        }
+    }());
+
 }(jQuery));

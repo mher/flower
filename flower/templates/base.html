@@ -1,6 +1,6 @@
 {% import pprint %}
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,7 @@
   	<link rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}">
 	  <link rel="stylesheet" href="{{ static_url('css/datatables-1.13.4.min.css') }}">
 	  <link href="{{ static_url('css/flower.css') }}" rel="stylesheet">
+    <script>(function(){var t=localStorage.getItem('flower-theme');if(t)document.documentElement.setAttribute('data-bs-theme',t);})();</script>
   </head>
   <body class="m-2">
     {% block navbar %}
