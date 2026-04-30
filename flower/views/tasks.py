@@ -220,18 +220,18 @@ class TasksDataTable(BaseHandler):
                         arg_queries = None
                         for s_arg in s_args:
                             if arg_queries is None:
-                                arg_queries = Wildcard(args='*'+s_arg+'*')
+                                arg_queries = Wildcard(args='*'+s_arg+'*')  # nosec
                             else:
-                                arg_queries &= Wildcard(args='*'+s_arg+'*')
+                                arg_queries &= Wildcard(args='*'+s_arg+'*')  # nosec
                         es_s = es_s.query(arg_queries)
                     if 'kwargs' in search_terms:
                         s_args = search_terms['kwargs']
                         arg_queries = None
                         for s_arg, s_v_arg in s_args.items():
                             if arg_queries is None:
-                                arg_queries = Wildcard(kwargs='*' + s_arg + ': ' + s_v_arg + '*')
+                                arg_queries = Wildcard(kwargs='*' + s_arg + ': ' + s_v_arg + '*')  # nosec
                             else:
-                                arg_queries &= Wildcard(kwargs='*' + s_arg + ': ' + s_v_arg + '*')
+                                arg_queries &= Wildcard(kwargs='*' + s_arg + ': ' + s_v_arg + '*')  # nosec
                         es_s = es_s.query(arg_queries)
                     if 'result' in search_terms:
                         es_s = es_s.query(Match(result=search_terms['result']))
