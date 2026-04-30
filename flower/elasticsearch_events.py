@@ -447,9 +447,7 @@ class IndexerEvents(Events):
             ]:
                 pass
             else:
-                logger.warning(
-                    "Elastic search occurred, " "may be bad: %s", traceback.format_exc()
-                )
+                logger.warning("Elastic search occurred (may be bad)", exc_info=te)
         try:
             INDICES_CLIENT.put_mapping(
                 doc_type="task",

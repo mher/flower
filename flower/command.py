@@ -1,4 +1,3 @@
-import inspect
 import os
 import sys
 import atexit
