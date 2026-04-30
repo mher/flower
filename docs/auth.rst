@@ -107,6 +107,21 @@ See Okta `Okta OAuth API`_ docs for more info.
 .. _Okta: https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/main/
 .. _Okta OAuth API: https://developer.okta.com/docs/reference/api/oidc/
 
+.. _generic-oauth:
+
+Generic OAuth
+----------
+
+Flower also supports Generic OAuth. Before getting started, you need to register Flower in `Generic`_.
+Generic OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.GenericLoginHandler`.
+
+Generic OAuth requires `oauth2_key`, `oauth2_secret` and `oauth2_redirect_uri` options which should be obtained from Generic.
+Generic OAuth also uses `FLOWER_OAUTH2_GENERIC_BASE_URL` environment variable.
+
+Generic OAuth can be used with any OAuth provider that supports the standard OAuth 2.0 protocol. This allows you to integrate Flower with a wide range of authentication providers, giving you flexibility in how you secure access to your Flower instance.
+
+Generic OAuth uses the `/.well-known/openid-configuration` endpoint to discover the necessary endpoints for authentication. Make sure your OAuth provider supports this endpoint for proper integration.
+
 .. _gitlab-oauth:
 
 GitLab OAuth
