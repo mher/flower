@@ -61,6 +61,36 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('123', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
 
+    def test_format_task(self):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        events = [Event('worker-online', hostname='worker1')]
+        events += task_succeeded_events(worker='worker1', name='task1', id='123')
+        for i, e in enumerate(events):
+            e['clock'] = i
+            e['local_received'] = time.time()
+            state.event(e)
+        self.app.events.state = state
+
+        def my_formatter(task):
+            task.name = 'custom_' + task.name
+            return task
+
+        params = dict(draw=1, start=0, length=10)
+        params['search[value]'] = ''
+        params['order[0][column]'] = 0
+        params['columns[0][data]'] = 'name'
+        params['order[0][dir]'] = 'asc'
+
+        with self.mock_option('format_task', my_formatter):
+            r = self.get('/tasks/datatable?' + '&'.join(
+                map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode("utf-8"))
+        tasks = table['data']
+        self.assertEqual('custom_task1', tasks[0]['name'])
+
+
     def test_failed_task(self):
         state = EventsState()
         state.get_or_create_worker('worker1')

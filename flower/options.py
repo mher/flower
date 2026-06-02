@@ -57,7 +57,7 @@ define("conf", default=DEFAULT_CONFIG_FILE,
        help="configuration file")
 define("enable_events", type=bool, default=True,
        help="periodically enable Celery events")
-define("format_task", type=types.FunctionType, default=None,
+define("format_task", type=object, default=None,
        help="use custom task formatter")
 define("natural_time", type=bool, default=False,
        help="show time in relative format")
