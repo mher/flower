@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # flower documentation build configuration file, created by
 # sphinx-quickstart on Fri Apr 11 17:26:01 2014.
 #
