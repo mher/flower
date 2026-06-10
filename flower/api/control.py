@@ -470,7 +470,7 @@ Change soft and hard time limits for a task
         else:
             logger.error(response)
             self.set_status(403)
-            reason = self.error_reason(taskname, response)
+            reason = self.error_reason(workername, response)
             self.write(f"Failed to set timeouts: '{reason}'")
 
 
@@ -527,5 +527,5 @@ Change rate limit for a task
         else:
             logger.error(response)
             self.set_status(403)
-            reason = self.error_reason(taskname, response)
+            reason = self.error_reason(workername, response)
             self.write(f"Failed to set rate limit: '{reason}'")
