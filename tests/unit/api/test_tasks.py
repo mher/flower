@@ -9,6 +9,7 @@ from celery.events import Event
 from celery.result import AsyncResult
 
 from flower.events import EventsState
+from flower.utils.tasks import filter_dict
 from tests.unit.utils import task_succeeded_events
 
 from . import BaseApiTestCase
@@ -93,7 +94,28 @@ class MockTasks:
     @staticmethod
     def get_task_by_id(events, task_id):
         from celery.events.state import Task
-        return Task()
+        task = Task()
+        # Set some test data on the task
+        task.name = 'test_task'
+        task.state = 'SUCCESS'
+        return task
+
+    @staticmethod
+    def as_dict(task, only_fields=None, except_fields=None):
+        # Create a mock dictionary with test data
+        task_dict = {
+            'name': task.name,
+            'state': task.state,
+            'worker': 'test_worker',
+            'received': 1234567890,
+            'started': 1234567891,
+            'succeeded': 1234567892,
+            'timestamp': 1234567892,
+            'runtime': 2.0
+        }
+
+        # Use the filter_dict function to handle field filtering
+        return filter_dict(task_dict, only_fields, except_fields)
 
 
 class TaskTests(BaseApiTestCase):
@@ -106,7 +128,68 @@ class TaskTests(BaseApiTestCase):
 
     @patch('flower.api.tasks.tasks', new=MockTasks)
     def test_task_info(self):
-        self.get('/api/task/info/123')
+        # Make the request
+        r = self.get('/api/task/info/123')
+
+        # Parse the response
+        task = json.loads(r.body.decode("utf-8"))
+
+        # Assert the response status code
+        self.assertEqual(200, r.code)
+
+        # Assert the task data
+        self.assertEqual('test_task', task['name'])
+        self.assertEqual('SUCCESS', task['state'])
+        self.assertEqual('test_worker', task['worker'])
+        self.assertEqual(1234567890, task['received'])
+        self.assertEqual(1234567891, task['started'])
+        self.assertEqual(1234567892, task['succeeded'])
+        self.assertEqual(1234567892, task['timestamp'])
+        self.assertEqual(2.0, task['runtime'])
+
+    def test_task_info_field_selection(self):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        events = [Event('worker-online', hostname='worker1')]
+        events += task_succeeded_events(worker='worker1', name='task1',
+                                        id='123')
+
+        for i, e in enumerate(events):
+            e['clock'] = i
+            e['local_received'] = time.time()
+            state.event(e)
+        self.app.events.state = state
+
+        # Test only_fields parameter
+        params = dict(only_fields='name,state')
+
+        r = self.get('/api/task/info/123?' + '&'.join(
+            map(lambda x: '%s=%s' % x, params.items())))
+
+        task = json.loads(r.body.decode("utf-8"))
+
+        self.assertEqual(200, r.code)
+        # Check that only the specified fields are returned
+        self.assertEqual(2, len(task))
+        self.assertIn('name', task)
+        self.assertIn('state', task)
+        self.assertNotIn('worker', task)
+        self.assertNotIn('received', task)
+
+        # Test except_fields parameter
+        params = dict(except_fields='worker,received')
+
+        r = self.get('/api/task/info/123?' + '&'.join(
+            map(lambda x: '%s=%s' % x, params.items())))
+
+        task = json.loads(r.body.decode("utf-8"))
+
+        self.assertEqual(200, r.code)
+        # Check that the specified fields are not returned
+        self.assertIn('name', task)
+        self.assertIn('state', task)
+        self.assertNotIn('worker', task)
+        self.assertNotIn('received', task)
 
     def test_tasks_pagination(self):
         state = EventsState()
@@ -216,3 +299,38 @@ class TaskTests(BaseApiTestCase):
         self.assertEqual(1, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
+
+        # Test only_fields parameter
+        params = dict(limit=4, offset=0, sort_by='name', only_fields='name,state')
+
+        r = self.get('/api/tasks?' + '&'.join(
+            map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
+
+        self.assertEqual(200, r.code)
+        self.assertEqual(4, len(table))
+        # Check that only the specified fields are returned
+        task = table[list(table)[0]]
+        self.assertEqual(2, len(task))
+        self.assertIn('name', task)
+        self.assertIn('state', task)
+        self.assertNotIn('worker', task)
+        self.assertNotIn('received', task)
+
+        # Test except_fields parameter
+        params = dict(limit=4, offset=0, sort_by='name', except_fields='worker,received')
+
+        r = self.get('/api/tasks?' + '&'.join(
+            map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
+
+        self.assertEqual(200, r.code)
+        self.assertEqual(4, len(table))
+        # Check that the specified fields are not returned
+        task = table[list(table)[0]]
+        self.assertIn('name', task)
+        self.assertIn('state', task)
+        self.assertNotIn('worker', task)
+        self.assertNotIn('received', task)
