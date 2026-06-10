@@ -3,27 +3,60 @@ from urllib.parse import urlencode
 
 import celery
 import tornado.testing
-from tornado.ioloop import IOLoop
 from tornado.options import options
+from tornado.httpclient import AsyncHTTPClient, HTTPResponse
 
 from flower import command  # noqa: F401 side effect - define options
 from flower.app import Flower
-from flower.events import Events
 from flower.urls import handlers, settings
 
 
-class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
+class AsyncHTTPTestCase(tornado.testing.AsyncTestCase):
 
-    def _get_celery_app(self):
-        return celery.Celery()
+    def setUp(self) -> None:
+        super().setUp()
+        self._http_client = AsyncHTTPClient()
+        self._capp = celery.Celery()
+        self._start_flower()
 
-    def get_app(self, capp=None):
-        if not capp:
-            capp = self._get_celery_app()
-        events = Events(capp, IOLoop.current())
-        app = Flower(capp=capp, events=events,
-                     options=options, handlers=handlers, **settings)
-        return app
+    def _start_flower(self):
+        self._app = Flower(
+            capp=self._capp,
+            io_loop=self.io_loop,
+            options=options,
+            handlers=handlers,
+            **settings
+        )
+        self._app.start_server()
+
+    def _stop_flower(self):
+        self._app.stop_server()
+
+    def _restart_flower(self, reset_celery_app=False):
+        self._stop_flower()
+        if reset_celery_app:
+            self._capp = celery.Celery()
+        self._start_flower()
+
+    def tearDown(self) -> None:
+        self._http_client.close()
+        self._app.stop_server()
+        del self._http_client
+        del self._app
+        super().tearDown()
+
+    def fetch(
+        self, path: str, raise_error: bool = False, **kwargs
+    ) -> HTTPResponse:
+        url = self._app.get_url(path)
+
+        def fetch():
+            return self._http_client.fetch(url, raise_error=raise_error, **kwargs)
+
+        return self.io_loop.run_sync(
+            fetch,
+            timeout=tornado.testing.get_async_test_timeout(),
+        )
 
     def get(self, url, **kwargs):
         return self.fetch(url, **kwargs)

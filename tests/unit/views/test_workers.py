@@ -13,12 +13,6 @@ from tests.unit.utils import (HtmlTableParser, task_failed_events,
 
 
 class WorkersTests(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
 
     def test_default_page(self):
         r1 = self.get('/')
@@ -45,7 +39,7 @@ class WorkersTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         state.event(Event('worker-offline', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
         table = HtmlTableParser()
@@ -65,7 +59,7 @@ class WorkersTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         state.event(Event('worker-offline', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         with patch('flower.views.workers.options') as mock_options:
             mock_options.purge_offline_workers = 0
@@ -82,7 +76,7 @@ class WorkersTests(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -110,7 +104,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -140,7 +134,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -172,7 +166,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -204,7 +198,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -238,7 +232,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -271,7 +265,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -293,7 +287,7 @@ class WorkersTests(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         res = self.get('/workers?json=1')
         self.assertEqual(200, res.code)
@@ -305,9 +299,9 @@ class WorkersTests(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
-        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+        with patch.object(self._app, "update_workers") as update_workers_mock:
             res = self.get('/workers?refresh=1')
             self.assertEqual(200, res.code)
             update_workers_mock.assert_called()
@@ -317,17 +311,17 @@ class WorkersTests(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
-        self.app.inspector.workers['worker1'] = {'registeres': [], 'active_queues': [],
+        self._app.events.state = state
+        self._app.inspector.workers['worker1'] = {'registeres': [], 'active_queues': [],
                                                  'stats': {'total': {'tasks.add': 10, 'tasks.sleep': 1, 'tasks.error': 1},
                                                            'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
 
-        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+        with patch.object(self._app, "update_workers") as update_workers_mock:
             res = self.get('/worker/worker1')
             self.assertEqual(200, res.code)
             update_workers_mock.assert_called_once_with(workername='worker1')
 
-        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+        with patch.object(self._app, "update_workers") as update_workers_mock:
             res = self.get('/worker/worker2')
             self.assertEqual(404, res.code)
             update_workers_mock.assert_called_once_with(workername='worker2')

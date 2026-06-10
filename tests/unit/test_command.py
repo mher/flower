@@ -74,38 +74,56 @@ class TestFlowerCommand(AsyncHTTPTestCase):
         - run app.autodiscover_tasks()
         - create flower command
         """
-        celery_app = self._get_celery_app()
+        celery_app = self._app.capp
         with patch.object(celery_app, '_autodiscover_tasks') as autodiscover:
             celery_app.autodiscover_tasks()
 
-            self.get_app(capp=celery_app)
+            self._restart_flower()
 
             self.assertTrue(autodiscover.called)
 
 
 class TestPrintBanner(AsyncHTTPTestCase):
-    def test_print_banner(self):
-        celery_app = celery.Celery()
-        with self.assertLogs('', level='INFO') as cm:
-            print_banner(celery_app, False)
 
-            self.assertTrue('INFO:flower.command:Visit me at http://0.0.0.0:5555' in cm.output)
-            self.assertTrue('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//' in cm.output)
+    def test_print_banner(self):
+        with self.assertLogs('', level='INFO') as cm:
+            print_banner(self._app)
+
+            self.assertIn('INFO:flower.command:Visit me at http://0.0.0.0:5555', cm.output)
+            self.assertIn('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//', cm.output)
 
     def test_print_banner_with_ssl(self):
-        celery_app = celery.Celery()
         with self.assertLogs('', level='INFO') as cm:
-            print_banner(celery_app, True)
+            self._app.ssl_options = dict(certfile="", keyfile="")
+            print_banner(self._app)
 
-            self.assertTrue('INFO:flower.command:Visit me at https://0.0.0.0:5555' in cm.output)
-            self.assertTrue('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//' in cm.output)
+            self.assertIn('INFO:flower.command:Visit me at https://0.0.0.0:5555', cm.output)
+            self.assertIn('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//', cm.output)
 
     def test_print_banner_unix_socket(self):
-        celery_app = celery.Celery()
         with self.assertLogs('', level='INFO') as cm, self.mock_option('unix_socket', 'foo'):
-            print_banner(celery_app, True)
+            print_banner(self._app)
 
-            self.assertTrue('INFO:flower.command:Visit me via unix socket file: foo' in cm.output)
+            self.assertIn('INFO:flower.command:Visit me via unix socket file: foo', cm.output)
+
+    def test_print_banner_with_dynamic_port(self):
+        with self.assertLogs('', level='INFO') as cm:
+            with self.mock_option("port", 0):
+                max_attempts = 10
+                for _ in range(max_attempts):
+                    self._restart_flower()
+                    
+                    port = self._app._get_port()
+                    assert port
+                    if port != 5555:
+                        break
+                else:
+                    self.fail(f"Port was 5555 after {max_attempts} attempts")
+
+                print_banner(self._app)
+
+                self.assertIn(f'INFO:flower.command:Visit me at http://0.0.0.0:{port}', cm.output)
+                self.assertIn('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//', cm.output)
 
 
 class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
