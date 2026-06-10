@@ -1,5 +1,6 @@
 import copy
 import logging
+from datetime import datetime
 from functools import total_ordering
 
 from tornado import web
@@ -112,9 +113,9 @@ class TasksView(BaseHandler):
         app = self.application
         capp = self.application.capp
 
-        time = 'natural-time' if app.options.natural_time else 'time'
-        if capp.conf.timezone:
-            time += '-' + str(capp.conf.timezone)
+        time_type = 'natural-time' if app.options.natural_time else 'time'
+        tzname = capp.timezone.tzname(datetime.now())
+        time = f"{time_type}-{tzname}"
 
         self.render(
             "tasks.html",
