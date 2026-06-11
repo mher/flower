@@ -10,6 +10,7 @@ from base64 import b64decode
 import tornado
 
 from ..utils import template, bugreport, strtobool
+from ..utils.broker import get_active_queue_names, get_active_queue_lengths
 
 logger = logging.getLogger(__name__)
 
@@ -125,12 +126,9 @@ class BaseHandler(tornado.web.RequestHandler):
         return task
 
     def get_active_queue_names(self):
-        queues = set([])
-        for _, info in self.application.workers.items():
-            for queue in info.get('active_queues', []):
-                queues.add(queue['name'])
+        return get_active_queue_names(self.application)
 
-        if not queues:
-            queues = set([self.capp.conf.task_default_queue]) |\
-                {q.name for q in self.capp.conf.task_queues or [] if q.name}
-        return sorted(queues)
+
+    async def get_active_queue_lengths(self):
+        queues = await get_active_queue_lengths(self.application)
+        return queues

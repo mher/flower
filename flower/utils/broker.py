@@ -89,8 +89,9 @@ class RedisBase(BrokerBase):
     DEFAULT_SEP = '\x06\x16'
     DEFAULT_PRIORITY_STEPS = [0, 3, 6, 9]
 
-    def __init__(self, broker_url, *_, **kwargs):
+    def __init__(self, broker_url, io_loop=None, *args, **kwargs):
         super().__init__(broker_url)
+        self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.redis = None
 
         if not redis:
@@ -109,6 +110,11 @@ class RedisBase(BrokerBase):
         return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
 
     async def queues(self, names):
+        # TODO: use redis.asyncio instead of synchronous client with ThreadPoolExecutor
+        queue_sizes = await self.io_loop.run_in_executor(None, self._queues_synchronous, names)
+        return queue_sizes
+
+    def _queues_synchronous(self, names):
         queue_stats = []
         for name in names:
             priority_names = [self.broker_prefix + self._q_for_pri(
@@ -256,6 +262,40 @@ class Broker:
 
     async def queues(self, names):
         raise NotImplementedError
+
+
+def get_active_queue_names(application):
+    queues = set([])
+    for _, info in application.workers.items():
+        for q in info.get('active_queues', []):
+            queues.add(q['name'])
+    return queues
+
+
+async def get_active_queue_lengths(application):
+    app = application
+    capp = application.capp
+    broker_options = capp.conf.BROKER_TRANSPORT_OPTIONS
+
+    http_api = None
+    if app.transport == 'amqp' and app.options.broker_api:
+        http_api = app.options.broker_api
+
+    broker_use_ssl = None
+    if capp.conf.BROKER_USE_SSL:
+        broker_use_ssl = capp.conf.BROKER_USE_SSL
+
+    broker = Broker(app.capp.connection().as_uri(include_password=True),
+                    http_api=http_api, broker_options=broker_options, broker_use_ssl=broker_use_ssl)
+
+    queue_names = get_active_queue_names(application)
+
+    if not queue_names:
+        queue_names = set([capp.conf.CELERY_DEFAULT_QUEUE]) | \
+                      set([q.name for q in capp.conf.CELERY_QUEUES or [] if q.name])
+
+    queues = await broker.queues(sorted(queue_names))
+    return queues
 
 
 async def main():
