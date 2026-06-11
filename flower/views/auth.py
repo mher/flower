@@ -137,10 +137,18 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             raise tornado.web.HTTPError(500, 'OAuth authentication failed')
         access_token = user['access_token']
 
-        response = await self.get_auth_http_client().fetch(
-            f'https://api.{self._OAUTH_DOMAIN}/user/emails',
-            headers={'Authorization': 'token ' + access_token,
-                     'User-agent': 'Tornado auth'})
+        try:
+            response = await self.get_auth_http_client().fetch(
+                f'https://api.{self._OAUTH_DOMAIN}/user/emails',
+                headers={'Authorization': 'token ' + access_token,
+                         'User-agent': 'Tornado auth'})
+        except Exception as e:
+            raise tornado.web.HTTPError(
+                403,
+                'Failed to fetch user emails from GitHub. '
+                'Make sure the GitHub OAuth app has permission '
+                'to read email addresses (Account permissions > Email addresses > Read-only).'
+            ) from e
 
         emails = [email['email'].lower() for email in json.loads(response.body.decode('utf-8'))
                   if email['verified'] and authenticate(self.application.options.auth, email['email'])]

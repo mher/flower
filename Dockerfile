@@ -1,7 +1,9 @@
 FROM python:alpine
 
-# Get latest root certificates
-RUN apk add --no-cache ca-certificates tzdata && update-ca-certificates
+# Get latest root certificates and update openssl to fix vulnerabilities
+RUN apk add --no-cache ca-certificates tzdata && \
+    apk upgrade --no-cache openssl && \
+    update-ca-certificates
 
 # Install the required packages
 RUN pip install --no-cache-dir redis flower

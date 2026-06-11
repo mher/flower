@@ -174,6 +174,17 @@ class WorkerControlTests(BaseApiTestCase):
                           body={'workername': 'foo', 'hard': 3.1, 'soft': 1.2})
             self.assertEqual(403, r.code)
             celery.control.time_limit.assert_not_called()
+    def test_task_timeout_failure_returns_worker_error_message(self):
+        celery = self._app.capp
+        celery.control.time_limit = MagicMock(
+            return_value=[{'foo': {'error': 'time limits not supported'}}])
+
+        r = self.post(
+            '/api/task/timeout/celery.map',
+            body={'workername': 'foo', 'hard': 3.1, 'soft': 1.2}
+        )
+        self.assertEqual(403, r.code)
+        self.assertEqual(b"Failed to set timeouts: 'time limits not supported'", r.body)
 
     def test_task_ratelimit(self):
         celery = self._app.capp
@@ -205,6 +216,16 @@ class WorkerControlTests(BaseApiTestCase):
         self.assertEqual(200, r.code)
         celery.control.rate_limit.assert_called_once_with(
             'celery.map', '11/m', destination=['foo'], reply=True)
+
+    def test_task_ratelimit_failure_returns_worker_error_message(self):
+        celery = self._app.capp
+        celery.control.rate_limit = MagicMock(
+            return_value=[{'foo': {'error': 'Invalid rate limit string'}}])
+
+        r = self.post('/api/task/rate-limit/celery.map',
+                      body={'workername': 'foo', 'ratelimit': 'garbage'})
+        self.assertEqual(403, r.code)
+        self.assertEqual(b"Failed to set rate limit: 'Invalid rate limit string'", r.body)
 
     def test_param_escape(self):
         app = self._app.capp
