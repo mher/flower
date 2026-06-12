@@ -396,7 +396,9 @@ Return length of all active queues
         if app.transport == 'amqp' and app.options.broker_api:
             http_api = app.options.broker_api
 
-        broker = Broker(app.capp.connection().as_uri(include_password=True),
+        with app.capp.connection() as conn:
+            broker_uri = conn.as_uri(include_password=True)
+        broker = Broker(broker_uri,
                         http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
                         broker_use_ssl=self.capp.conf.broker_use_ssl)
 

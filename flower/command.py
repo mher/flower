@@ -173,7 +173,8 @@ def print_banner(app, ssl):
     else:
         logger.info("Visit me via unix socket file: %s", options.unix_socket)
 
-    logger.info('Broker: %s', app.connection().as_uri())
+    with app.connection() as conn:
+        logger.info('Broker: %s', conn.as_uri())
     logger.info(
         'Registered tasks: \n%s',
         pformat(sorted(app.tasks.keys()))
