@@ -39,3 +39,282 @@ div.dataTables_wrapper .dataTables_filter input {
 .overflow-auto::-webkit-scrollbar {
   display: none;
 }
+
+/* Dark mode toggle button */
+#theme-toggle {
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  color: #495057;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+#theme-toggle:hover {
+  border-color: #495057;
+}
+
+/* Dark mode — Bootstrap 5.2 has no built-in dark mode support, all overrides are manual */
+
+[data-bs-theme="dark"] body {
+  background-color: #1a1e21;
+  color: #dee2e6;
+}
+
+/* Navbar */
+[data-bs-theme="dark"] .bg-green {
+  background-color: #141f10 !important;
+}
+
+[data-bs-theme="dark"] .navbar-light .navbar-brand,
+[data-bs-theme="dark"] .navbar-light .nav-link,
+[data-bs-theme="dark"] .navbar-light .nav-link.text-dark {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-bs-theme="dark"] .navbar-light .nav-link:hover,
+[data-bs-theme="dark"] .navbar-light .nav-link.text-dark:hover {
+  color: #fff !important;
+}
+
+[data-bs-theme="dark"] .navbar-nav-svg {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-bs-theme="dark"] #theme-toggle {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+[data-bs-theme="dark"] #theme-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #fff;
+}
+
+/* Tables */
+[data-bs-theme="dark"] .table {
+  color: #dee2e6;
+  border-color: #3d4349;
+  --bs-table-color: #dee2e6;
+  --bs-table-bg: #212529;
+  --bs-table-border-color: #3d4349;
+  --bs-table-striped-color: #dee2e6;
+  --bs-table-striped-bg: #1d2921;
+  --bs-table-accent-bg: #1d2921;
+  --bs-table-hover-color: #dee2e6;
+  --bs-table-hover-bg: #263022;
+}
+
+[data-bs-theme="dark"] .table > :not(caption) > * > * {
+  background-color: #212529;
+  color: #dee2e6;
+  border-color: #3d4349;
+}
+
+[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: #1d2921 !important;
+  color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .table-hover > tbody > tr:hover > * {
+  background-color: #263022 !important;
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .table-bordered > :not(caption) > * {
+  border-color: #3d4349;
+}
+
+[data-bs-theme="dark"] .table > thead > tr > th {
+  border-color: #3d4349;
+}
+
+/* DataTables controls */
+[data-bs-theme="dark"] .dataTables_wrapper {
+  border-color: #3d4349;
+  color: #dee2e6;
+}
+
+[data-bs-theme="dark"] div.dataTables_wrapper .dataTables_filter input {
+  background-color: #2a2e33;
+  border-color: #3d4349;
+  color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .dataTables_length select {
+  background-color: #2a2e33;
+  border-color: #3d4349;
+  color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .dataTables_info,
+[data-bs-theme="dark"] .dataTables_length {
+  color: #9ca3af;
+}
+
+/* Pagination */
+[data-bs-theme="dark"] .page-link {
+  background-color: #2a2e33;
+  border-color: #3d4349;
+  color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .page-link:hover {
+  background-color: #3d4349;
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .page-item.active .page-link {
+  background-color: #348613;
+  border-color: #348613;
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .page-item.disabled .page-link {
+  background-color: #212529;
+  color: #6c757d;
+  border-color: #3d4349;
+}
+
+/* Dropdowns */
+[data-bs-theme="dark"] .dropdown-menu {
+  background-color: #2a2e33;
+  border-color: #3d4349;
+}
+
+[data-bs-theme="dark"] .dropdown-item {
+  color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .dropdown-item:hover,
+[data-bs-theme="dark"] .dropdown-item:focus {
+  background-color: #3d4349;
+  color: #fff;
+}
+
+[data-bs-theme="dark"] .dropdown-divider {
+  border-color: #3d4349;
+}
+
+/* Form controls */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] input[type="number"],
+[data-bs-theme="dark"] input[type="text"] {
+  background-color: #2a2e33;
+  border-color: #3d4349;
+  color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] input[type="number"]:focus,
+[data-bs-theme="dark"] input[type="text"]:focus {
+  background-color: #2a2e33;
+  color: #dee2e6;
+  border-color: #348613;
+  box-shadow: 0 0 0 0.2rem rgba(52, 134, 19, 0.3);
+}
+
+[data-bs-theme="dark"] .form-control::placeholder,
+[data-bs-theme="dark"] input::placeholder {
+  color: #6c757d;
+}
+
+/* Nav tabs */
+[data-bs-theme="dark"] .nav-tabs {
+  border-color: #3d4349;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link {
+  color: #9ca3af;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link:hover {
+  border-color: #3d4349 #3d4349 transparent;
+  color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link.active {
+  background-color: #1a1e21;
+  border-color: #3d4349 #3d4349 #1a1e21;
+  color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .tab-content {
+  color: #dee2e6;
+}
+
+/* Links */
+[data-bs-theme="dark"] a {
+  color: #5cb85c;
+}
+
+[data-bs-theme="dark"] a:hover {
+  color: #82cc82;
+}
+
+/* Buttons */
+[data-bs-theme="dark"] .btn-primary {
+  background-color: #348613;
+  border-color: #348613;
+}
+
+[data-bs-theme="dark"] .btn-danger {
+  background-color: #842029;
+  border-color: #842029;
+}
+
+[data-bs-theme="dark"] .btn-close {
+  filter: invert(1);
+}
+
+/* Alerts */
+[data-bs-theme="dark"] .alert-success {
+  background-color: #0d2610;
+  border-color: #1a4a1e;
+  color: #a3d4a8;
+}
+
+[data-bs-theme="dark"] .alert-danger {
+  background-color: #2c0b0e;
+  border-color: #4a1820;
+  color: #f1aeb5;
+}
+
+/* Badges */
+[data-bs-theme="dark"] .badge.bg-secondary {
+  background-color: #495057 !important;
+}
+
+/* Table captions */
+[data-bs-theme="dark"] caption {
+  color: #9ca3af;
+}
+
+/* Pre / tracebacks */
+[data-bs-theme="dark"] pre {
+  color: #dee2e6;
+  background-color: #2a2e33;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+/* Text helpers */
+[data-bs-theme="dark"] .text-muted {
+  color: #9ca3af !important;
+}
+
+[data-bs-theme="dark"] .text-dark {
+  color: #dee2e6 !important;
+}
+
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6 {
+  color: #dee2e6;
+}
