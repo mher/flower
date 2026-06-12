@@ -35,6 +35,16 @@ define("db", type=str, default='flower',
        help="flower database file")
 define("persistent", type=bool, default=False,
        help="enable persistent mode")
+define("redis_host", type=str, default=None,
+       help="Redis host")
+define("redis_port", type=int, default=None,
+       help="Redis port")
+define("redis_db", type=int, default=None,
+       help="Redis database")
+define("redis_ssl", type=bool, default=False,
+       help="Use SSL for Redis connection")
+define("redis_key", type=str, default='flower',
+       help="Redis key")
 define("state_save_interval", type=int, default=0,
        help="state save interval (in milliseconds)")
 define("broker_api", type=str, default=None,
