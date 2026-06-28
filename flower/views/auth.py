@@ -87,19 +87,6 @@ class LoginHandler(BaseHandler):
 
 
 class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
-    """GitHub OAuth handler supporting both web (browser) and device (CLI) flows.
-
-    Web OAuth flow (existing behaviour):
-      - ``GET /login``              → redirect to GitHub authorize page
-      - ``GET /login?code=…``       → exchange code for token, set cookie
-
-    Device Authorization Grant (CLI / browserless, RFC 8628):
-      - ``POST /login``                      → request device+user code from GitHub,
-                                               return JSON with ``user_code`` and
-                                               ``verification_uri`` for the CLI to display
-      - ``GET /login?device_code=…``         → poll; returns 202 while pending,
-                                               302 on success
-    """
 
     _OAUTH_DOMAIN = os.getenv(
         "FLOWER_GITHUB_OAUTH_DOMAIN", "github.com")
@@ -130,7 +117,6 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         return json.loads(response.body.decode('utf-8'))
 
     async def post(self):
-        """Device flow step 1: request a device + user code from GitHub."""
         body = urlencode({
             'client_id': self.settings[self._OAUTH_SETTINGS_KEY]['key'],
             'scope': 'user:email',
@@ -170,7 +156,6 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
             )
 
     async def _device_poll(self, device_code):
-        """Device flow step 2: poll GitHub for an access token."""
         body = urlencode({
             'client_id': self.settings[self._OAUTH_SETTINGS_KEY]['key'],
             'device_code': device_code,

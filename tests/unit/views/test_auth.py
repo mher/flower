@@ -66,7 +66,6 @@ class AuthTests(AsyncHTTPTestCase):
 
 
 def _mock_response(body, error=None):
-    """Build a minimal mock that looks like a tornado HTTPResponse."""
     resp = MagicMock()
     resp.error = error
     resp.body = json.dumps(body).encode()
