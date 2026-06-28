@@ -73,6 +73,10 @@ _OAUTH_SETTINGS = {
 
 
 class GithubLoginHandlerDeviceFlowTests(AsyncHTTPTestCase):
+    def setUp(self):
+        super().setUp()
+        self._app.settings['oauth'] = _OAUTH_SETTINGS
+
     def test_post_returns_device_code_json(self):
         client = MagicMock()
         client.fetch = AsyncMock(return_value=MagicMock(
@@ -81,8 +85,7 @@ class GithubLoginHandlerDeviceFlowTests(AsyncHTTPTestCase):
         ))
         with self.mock_option('auth_provider', 'flower.views.auth.GithubLoginHandler'), \
              self.mock_option('auth', '.*@example.com'), \
-             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client), \
-             patch.dict(self.get_app().settings, {'oauth': _OAUTH_SETTINGS}):
+             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client):
             r = self.fetch('/login', method='POST', body='')
             self.assertEqual(200, r.code)
             self.assertEqual('ABCD-1234', json.loads(r.body)['user_code'])
@@ -95,8 +98,7 @@ class GithubLoginHandlerDeviceFlowTests(AsyncHTTPTestCase):
         ))
         with self.mock_option('auth_provider', 'flower.views.auth.GithubLoginHandler'), \
              self.mock_option('auth', '.*@example.com'), \
-             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client), \
-             patch.dict(self.get_app().settings, {'oauth': _OAUTH_SETTINGS}):
+             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client):
             r = self.fetch('/login?device_code=dev123')
             self.assertEqual(202, r.code)
 
@@ -108,8 +110,7 @@ class GithubLoginHandlerDeviceFlowTests(AsyncHTTPTestCase):
         ))
         with self.mock_option('auth_provider', 'flower.views.auth.GithubLoginHandler'), \
              self.mock_option('auth', '.*@example.com'), \
-             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client), \
-             patch.dict(self.get_app().settings, {'oauth': _OAUTH_SETTINGS}):
+             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client):
             r = self.fetch('/login?device_code=dev123')
             self.assertEqual(403, r.code)
 
@@ -122,8 +123,7 @@ class GithubLoginHandlerDeviceFlowTests(AsyncHTTPTestCase):
         ])
         with self.mock_option('auth_provider', 'flower.views.auth.GithubLoginHandler'), \
              self.mock_option('auth', '.*@example.com'), \
-             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client), \
-             patch.dict(self.get_app().settings, {'oauth': _OAUTH_SETTINGS}):
+             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client):
             r = self.fetch('/login?device_code=dev123', follow_redirects=False)
             self.assertEqual(302, r.code)
             self.assertIn('user', r.headers.get('Set-Cookie', ''))
