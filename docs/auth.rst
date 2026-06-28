@@ -83,18 +83,46 @@ Here's an example configuration file with the Github OAuth options:
     oauth2_secret="<your_client_secret>"
     oauth2_redirect_uri="http://localhost:5555/login"
 
-Replace `<your_client_id>` and `<your_client_secret>` with the actual  Client ID and secret obtained from
+Replace `<your_client_id>` and `<your_client_secret>` with the actual Client ID and secret obtained from
 the Github Settings.
+
+(Optional) The custom GitHub Domain can be adjusted using the ``FLOWER_GITHUB_OAUTH_DOMAIN`` environment variable.
 
 See `GitHub OAuth API`_ docs for more info.
 
 .. _Github Settings: https://github.com/settings/applications/new
 .. _GitHub OAuth API: https://developer.github.com/v3/oauth/
 
+.. _github-device-auth:
+
+GitHub Device Auth (CLI)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+``GithubLoginHandler`` also supports the `GitHub Device Authorization Grant`_ (RFC 8628)
+for CLI / browserless environments. No additional ``auth_provider`` is needed — the same
+``GithubLoginHandler`` configuration is used:
+
+.. code-block:: python
+
+    auth_provider="flower.views.auth.GithubLoginHandler"
+    auth=".*@example.com"
+    oauth2_key="<your_client_id>"
+    oauth2_secret="<your_client_secret>"
+    oauth2_redirect_uri="http://localhost:5555/login"
+
+**Prerequisites:** Enable *Device Flow* in your GitHub OAuth App settings.
+
+See `GitHub Device Authorization Grant`_ and `GitHub Device Flow API`_ docs for more info.
+
+.. _GitHub Device Authorization Grant: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow
+.. _GitHub Device Flow API: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#response-parameters
+
+
 .. _okta-oauth:
 
 Okta OAuth
 ----------
+
 
 Flower also supports Okta OAuth. Before getting started, you need to register Flower in `Okta`_.
 Okta OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.OktaLoginHandler`.
