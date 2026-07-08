@@ -48,6 +48,19 @@ class TestParseArgs(unittest.TestCase):
         with self.assertRaises(ValueError):
             parse_args('[' + '1,' * MAX_ARG_LENGTH + ']')
 
+    def test_deeply_nested_input_rejected(self):
+        # json.loads raises RecursionError on this; must surface as ValueError
+        with self.assertRaises(ValueError):
+            parse_args('[' * 3000)
+
+    def test_string_truncated_by_saferepr_rejected(self):
+        # celery's saferepr can truncate a long string inside its quotes,
+        # leaving a parseable repr with corrupted content
+        with self.assertRaises(ValueError):
+            parse_args("(7, 'Bearer...')")
+        with self.assertRaises(ValueError):
+            parse_args('[{"token": "Bearer..."}]')
+
 
 class TestParseKwargs(unittest.TestCase):
     def test_empty(self):
@@ -75,6 +88,10 @@ class TestParseKwargs(unittest.TestCase):
         with self.assertRaises(ValueError):
             parse_kwargs("{'a': 1, ...")
 
+    def test_truncated_value_rejected(self):
+        with self.assertRaises(ValueError):
+            parse_kwargs("{'token': 'Bearer...'}")
+
 
 class TestMakeJsonSerializable(unittest.TestCase):
     def test_scalars_pass_through(self):
@@ -83,7 +100,6 @@ class TestMakeJsonSerializable(unittest.TestCase):
 
     def test_containers_converted(self):
         self.assertEqual([1, 2], make_json_serializable((1, 2)))
-        self.assertEqual([1], make_json_serializable({1}))
         self.assertEqual({'a': [1, 2]}, make_json_serializable({'a': (1, 2)}))
         self.assertEqual([[1], {'b': 2}],
                          make_json_serializable([(1,), {'b': 2}]))
@@ -100,6 +116,16 @@ class TestMakeJsonSerializable(unittest.TestCase):
             make_json_serializable(...)
         with self.assertRaises(TypeError):
             make_json_serializable([1, object()])
+        # sets have no faithful JSON equivalent; converting to a list would
+        # change the type the retried task receives
+        with self.assertRaises(TypeError):
+            make_json_serializable({1, 2})
+
+    def test_non_string_dict_keys_rejected(self):
+        with self.assertRaises(TypeError):
+            make_json_serializable({1: 'a'})
+        with self.assertRaises(TypeError):
+            make_json_serializable({'m': {(1, 2): 'b'}})
 
 
 if __name__ == '__main__':

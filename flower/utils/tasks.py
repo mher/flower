@@ -93,10 +93,35 @@ def _parse_literal(value, kind):
         return json.loads(value)
     except json.JSONDecodeError:
         pass
+    except (MemoryError, RecursionError) as exc:
+        raise ValueError(f"Could not parse task {kind}: {value!r}") from exc
     try:
         return ast.literal_eval(value)
     except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError) as exc:
         raise ValueError(f"Could not parse task {kind}: {value!r}") from exc
+
+
+def _reject_truncated(obj, kind):
+    """
+    Reject values truncated by celery.
+
+    Celery stores event args/kwargs via saferepr, which truncates long
+    strings by cutting them and appending '...' inside the quotes, so a
+    truncated repr like "(7, 'Bearer...')" still parses cleanly. Refuse
+    such values rather than reapply a task with corrupted arguments.
+    A legitimate string ending in '...' is indistinguishable from a
+    truncated one, so it is rejected too.
+    """
+    if isinstance(obj, str):
+        if obj.endswith('...'):
+            raise ValueError(f"Task {kind} appear truncated by celery: {obj!r}")
+    elif isinstance(obj, (list, tuple, set)):
+        for item in obj:
+            _reject_truncated(item, kind)
+    elif isinstance(obj, dict):
+        for key, value in obj.items():
+            _reject_truncated(key, kind)
+            _reject_truncated(value, kind)
 
 
 def parse_args(args):
@@ -115,6 +140,7 @@ def parse_args(args):
         parsed = list(parsed)
     if not isinstance(parsed, list):
         raise ValueError(f"Task args must be a list or tuple: {args!r}")
+    _reject_truncated(parsed, 'args')
     return parsed
 
 
@@ -131,6 +157,7 @@ def parse_kwargs(kwargs):
     parsed = _parse_literal(kwargs, 'kwargs')
     if not isinstance(parsed, dict):
         raise ValueError(f"Task kwargs must be a dict: {kwargs!r}")
+    _reject_truncated(parsed, 'kwargs')
     return parsed
 
 
@@ -138,15 +165,23 @@ def make_json_serializable(obj):
     """
     Recursively convert parsed argument values to JSON-serializable types.
 
-    Raises TypeError for values with no JSON equivalent so callers fail
-    loudly instead of reapplying a task with corrupted arguments.
+    Raises TypeError for values with no faithful JSON equivalent (sets,
+    bytes, non-string dict keys, ...) so callers fail loudly instead of
+    reapplying a task with arguments of the wrong type. Tuples become
+    lists because that is what the original task received from the JSON
+    serializer anyway.
     """
     if obj is None or isinstance(obj, (str, int, float, bool)):
         return obj
-    if isinstance(obj, (list, tuple, set)):
+    if isinstance(obj, (list, tuple)):
         return [make_json_serializable(item) for item in obj]
     if isinstance(obj, dict):
-        return {key: make_json_serializable(value) for key, value in obj.items()}
+        result = {}
+        for key, value in obj.items():
+            if not isinstance(key, str):
+                raise TypeError(f"Dict key {key!r} is not JSON serializable")
+            result[key] = make_json_serializable(value)
+        return result
     if isinstance(obj, (datetime.datetime, datetime.date)):
         return obj.isoformat()
     raise TypeError(f"Value of type {type(obj).__name__} is not JSON serializable: {obj!r}")

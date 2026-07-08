@@ -680,19 +680,24 @@ Reapply a task with its original arguments
             raise HTTPError(400, "Cannot reapply task with no name")
 
         try:
-            task_obj = self.capp.tasks[taskname]
-        except KeyError as exc:
-            raise HTTPError(404, f"Unknown task '{taskname}'") from exc
-
-        try:
             args = tasks.make_json_serializable(tasks.parse_args(task.args))
             kwargs = tasks.make_json_serializable(tasks.parse_kwargs(task.kwargs))
         except (ValueError, TypeError) as exc:
             logger.error("Cannot reapply task '%s': %s", taskid, exc)
             raise HTTPError(400, f"Invalid task arguments: {exc}") from exc
 
+        # Preserve the original routing when the event carries it, so the
+        # retry runs on the same queue as the original task.
+        options = {}
+        if getattr(task, 'routing_key', None):
+            options['routing_key'] = task.routing_key
+        if getattr(task, 'exchange', None):
+            options['exchange'] = task.exchange
+
         try:
-            result = task_obj.apply_async(args=args, kwargs=kwargs)
+            # send_task works even when the task module is not importable
+            # by flower (same approach as TaskSendTask above)
+            result = self.capp.send_task(taskname, args=args, kwargs=kwargs, **options)
         except Exception as exc:  # broker and serializer failures are heterogeneous
             logger.exception("Error reapplying task '%s' with args=%s, kwargs=%s",
                              taskid, args, kwargs)
