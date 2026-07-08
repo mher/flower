@@ -363,7 +363,8 @@ var flower = (function () {
     });
 
     function sum(a, b) {
-        return parseInt(a, 10) + parseInt(b, 10);
+        var x = parseInt(a, 10), y = parseInt(b, 10);
+        return (isNaN(x) ? 0 : x) + (isNaN(y) ? 0 : y);
     }
 
     function format_time(timestamp) {
