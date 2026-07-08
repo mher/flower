@@ -694,33 +694,41 @@ var flower = (function () {
         const $button = $(this);
         const $spinner = $button.find('.spinner-border');
         const taskId = $('#taskid').text();
-    
+
         if (!taskId) {
             show_alert('Task ID is missing. Cannot proceed.', 'danger');
             return;
         }
-    
-        // Show loading state
+
+        function resetButton() {
+            $button.prop('disabled', false);
+            $spinner.addClass('d-none');
+        }
+
+        // Show loading state while the task is reapplied
         $button.prop('disabled', true);
         $spinner.removeClass('d-none');
-    
-        // Reapply the task using the reapply endpoint
+
         $.ajax({
             type: 'POST',
             url: url_prefix() + '/api/task/reapply/' + taskId,
+            dataType: 'json',
             success: function (response) {
-                show_alert(`Task ${taskId} has been retried (new task ID: ${response['task-id']})`, 'success');
-                // Optionally reload the page after success
+                const newTaskId = response && response['task-id'];
+                if (!newTaskId) {
+                    show_alert('Task retry did not return a new task ID.', 'danger');
+                    resetButton();
+                    return;
+                }
+                show_alert(`Task ${taskId} has been retried (new task ID: ${newTaskId})`, 'success');
                 setTimeout(() => location.reload(), 1500);
             },
-            error: function (response) {
-                show_alert(response.responseText || 'Failed to retry task', 'danger');
-                // Reset button state on error
-                $button.prop('disabled', false);
-                $spinner.addClass('d-none');
+            error: function (data) {
+                console.error('Failed to retry task', taskId, data.status, data.responseText);
+                show_alert('Failed to retry task. Check the flower logs for details.', 'danger');
+                resetButton();
             }
         });
     });
-
 
 }(jQuery));

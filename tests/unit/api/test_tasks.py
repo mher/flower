@@ -150,18 +150,74 @@ class TaskReapplyTests(BaseApiTestCase):
         self.assertEqual(404, r.code)
 
     def test_reapply_invalid_args(self):
-        """Test reapplying a task with invalid args returns 400"""
+        """Test reapplying a task with unparseable args returns 400"""
         mock_task = Task()
         mock_task.name = 'tasks.add'
         mock_task.args = 'invalid json'
         mock_task.kwargs = '{}'
 
         with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
-            self._app.capp.tasks['tasks.add'] = Mock()
-            with patch('flower.api.tasks.parse_args', side_effect=ValueError("Invalid args")):
-                r = self.post('/api/task/reapply/123', body='')
+            task = self._app.capp.tasks['tasks.add'] = Mock()
+            r = self.post('/api/task/reapply/123', body='')
 
         self.assertEqual(400, r.code)
+        task.apply_async.assert_not_called()
+
+    def test_reapply_truncated_args(self):
+        """Test reapplying a task whose args repr was truncated returns 400"""
+        mock_task = Task()
+        mock_task.name = 'tasks.add'
+        mock_task.args = "(1, 2, 'long-value..."
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.add'] = Mock()
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(400, r.code)
+        task.apply_async.assert_not_called()
+
+    def test_reapply_non_list_args(self):
+        """Test reapplying a task whose args are not a list/tuple returns 400"""
+        mock_task = Task()
+        mock_task.name = 'tasks.add'
+        mock_task.args = '"just a string"'
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.add'] = Mock()
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(400, r.code)
+        task.apply_async.assert_not_called()
+
+    def test_reapply_non_dict_kwargs(self):
+        """Test reapplying a task whose kwargs are not a dict returns 400"""
+        mock_task = Task()
+        mock_task.name = 'tasks.add'
+        mock_task.args = '[]'
+        mock_task.kwargs = '[1, 2]'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.add'] = Mock()
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(400, r.code)
+        task.apply_async.assert_not_called()
+
+    def test_reapply_non_serializable_args(self):
+        """Test reapplying a task with non-JSON-serializable args returns 400"""
+        mock_task = Task()
+        mock_task.name = 'tasks.add'
+        mock_task.args = "(b'raw-bytes',)"
+        mock_task.kwargs = '{}'
+
+        with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
+            task = self._app.capp.tasks['tasks.add'] = Mock()
+            r = self.post('/api/task/reapply/123', body='')
+
+        self.assertEqual(400, r.code)
+        task.apply_async.assert_not_called()
 
     def test_reapply_apply_async_error(self):
         """Test handling error during apply_async returns 500"""
@@ -193,7 +249,7 @@ class TaskReapplyTests(BaseApiTestCase):
         task.apply_async.assert_called_once_with(args=[], kwargs={})
 
     def test_reapply_with_ellipsis_args(self):
-        """Test reapplying a task with ellipsis in args"""
+        """Test reapplying a task with truncated ('...') args returns 400"""
         mock_task = Task()
         mock_task.name = 'tasks.test'
         mock_task.args = '...'
@@ -201,11 +257,10 @@ class TaskReapplyTests(BaseApiTestCase):
 
         with patch('flower.api.tasks.tasks.get_task_by_id', return_value=mock_task):
             task = self._app.capp.tasks['tasks.test'] = Mock()
-            task.apply_async = Mock(return_value=AsyncResult('new-task-id'))
             r = self.post('/api/task/reapply/123', body='')
 
-        self.assertEqual(200, r.code)
-        task.apply_async.assert_called_once_with(args=[None], kwargs={})
+        self.assertEqual(400, r.code)
+        task.apply_async.assert_not_called()
 
     def test_reapply_with_nested_json_args(self):
         """Test reapplying task with nested JSON structures in args"""
@@ -256,7 +311,7 @@ class TaskReapplyTests(BaseApiTestCase):
             r = self.post('/api/task/reapply/123', body='')
 
         self.assertEqual(200, r.code)
-        task.apply_async.assert_called_once_with(args=(1, 2, 3), kwargs={})
+        task.apply_async.assert_called_once_with(args=[1, 2, 3], kwargs={})
 
     def test_reapply_with_python_dict_kwargs(self):
         """Test reapplying task with Python dict string in kwargs"""

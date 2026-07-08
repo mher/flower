@@ -1,7 +1,7 @@
-import datetime
-import time
-import json
 import ast
+import datetime
+import json
+import time
 
 from .search import parse_search_terms, satisfies_search_terms
 
@@ -71,52 +71,82 @@ def get_task_by_id(events, task_id):
 def as_dict(task):
     return task.as_dict()
 
+
+# Upper bound on the size of a stored args/kwargs string we are willing to
+# parse. Celery truncates event args far below this; anything larger is not
+# a legitimate task representation and is rejected before parsing.
+MAX_ARG_LENGTH = 65536
+
+
+def _parse_literal(value, kind):
+    """
+    Parse a string holding a JSON value or a Python literal (the two formats
+    celery events use for task args/kwargs) into a Python value.
+
+    Only ``json.loads`` and ``ast.literal_eval`` are used, so no code is ever
+    executed. Raises ValueError for anything that is not a plain literal,
+    including truncated reprs such as ``'(1, 2, ...'``.
+    """
+    if len(value) > MAX_ARG_LENGTH:
+        raise ValueError(f"Task {kind} too long to parse ({len(value)} bytes)")
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        pass
+    try:
+        return ast.literal_eval(value)
+    except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError) as exc:
+        raise ValueError(f"Could not parse task {kind}: {value!r}") from exc
+
+
 def parse_args(args):
     """
-    Parse and process the `args` of the task.
+    Parse the string representation of a task's positional arguments
+    into a list.
+
+    Raises ValueError if the string cannot be restored to the original
+    arguments (e.g. it was truncated by celery), so callers never reapply
+    a task with wrong arguments.
     """
     if not args:
         return []
-    try:
-        # Attempt to parse JSON
-        parsed_args = json.loads(args)
-        if isinstance(parsed_args, str) and parsed_args.startswith('(') and parsed_args.endswith(')'):
-            return ast.literal_eval(parsed_args)  # Handle stringified tuples safely
-        return parsed_args
-    except (json.JSONDecodeError, SyntaxError):
-        # Fallback for stringified tuples or ellipsis
-        if args == '...':
-            return [...]
-        if args.startswith('(') and args.endswith(')'):
-            return ast.literal_eval(args)
-        return [args]
+    parsed = _parse_literal(args, 'args')
+    if isinstance(parsed, tuple):
+        parsed = list(parsed)
+    if not isinstance(parsed, list):
+        raise ValueError(f"Task args must be a list or tuple: {args!r}")
+    return parsed
+
 
 def parse_kwargs(kwargs):
     """
-    Parse and process the `kwargs` of the task.
+    Parse the string representation of a task's keyword arguments
+    into a dict.
+
+    Raises ValueError if the string cannot be restored to the original
+    keyword arguments.
     """
     if not kwargs:
         return {}
-    try:
-        # Attempt to parse JSON
-        return json.loads(kwargs)
-    except json.JSONDecodeError as json_err:
-        # Fallback for stringified dictionaries
-        if kwargs.startswith('{') and kwargs.endswith('}'):
-            try:
-                return ast.literal_eval(kwargs)
-            except (ValueError, SyntaxError) as literal_err:
-                raise ValueError(f"Could not parse kwargs: {kwargs!r}") from literal_err
-        raise ValueError(f"Could not parse kwargs: {kwargs!r}") from json_err
+    parsed = _parse_literal(kwargs, 'kwargs')
+    if not isinstance(parsed, dict):
+        raise ValueError(f"Task kwargs must be a dict: {kwargs!r}")
+    return parsed
+
 
 def make_json_serializable(obj):
     """
-    Recursively replace non-serializable types with JSON-serializable alternatives.
+    Recursively convert parsed argument values to JSON-serializable types.
+
+    Raises TypeError for values with no JSON equivalent so callers fail
+    loudly instead of reapplying a task with corrupted arguments.
     """
-    if isinstance(obj, list):
+    if obj is None or isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, (list, tuple, set)):
         return [make_json_serializable(item) for item in obj]
-    elif isinstance(obj, dict):
+    if isinstance(obj, dict):
         return {key: make_json_serializable(value) for key, value in obj.items()}
-    elif obj is Ellipsis:
-        return None  # Replace `...` with `null`
-    return obj  # Return the object if it's already serializable
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    raise TypeError(f"Value of type {type(obj).__name__} is not JSON serializable: {obj!r}")
