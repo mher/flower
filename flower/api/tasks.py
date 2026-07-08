@@ -636,3 +636,74 @@ Get a task info
             response['worker'] = task.worker.hostname
 
         self.write(response)
+
+
+class TaskReapply(BaseTaskHandler):
+    @web.authenticated
+    async def post(self, taskid):
+        """
+Reapply a task with its original arguments
+
+**Example request**:
+
+.. sourcecode:: http
+
+  POST /api/task/reapply/91396550-c228-4111-9da4-9d88cfd5ddc6 HTTP/1.1
+  Content-Length: 0
+  Host: localhost:5555
+
+**Example response**:
+
+.. sourcecode:: http
+
+  HTTP/1.1 200 OK
+  Content-Length: 51
+  Content-Type: application/json; charset=UTF-8
+
+  {
+      "task-id": "aef8138a-4b2d-42fa-9c34-4ea23b1ffa9e"
+  }
+
+:reqheader Authorization: optional OAuth token to authenticate
+:statuscode 200: no error
+:statuscode 400: task has no name or its original arguments cannot be restored
+:statuscode 401: unauthorized request
+:statuscode 404: unknown task
+:statuscode 500: failed to reapply the task
+        """
+        task = tasks.get_task_by_id(self.application.events, taskid)
+        if not task:
+            raise HTTPError(404, f"Unknown task '{taskid}'")
+
+        taskname = task.name
+        if not taskname:
+            raise HTTPError(400, "Cannot reapply task with no name")
+
+        try:
+            args = tasks.make_json_serializable(tasks.parse_args(task.args))
+            kwargs = tasks.make_json_serializable(tasks.parse_kwargs(task.kwargs))
+        except (ValueError, TypeError) as exc:
+            logger.error("Cannot reapply task '%s': %s", taskid, exc)
+            raise HTTPError(400, f"Invalid task arguments: {exc}") from exc
+
+        # Preserve the original routing when the event carries it, so the
+        # retry runs on the same queue as the original task.
+        options = {}
+        if getattr(task, 'routing_key', None):
+            options['routing_key'] = task.routing_key
+        if getattr(task, 'exchange', None):
+            options['exchange'] = task.exchange
+
+        try:
+            # send_task works even when the task module is not importable
+            # by flower (same approach as TaskSendTask above)
+            result = self.capp.send_task(taskname, args=args, kwargs=kwargs, **options)
+        except Exception as exc:  # broker and serializer failures are heterogeneous
+            logger.exception("Error reapplying task '%s' with args=%s, kwargs=%s",
+                             taskid, args, kwargs)
+            raise HTTPError(500, f"Error reapplying task: {exc}") from exc
+
+        response = {'task-id': result.task_id}
+        if self.backend_configured(result):
+            response.update(state=result.state)
+        self.write(response)
