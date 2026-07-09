@@ -2,7 +2,7 @@ import os
 
 from tornado.web import StaticFileHandler, url
 
-from .api import control, tasks, workers
+from .api import control, tasks, workers, elasticsearch_history
 from .utils import gen_cookie_secret
 from .views import auth, monitor
 from .views.broker import BrokerView
@@ -54,6 +54,8 @@ handlers = [
     # Metrics
     (r"/metrics", monitor.Metrics),
     (r"/healthcheck", monitor.Healthcheck),
+    # Elastic search
+    (r"/api/es/refresh/(.*)", elasticsearch_history.ElasticSearchHistoryHandler),
     # Static
     (r"/static/(.*)", StaticFileHandler,
      {"path": settings['static_path']}),
