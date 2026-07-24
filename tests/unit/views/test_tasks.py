@@ -15,6 +15,58 @@ class TaskTest(AsyncHTTPTestCase):
         self.assertTrue('Unknown task' in str(r.body))
 
 
+class TaskControlsTest(AsyncHTTPTestCase):
+    def setUp(self):
+        self.app = super().get_app()
+        super().setUp()
+
+    def get_app(self, capp=None):
+        return self.app
+
+    def render_task(self, *task_events):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        events = [Event('worker-online', hostname='worker1'), *task_events]
+        for i, e in enumerate(events):
+            e['clock'] = i
+            e['local_received'] = time.time()
+            state.event(e)
+        self.app.events.state = state
+        return self.get('/task/123')
+
+    @staticmethod
+    def received_event():
+        return Event('task-received', uuid='123', name='task1', args='(2, 2)',
+                     kwargs="{'foo': 'bar'}", retries=0, eta=None,
+                     hostname='worker1')
+
+    @staticmethod
+    def started_event():
+        return Event('task-started', uuid='123', hostname='worker1')
+
+    def test_started_task_has_terminate_button(self):
+        r = self.render_task(self.received_event(), self.started_event())
+        self.assertEqual(200, r.code)
+        self.assertIn('task-terminate', str(r.body))
+
+    def test_started_task_has_no_terminate_button_in_read_only(self):
+        with self.mock_option('read_only', True):
+            r = self.render_task(self.received_event(), self.started_event())
+        self.assertEqual(200, r.code)
+        self.assertNotIn('task-terminate', str(r.body))
+
+    def test_received_task_has_revoke_button(self):
+        r = self.render_task(self.received_event())
+        self.assertEqual(200, r.code)
+        self.assertIn('task-revoke', str(r.body))
+
+    def test_received_task_has_no_revoke_button_in_read_only(self):
+        with self.mock_option('read_only', True):
+            r = self.render_task(self.received_event())
+        self.assertEqual(200, r.code)
+        self.assertNotIn('task-revoke', str(r.body))
+
+
 class TasksTest(AsyncHTTPTestCase):
     def setUp(self):
         self.app = super().get_app()

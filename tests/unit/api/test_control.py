@@ -31,6 +31,7 @@ class WorkerControlTests(BaseApiTestCase):
         self.assertEqual(200, r.code)
         celery.control.broadcast.assert_called_once_with('shutdown',
                                                          destination=['test'])
+
     def test_shutdown_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -101,6 +102,7 @@ class WorkerControlTests(BaseApiTestCase):
             'autoscale',
             reply=True, destination=['test'],
             arguments={'min': 2, 'max': 5})
+
     def test_pool_autoscale_read_only(self):
         with patch.object(options.mockable(), 'read_only', True):
             celery = self._app.capp
@@ -174,6 +176,7 @@ class WorkerControlTests(BaseApiTestCase):
                           body={'workername': 'foo', 'hard': 3.1, 'soft': 1.2})
             self.assertEqual(403, r.code)
             celery.control.time_limit.assert_not_called()
+
     def test_task_timeout_failure_returns_worker_error_message(self):
         celery = self._app.capp
         celery.control.time_limit = MagicMock(

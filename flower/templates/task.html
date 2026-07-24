@@ -12,10 +12,12 @@
           <p id="taskid" class="d-none">{{ task.uuid }}</p>
           <h2>{{ getattr(task, 'name', None) }}
             <small class="text-muted fs-5">{{ task.uuid }}</small>
-            {% if task.state == "STARTED" %}
+            {% if not read_only %}
+              {% if task.state == "STARTED" %}
                 <button class="btn btn-danger float-end" id="task-terminate">Terminate</button>
-            {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
+              {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
                 <button class="btn btn-danger float-end" id="task-revoke">Revoke</button>
+              {% end %}
             {% end %}
           </h2>
         </div>
