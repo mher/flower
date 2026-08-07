@@ -68,6 +68,12 @@ class TestSearchParser(unittest.TestCase):
             parse_search_terms('kwargs:some_kwarg1="some value1" kwargs:some_kwarg2="some value2"')
         )
 
+    def test_state(self):
+        self.assertEqual(
+            {'state': ['STARTED']},
+            parse_search_terms('state:STARTED')
+        )
+
 
 class TestStringfiedDictChecker(unittest.TestCase):
     def test_stringifies_args(self):

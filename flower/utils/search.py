@@ -25,7 +25,7 @@ def parse_search_terms(raw_search_value):
             except ValueError:
                 continue
             parsed_search['kwargs'][key] = preprocess_search_value(value)
-        elif query_part.startswith('state'):
+        elif query_part.startswith('state:'):
             if 'state' not in parsed_search:
                 parsed_search['state'] = []
             parsed_search['state'].append(preprocess_search_value(query_part[len('state:'):]))
