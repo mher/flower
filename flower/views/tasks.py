@@ -18,7 +18,11 @@ class TaskView(BaseHandler):
         if task is None:
             raise web.HTTPError(404, f"Unknown task '{task_id}'")
         task = self.format_task(task)
-        self.render("task.html", task=task)
+        self.render(
+            "task.html",
+            task=task,
+            read_only=self.application.options.read_only,
+        )
 
 
 @total_ordering

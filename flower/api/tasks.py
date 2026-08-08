@@ -117,8 +117,12 @@ Execute a task by name and wait results
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown task
         """
+        if self.application.options.read_only:
+            raise web.HTTPError(403, "Read only mode is enabled")
+
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking a task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -192,8 +196,12 @@ Execute a task
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown task
         """
+        if self.application.options.read_only:
+            raise web.HTTPError(403, "Read only mode is enabled")
+
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking a task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -254,8 +262,12 @@ Execute a task by name (doesn't require task sources)
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 404: unknown task
         """
+        if self.application.options.read_only:
+            raise web.HTTPError(403, "Read only mode is enabled")
+
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
@@ -344,8 +356,12 @@ Abort a running task
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
+:statuscode 403: read only mode is enabled
 :statuscode 503: result backend is not configured
         """
+        if self.application.options.read_only:
+            raise web.HTTPError(403, "Read only mode is enabled")
+
         logger.info("Aborting task '%s'", taskid)
 
         result = AbortableAsyncResult(taskid)

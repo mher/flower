@@ -16,6 +16,7 @@
         <h3 id="workername">{{ worker['name'] }}</h3>
       </div>
 
+      {% if not read_only %}
       <div class="btn-group float-end" role="group" aria-label="Button Group">
         <button id="worker-group" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
           aria-expanded="false">
@@ -28,6 +29,7 @@
           <li><a id="worker-refresh-all" class="dropdown-item" data-bs-dismiss="dropdown">Refresh All</a></li>
         </ul>
       </div>
+      {% end %}
 
       <div class="tabbable">
         <ul class="nav nav-tabs" role="tablist">
@@ -84,6 +86,7 @@
                   </table>
                 </div>
 
+                {% if not read_only %}
                 <div class="col-lg-4 container">
                   <form class="mx-auto">
                     <legend class="form-label mt-md-5">Pool size control</legend>
@@ -103,6 +106,7 @@
                     </div>
                   </form>
                 </div>
+                {% end %}
               </div>
 
               {% if worker['stats'].get('autoscaler', None) %}
@@ -154,7 +158,9 @@
                   <th>Queue arguments</th>
                   <th>Binding arguments</th>
                   <th>Auto delete</th>
+                  {% if not read_only %}
                   <th style="width: 125px;"></th>
+                  {% end %}
                 </tr>
               </thead>
               <tbody id="worker-queues">
@@ -170,12 +176,15 @@
                   <td>{{ queue['queue_arguments'] }}</td>
                   <td>{{ queue['binding_arguments'] }}</td>
                   <td>{{ queue['auto_delete'] }}</td>
-                  <td><button id="worker-cancel-consumer-{{ queue['name'] }}" class="btn btn-danger text-nowrap">Cancel
-                      Consumer</button></td>
+                  {% if not read_only %}
+                    <td><button id="worker-cancel-consumer-{{ queue['name'] }}" class="btn btn-danger text-nowrap">Cancel
+                        Consumer</button></td>
+                  {% end %}
                 </tr>
                 {% end %}
               </tbody>
             </table>
+            {% if not read_only %}
             <div class="control-group col-lg-3">
               <div class="input-group mb-3">
                 <input id="add-consumer-name" type="text" class="form-control" placeholder="New consumer"
@@ -183,6 +192,7 @@
                 <button class="btn btn-primary mx-1" type="button" id="worker-add-consumer">Add</button>
               </div>
             </div>
+            {% end %}
           </div> <!-- end queues tab -->
 
           <div class="tab-pane fade" id="tab-tasks" role="tabpanel" aria-labelledby="tab-tasks">
@@ -304,8 +314,10 @@
                       <div class="form-group">
                         <div class="input-group">
                           <input class="form-control form-control-sm" type="number">
+                          {% if not read_only %}
                           <button class="btn btn-primary btn-sm mx-1" type="button"
                             id="task-rate-limit-{{taskname}}">Apply</button>
+                          {% end %}
                         </div>
                       </div>
                     </td>
@@ -313,10 +325,12 @@
                       <div class="form-group">
                         <div class="input-group">
                           <input class="form-control form-control-sm" type="number">
+                          {% if not read_only %}
                           <button class="btn btn-primary btn-sm mx-1" type="button"
                             id="task-timeout-soft-{{taskname}}">Soft</button>
                           <button class="btn btn-primary btn-sm mx-1" type="button"
                             id="task-timeout-hard-{{taskname}}">Hard</button>
+                          {% end %}
                         </div>
                       </div>
                     </td>
@@ -387,4 +401,5 @@
       </div>
     </div>
   </div>
-  {% end %}
+</div>
+{% end %}

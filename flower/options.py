@@ -68,6 +68,7 @@ define("auth_provider", default=None, type=str, help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
 define("task_runtime_metric_buckets", type=float, default=Histogram.DEFAULT_BUCKETS,
        multiple=True, help="histogram latency bucket value")
-
+define("read_only", type=bool, default=False,
+       help="enable read only mode, disabling all operations")
 
 default_options = options
