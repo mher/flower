@@ -23,6 +23,12 @@ class Inspector:
         return feutures
 
     def _on_update(self, workername, method, response):
+        if method == 'stats':
+            consumer = response.get('consumer') or response
+            broker = consumer.get('broker', {})
+            # Temporary fix for issue #1512, until Celery sanitizes broker statistics.
+            broker.pop('alternates', None)
+
         info = self.workers[workername]
         info[method] = response
         info['timestamp'] = time.time()
