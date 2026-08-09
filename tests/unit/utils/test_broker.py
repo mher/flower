@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 from flower.utils import broker
 from flower.utils.broker import (Broker, RabbitMQ, Redis, RedisBase,
-                                 RedisSentinel, RedisSocket)
+                                 RedisSentinel, RedisSocket, RedisSsl)
 
 broker.requests = MagicMock()
 broker.redis = MagicMock()
@@ -166,6 +166,15 @@ class TestRedisSsl(unittest.TestCase):
         b = Broker('rediss://localhost:6379/0', broker_use_ssl=self.BROKER_USE_SSL_OPTIONS)
         self.assertFalse(isinstance(b, RabbitMQ))
         self.assertTrue(isinstance(b, Redis))
+
+    def test_init_with_redis_scheme_and_broker_use_ssl(self):
+        b = Broker('redis://localhost:6379/0', broker_use_ssl=self.BROKER_USE_SSL_OPTIONS)
+        self.assertIsInstance(b, RedisSsl)
+
+        redis_client_args = b._get_redis_client_args()
+        self.assertTrue(redis_client_args['ssl'])
+        for ssl_key, ssl_val in self.BROKER_USE_SSL_OPTIONS.items():
+            self.assertEqual(ssl_val, redis_client_args[ssl_key])
 
     def test_init_without_broker_use_ssl(self):
         with self.assertRaises(ValueError):

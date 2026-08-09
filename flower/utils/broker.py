@@ -217,7 +217,7 @@ class RedisSsl(Redis):
 
     def __init__(self, broker_url, *args, **kwargs):
         if 'broker_use_ssl' not in kwargs:
-            raise ValueError('rediss broker requires broker_use_ssl')
+            raise ValueError('Redis SSL broker requires broker_use_ssl')
         self.broker_use_ssl = kwargs.get('broker_use_ssl', {})
         super().__init__(broker_url, *args, **kwargs)
 
@@ -234,7 +234,7 @@ class Broker:
 
     Supported schemes:
     ``amqp`` or ``amqps``  -> :class:`RabbitMQ`
-    ``redis``              -> :class:`Redis`
+    ``redis``              -> :class:`Redis` or :class:`RedisSsl`
     ``rediss``             -> :class:`RedisSsl`
     ``redis+socket``       -> :class:`RedisSocket`
     ``sentinel``           -> :class:`RedisSentinel`
@@ -245,6 +245,8 @@ class Broker:
         if scheme in ('amqp', 'amqps'):
             return RabbitMQ(broker_url, *args, **kwargs)
         if scheme == 'redis':
+            if kwargs.get('broker_use_ssl'):
+                return RedisSsl(broker_url, *args, **kwargs)
             return Redis(broker_url, *args, **kwargs)
         if scheme == 'rediss':
             return RedisSsl(broker_url, *args, **kwargs)
