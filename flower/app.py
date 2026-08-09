@@ -2,6 +2,7 @@ import sys
 import logging
 
 from concurrent.futures import ThreadPoolExecutor
+from functools import cached_property
 
 import celery
 import tornado.web
@@ -102,9 +103,20 @@ class Flower(tornado.web.Application):
             self.io_loop.stop()
             self.started = False
 
-    @property
+    @cached_property
+    def broker_uri(self):
+        with self.capp.connection() as conn:
+            return conn.as_uri()
+
+    @cached_property
+    def broker_uri_with_password(self):
+        with self.capp.connection() as conn:
+            return conn.as_uri(include_password=True)
+
+    @cached_property
     def transport(self):
-        return getattr(self.capp.connection().transport, 'driver_type', None)
+        with self.capp.connection() as conn:
+            return getattr(conn.transport, 'driver_type', None)
 
     @property
     def workers(self):

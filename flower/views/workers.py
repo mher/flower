@@ -75,7 +75,7 @@ class WorkersView(BaseHandler):
         else:
             self.render("workers.html",
                         workers=workers,
-                        broker=self.application.capp.connection().as_uri(),
+                        broker=self.application.broker_uri,
                         autorefresh=1 if self.application.options.auto_refresh else 0)
 
     @classmethod

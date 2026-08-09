@@ -3,7 +3,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import celery
 from prometheus_client import Histogram
@@ -84,6 +84,17 @@ class TestFlowerCommand(AsyncHTTPTestCase):
 
 
 class TestPrintBanner(AsyncHTTPTestCase):
+    def test_closes_broker_connection(self):
+        celery_app = MagicMock()
+        connection = celery_app.connection.return_value
+        connection.__enter__.return_value = connection
+        celery_app.tasks = {}
+
+        print_banner(celery_app, False, options.port)
+
+        connection.__enter__.assert_called_once_with()
+        connection.__exit__.assert_called_once()
+
     def test_print_banner(self):
         celery_app = celery.Celery()
         with self.assertLogs('', level='INFO') as cm:
