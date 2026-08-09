@@ -124,12 +124,6 @@ body.app-body {
   border: 0;
 }
 
-.app-alerts {
-  width: min(100%, 100rem);
-  margin-right: auto;
-  margin-left: auto;
-}
-
 .app-content {
   width: min(100%, 120rem);
   margin-right: auto;

@@ -18,10 +18,9 @@
       {% module Template("navbar.html", active_tab="") %}
     {% end %}
 
-    <div class="app-alerts container-fluid my-2" aria-live="polite">
-      <div id="alert-container"></div>
-      <input type="hidden" value="{{ url_prefix or '' }}" id='url_prefix'>
-    </div>
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"
+      aria-live="polite" aria-atomic="true"></div>
+    <input type="hidden" value="{{ url_prefix or '' }}" id="url_prefix">
 
     <main class="app-content" id="main-content">
       {% block container %}

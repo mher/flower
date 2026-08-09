@@ -1,18 +1,48 @@
 /*jslint browser: true */
-/*global $, WebSocket, jQuery */
+/*global $, WebSocket, jQuery, bootstrap */
 
 var flower = (function () {
     "use strict";
 
-    var alertContainer = document.getElementById('alert-container');
+    var toastContainer = document.getElementById('toast-container');
+
     function show_alert(message, type) {
-        var wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible" role="alert">
-                <div>${message}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>`;
-        alertContainer.appendChild(wrapper);
+        var isError = type === 'danger',
+            toastElement = document.createElement('div'),
+            toastContent = document.createElement('div'),
+            toastBody = document.createElement('div'),
+            closeButton = document.createElement('button'),
+            toast;
+
+        toastElement.className = 'toast align-items-center text-bg-' + type + ' border-0';
+        toastElement.setAttribute('role', isError ? 'alert' : 'status');
+        toastElement.setAttribute('aria-live', isError ? 'assertive' : 'polite');
+        toastElement.setAttribute('aria-atomic', 'true');
+
+        toastContent.className = 'd-flex';
+        toastBody.className = 'toast-body';
+        toastBody.textContent = message;
+
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close btn-close-white me-2 m-auto';
+        closeButton.setAttribute('data-bs-dismiss', 'toast');
+        closeButton.setAttribute('aria-label', 'Close');
+
+        toastContent.appendChild(toastBody);
+        toastContent.appendChild(closeButton);
+        toastElement.appendChild(toastContent);
+        toastContainer.appendChild(toastElement);
+
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toast.dispose();
+            toastElement.remove();
+        });
+
+        toast = bootstrap.Toast.getOrCreateInstance(toastElement, {
+            autohide: true,
+            delay: isError ? 10000 : 5000
+        });
+        toast.show();
     }
 
     function url_prefix() {
