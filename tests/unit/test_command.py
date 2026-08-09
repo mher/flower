@@ -87,7 +87,7 @@ class TestPrintBanner(AsyncHTTPTestCase):
     def test_print_banner(self):
         celery_app = celery.Celery()
         with self.assertLogs('', level='INFO') as cm:
-            print_banner(celery_app, False)
+            print_banner(celery_app, False, options.port)
 
             self.assertTrue('INFO:flower.command:Visit me at http://0.0.0.0:5555' in cm.output)
             self.assertTrue('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//' in cm.output)
@@ -95,10 +95,17 @@ class TestPrintBanner(AsyncHTTPTestCase):
     def test_print_banner_with_ssl(self):
         celery_app = celery.Celery()
         with self.assertLogs('', level='INFO') as cm:
-            print_banner(celery_app, True)
+            print_banner(celery_app, True, options.port)
 
             self.assertTrue('INFO:flower.command:Visit me at https://0.0.0.0:5555' in cm.output)
             self.assertTrue('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//' in cm.output)
+
+    def test_print_banner_with_dynamic_port(self):
+        celery_app = celery.Celery()
+        with self.assertLogs('', level='INFO') as cm:
+            print_banner(celery_app, False, 52345)
+
+            self.assertTrue('INFO:flower.command:Visit me at http://0.0.0.0:52345' in cm.output)
 
     def test_print_banner_unix_socket(self):
         celery_app = celery.Celery()

@@ -50,8 +50,9 @@ def flower(ctx, tornado_argv):
     atexit.register(flower_app.stop)
     signal.signal(signal.SIGTERM, sigterm_handler)
 
+    port = flower_app.start_http_server()
     if not ctx.obj.quiet:
-        print_banner(app, 'ssl_options' in settings)
+        print_banner(app, 'ssl_options' in settings, port)
 
     try:
         flower_app.start()
@@ -158,7 +159,7 @@ def is_flower_envvar(name):
         name[len(ENV_VAR_PREFIX):].lower() in default_options
 
 
-def print_banner(app, ssl):
+def print_banner(app, ssl, port=None):
     if not options.unix_socket:
         if options.url_prefix:
             prefix_str = f'/{options.url_prefix}/'
@@ -167,7 +168,7 @@ def print_banner(app, ssl):
 
         logger.info(
             "Visit me at http%s://%s:%s%s", 's' if ssl else '',
-            options.address or '0.0.0.0', options.port,
+            options.address or '0.0.0.0', port,
             prefix_str
         )
     else:

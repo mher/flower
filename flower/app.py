@@ -8,6 +8,7 @@ import tornado.web
 
 from tornado import ioloop
 from tornado.httpserver import HTTPServer
+from tornado.netutil import bind_sockets
 from tornado.web import url
 
 from .urls import handlers as default_handlers
@@ -65,18 +66,28 @@ class Flower(tornado.web.Application):
             max_tasks_in_memory=self.options.max_tasks)
         self.started = False
 
+    def start_http_server(self):
+        if not self.options.unix_socket:
+            sockets = bind_sockets(
+                self.options.port,
+                address=self.options.address,
+            )
+            server = HTTPServer(
+                self,
+                ssl_options=self.ssl_options,
+                xheaders=self.options.xheaders,
+            )
+            server.add_sockets(sockets)
+            return sockets[0].getsockname()[1]
+
+        from tornado.netutil import bind_unix_socket
+        server = HTTPServer(self)
+        socket = bind_unix_socket(self.options.unix_socket, mode=0o777)
+        server.add_socket(socket)
+        return None
+
     def start(self):
         self.events.start()
-
-        if not self.options.unix_socket:
-            self.listen(self.options.port, address=self.options.address,
-                        ssl_options=self.ssl_options,
-                        xheaders=self.options.xheaders)
-        else:
-            from tornado.netutil import bind_unix_socket
-            server = HTTPServer(self)
-            socket = bind_unix_socket(self.options.unix_socket, mode=0o777)
-            server.add_socket(socket)
 
         self.started = True
         self.update_workers()
