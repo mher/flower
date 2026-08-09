@@ -113,6 +113,12 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(6379, b.port)
         self.assertEqual(0, b.vhost)
 
+    def test_url_encoded_ipv6(self):
+        b = Broker('redis://2001%3Adb8%3A%3A1:6379/3')
+        self.assertEqual('2001:db8::1', b.host)
+        self.assertEqual(6379, b.port)
+        self.assertEqual(3, b.vhost)
+
 
 class TestRedisSentinel(unittest.TestCase):
     def test_init(self):

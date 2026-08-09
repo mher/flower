@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class BrokerBase:
     def __init__(self, broker_url, *_, **__):
         purl = urlparse(broker_url)
-        self.host = purl.hostname
+        self.host = unquote(purl.hostname) if purl.hostname else purl.hostname
         self.port = purl.port
         self.vhost = purl.path[1:]
 
