@@ -167,10 +167,21 @@ class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
 class TestConfOption(AsyncHTTPTestCase):
     def test_error_conf(self):
         with self.mock_option('conf', None):
-            self.assertRaises(IOError, apply_options,
+            self.assertRaises(FileNotFoundError, apply_options,
                               'flower', argv=['--conf=foo'])
-            self.assertRaises(IOError, apply_options,
+            self.assertRaises(FileNotFoundError, apply_options,
                               'flower', argv=['--conf=/tmp/flower/foo'])
+
+    def test_error_conf_with_default_filename(self):
+        with tempfile.TemporaryDirectory() as directory:
+            conf = os.path.join(directory, 'flowerconfig.py')
+            with self.mock_option('conf', None):
+                self.assertRaises(
+                    FileNotFoundError,
+                    apply_options,
+                    'flower',
+                    argv=['--conf=%s' % conf],
+                )
 
     def test_default_option(self):
         apply_options('flower', argv=[])

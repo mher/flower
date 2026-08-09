@@ -88,8 +88,8 @@ def apply_options(prog_name, argv):
     try:
         parse_config_file(os.path.abspath(options.conf), final=False)
         parse_command_line([prog_name] + argv)
-    except IOError:
-        if os.path.basename(options.conf) != DEFAULT_CONFIG_FILE:
+    except FileNotFoundError:
+        if options.conf != DEFAULT_CONFIG_FILE:
             raise
 
 
