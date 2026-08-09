@@ -56,6 +56,26 @@ class PrometheusMetrics:
             ['worker']
         )
 
+    def remove_workers(self, worker_names):
+        metrics = (
+            self.events,
+            self.runtime,
+            self.prefetch_time,
+            self.number_of_prefetched_tasks,
+            self.worker_online,
+            self.worker_number_of_currently_executing_tasks,
+        )
+        removed_workers = set()
+        for metric in metrics:
+            labels_to_remove = [
+                labels for labels in metric._metrics  # pylint: disable=protected-access
+                if labels and labels[0] in worker_names
+            ]
+            for labels in labels_to_remove:
+                removed_workers.add(labels[0])
+                metric.remove(*labels)
+        return len(removed_workers)
+
 
 class EventsState(State):
     # EventsState object is created and accessed only from ioloop thread

@@ -1,5 +1,6 @@
 import sys
 import logging
+import time
 
 from concurrent.futures import ThreadPoolExecutor
 from functools import cached_property
@@ -126,3 +127,32 @@ class Flower(tornado.web.Application):
 
     def update_workers(self, workername=None):
         return self.inspector.inspect(workername)
+
+    def purge_offline_worker_metrics(self):
+        threshold = self.options.purge_offline_workers
+        if threshold is None:
+            return
+
+        state = self.events.state
+        now = time.time()
+        worker_names = set(state.counter) | set(state.workers) | \
+            set(self.inspector.workers)
+        offline_workers = set()
+
+        for worker_name in worker_names:
+            worker = state.workers.get(worker_name)
+            if worker is None:
+                offline_workers.add(worker_name)
+                continue
+            if worker.alive:
+                continue
+            if not worker.heartbeats or \
+                    now - max(worker.heartbeats) > threshold:
+                offline_workers.add(worker_name)
+
+        if not offline_workers:
+            return
+
+        removed = state.metrics.remove_workers(offline_workers)
+        if removed:
+            logger.debug("Purged metrics for %d offline workers", removed)
