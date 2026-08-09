@@ -180,6 +180,7 @@ class Events(threading.Thread):
             state = shelve.open(self.db)
             if state:
                 self.state = state['events']
+                self.state.counter.update(state.get('counter', {}))
             state.close()
 
             if state_save_interval:
@@ -244,6 +245,7 @@ class Events(threading.Thread):
         logger.debug("Saving state to '%s'...", self.db)
         state = shelve.open(self.db, flag='n')
         state['events'] = self.state
+        state['counter'] = dict(self.state.counter)
         state.close()
 
     async def on_enable_events(self):
