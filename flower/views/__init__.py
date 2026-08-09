@@ -36,6 +36,10 @@ class BaseHandler(tornado.web.RequestHandler):
         super().render(*args, **kwargs)
 
     def write_error(self, status_code, **kwargs):
+        # Avoid re-running authentication while rendering an error response
+        if not hasattr(self, '_current_user'):
+            self.current_user = None
+
         if status_code in (404, 403):
             message = ''
             if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
