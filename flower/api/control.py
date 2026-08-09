@@ -24,7 +24,7 @@ class ControlHandler(BaseApiHandler):
 
 class WorkerShutDown(ControlHandler):
     @web.authenticated
-    def post(self, workername):
+    async def post(self, workername):
         """
 Shut down a worker
 
@@ -61,13 +61,15 @@ Shut down a worker
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
         logger.info("Shutting down '%s' worker", workername)
-        self.capp.control.broadcast('shutdown', destination=[workername])
+        await self.run_blocking(
+            'worker.shutdown', workername, self.capp.control.broadcast,
+            'shutdown', destination=[workername])
         self.write(dict(message="Shutting down!"))
 
 
 class WorkerPoolRestart(ControlHandler):
     @web.authenticated
-    def post(self, workername):
+    async def post(self, workername):
         """
 Restart worker's pool
 
@@ -104,7 +106,8 @@ Restart worker's pool
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
         logger.info("Restarting '%s' worker's pool", workername)
-        response = self.capp.control.broadcast(
+        response = await self.run_blocking(
+            'worker.pool_restart', workername, self.capp.control.broadcast,
             'pool_restart', arguments={'reload': False},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
@@ -118,7 +121,7 @@ Restart worker's pool
 
 class WorkerPoolGrow(ControlHandler):
     @web.authenticated
-    def post(self, workername):
+    async def post(self, workername):
         """
 Grow worker's pool
 
@@ -159,7 +162,8 @@ Grow worker's pool
         n = self.get_argument('n', default=1, type=int)
 
         logger.info("Growing '%s' worker's pool by '%s'", workername, n)
-        response = self.capp.control.pool_grow(
+        response = await self.run_blocking(
+            'worker.pool_grow', workername, self.capp.control.pool_grow,
             n=n, reply=True, destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=f"Growing '{workername}' worker's pool by {n}"))
@@ -172,7 +176,7 @@ Grow worker's pool
 
 class WorkerPoolShrink(ControlHandler):
     @web.authenticated
-    def post(self, workername):
+    async def post(self, workername):
         """
 Shrink worker's pool
 
@@ -213,7 +217,8 @@ Shrink worker's pool
         n = self.get_argument('n', default=1, type=int)
 
         logger.info("Shrinking '%s' worker's pool by '%s'", workername, n)
-        response = self.capp.control.pool_shrink(
+        response = await self.run_blocking(
+            'worker.pool_shrink', workername, self.capp.control.pool_shrink,
             n=n, reply=True, destination=[workername])
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=f"Shrinking '{workername}' worker's pool by {n}"))
@@ -226,7 +231,7 @@ Shrink worker's pool
 
 class WorkerPoolAutoscale(ControlHandler):
     @web.authenticated
-    def post(self, workername):
+    async def post(self, workername):
         """
 Autoscale worker pool
 
@@ -270,7 +275,9 @@ Autoscale worker pool
 
         logger.info("Autoscaling '%s' worker by '%s'",
                     workername, (min, max))
-        response = self.capp.control.broadcast(
+        response = await self.run_blocking(
+            'worker.pool_autoscale', workername,
+            self.capp.control.broadcast,
             'autoscale', arguments={'min': min, 'max': max},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
@@ -285,7 +292,7 @@ Autoscale worker pool
 
 class WorkerQueueAddConsumer(ControlHandler):
     @web.authenticated
-    def post(self, workername):
+    async def post(self, workername):
         """
 Start consuming from a queue
 
@@ -327,7 +334,9 @@ Start consuming from a queue
 
         logger.info("Adding consumer '%s' to worker '%s'",
                     queue, workername)
-        response = self.capp.control.broadcast(
+        response = await self.run_blocking(
+            'worker.queue_add_consumer', workername,
+            self.capp.control.broadcast,
             'add_consumer', arguments={'queue': queue},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
@@ -341,7 +350,7 @@ Start consuming from a queue
 
 class WorkerQueueCancelConsumer(ControlHandler):
     @web.authenticated
-    def post(self, workername):
+    async def post(self, workername):
         """
 Stop consuming from a queue
 
@@ -383,7 +392,9 @@ Stop consuming from a queue
 
         logger.info("Canceling consumer '%s' from worker '%s'",
                     queue, workername)
-        response = self.capp.control.broadcast(
+        response = await self.run_blocking(
+            'worker.queue_cancel_consumer', workername,
+            self.capp.control.broadcast,
             'cancel_consumer', arguments={'queue': queue},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
@@ -397,7 +408,7 @@ Stop consuming from a queue
 
 class TaskRevoke(ControlHandler):
     @web.authenticated
-    def post(self, taskid):
+    async def post(self, taskid):
         """
 Revoke a task
 
@@ -435,13 +446,15 @@ Revoke a task
         logger.info("Revoking task '%s'", taskid)
         terminate = self.get_argument('terminate', default=False, type=bool)
         signal = self.get_argument('signal', default='SIGTERM', type=str)
-        self.capp.control.revoke(taskid, terminate=terminate, signal=signal)
+        await self.run_blocking(
+            'task.revoke', taskid, self.capp.control.revoke,
+            taskid, terminate=terminate, signal=signal)
         self.write(dict(message=f"Revoked '{taskid}'"))
 
 
 class TaskTimout(ControlHandler):
     @web.authenticated
-    def post(self, taskname):
+    async def post(self, taskname):
         """
 Change soft and hard time limits for a task
 
@@ -490,7 +503,8 @@ Change soft and hard time limits for a task
         logger.info("Setting timeouts for '%s' task (%s, %s)",
                     taskname, soft, hard)
         destination = [workername] if workername is not None else None
-        response = self.capp.control.time_limit(
+        response = await self.run_blocking(
+            'task.time_limit', taskname, self.capp.control.time_limit,
             taskname, reply=True, hard=hard, soft=soft,
             destination=destination)
 
@@ -505,7 +519,7 @@ Change soft and hard time limits for a task
 
 class TaskRateLimit(ControlHandler):
     @web.authenticated
-    def post(self, taskname):
+    async def post(self, taskname):
         """
 Change rate limit for a task
 
@@ -553,7 +567,8 @@ Change rate limit for a task
         logger.info("Setting '%s' rate limit for '%s' task",
                     ratelimit, taskname)
         destination = [workername] if workername is not None else None
-        response = self.capp.control.rate_limit(
+        response = await self.run_blocking(
+            'task.rate_limit', taskname, self.capp.control.rate_limit,
             taskname, ratelimit, reply=True, destination=destination)
         if response and 'ok' in response[0][workername]:
             self.write(dict(message=response[0][workername]['ok']))

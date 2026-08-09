@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, Mock, PropertyMock, patch
 import celery.states as states
 from celery.events import Event
 from celery.result import AsyncResult
+from kombu.exceptions import OperationalError
 from tornado.options import options
 
 from flower.events import EventsState
@@ -54,6 +55,14 @@ class AsyncApplyTests(BaseApiTestCase):
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(args=[], kwargs={})
+
+    def test_broker_connection_failure_returns_service_unavailable(self):
+        task = self._app.capp.tasks['foo'] = Mock()
+        task.apply_async.side_effect = OperationalError('broker is down')
+
+        r = self.post('/api/task/async-apply/foo', body={})
+
+        self.assertEqual(503, r.code)
 
     def test_async_apply_eta(self):
         task = self._app.capp.tasks['foo'] = Mock()
@@ -105,6 +114,58 @@ class AsyncApplyTests(BaseApiTestCase):
             r = self.post('/api/task/async-apply/foo', body={})
             self.assertEqual(403, r.code)
             celery.tasks['foo'].apply_async.assert_not_called()
+
+
+class SendTaskTests(BaseApiTestCase):
+    def test_send_task(self):
+        result = AsyncResult(123)
+        self._app.capp.send_task = Mock(return_value=result)
+
+        r = self.post('/api/task/send-task/foo', body={})
+
+        self.assertEqual(200, r.code)
+        self._app.capp.send_task.assert_called_once_with(
+            'foo', args=[], kwargs={})
+
+    def test_broker_connection_failure_returns_service_unavailable(self):
+        self._app.capp.send_task = Mock(
+            side_effect=OperationalError('broker is down'))
+
+        r = self.post('/api/task/send-task/foo', body={})
+
+        self.assertEqual(503, r.code)
+
+
+class TaskResultTests(BaseApiTestCase):
+    @patch('flower.api.tasks.AsyncResult')
+    def test_backend_connection_failure_returns_service_unavailable(
+            self, async_result):
+        class BackendConnectionError(Exception):
+            pass
+
+        result = Mock()
+        result.backend.connection_errors = (BackendConnectionError,)
+        type(result).state = PropertyMock(
+            side_effect=BackendConnectionError('backend is down'))
+        async_result.return_value = result
+
+        r = self.get('/api/task/result/123')
+
+        self.assertEqual(503, r.code)
+
+
+class TaskAbortTests(BaseApiTestCase):
+    @patch('flower.api.tasks.AbortableAsyncResult')
+    def test_backend_connection_failure_returns_service_unavailable(
+            self, abortable_result):
+        result = Mock()
+        result.backend.connection_errors = (ConnectionError,)
+        result.abort.side_effect = ConnectionError('backend is down')
+        abortable_result.return_value = result
+
+        r = self.post('/api/task/abort/123', body={})
+
+        self.assertEqual(503, r.code)
 
 
 class MockTasks:

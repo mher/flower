@@ -8,6 +8,7 @@ from functools import partial
 
 from celery.events import EventReceiver
 from celery.events.state import State
+from kombu.exceptions import OperationalError
 from prometheus_client import Counter as PrometheusCounter
 from prometheus_client import Gauge, Histogram
 from tornado.ioloop import PeriodicCallback
@@ -225,10 +226,14 @@ class Events(threading.Thread):
         state['events'] = self.state
         state.close()
 
-    def on_enable_events(self):
+    async def on_enable_events(self):
         # Periodically enable events for workers
         # launched after flower
-        self.io_loop.run_in_executor(None, self.capp.control.enable_events)
+        try:
+            await self.io_loop.run_in_executor(
+                None, self.capp.control.enable_events)
+        except OperationalError as exc:
+            logger.warning("Failed to enable events: %s", exc)
 
     def on_event(self, event):
         # Call EventsState.event in ioloop thread to avoid synchronization

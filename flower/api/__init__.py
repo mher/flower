@@ -7,6 +7,17 @@ from ..views import BaseHandler
 
 
 class BaseApiHandler(BaseHandler):
+    async def run_blocking(self, operation, target, func, *args,
+                           connection_errors=(), **kwargs):
+        return await self.application.blocking_runner.run(
+            operation,
+            target,
+            func,
+            *args,
+            connection_errors=connection_errors,
+            **kwargs,
+        )
+
     def prepare(self):
         enable_api = strtobool(os.environ.get(
             'FLOWER_UNAUTHENTICATED_API') or "false")

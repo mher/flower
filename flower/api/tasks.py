@@ -9,7 +9,6 @@ from celery.contrib.abortable import AbortableAsyncResult
 from celery.result import AsyncResult
 from tornado import web
 from tornado.escape import json_decode
-from tornado.ioloop import IOLoop
 from tornado.web import HTTPError
 
 from ..utils import tasks
@@ -44,6 +43,14 @@ class BaseTaskHandler(BaseApiHandler):
     @staticmethod
     def backend_configured(result):
         return not isinstance(result.backend, DisabledBackend)
+
+    @staticmethod
+    def backend_connection_errors(result):
+        return getattr(result.backend, 'connection_errors', ()) or ()
+
+    @staticmethod
+    def result_state(result):
+        return result.state
 
     def write_error(self, status_code, **kwargs):
         self.set_status(status_code)
@@ -140,11 +147,15 @@ All other top-level request body properties are passed to ``Task.apply_async``.
         except ValueError as exc:
             raise HTTPError(400, 'Invalid option') from exc
 
-        result = task.apply_async(args=args, kwargs=kwargs, **options)
+        result = await self.run_blocking(
+            'task.publish', taskname, task.apply_async,
+            args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
 
-        response = await IOLoop.current().run_in_executor(
-            None, self.wait_results, result, response)
+        response = await self.run_blocking(
+            'task.result_wait', result.task_id, self.wait_results,
+            result, response,
+            connection_errors=self.backend_connection_errors(result))
         self.write(response)
 
     def wait_results(self, result, response):
@@ -160,7 +171,7 @@ All other top-level request body properties are passed to ``Task.apply_async``.
 class TaskAsyncApply(BaseTaskHandler):
 
     @web.authenticated
-    def post(self, taskname):
+    async def post(self, taskname):
         """
 Execute a task
 
@@ -220,16 +231,22 @@ All other top-level request body properties are passed to ``Task.apply_async``.
         except ValueError as exc:
             raise HTTPError(400, 'Invalid option') from exc
 
-        result = task.apply_async(args=args, kwargs=kwargs, **options)
+        result = await self.run_blocking(
+            'task.publish', taskname, task.apply_async,
+            args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if self.backend_configured(result):
-            response.update(state=result.state)
+            state = await self.run_blocking(
+                'task.result_state', result.task_id, self.result_state,
+                result,
+                connection_errors=self.backend_connection_errors(result))
+            response.update(state=state)
         self.write(response)
 
 
 class TaskSend(BaseTaskHandler):
     @web.authenticated
-    def post(self, taskname):
+    async def post(self, taskname):
         """
 Execute a task by name (doesn't require task sources)
 
@@ -277,17 +294,22 @@ All other top-level request body properties are passed to ``Celery.send_task``.
         args, kwargs, options = self.get_task_args()
         logger.debug("Invoking task '%s' with '%s' and '%s'",
                      taskname, args, kwargs)
-        result = self.capp.send_task(
+        result = await self.run_blocking(
+            'task.publish', taskname, self.capp.send_task,
             taskname, args=args, kwargs=kwargs, **options)
         response = {'task-id': result.task_id}
         if self.backend_configured(result):
-            response.update(state=result.state)
+            state = await self.run_blocking(
+                'task.result_state', result.task_id, self.result_state,
+                result,
+                connection_errors=self.backend_connection_errors(result))
+            response.update(state=state)
         self.write(response)
 
 
 class TaskResult(BaseTaskHandler):
     @web.authenticated
-    def get(self, taskid):
+    async def get(self, taskid):
         """
 Get a task result
 
@@ -324,19 +346,24 @@ Get a task result
         result = AsyncResult(taskid)
         if not self.backend_configured(result):
             raise HTTPError(503)
-        response = {'task-id': taskid, 'state': result.state}
+        response = await self.run_blocking(
+            'task.result', taskid, self.read_result, result, timeout,
+            connection_errors=self.backend_connection_errors(result))
+        self.write(response)
 
+    def read_result(self, result, timeout):
+        response = {'task-id': result.id, 'state': result.state}
         if timeout:
             result.get(timeout=timeout, propagate=False)
             self.update_response_result(response, result)
         elif result.ready():
             self.update_response_result(response, result)
-        self.write(response)
+        return response
 
 
 class TaskAbort(BaseTaskHandler):
     @web.authenticated
-    def post(self, taskid):
+    async def post(self, taskid):
         """
 Abort a running task
 
@@ -374,7 +401,9 @@ Abort a running task
         if not self.backend_configured(result):
             raise HTTPError(503)
 
-        result.abort()
+        await self.run_blocking(
+            'task.abort', taskid, result.abort,
+            connection_errors=self.backend_connection_errors(result))
 
         self.write(dict(message=f"Aborted '{taskid}'"))
 

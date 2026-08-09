@@ -1,7 +1,12 @@
+import asyncio
 import os
+import threading
 from unittest.mock import MagicMock, patch
 
+from kombu.exceptions import OperationalError
+from tornado.httpclient import HTTPRequest
 from tornado.options import options
+from tornado.testing import gen_test
 
 from flower.api.control import ControlHandler
 
@@ -39,6 +44,56 @@ class WorkerControlTests(BaseApiTestCase):
             r = self.post('/api/worker/shutdown/test', body={})
             self.assertEqual(403, r.code)
             celery.control.broadcast.assert_not_called()
+    @gen_test
+    async def test_blocked_control_operation_does_not_block_healthcheck(self):
+        celery = self._app.capp
+        started = threading.Event()
+        release = threading.Event()
+
+        def block(*_args, **_kwargs):
+            started.set()
+            release.wait(timeout=2)
+
+        celery.control.broadcast = MagicMock(side_effect=block)
+        shutdown = self.http_client.fetch(HTTPRequest(
+            self.get_url('/api/worker/shutdown/test'),
+            method='POST',
+            body='',
+        ))
+        try:
+            for _ in range(100):
+                if started.is_set():
+                    break
+                await asyncio.sleep(0.01)
+            self.assertTrue(started.is_set())
+
+            healthcheck = await self.http_client.fetch(
+                self.get_url('/healthcheck'))
+            self.assertEqual(200, healthcheck.code)
+        finally:
+            release.set()
+
+        response = await shutdown
+        self.assertEqual(200, response.code)
+
+    def test_broker_connection_failure_returns_service_unavailable(self):
+        celery = self._app.capp
+        celery.control.broadcast = MagicMock(
+            side_effect=OperationalError('broker is down'))
+
+        r = self.post('/api/worker/shutdown/test', body={})
+
+        self.assertEqual(503, r.code)
+        self.assertEqual(b'Broker or result backend unavailable', r.body)
+
+    def test_unexpected_failure_returns_internal_server_error(self):
+        celery = self._app.capp
+        celery.control.broadcast = MagicMock(
+            side_effect=ValueError('unexpected'))
+
+        r = self.post('/api/worker/shutdown/test', body={})
+
+        self.assertEqual(500, r.code)
 
     def test_pool_restart(self):
         celery = self._app.capp

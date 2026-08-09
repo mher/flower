@@ -16,6 +16,7 @@ from .urls import handlers as default_handlers
 from .events import Events
 from .inspector import Inspector
 from .options import default_options
+from .utils.blocking import BlockingOperationRunner
 
 
 logger = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ class Flower(tornado.web.Application):
 
         self.executor = self.pool_executor_cls(max_workers=self.max_workers)
         self.io_loop.set_default_executor(self.executor)
+        self.blocking_runner = BlockingOperationRunner(self.executor)
 
         self.inspector = Inspector(self.io_loop, self.capp, self.options.inspect_timeout / 1000.0)
 

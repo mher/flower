@@ -3,6 +3,8 @@ import logging
 import time
 from functools import partial
 
+from kombu.exceptions import OperationalError
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,11 +41,17 @@ class Inspector:
 
         logger.debug('Sending %s inspect command', method)
         start = time.time()
-        result = (
-            getattr(inspect, method)()
-            if method != 'active'
-            else getattr(inspect, method)(safe=True)
-        )
+        try:
+            result = (
+                getattr(inspect, method)()
+                if method != 'active'
+                else getattr(inspect, method)(safe=True)
+            )
+        except Exception as exc:
+            if not self._is_connection_error(exc):
+                raise
+            logger.warning("Inspect method %s failed: %s", method, exc)
+            return
         logger.debug("Inspect command %s took %.2fs to complete", method, time.time() - start)
 
         if result is None or 'error' in result:
@@ -52,3 +60,13 @@ class Inspector:
         for worker, response in result.items():
             if response is not None:
                 self.io_loop.add_callback(partial(self._on_update, worker, method, response))
+
+    def _is_connection_error(self, exc):
+        if isinstance(exc, OperationalError):
+            return True
+
+        connection = self.capp.connection_for_read()
+        try:
+            return isinstance(exc, connection.recoverable_connection_errors)
+        finally:
+            connection.close()
