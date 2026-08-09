@@ -112,6 +112,8 @@ Execute a task by name and wait results
       "result": 3
   }
 
+All other top-level request body properties are passed to ``Task.apply_async``.
+
 :query args: a list of arguments
 :query kwargs: a dictionary of arguments
 :reqheader Authorization: optional OAuth token to authenticate
@@ -190,9 +192,10 @@ Execute a task
       "task-id": "abc300c7-2922-4069-97b6-a635cc2ac47c"
   }
 
+All other top-level request body properties are passed to ``Task.apply_async``.
+
 :query args: a list of arguments
 :query kwargs: a dictionary of arguments
-:query options: a dictionary of `apply_async` keyword arguments
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
@@ -256,6 +259,8 @@ Execute a task by name (doesn't require task sources)
       "state": "SUCCESS",
       "task-id": "c60be250-fe52-48df-befb-ac66174076e6"
   }
+
+All other top-level request body properties are passed to ``Celery.send_task``.
 
 :query args: a list of arguments
 :query kwargs: a dictionary of arguments
