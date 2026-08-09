@@ -1,4 +1,5 @@
-from unittest import TestCase
+import asyncio
+from unittest import IsolatedAsyncioTestCase, TestCase
 from unittest.mock import Mock
 
 from kombu.exceptions import OperationalError
@@ -44,3 +45,64 @@ class InspectorTests(TestCase):
             logs.output[0],
         )
         connection.close.assert_called_once_with()
+
+
+class InspectorConcurrencyTests(IsolatedAsyncioTestCase):
+    async def test_coalesces_refreshes_for_the_same_worker(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1)
+        complete = asyncio.Event()
+
+        async def inspect_all(_):
+            await complete.wait()
+
+        inspector._inspect_all = inspect_all
+
+        first = inspector.inspect('worker1')
+        second = inspector.inspect('worker1')
+
+        self.assertIs(first, second)
+        complete.set()
+        await first
+
+    async def test_global_refresh_satisfies_worker_refresh(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1)
+        complete = asyncio.Event()
+
+        async def inspect_all(_):
+            await complete.wait()
+
+        inspector._inspect_all = inspect_all
+
+        all_workers = inspector.inspect()
+        one_worker = inspector.inspect('worker1')
+
+        self.assertIs(all_workers, one_worker)
+        complete.set()
+        await all_workers
+
+    async def test_bounds_inspector_concurrency(self):
+        io_loop = Mock()
+        pending = []
+
+        def run_in_executor(*_):
+            future = asyncio.get_running_loop().create_future()
+            pending.append(future)
+            return future
+
+        io_loop.run_in_executor.side_effect = run_in_executor
+        inspector = Inspector(io_loop, Mock(), timeout=1, max_concurrency=2)
+        inspector.methods = ('stats', 'active', 'conf')
+
+        operation = inspector.inspect()
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        self.assertEqual(2, len(pending))
+
+        pending[0].set_result(None)
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        self.assertEqual(3, len(pending))
+
+        pending[1].set_result(None)
+        pending[2].set_result(None)
+        await operation

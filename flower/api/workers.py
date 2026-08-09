@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from tornado import web
@@ -156,7 +155,7 @@ List workers
 
         if refresh:
             try:
-                await asyncio.wait(self.application.update_workers(workername=workername))
+                await self.application.update_workers(workername=workername)
             except Exception as e:
                 msg = f"Failed to update workers: {e}"
                 logger.error(msg)

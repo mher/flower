@@ -1,3 +1,4 @@
+import asyncio
 import collections
 import logging
 import time
@@ -11,18 +12,47 @@ logger = logging.getLogger(__name__)
 class Inspector:
     methods = ('stats', 'active_queues', 'registered', 'scheduled',
                'active', 'reserved', 'revoked', 'conf')
+    max_concurrency = len(methods)
 
-    def __init__(self, io_loop, capp, timeout):
+    def __init__(self, io_loop, capp, timeout, max_concurrency=None):
         self.io_loop = io_loop
         self.capp = capp
         self.timeout = timeout
         self.workers = collections.defaultdict(dict)
+        self._inspect_tasks = {}
+        self._inspect_semaphore = asyncio.Semaphore(
+            max_concurrency or self.max_concurrency)
 
     def inspect(self, workername=None):
-        feutures = []
-        for method in self.methods:
-            feutures.append(self.io_loop.run_in_executor(None, partial(self._inspect, method, workername)))
-        return feutures
+        task = self._inspect_tasks.get(workername)
+        if task is None and workername is not None:
+            task = self._inspect_tasks.get(None)
+        if task is None:
+            task = asyncio.ensure_future(self._inspect_all(workername))
+            self._inspect_tasks[workername] = task
+            task.add_done_callback(
+                partial(self._on_inspect_done, workername))
+        return task
+
+    async def _inspect_all(self, workername):
+        results = await asyncio.gather(*(
+            self._inspect_method(method, workername)
+            for method in self.methods
+        ), return_exceptions=True)
+        for method, result in zip(self.methods, results):
+            if isinstance(result, Exception):
+                logger.error("Inspect method %s failed: %s", method, result)
+
+    async def _inspect_method(self, method, workername):
+        async with self._inspect_semaphore:
+            await self.io_loop.run_in_executor(
+                None, partial(self._inspect, method, workername))
+
+    def _on_inspect_done(self, workername, task):
+        if self._inspect_tasks.get(workername) is task:
+            self._inspect_tasks.pop(workername)
+        if not task.cancelled() and task.exception() is not None:
+            logger.error("Worker inspection failed: %s", task.exception())
 
     def _on_update(self, workername, method, response):
         if method == 'stats':
