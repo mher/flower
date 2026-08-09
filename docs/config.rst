@@ -477,7 +477,8 @@ To enable authentication and specify an authentication provider, set the `auth_p
   - GitLab `flower.views.auth.GitLabLoginHandler`
   - Okta `flower.views.auth.OktaLoginHandler`
 
-See also :ref:`Authentication` for usage examples
+Custom handlers can be specified by their fully qualified import path. See
+:ref:`custom-authentication` for an example.
 
 .. _purge_offline_workers:
 

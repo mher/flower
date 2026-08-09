@@ -133,3 +133,57 @@ See also `GitLab OAuth2 API`_ documentation for more info.
 .. _GitLab OAuth documentation: https://docs.gitlab.com/ee/integration/oauth_provider.htm
 .. _GitLab OAuth2 API: https://docs.gitlab.com/ee/api/oauth2.html
 .. _Group and project members API: https://docs.gitlab.com/ee/api/members.html
+
+.. _custom-authentication:
+
+Custom authentication providers
+-------------------------------
+
+Custom providers let Flower integrate with authentication services that are
+not supported by the built-in handlers.
+
+A custom handler can subclass a built-in handler to modify its behavior, or
+inherit from ``flower.views.BaseHandler`` to implement a new authentication
+flow.
+
+The :ref:`auth_provider` option accepts the fully qualified import path of a
+custom login handler. For example::
+
+    myproject/
+        __init__.py
+        auth.py
+        celery_app.py
+        provider.py
+
+Flower uses the handler for its ``/login`` route. The handler must authenticate
+the request, set the secure ``user`` cookie to an identity accepted by
+:ref:`auth`, and redirect the user after a successful login. It is also
+responsible for validating provider responses and rejecting failed logins.
+
+For example, a handler can delegate authentication to an application function
+that returns a verified identity, or ``None`` when authentication fails:
+
+.. code-block:: python
+
+    from tornado import web
+
+    from flower.views import BaseHandler
+    from myproject.provider import authenticate
+
+
+    class CustomLoginHandler(BaseHandler):
+        async def get(self):
+            identity = await authenticate(self.request)
+            if not identity:
+                raise web.HTTPError(403, "Authentication failed")
+
+            self.set_secure_cookie("user", identity)
+            self.redirect(self.get_argument("next", "/"))
+
+Start Flower with::
+
+    $ celery -A myproject.celery_app flower \
+        --auth_provider=myproject.auth.CustomLoginHandler \
+        --auth='.*@example.com'
+
+The module must be importable from Flower's Python environment.
