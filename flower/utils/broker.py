@@ -9,7 +9,9 @@ from urllib.parse import quote, unquote, urljoin, urlparse
 from tornado import httpclient, ioloop
 
 try:
-    import redis
+    from redis import asyncio as redis
+    from redis.asyncio.retry import Retry
+    from redis.backoff import NoBackoff
 except ImportError:
     redis = None
 
@@ -88,6 +90,8 @@ class RabbitMQ(BrokerBase):
 class RedisBase(BrokerBase):
     DEFAULT_SEP = '\x06\x16'
     DEFAULT_PRIORITY_STEPS = [0, 3, 6, 9]
+    DEFAULT_SOCKET_CONNECT_TIMEOUT = 1.0
+    DEFAULT_SOCKET_TIMEOUT = 2.0
 
     def __init__(self, broker_url, *_, **kwargs):
         super().__init__(broker_url)
@@ -101,6 +105,10 @@ class RedisBase(BrokerBase):
             'priority_steps', self.DEFAULT_PRIORITY_STEPS)
         self.sep = broker_options.get('sep', self.DEFAULT_SEP)
         self.broker_prefix = broker_options.get('global_keyprefix', '')
+        self.socket_connect_timeout = broker_options.get(
+            'socket_connect_timeout', self.DEFAULT_SOCKET_CONNECT_TIMEOUT)
+        self.socket_timeout = broker_options.get(
+            'socket_timeout', self.DEFAULT_SOCKET_TIMEOUT)
 
     def _q_for_pri(self, queue, pri):
         if pri not in self.priority_steps:
@@ -109,15 +117,26 @@ class RedisBase(BrokerBase):
         return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
 
     async def queues(self, names):
-        queue_stats = []
-        for name in names:
-            priority_names = [self.broker_prefix + self._q_for_pri(
-                name, pri) for pri in self.priority_steps]
-            queue_stats.append({
+        names = list(names)
+        try:
+            async with self.redis.pipeline() as pipeline:
+                for name in names:
+                    for priority in self.priority_steps:
+                        queue = self.broker_prefix + self._q_for_pri(
+                            name, priority)
+                        pipeline.llen(queue)
+                lengths = iter(await pipeline.execute())
+
+            return [{
                 'name': name,
-                'messages': sum((self.redis.llen(x) for x in priority_names))
-            })
-        return queue_stats
+                'messages': sum(
+                    next(lengths) for _ in self.priority_steps),
+            } for name in names]
+        finally:
+            if hasattr(self.redis, 'aclose'):
+                await self.redis.aclose()
+            else:
+                await self.redis.close()
 
 
 class Redis(RedisBase):
@@ -147,7 +166,10 @@ class Redis(RedisBase):
             'port': self.port,
             'db': self.vhost,
             'username': self.username,
-            'password': self.password
+            'password': self.password,
+            'socket_connect_timeout': self.socket_connect_timeout,
+            'socket_timeout': self.socket_timeout,
+            'retry': Retry(NoBackoff(), 0),
         }
 
     def _get_redis_client(self):
@@ -186,9 +208,18 @@ class RedisSentinel(RedisBase):
         return master_name
 
     def _get_redis_client(self, broker_options, broker_use_ssl):
+        sentinel_kwargs = dict(broker_options.get('sentinel_kwargs') or {})
+        sentinel_kwargs.setdefault(
+            'socket_connect_timeout', self.socket_connect_timeout)
+        sentinel_kwargs.setdefault(
+            'socket_timeout', self.socket_timeout)
+        sentinel_kwargs.setdefault('retry', Retry(NoBackoff(), 0))
         connection_kwargs = {
             'password': self.password,
-            'sentinel_kwargs': broker_options.get('sentinel_kwargs')
+            'sentinel_kwargs': sentinel_kwargs,
+            'socket_connect_timeout': self.socket_connect_timeout,
+            'socket_timeout': self.socket_timeout,
+            'retry': Retry(NoBackoff(), 0),
         }
         if isinstance(broker_use_ssl, dict):
             connection_kwargs['ssl'] = True
@@ -204,8 +235,11 @@ class RedisSocket(RedisBase):
 
     def __init__(self, broker_url, *args, **kwargs):
         super().__init__(broker_url, *args, **kwargs)
-        self.redis = redis.Redis(unix_socket_path='/' + self.vhost,
-                                 password=self.password)
+        self.redis = redis.Redis(
+            unix_socket_path='/' + self.vhost,
+            password=self.password,
+            socket_timeout=self.socket_timeout,
+            retry=Retry(NoBackoff(), 0))
 
 
 class RedisSsl(Redis):

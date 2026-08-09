@@ -70,6 +70,25 @@ class TestRedis(unittest.TestCase):
             b = Broker('redis://localhost:6379/0', broker_options=options)
             self.assertEqual(expected, b.priority_steps)
 
+    def test_client_timeouts(self):
+        b = Broker('redis://localhost:6379/0')
+        args = b._get_redis_client_args()
+        self.assertEqual(1.0, args['socket_connect_timeout'])
+        self.assertEqual(2.0, args['socket_timeout'])
+        self.assertEqual(0, args['retry'].get_retries())
+
+    def test_client_options(self):
+        options = {
+            'socket_connect_timeout': 3.0,
+            'socket_timeout': 4.0,
+            'visibility_timeout': 6,
+        }
+        b = Broker('redis://localhost:6379/0', broker_options=options)
+        args = b._get_redis_client_args()
+        self.assertEqual(3.0, args['socket_connect_timeout'])
+        self.assertEqual(4.0, args['socket_timeout'])
+        self.assertNotIn('visibility_timeout', args)
+
     def test_custom_sep(self):
         custom_sep = '.'
         cases = [(RedisBase.DEFAULT_SEP, {}),
@@ -118,6 +137,58 @@ class TestRedis(unittest.TestCase):
         self.assertEqual('2001:db8::1', b.host)
         self.assertEqual(6379, b.port)
         self.assertEqual(3, b.vhost)
+
+
+class TestRedisQueues(unittest.IsolatedAsyncioTestCase):
+    async def test_queues_uses_async_pipeline(self):
+        class Pipeline:
+            def __init__(self):
+                self.keys = []
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *_):
+                return None
+
+            def llen(self, key):
+                self.keys.append(key)
+
+            async def execute(self):
+                return range(1, len(self.keys) + 1)
+
+        class Client:
+            def __init__(self):
+                self.pipeline_instance = Pipeline()
+                self.closed = False
+
+            def pipeline(self):
+                return self.pipeline_instance
+
+            async def aclose(self):
+                self.closed = True
+
+        b = Broker('redis://localhost:6379/0')
+        client = Client()
+        b.redis = client
+
+        queues = await b.queues(['celery', 'priority'])
+
+        self.assertEqual([
+            {'name': 'celery', 'messages': 10},
+            {'name': 'priority', 'messages': 26},
+        ], queues)
+        self.assertEqual([
+            'celery',
+            'celery\x06\x163',
+            'celery\x06\x166',
+            'celery\x06\x169',
+            'priority',
+            'priority\x06\x163',
+            'priority\x06\x166',
+            'priority\x06\x169',
+        ], client.pipeline_instance.keys)
+        self.assertTrue(client.closed)
 
 
 class TestRedisSentinel(unittest.TestCase):
