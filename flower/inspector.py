@@ -20,8 +20,9 @@ class Inspector:
         self.timeout = timeout
         self.workers = collections.defaultdict(dict)
         self._inspect_tasks = {}
-        self._inspect_semaphore = asyncio.Semaphore(
+        self._inspect_max_concurrency = (
             max_concurrency or self.max_concurrency)
+        self._inspect_semaphore = None
 
     def inspect(self, workername=None):
         task = self._inspect_tasks.get(workername)
@@ -44,6 +45,9 @@ class Inspector:
                 logger.error("Inspect method %s failed: %s", method, result)
 
     async def _inspect_method(self, method, workername):
+        if self._inspect_semaphore is None:
+            self._inspect_semaphore = asyncio.Semaphore(
+                self._inspect_max_concurrency)
         async with self._inspect_semaphore:
             await self.io_loop.run_in_executor(
                 None, partial(self._inspect, method, workername))

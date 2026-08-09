@@ -82,10 +82,16 @@ class BlockingOperationRunnerTests(AsyncTestCase):
         class PausedExecutor:
             def __init__(self):
                 self.futures = []
+                self.two_submitted = asyncio.Event()
+                self.three_submitted = asyncio.Event()
 
             def submit(self, _func, *_args, **_kwargs):
                 future = Future()
                 self.futures.append(future)
+                if len(self.futures) == 2:
+                    self.two_submitted.set()
+                elif len(self.futures) == 3:
+                    self.three_submitted.set()
                 return future
 
         executor = PausedExecutor()
@@ -95,13 +101,13 @@ class BlockingOperationRunnerTests(AsyncTestCase):
             asyncio.create_task(runner.run('test.operation', index, lambda: None))
             for index in range(3)
         ]
-        await asyncio.sleep(0)
+        await asyncio.wait_for(executor.two_submitted.wait(), timeout=1)
 
         self.assertEqual(2, len(executor.futures))
         executor.futures[0].set_result(None)
-        executor.futures[1].set_result(None)
-        await asyncio.sleep(0)
-        await asyncio.sleep(0)
+        await asyncio.wait_for(executor.three_submitted.wait(), timeout=1)
         self.assertEqual(3, len(executor.futures))
+
+        executor.futures[1].set_result(None)
         executor.futures[2].set_result(None)
         await asyncio.gather(*operations)

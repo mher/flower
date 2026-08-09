@@ -9,12 +9,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
-        celery-version: ['5.2.*', '5.3.*', '5.4.*', '5.5.*']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        celery-version: ['5.2.*', '5.3.*', '5.4.*', '5.5.*', '5.6.*']
         tornado-version: ['6.5.7']
-        exclude:  # https://docs.celeryq.dev/en/v5.2.7/whatsnew-5.2.html#step-5-upgrade-to-celery-5-2
+        exclude:
           - python-version: '3.12'
             celery-version: '5.2.*'
+          - python-version: '3.13'
+            celery-version: '5.2.*'
+          - python-version: '3.13'
+            celery-version: '5.3.*'
+          - python-version: '3.13'
+            celery-version: '5.4.*'
+          - python-version: '3.14'
+            celery-version: '5.2.*'
+          - python-version: '3.14'
+            celery-version: '5.3.*'
+          - python-version: '3.14'
+            celery-version: '5.4.*'
+          - python-version: '3.14'
+            celery-version: '5.5.*'
 
     steps:
     - uses: actions/checkout@v7

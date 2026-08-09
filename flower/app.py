@@ -23,9 +23,10 @@ from .utils.blocking import BlockingOperationRunner
 logger = logging.getLogger(__name__)
 
 
-if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+if sys.platform.startswith('win'):
     import asyncio
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.set_event_loop_policy(
+        asyncio.WindowsSelectorEventLoopPolicy())  # pylint: disable=deprecated-class
 
 # pylint: disable=consider-using-f-string
 def rewrite_handler(handler, url_prefix):
