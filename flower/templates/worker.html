@@ -9,64 +9,83 @@
 {% set other = {key: value for key, value in worker['stats'].items() if key not in
 'pool pid prefetch_count autoscaler consumer broker clock total rusage'.split()} %}
 
-<div class="container-fluid">
-  <div class="row-fluid">
-    <div class="col-lg-12">
-      <div class="mt-4 mb-4">
-        <h3 id="workername">{{ worker['name'] }}</h3>
-      </div>
+<div class="page-section worker-detail-page">
+  <header class="worker-detail-header">
+    <div>
+      <p class="page-eyebrow">Worker detail</p>
+      <h1 id="workername">{{ worker['name'] }}</h1>
+    </div>
 
-      {% if not read_only %}
-      <div class="btn-group float-end" role="group" aria-label="Button Group">
-        <button id="worker-group" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
-          aria-expanded="false">
-          Refresh
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="btnGroupDrop">
-          <li><a id="worker-shutdown" class="dropdown-item" data-bs-dismiss="dropdown">Shut Down</a></li>
-          <li><a id="worker-pool-restart" class="dropdown-item" data-bs-dismiss="dropdown">Restart Pool</a></li>
-          <li><a id="worker-refresh" class="dropdown-item" data-bs-dismiss="dropdown">Refresh</a></li>
-          <li><a id="worker-refresh-all" class="dropdown-item" data-bs-dismiss="dropdown">Refresh All</a></li>
-        </ul>
-      </div>
-      {% end %}
+    {% if not read_only %}
+    <div class="btn-group" role="group" aria-label="Worker actions">
+      <button id="worker-group" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Actions
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="worker-group">
+        <li>
+          <button id="worker-shutdown" class="dropdown-item" type="button" data-bs-dismiss="dropdown">
+            Shut Down
+          </button>
+        </li>
+        <li>
+          <button id="worker-pool-restart" class="dropdown-item" type="button" data-bs-dismiss="dropdown">
+            Restart Pool
+          </button>
+        </li>
+        <li>
+          <button id="worker-refresh" class="dropdown-item" type="button" data-bs-dismiss="dropdown">
+            Refresh
+          </button>
+        </li>
+        <li>
+          <button id="worker-refresh-all" class="dropdown-item" type="button" data-bs-dismiss="dropdown">
+            Refresh All
+          </button>
+        </li>
+      </ul>
+    </div>
+    {% end %}
+  </header>
 
-      <div class="tabbable">
-        <ul class="nav nav-tabs" role="tablist">
-          <li class="nav-item" role="presentation"><a class="nav-link active" href="#tab-pool" data-bs-toggle="tab"
+  <div class="worker-tabs">
+    <nav class="worker-tabs-scroll" aria-label="Worker information">
+      <ul class="nav nav-tabs worker-tabs-nav flex-nowrap" role="tablist">
+          <li class="nav-item" role="presentation"><a class="nav-link active" id="worker-tab-pool" href="#tab-pool" data-bs-toggle="tab"
               data-bs-target="#tab-pool" type="button" role="tab" aria-controls="tab-pool" aria-selected="true">Pool</a>
           </li>
-          <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-broker" data-bs-toggle="tab"
+          <li class="nav-item" role="presentation"><a class="nav-link" id="worker-tab-broker" href="#tab-broker" data-bs-toggle="tab"
               data-bs-target="#tab-broker" type="button" role="tab" aria-controls="tab-broker"
               aria-selected="false">Broker</a></li>
-          <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-queues" data-bs-toggle="tab"
+          <li class="nav-item" role="presentation"><a class="nav-link" id="worker-tab-queues" href="#tab-queues" data-bs-toggle="tab"
               data-bs-target="#tab-queues" type="button" role="tab" aria-controls="tab-queues"
               aria-selected="false">Queues</a></li>
-          <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-tasks" data-bs-toggle="tab"
+          <li class="nav-item" role="presentation"><a class="nav-link" id="worker-tab-tasks" href="#tab-tasks" data-bs-toggle="tab"
               data-bs-target="#tab-tasks" type="button" role="tab" aria-controls="tab-tasks"
               aria-selected="false">Tasks</a></li>
-          <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-limits" data-bs-toggle="tab"
+          <li class="nav-item" role="presentation"><a class="nav-link" id="worker-tab-limits" href="#tab-limits" data-bs-toggle="tab"
               data-bs-target="#tab-limits" type="button" role="tab" aria-controls="tab-limits"
               aria-selected="false">Limits</a></li>
-          <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-config" data-bs-toggle="tab"
+          <li class="nav-item" role="presentation"><a class="nav-link" id="worker-tab-config" href="#tab-config" data-bs-toggle="tab"
               data-bs-target="#tab-config" type="button" role="tab" aria-controls="tab-config"
               aria-selected="false">Config</a></li>
-          <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-system" data-bs-toggle="tab"
+          <li class="nav-item" role="presentation"><a class="nav-link" id="worker-tab-system" href="#tab-system" data-bs-toggle="tab"
               data-bs-target="#tab-system" type="button" role="tab" aria-controls="tab-system"
               aria-selected="false">System</a></li>
           {% if other %}
-          <li class="nav-item"><a class="nav-link" href="#tab-other" data-bs-toggle="tab" data-bs-target="#tab-other"
+          <li class="nav-item" role="presentation"><a class="nav-link" id="worker-tab-other" href="#tab-other" data-bs-toggle="tab" data-bs-target="#tab-other"
               type="button" role="tab" aria-controls="tab-other" aria-selected="false">Other</a></li>
           {% end %}
-        </ul>
+      </ul>
+    </nav>
 
-        <div class="tab-content">
-          <div class="tab-pane fade show active" id="tab-pool" role="tabpanel" aria-labelledby="tab-pool">
-            <div class="container-fluid">
-              <div class="row">
-                <div class="col-lg-8">
-                  <table class="table table-bordered table-striped caption-top">
-                    <caption>Worker pool options</caption>
+    <div class="tab-content worker-tab-content">
+      <div class="tab-pane fade show active" id="tab-pool" role="tabpanel" aria-labelledby="worker-tab-pool" tabindex="0">
+        <div class="worker-pool-layout">
+          <section class="worker-panel" aria-labelledby="pool-options-heading">
+            <h2 class="worker-panel-title" id="pool-options-heading">Worker pool options</h2>
+                  <table class="table worker-key-value-table mb-0">
+                    <caption class="visually-hidden">Worker pool options</caption>
                     <tbody>
                       {% for name,value in worker['stats'].get('pool', {}).items() %}
                       <tr>
@@ -84,35 +103,40 @@
                       </tr>
                     </tbody>
                   </table>
-                </div>
+          </section>
 
-                {% if not read_only %}
-                <div class="col-lg-4 container">
-                  <form class="mx-auto">
-                    <legend class="form-label mt-md-5">Pool size control</legend>
-                    <div class="mb-3">
-                      <label for="pool-size" class="col-sm-2 col-form-label text-nowrap">Pool size</label>
-                      <input type="number" id="pool-size" min="1" max="100" value="1">
-                      <button id="worker-pool-grow" class="btn btn-primary btn-sm" type="button">Grow</button>
-                      <button id="worker-pool-shrink" class="btn btn-primary btn-sm" type="button">Shrink</button>
+          {% if not read_only %}
+          <section class="worker-panel worker-controls-panel" aria-labelledby="pool-controls-heading">
+            <h2 class="worker-panel-title" id="pool-controls-heading">Pool controls</h2>
+                  <form class="worker-controls-form">
+                    <div class="worker-control-group">
+                      <label for="pool-size" class="form-label">Pool size</label>
+                      <div class="worker-control-row">
+                        <input class="form-control" type="number" id="pool-size" min="1" max="100" value="1">
+                        <button id="worker-pool-grow" class="btn btn-outline-primary" type="button">Grow</button>
+                        <button id="worker-pool-shrink" class="btn btn-outline-primary" type="button">Shrink</button>
+                      </div>
                     </div>
-                    <div class="mb-3 input-group">
-                      <label for="min-autoscale" class="col-sm-2 form-label text-nowrap">Auto scale</label>
-                      <input class="form-control-sm" id="min-autoscale" type="number" placeholder="Min" min="1"
-                        max="100">
-                      <input class="form-control-sm mx-1" id="max-autoscale" type="number" placeholder="Max" min="1"
-                        max="100">
-                      <button id="worker-pool-autoscale" class="btn btn-primary btn-sm" type="button">Apply</button>
+                    <div class="worker-control-group">
+                      <label for="min-autoscale" class="form-label">Autoscale range</label>
+                      <div class="worker-control-row worker-autoscale-row">
+                        <input class="form-control" id="min-autoscale" type="number" placeholder="Minimum"
+                          aria-label="Minimum autoscale pool size" min="1" max="100">
+                        <input class="form-control" id="max-autoscale" type="number" placeholder="Maximum"
+                          aria-label="Maximum autoscale pool size" min="1" max="100">
+                        <button id="worker-pool-autoscale" class="btn btn-primary" type="button">Apply</button>
+                      </div>
                     </div>
                   </form>
-                </div>
-                {% end %}
-              </div>
+          </section>
+          {% end %}
+        </div>
 
               {% if worker['stats'].get('autoscaler', None) %}
-              <div class="col-md-4">
-                <table class="table table-bordered table-striped caption-top">
-                  <caption>Autoscaler options</caption>
+              <section class="worker-panel worker-autoscaler-panel" aria-labelledby="autoscaler-options-heading">
+                <h2 class="worker-panel-title" id="autoscaler-options-heading">Autoscaler options</h2>
+                <table class="table worker-key-value-table mb-0">
+                  <caption class="visually-hidden">Autoscaler options</caption>
                   <tbody>
                     {% for name,value in worker['stats']['autoscaler'].items() %}
                     <tr>
@@ -122,12 +146,11 @@
                     {% end %}
                   </tbody>
                 </table>
-              </div>
+              </section>
               {% end %}
-            </div>
-          </div> <!-- end pool tab -->
+      </div> <!-- end pool tab -->
 
-          <div class="tab-pane fade" id="tab-broker" role="tabpanel" aria-labelledby="tab-broker">
+          <div class="tab-pane fade" id="tab-broker" role="tabpanel" aria-labelledby="worker-tab-broker" tabindex="0">
             <div class="col-lg-6">
               <table class="table table-bordered table-striped caption-top">
                 <caption>Broker options</caption>
@@ -143,7 +166,7 @@
             </div>
           </div> <!-- end broker tab -->
 
-          <div class="tab-pane fade" id="tab-queues" role="tabpanel" aria-labelledby="tab-queues">
+          <div class="tab-pane fade" id="tab-queues" role="tabpanel" aria-labelledby="worker-tab-queues" tabindex="0">
             <table class="table table-bordered table-striped caption-top">
               <caption>Active queues</caption>
               <thead>
@@ -195,7 +218,7 @@
             {% end %}
           </div> <!-- end queues tab -->
 
-          <div class="tab-pane fade" id="tab-tasks" role="tabpanel" aria-labelledby="tab-tasks">
+          <div class="tab-pane fade" id="tab-tasks" role="tabpanel" aria-labelledby="worker-tab-tasks" tabindex="0">
             <table class="table table-bordered table-striped caption-top">
               <caption>Processed tasks</caption>
               <tbody>
@@ -295,9 +318,9 @@
             </table>
           </div> <!-- end tasks tab -->
 
-          <div class="tab-pane fade" id="tab-limits" role="tabpanel" aria-labelledby="tab-limits">
+          <div class="tab-pane fade" id="tab-limits" role="tabpanel" aria-labelledby="worker-tab-limits" tabindex="0">
             <div class="col-lg-10">
-              <table class="table table-bordered table-striped caption-top">
+              <table class="table table-bordered table-striped caption-top worker-limits-table">
                 <caption>Task limits</caption>
                 <thead>
                   <tr>
@@ -310,28 +333,26 @@
                   {% for taskname in worker.get('registered', []) %}
                   <tr>
                     <td>{{ taskname }}</td>
-                    <td class="col-lg-2">
-                      <div class="form-group">
-                        <div class="input-group">
-                          <input class="form-control form-control-sm" type="number">
-                          {% if not read_only %}
-                          <button class="btn btn-primary btn-sm mx-1" type="button"
-                            id="task-rate-limit-{{taskname}}">Apply</button>
-                          {% end %}
-                        </div>
+                    <td>
+                      <div class="worker-limit-control">
+                        <input class="form-control form-control-sm" type="number" placeholder="Rate"
+                          aria-label="Rate limit for {{ taskname }}">
+                        {% if not read_only %}
+                        <button class="btn btn-primary btn-sm" type="button"
+                          id="task-rate-limit-{{taskname}}">Apply</button>
+                        {% end %}
                       </div>
                     </td>
-                    <td class="col-lg-2">
-                      <div class="form-group">
-                        <div class="input-group">
-                          <input class="form-control form-control-sm" type="number">
-                          {% if not read_only %}
-                          <button class="btn btn-primary btn-sm mx-1" type="button"
-                            id="task-timeout-soft-{{taskname}}">Soft</button>
-                          <button class="btn btn-primary btn-sm mx-1" type="button"
-                            id="task-timeout-hard-{{taskname}}">Hard</button>
-                          {% end %}
-                        </div>
+                    <td>
+                      <div class="worker-limit-control worker-timeout-control">
+                        <input class="form-control form-control-sm" type="number" placeholder="Seconds"
+                          aria-label="Timeout for {{ taskname }}">
+                        {% if not read_only %}
+                        <button class="btn btn-outline-primary btn-sm" type="button"
+                          id="task-timeout-soft-{{taskname}}">Soft</button>
+                        <button class="btn btn-outline-primary btn-sm" type="button"
+                          id="task-timeout-hard-{{taskname}}">Hard</button>
+                        {% end %}
                       </div>
                     </td>
                   </tr>
@@ -341,7 +362,7 @@
             </div>
           </div> <!-- end limits tab -->
 
-          <div class="tab-pane fade" id="tab-config" role="tabpanel" aria-labelledby="tab-config">
+          <div class="tab-pane fade" id="tab-config" role="tabpanel" aria-labelledby="worker-tab-config" tabindex="0">
             <div class="col-lg-8">
               <table class="table table-bordered table-striped caption-top">
                 <caption>Configuration options</caption>
@@ -361,7 +382,7 @@
             </div>
           </div> <!-- end config tab -->
 
-          <div class="tab-pane fade" id="tab-system" role="tabpanel" aria-labelledby="tab-system">
+          <div class="tab-pane fade" id="tab-system" role="tabpanel" aria-labelledby="worker-tab-system" tabindex="0">
             <div class="col-lg-8">
               <table class="table table-bordered table-striped caption-top">
                 <caption>System usage statistics</caption>
@@ -380,7 +401,7 @@
           </div> <!-- end system tab -->
 
           {% if other %}
-          <div class="tab-pane fade" id="tab-other" role="tabpanel" aria-labelledby="tab-other">
+          <div class="tab-pane fade" id="tab-other" role="tabpanel" aria-labelledby="worker-tab-other" tabindex="0">
             <div class="col-lg-8">
               <table class="table table-bordered table-striped caption-top">
                 <caption>Other statistics</caption>
@@ -397,8 +418,6 @@
           </div> <!-- end other tab -->
           {% end %}
 
-        </div>
-      </div>
     </div>
   </div>
 </div>

@@ -5,9 +5,39 @@
 {% end %}
 
 {% block container %}
-<div class="container-fluid mt-3">
-  <figure class="table-responsive">
-    <table id="workers-table" class="table table-bordered table-striped table-hover w-100">
+<div class="page-section workers-page">
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">Cluster overview</p>
+    </div>
+    <div class="refresh-status" aria-live="polite">
+      <span class="status-dot status-dot-live" id="workers-live-indicator" aria-hidden="true"></span>
+      <span id="workers-refresh-status">Connecting…</span>
+    </div>
+  </header>
+
+  <section class="metric-grid" aria-label="Worker summary">
+    <article class="metric-card">
+      <p class="metric-label">Online workers</p>
+      <p class="metric-value" id="workers-online">—</p>
+    </article>
+    <article class="metric-card metric-card-active">
+      <p class="metric-label">Active tasks</p>
+      <p class="metric-value" id="workers-active">—</p>
+    </article>
+    <article class="metric-card metric-card-success">
+      <p class="metric-label">Succeeded</p>
+      <p class="metric-value" id="workers-succeeded">—</p>
+    </article>
+    <article class="metric-card metric-card-danger">
+      <p class="metric-label">Failed</p>
+      <p class="metric-value" id="workers-failed">—</p>
+    </article>
+  </section>
+
+  <section class="workers-table-card" aria-label="Workers">
+    <figure class="table-responsive mb-0">
+      <table id="workers-table" class="workers-table table table-hover align-middle w-100 mb-0">
       <thead>
         <tr>
           <th>Worker</th>
@@ -46,8 +76,9 @@
           <th></th>
         </tr>
       </tfoot>
-    </table>
-  </figure>
+      </table>
+    </figure>
+  </section>
 </div>
 {% end %}
 

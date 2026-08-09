@@ -6,22 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flower</title>
     <link rel="icon" href="{{ static_url('favicon.ico') }}">
+    <script src="{{ static_url('js/theme.js') }}"></script>
   	<link rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}">
 	  <link rel="stylesheet" href="{{ static_url('css/datatables-1.13.4.min.css') }}">
 	  <link href="{{ static_url('css/flower.css') }}" rel="stylesheet">
   </head>
-  <body class="m-2">
+  <body class="app-body">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
     {% block navbar %}
       {% module Template("navbar.html", active_tab="") %}
     {% end %}
 
-    <div class="container-fluid my-2">
+    <div class="app-alerts container-fluid my-2" aria-live="polite">
       <div id="alert-container"></div>
       <input type="hidden" value="{{ url_prefix or '' }}" id='url_prefix'>
     </div>
 
-    {% block container %}
-    {% end %}
+    <main class="app-content" id="main-content">
+      {% block container %}
+      {% end %}
+    </main>
 
     <script src="{{ static_url('js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ static_url('js/jquery-3.6.4.min.js') }}"></script>
