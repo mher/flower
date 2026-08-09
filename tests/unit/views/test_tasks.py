@@ -113,6 +113,30 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('123', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
 
+    def test_search_task_with_list_args(self):
+        state = EventsState()
+        event = Event(
+            'task-received', uuid='123', name='task1',
+            args=['needle', 2], kwargs={}, retries=0, eta=None,
+            hostname='worker1', clock=1, local_received=time.time())
+        state.event(event)
+        self.app.events.state = state
+
+        params = dict(draw=1, start=0, length=10)
+        params['search[value]'] = 'needle'
+        params['order[0][column]'] = 0
+        params['columns[0][data]'] = 'name'
+        params['order[0][dir]'] = 'asc'
+
+        r = self.get('/tasks/datatable?' + '&'.join(
+            map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode('utf-8'))
+        self.assertEqual(200, r.code)
+        self.assertEqual(1, table['recordsTotal'])
+        self.assertEqual(1, table['recordsFiltered'])
+        self.assertEqual('123', table['data'][0]['uuid'])
+
     def test_failed_task(self):
         state = EventsState()
         state.get_or_create_worker('worker1')

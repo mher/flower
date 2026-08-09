@@ -105,8 +105,10 @@ class TestStringfiedDictChecker(unittest.TestCase):
 class TestTaskFiltering(unittest.TestCase):
     def _create_task(self, result=None, args=None, kwargs='{}'):
         args = args or []
-        TaskMockClass = namedtuple('Task', 'result args kwargs')
-        return TaskMockClass(result, args, kwargs)
+        TaskMockClass = namedtuple(
+            'Task', 'name uuid state worker result args kwargs')
+        return TaskMockClass(
+            'task', 'uuid', 'SUCCESS', None, result, args, kwargs)
 
     def setUp(self):
         self.task = self._create_task(
@@ -145,6 +147,19 @@ class TestTaskFiltering(unittest.TestCase):
         self.assertEqual(
             False,
             satisfies_search_terms(self.task, dict(args=['arg']))
+        )
+
+    def test_any_search_handles_list_args(self):
+        self.assertEqual(
+            True,
+            satisfies_search_terms(self.task, dict(any='arg1'))
+        )
+
+    def test_any_search_handles_dict_kwargs(self):
+        task = self._create_task(kwargs={'kwarg1': 'some_value'})
+        self.assertEqual(
+            True,
+            satisfies_search_terms(task, dict(any='some_value'))
         )
 
     def test_result_search_handles_none(self):
