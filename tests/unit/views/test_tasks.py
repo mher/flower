@@ -80,6 +80,27 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
         self.assertTrue('UUID' in str(r.body))
         self.assertNotIn('<tr id=', str(r.body))
+        self.assertIn('tasks_filter.html', str(r.body))
+
+    def test_invalid_search_returns_inline_error(self):
+        params = dict(draw=1, start=0, length=10)
+        params['search[value]'] = 'ab'
+        params['order[0][column]'] = 0
+        params['columns[0][data]'] = 'name'
+        params['order[0][dir]'] = 'asc'
+
+        r = self.get('/tasks/datatable?' + '&'.join(
+            map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode('utf-8'))
+        self.assertEqual(200, r.code)
+        self.assertEqual([], table['data'])
+        self.assertEqual(0, table['recordsTotal'])
+        self.assertEqual(0, table['recordsFiltered'])
+        self.assertEqual(
+            'Substring search terms must contain at least 3 characters '
+            'at position 0.',
+            table['searchError'])
 
     def test_succeeded_task(self):
         state = EventsState()

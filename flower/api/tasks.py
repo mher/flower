@@ -14,6 +14,7 @@ from tornado.web import HTTPError
 
 from ..utils import tasks
 from ..utils.broker import Broker
+from ..utils.search import QuerySyntaxError
 from . import BaseApiHandler
 
 logger = logging.getLogger(__name__)
@@ -427,6 +428,7 @@ Return length of all active queues
 
 class ListTasks(BaseTaskHandler):
     @web.authenticated
+    # pylint: disable=too-many-locals
     def get(self):
         """
 List tasks
@@ -514,8 +516,10 @@ List tasks
 :query state: filter tasks by state
 :query received_start: filter tasks by received date (must be greater than) format %Y-%m-%d %H:%M
 :query received_end: filter tasks by received date (must be less than) format %Y-%m-%d %H:%M
+:query search: search task details using the task-filter query syntax
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
+:statuscode 400: invalid search query
 :statuscode 401: unauthorized request
         """
         app = self.application
@@ -536,18 +540,24 @@ List tasks
         state = state if state != 'All' else None
 
         result = []
-        for task_id, task in tasks.iter_tasks(
-                app.events, limit=limit, offset=offset, sort_by=sort_by, type=type,
-                worker=worker, state=state,
-                received_start=received_start,
-                received_end=received_end,
-                search=search
-        ):
-            task = tasks.as_dict(task)
-            worker = task.pop('worker', None)
-            if worker is not None:
-                task['worker'] = worker.hostname
-            result.append((task_id, task))
+        try:
+            task_iterator = tasks.iter_tasks(
+                    app.events, limit=limit, offset=offset, sort_by=sort_by, type=type,
+                    worker=worker, state=state,
+                    received_start=received_start,
+                    received_end=received_end,
+                    search=search
+            )
+            for task_id, task in task_iterator:
+                task = tasks.as_dict(task)
+                worker = task.pop('worker', None)
+                if worker is not None:
+                    task['worker'] = worker.hostname
+                result.append((task_id, task))
+        except QuerySyntaxError as exc:
+            self.set_status(400)
+            self.write({'error': str(exc)})
+            return
         self.write(OrderedDict(result))
 
 

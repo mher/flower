@@ -235,3 +235,13 @@ class TaskTests(BaseApiTestCase):
         self.assertEqual(1, len(table))
         firstFetchedTaskName = table[list(table)[0]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
+
+    def test_invalid_search(self):
+        r = self.get('/api/tasks?search=ab')
+
+        self.assertEqual(400, r.code)
+        error = json.loads(r.body.decode('utf-8'))
+        self.assertEqual(
+            'Substring search terms must contain at least 3 characters '
+            'at position 0.',
+            error['error'])

@@ -13,6 +13,8 @@ from prometheus_client import Gauge, Histogram
 from tornado.ioloop import PeriodicCallback
 from tornado.options import options
 
+from .utils.search import TaskSearchEngine
+
 logger = logging.getLogger(__name__)
 
 PROMETHEUS_METRICS = None
@@ -61,19 +63,42 @@ class EventsState(State):
         super().__init__(*args, **kwargs)
         self.counter = collections.defaultdict(Counter)
         self.metrics = get_prometheus_metrics()
+        self.search_engine = TaskSearchEngine()
+        self._rebuild_search_index()
 
+    def _rebuild_search_index(self):
+        self.search_engine.rebuild(self.tasks.items())
+
+    def _clear_tasks(self, ready=True):
+        super()._clear_tasks(ready)
+        self._rebuild_search_index()
+
+    # pylint: disable=too-many-branches
     def event(self, event):
+        event_type = event['type']
+        lru_task_id = None
+        if event_type.startswith('task-'):
+            task_id = event.get('uuid')
+            limit = getattr(self.tasks, 'limit', None)
+            # Celery may discard the least recently used task while applying
+            # this event. Remember its ID so its search entry can be removed
+            if task_id not in self.tasks and limit and len(self.tasks) >= limit:
+                lru_task_id = next(iter(self.tasks), None)
+
         # Save the event
         super().event(event)
 
         worker_name = event['hostname']
-        event_type = event['type']
 
         self.counter[worker_name][event_type] += 1
 
         if event_type.startswith('task-'):
             task_id = event['uuid']
             task = self.tasks.get(task_id)
+            if lru_task_id is not None and lru_task_id not in self.tasks:
+                self.search_engine.remove(lru_task_id)
+            if task is not None:
+                self.search_engine.upsert(task)
             task_name = event.get('name', '')
             if not task_name and task_id in self.tasks:
                 task_name = task.name or ''

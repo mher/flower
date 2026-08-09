@@ -722,6 +722,7 @@ var flower = (function () {
             tasksTable = $('#tasks-table').DataTable({
             rowId: 'uuid',
             searching: true,
+            searchDelay: 300,
             scrollX: true,
             scrollCollapse: true,
             processing: true,
@@ -747,7 +748,19 @@ var flower = (function () {
             },
             ajax: {
                 type: 'POST',
-                url: url_prefix() + '/tasks/datatable'
+                url: url_prefix() + '/tasks/datatable',
+                dataSrc: function (response) {
+                    var searchError = $('#task-search-error'),
+                        searchErrorMessage = $('#task-search-error-message');
+                    if (response.searchError) {
+                        searchErrorMessage.text(response.searchError);
+                        searchError.removeClass('d-none');
+                    } else {
+                        searchErrorMessage.text('');
+                        searchError.addClass('d-none');
+                    }
+                    return response.data;
+                }
             },
             order: [
                 [7, "desc"]
