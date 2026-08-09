@@ -110,18 +110,74 @@ body.app-body {
   margin-left: auto;
 }
 
-.app-github-link {
-  display: inline-flex;
-  gap: 0.45rem;
-  align-items: center;
+.app-nav .app-icon-link {
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  place-items: center;
+}
+
+.app-icon-link svg {
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .theme-toggle {
-  width: 100%;
-  font: inherit;
-  text-align: left;
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  place-items: center;
   background: transparent;
   border: 0;
+}
+
+.theme-toggle::after {
+  display: none;
+}
+
+.theme-icon,
+.theme-check {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}
+
+.theme-toggle .theme-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.theme-menu {
+  width: 10rem;
+  min-width: 10rem;
+  padding: 0.375rem;
+  border-color: var(--bs-border-color);
+  box-shadow: var(--flower-shadow);
+}
+
+.theme-option {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--bs-border-radius-sm);
+}
+
+.theme-option.active,
+.theme-option:active {
+  color: var(--bs-primary);
+  background: var(--bs-primary-bg-subtle);
+}
+
+.theme-check {
+  margin-left: auto;
+  opacity: 0;
+}
+
+.theme-option.active .theme-check {
+  opacity: 1;
 }
 
 .app-content {

@@ -6,6 +6,14 @@ var flower = (function () {
 
     var toastContainer = document.getElementById('toast-container');
 
+    document.querySelectorAll('[data-flower-tooltip]').forEach(function (element) {
+        var tooltip = bootstrap.Tooltip.getOrCreateInstance(element);
+
+        element.addEventListener('show.bs.dropdown', function () {
+            tooltip.hide();
+        });
+    });
+
     function show_alert(message, type) {
         var isError = type === 'danger',
             toastElement = document.createElement('div'),
