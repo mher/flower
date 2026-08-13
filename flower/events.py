@@ -1,11 +1,12 @@
 import collections
 import logging
+import pickle
+import redis
 import shelve
 import threading
 import time
 from collections import Counter
 from functools import partial
-
 from celery.events import EventReceiver
 from celery.events.state import State
 from prometheus_client import Counter as PrometheusCounter
@@ -116,6 +117,8 @@ class Events(threading.Thread):
     # pylint: disable=too-many-arguments
     def __init__(self, capp, io_loop, db=None, persistent=False,
                  enable_events=True, state_save_interval=0,
+                 redis_host=None, redis_port=None, redis_db=None,
+                 redis_ssl=False, redis_key='flower',
                  **kwargs):
         threading.Thread.__init__(self)
         self.daemon = True
@@ -129,12 +132,32 @@ class Events(threading.Thread):
         self.state = None
         self.state_save_timer = None
 
+        self.redis_host = redis_host
+        self.redis_port = redis_port
+        self.redis_db = redis_db
+        self.redis_ssl = redis_ssl
+        self.redis_key = redis_key
+
+        # Check if we are using Redis as the database for persistence
+        self.redis_as_db = self.redis_host and self.redis_port and self.redis_db
+
         if self.persistent:
-            logger.debug("Loading state from '%s'...", self.db)
-            state = shelve.open(self.db)
-            if state:
-                self.state = state['events']
-            state.close()
+            if self.redis_as_db:
+                logger.debug("Loading state from Redis...")
+                redis_client = redis.Redis(host=self.redis_host, port=self.redis_port, db=self.redis_db, ssl=self.redis_ssl)
+                state_data = redis_client.get(self.redis_key)
+                redis_client.close()
+                if state_data:
+                    self.state = pickle.loads(state_data)
+                    logger.debug(f"State loaded from Redis: {self.state}")
+                else:
+                    self.state = None
+            else:
+                logger.debug(f"Loading state from file '{self.db}'...")
+                state = shelve.open(self.db)
+                if state:
+                    self.state = state['events']
+                state.close()
 
             if state_save_interval:
                 self.state_save_timer = PeriodicCallback(self.save_state,
@@ -195,10 +218,16 @@ class Events(threading.Thread):
                 time.sleep(try_interval)
 
     def save_state(self):
-        logger.debug("Saving state to '%s'...", self.db)
-        state = shelve.open(self.db, flag='n')
-        state['events'] = self.state
-        state.close()
+        logger.debug("Saving state...")
+        if self.redis_as_db:
+            redis_client = redis.Redis(host=self.redis_host, port=self.redis_port, db=self.redis_db, ssl=self.redis_ssl)
+            state_data = pickle.dumps(self.state)
+            redis_client.set(self.redis_key, state_data)
+            redis_client.close()
+        else:
+            state = shelve.open(self.db, flag='n')
+            state['events'] = self.state
+            state.close()
 
     def on_enable_events(self):
         # Periodically enable events for workers
