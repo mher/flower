@@ -328,6 +328,16 @@ Enables showing time relative to the page refresh time in a more human-readable 
 
 When enabled, timestamps will be shown as relative time such as "2 minutes ago" or "1 hour ago" instead of the exact timestamp.
 
+
+.. _browser_local_time:
+
+browser_local_time
+~~~~~~~~~~~~~~~~~~
+
+Default: False
+
+Show time in the browser's local timezone. If not specified, or set to `False`, the timezone of the Celery app is used.
+
 .. _persistent:
 
 persistent
