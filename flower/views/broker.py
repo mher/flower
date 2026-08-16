@@ -18,7 +18,7 @@ class BrokerView(BaseHandler):
             http_api = app.options.broker_api
 
         try:
-            broker = Broker(app.capp.connection(connect_timeout=1.0).as_uri(include_password=True),
+            broker = Broker(app.broker_uri_with_password,
                             http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
                             broker_use_ssl=self.capp.conf.broker_use_ssl)
         except NotImplementedError as exc:
@@ -28,8 +28,9 @@ class BrokerView(BaseHandler):
         try:
             queues = await broker.queues(self.get_active_queue_names())
         except Exception as e:
+            queues = []
             logger.error("Unable to get queues: '%s'", e)
 
         self.render("broker.html",
-                    broker_url=app.capp.connection().as_uri(),
+                    broker_url=app.broker_uri,
                     queues=queues)

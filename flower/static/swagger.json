@@ -101,10 +101,11 @@
                 "args": {
                   "type": "array"
                 }
-              }
+              },
+              "additionalProperties": {}
             },
             "name": "args",
-            "description": "the dictionary of args and kwargs",
+            "description": "args, kwargs, and top-level Task.apply_async options",
             "in": "body"
           }
         ]
@@ -131,14 +132,12 @@
                 },
                 "args": {
                   "type": "array"
-                },
-                "options": {
-                  "type": "object"
                 }
-              }
+              },
+              "additionalProperties": {}
             },
             "name": "args",
-            "description": "the dictionary of args, kwargs, and apply-async options",
+            "description": "args, kwargs, and top-level Task.apply_async options",
             "in": "body"
           }
         ]
@@ -166,10 +165,11 @@
                 "args": {
                   "type": "array"
                 }
-              }
+              },
+              "additionalProperties": {}
             },
             "name": "args",
-            "description": "the dictionary of args, and kwargs",
+            "description": "args, kwargs, and top-level Celery.send_task options",
             "in": "body"
           }
         ]
@@ -520,4 +520,3 @@
   },
   "swagger": "2.0"
 }
-

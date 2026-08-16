@@ -50,8 +50,9 @@ def flower(ctx, tornado_argv):
     atexit.register(flower_app.stop)
     signal.signal(signal.SIGTERM, sigterm_handler)
 
+    port = flower_app.start_http_server()
     if not ctx.obj.quiet:
-        print_banner(app, 'ssl_options' in settings)
+        print_banner(app, 'ssl_options' in settings, port)
 
     try:
         flower_app.start()
@@ -87,8 +88,8 @@ def apply_options(prog_name, argv):
     try:
         parse_config_file(os.path.abspath(options.conf), final=False)
         parse_command_line([prog_name] + argv)
-    except IOError:
-        if os.path.basename(options.conf) != DEFAULT_CONFIG_FILE:
+    except FileNotFoundError:
+        if options.conf != DEFAULT_CONFIG_FILE:
             raise
 
 
@@ -158,7 +159,7 @@ def is_flower_envvar(name):
         name[len(ENV_VAR_PREFIX):].lower() in default_options
 
 
-def print_banner(app, ssl):
+def print_banner(app, ssl, port=None):
     if not options.unix_socket:
         if options.url_prefix:
             prefix_str = f'/{options.url_prefix}/'
@@ -167,13 +168,14 @@ def print_banner(app, ssl):
 
         logger.info(
             "Visit me at http%s://%s:%s%s", 's' if ssl else '',
-            options.address or '0.0.0.0', options.port,
+            options.address or '127.0.0.1', port,
             prefix_str
         )
     else:
         logger.info("Visit me via unix socket file: %s", options.unix_socket)
 
-    logger.info('Broker: %s', app.connection().as_uri())
+    with app.connection() as conn:
+        logger.info('Broker: %s', conn.as_uri())
     logger.info(
         'Registered tasks: \n%s',
         pformat(sorted(app.tasks.keys()))

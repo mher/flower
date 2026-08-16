@@ -24,4 +24,7 @@ Contents
 Flower is licensed under BSD 3-Clause License.
 See the `License`_ file for the full license text.
 
+Flower development and support is provided through its GitHub `repository`_.
+
 .. _`License`: https://github.com/mher/flower/blob/master/LICENSE
+.. _`repository`: https://github.com/mher/flower

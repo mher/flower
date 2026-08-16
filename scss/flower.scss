@@ -1,9 +1,24 @@
-// flower.scss
+// Flower palette
+$flower-green-700: #348613;
+$flower-green-800: #28680e;
+$flower-gray-50: #f6f8f5;
+$flower-gray-200: #dfe5dc;
+$flower-gray-900: #172012;
 
-$primary: #348613;
-$link-color: #348613;
-$border-color: #c7ecb8;
-$table-striped-bg: #f0ffeb;
-$bg-light: #f0ffeb;
+// Bootstrap theme
+$primary: $flower-green-700;
+$light: $flower-gray-50;
+$body-color: $flower-gray-900;
+$body-bg: $flower-gray-50;
+$link-color: $flower-green-700;
+$link-hover-color: $flower-green-800;
+$border-color: $flower-gray-200;
+
+// Component foundation
+$border-radius: 0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
+$table-striped-bg: rgba($primary, 0.035);
+$table-hover-bg: rgba($primary, 0.055);
 
 @import "bootstrap";

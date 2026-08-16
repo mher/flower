@@ -155,6 +155,70 @@ class PrometheusTests(AsyncHTTPTestCase):
 
         self.assertTrue(f'flower_worker_online{{worker="{worker_name}"}} 0.0' in metrics)
 
+    def test_metrics_purge_expired_worker(self):
+        state = EventsState()
+        worker_name = 'expired-worker-for-metrics-purge'
+        task_name = 'task-for-metrics-purge'
+        old_timestamp = time.time() - 3600
+        state.event(Event(
+            'worker-heartbeat', hostname=worker_name,
+            timestamp=old_timestamp, local_received=old_timestamp,
+            freq=2, active=1))
+        state.metrics.events.labels(
+            worker_name, 'task-succeeded', task_name).inc()
+        state.metrics.runtime.labels(worker_name, task_name).observe(1)
+        state.metrics.prefetch_time.labels(worker_name, task_name).set(1)
+        state.metrics.number_of_prefetched_tasks.labels(
+            worker_name, task_name).set(1)
+        self.app.events.state = state
+        self.app.inspector.workers[worker_name] = {'stats': {}}
+
+        self.assertFalse(state.workers[worker_name].alive)
+        with self.mock_option('purge_offline_workers', 60):
+            metrics = self.get('/metrics').body.decode('utf-8')
+            next_metrics = self.get('/metrics').body.decode('utf-8')
+
+        self.assertNotIn(worker_name, metrics)
+        self.assertNotIn(worker_name, next_metrics)
+        self.assertIn(worker_name, state.counter)
+        self.assertIn(worker_name, state.workers)
+        self.assertIn(worker_name, self.app.inspector.workers)
+
+    def test_metrics_keep_live_worker(self):
+        state = EventsState()
+        worker_name = 'live-worker-for-metrics-purge'
+        timestamp = time.time()
+        state.event(Event(
+            'worker-heartbeat', hostname=worker_name,
+            timestamp=timestamp, local_received=timestamp,
+            freq=2, active=1))
+        self.app.events.state = state
+        self.app.inspector.workers[worker_name] = {'stats': {}}
+
+        with self.mock_option('purge_offline_workers', 60):
+            metrics = self.get('/metrics').body.decode('utf-8')
+
+        self.assertIn(
+            f'flower_worker_online{{worker="{worker_name}"}} 1.0', metrics)
+        self.assertIn(worker_name, state.counter)
+        self.assertIn(worker_name, state.workers)
+        self.assertIn(worker_name, self.app.inspector.workers)
+
+    def test_metrics_purge_worker_without_heartbeat_metric(self):
+        state = EventsState()
+        worker_name = 'task-only-worker-for-metrics-purge'
+        task_name = 'task-for-worker-without-heartbeat'
+        state.get_or_create_worker(worker_name)
+        state.counter[worker_name]['task-succeeded'] += 1
+        state.metrics.events.labels(
+            worker_name, 'task-succeeded', task_name).inc()
+        self.app.events.state = state
+
+        with self.mock_option('purge_offline_workers', 60):
+            metrics = self.get('/metrics').body.decode('utf-8')
+
+        self.assertNotIn(worker_name, metrics)
+
     def test_worker_prefetched_tasks_metric(self):
         state = EventsState()
         worker_name = 'worker2'

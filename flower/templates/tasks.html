@@ -9,8 +9,29 @@
 <input type="hidden" value="{{ time }}" id='time'>
 <input type="hidden" value="{{ columns }}" id='columns'>
 
-<div class="container-fluid mt-3">
-  <table id="tasks-table" class="table table-bordered table-striped table-hover w-100">
+<div class="page-section tasks-page">
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">Task history</p>
+    </div>
+  </header>
+
+  <nav class="task-state-filters" aria-label="Filter tasks by state">
+    <button class="task-state-filter active" type="button" data-task-state="" aria-pressed="true">All</button>
+    <button class="task-state-filter" type="button" data-task-state="STARTED" aria-pressed="false">Started</button>
+    <button class="task-state-filter" type="button" data-task-state="SUCCESS" aria-pressed="false">Succeeded</button>
+    <button class="task-state-filter" type="button" data-task-state="FAILURE" aria-pressed="false">Failed</button>
+    <button class="task-state-filter" type="button" data-task-state="RETRY" aria-pressed="false">Retried</button>
+  </nav>
+
+  <section class="tasks-table-card" aria-label="Tasks">
+    <p id="task-search-error" class="small text-danger px-3 pt-2 mb-0 d-none" role="alert">
+      <span id="task-search-error-message"></span>
+      See
+      <a href="https://flower.readthedocs.io/en/latest/tasks_filter.html"
+         target="_blank" rel="noopener">Search syntax</a> for details.
+    </p>
+    <table id="tasks-table" class="tasks-table table table-hover align-middle w-100 mb-0">
     <thead>
     <tr>
       <th>Name</th>
@@ -68,6 +89,7 @@
     </tr>
       {% end %}
     </tbody>
-  </table>
+    </table>
+  </section>
 </div>
 {% end %}

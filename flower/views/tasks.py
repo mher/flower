@@ -1,10 +1,10 @@
 import copy
 import logging
-from functools import total_ordering
 
 from tornado import web
 
-from ..utils.tasks import as_dict, get_task_by_id, iter_tasks
+from ..utils.search import QuerySyntaxError
+from ..utils.tasks import as_dict, get_task_by_id, search_tasks
 from ..views import BaseHandler
 
 logger = logging.getLogger(__name__)
@@ -18,31 +18,16 @@ class TaskView(BaseHandler):
         if task is None:
             raise web.HTTPError(404, f"Unknown task '{task_id}'")
         task = self.format_task(task)
-        self.render("task.html", task=task)
-
-
-@total_ordering
-class Comparable:
-    """
-    Compare two objects, one or more of which may be None.  If one of the
-    values is None, the other will be deemed greater.
-    """
-
-    def __init__(self, value):
-        self.value = value
-
-    def __eq__(self, other):
-        return self.value == other.value
-
-    def __lt__(self, other):
-        try:
-            return self.value < other.value
-        except TypeError:
-            return self.value is None
+        self.render(
+            "task.html",
+            task=task,
+            read_only=self.application.options.read_only,
+        )
 
 
 class TasksDataTable(BaseHandler):
     @web.authenticated
+    # pylint: disable=too-many-locals
     def get(self):
         app = self.application
         draw = self.get_argument('draw', type=int)
@@ -54,41 +39,39 @@ class TasksDataTable(BaseHandler):
         sort_by = self.get_argument(f'columns[{column}][data]', type=str)
         sort_order = self.get_argument('order[0][dir]', type=str) == 'desc'
 
-        def key(item):
-            return Comparable(getattr(item[1], sort_by))
-
-        self.maybe_normalize_for_sort(app.events.state.tasks_by_timestamp(), sort_by)
-
-        sorted_tasks = sorted(
-            iter_tasks(app.events, search=search),
-            key=key,
-            reverse=sort_order
-        )
+        try:
+            page = search_tasks(
+                app.events,
+                search=search,
+                sort_by=sort_by,
+                descending=sort_order,
+                offset=start,
+                limit=length)
+        except QuerySyntaxError as exc:
+            self.write(dict(
+                draw=draw,
+                data=[],
+                recordsTotal=len(app.events.state.tasks),
+                recordsFiltered=0,
+                searchError=str(exc)))
+            return
 
         filtered_tasks = []
+        task_map = getattr(app.events.state.tasks, 'data', app.events.state.tasks)
 
-        for task in sorted_tasks[start:start + length]:
-            task_dict = as_dict(self.format_task(task)[1])
+        for task_id in page.task_ids:
+            task = task_map.get(task_id)
+            if task is None:
+                continue
+            task_dict = as_dict(self.format_task((task_id, task))[1])
             if task_dict.get('worker'):
                 task_dict['worker'] = task_dict['worker'].hostname
 
             filtered_tasks.append(task_dict)
 
         self.write(dict(draw=draw, data=filtered_tasks,
-                        recordsTotal=len(sorted_tasks),
-                        recordsFiltered=len(sorted_tasks)))
-
-    @classmethod
-    def maybe_normalize_for_sort(cls, tasks, sort_by):
-        sort_keys = {'name': str, 'state': str, 'received': float, 'started': float, 'runtime': float}
-        if sort_by in sort_keys:
-            for _, task in tasks:
-                attr_value = getattr(task, sort_by, None)
-                if attr_value:
-                    try:
-                        setattr(task, sort_by, sort_keys[sort_by](attr_value))
-                    except TypeError:
-                        pass
+                        recordsTotal=page.total_count,
+                        recordsFiltered=page.filtered_count))
 
     @web.authenticated
     def post(self):

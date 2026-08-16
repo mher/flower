@@ -15,6 +15,58 @@ class TaskTest(AsyncHTTPTestCase):
         self.assertTrue('Unknown task' in str(r.body))
 
 
+class TaskControlsTest(AsyncHTTPTestCase):
+    def setUp(self):
+        self.app = super().get_app()
+        super().setUp()
+
+    def get_app(self, capp=None):
+        return self.app
+
+    def render_task(self, *task_events):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        events = [Event('worker-online', hostname='worker1'), *task_events]
+        for i, e in enumerate(events):
+            e['clock'] = i
+            e['local_received'] = time.time()
+            state.event(e)
+        self.app.events.state = state
+        return self.get('/task/123')
+
+    @staticmethod
+    def received_event():
+        return Event('task-received', uuid='123', name='task1', args='(2, 2)',
+                     kwargs="{'foo': 'bar'}", retries=0, eta=None,
+                     hostname='worker1')
+
+    @staticmethod
+    def started_event():
+        return Event('task-started', uuid='123', hostname='worker1')
+
+    def test_started_task_has_terminate_button(self):
+        r = self.render_task(self.received_event(), self.started_event())
+        self.assertEqual(200, r.code)
+        self.assertIn('task-terminate', str(r.body))
+
+    def test_started_task_has_no_terminate_button_in_read_only(self):
+        with self.mock_option('read_only', True):
+            r = self.render_task(self.received_event(), self.started_event())
+        self.assertEqual(200, r.code)
+        self.assertNotIn('task-terminate', str(r.body))
+
+    def test_received_task_has_revoke_button(self):
+        r = self.render_task(self.received_event())
+        self.assertEqual(200, r.code)
+        self.assertIn('task-revoke', str(r.body))
+
+    def test_received_task_has_no_revoke_button_in_read_only(self):
+        with self.mock_option('read_only', True):
+            r = self.render_task(self.received_event())
+        self.assertEqual(200, r.code)
+        self.assertNotIn('task-revoke', str(r.body))
+
+
 class TasksTest(AsyncHTTPTestCase):
     def setUp(self):
         self.app = super().get_app()
@@ -28,6 +80,27 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
         self.assertTrue('UUID' in str(r.body))
         self.assertNotIn('<tr id=', str(r.body))
+        self.assertIn('tasks_filter.html', str(r.body))
+
+    def test_invalid_search_returns_inline_error(self):
+        params = dict(draw=1, start=0, length=10)
+        params['search[value]'] = 'ab'
+        params['order[0][column]'] = 0
+        params['columns[0][data]'] = 'name'
+        params['order[0][dir]'] = 'asc'
+
+        r = self.get('/tasks/datatable?' + '&'.join(
+            map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode('utf-8'))
+        self.assertEqual(200, r.code)
+        self.assertEqual([], table['data'])
+        self.assertEqual(0, table['recordsTotal'])
+        self.assertEqual(0, table['recordsFiltered'])
+        self.assertEqual(
+            'Substring search terms must contain at least 3 characters '
+            'at position 0.',
+            table['searchError'])
 
     def test_succeeded_task(self):
         state = EventsState()
@@ -60,6 +133,30 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('task1', tasks[0]['name'])
         self.assertEqual('123', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
+
+    def test_search_task_with_list_args(self):
+        state = EventsState()
+        event = Event(
+            'task-received', uuid='123', name='task1',
+            args=['needle', 2], kwargs={}, retries=0, eta=None,
+            hostname='worker1', clock=1, local_received=time.time())
+        state.event(event)
+        self.app.events.state = state
+
+        params = dict(draw=1, start=0, length=10)
+        params['search[value]'] = 'needle'
+        params['order[0][column]'] = 0
+        params['columns[0][data]'] = 'name'
+        params['order[0][dir]'] = 'asc'
+
+        r = self.get('/tasks/datatable?' + '&'.join(
+            map(lambda x: '%s=%s' % x, params.items())))
+
+        table = json.loads(r.body.decode('utf-8'))
+        self.assertEqual(200, r.code)
+        self.assertEqual(1, table['recordsTotal'])
+        self.assertEqual(1, table['recordsFiltered'])
+        self.assertEqual('123', table['data'][0]['uuid'])
 
     def test_failed_task(self):
         state = EventsState()

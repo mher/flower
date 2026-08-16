@@ -5,33 +5,46 @@
 {% end %}
 
 {% block container %}
-<div class="container-fluid">
-  <figure class="table-responsive mt-3">
-    <table id="queue-table" class="table table-bordered table-striped caption-top">
-      <caption>{{ broker_url }}</caption>
+<div class="page-section broker-page">
+  <header class="page-header mb-2">
+    <div>
+      <p class="page-eyebrow">Message broker</p>
+      <p class="page-description broker-url mt-3">{{ broker_url }}</p>
+    </div>
+  </header>
+
+  <section class="broker-table-card" aria-label="Broker queues">
+    <figure class="table-responsive mb-0">
+      <table id="queue-table" class="broker-table table table-hover align-middle mb-0">
       <thead>
         <tr>
           <th>Queue</th>
-          <th>Messages</th>
-          <th>Unacked</th>
+          <th class="broker-secondary-column">Messages</th>
+          <th class="broker-secondary-column">Unacked</th>
           <th>Ready</th>
           <th>Consumers</th>
-          <th>Idle since</th>
+          <th class="broker-secondary-column">Idle since</th>
         </tr>
       </thead>
       <tbody>
         {% for queue in queues %}
         <tr id="{{ url_escape(queue['name']) }}">
           <td>{{ queue['name'] }}</td>
-          <td>{{ queue.get('messages', 'N/A') }}</td>
-          <td>{{ queue.get('messages_unacknowledged', 'N/A') }}</td>
+          <td class="broker-secondary-column">{{ queue.get('messages', 'N/A') }}</td>
+          <td class="broker-secondary-column">{{ queue.get('messages_unacknowledged', 'N/A') }}</td>
           <td>{{ queue.get('messages_ready', 'N/A') }}</td>
           <td>{{ queue.get('consumers', 'N/A') }}</td>
-          <td>{{ queue.get('idle_since', 'N/A') }}</td>
+          <td class="broker-secondary-column">{{ queue.get('idle_since', 'N/A') }}</td>
+        </tr>
+        {% end %}
+        {% if not queues %}
+        <tr>
+          <td class="empty-table-message" colspan="6">No queue data is available.</td>
         </tr>
         {% end %}
       </tbody>
-    </table>
-  </figure>
+      </table>
+    </figure>
+  </section>
 </div>
 {% end %}

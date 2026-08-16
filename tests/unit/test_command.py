@@ -3,7 +3,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import celery
 from prometheus_client import Histogram
@@ -84,21 +84,46 @@ class TestFlowerCommand(AsyncHTTPTestCase):
 
 
 class TestPrintBanner(AsyncHTTPTestCase):
+    def test_closes_broker_connection(self):
+        celery_app = MagicMock()
+        connection = celery_app.connection.return_value
+        connection.__enter__.return_value = connection
+        celery_app.tasks = {}
+
+        print_banner(celery_app, False, options.port)
+
+        connection.__enter__.assert_called_once_with()
+        connection.__exit__.assert_called_once()
+
     def test_print_banner(self):
         celery_app = celery.Celery()
         with self.assertLogs('', level='INFO') as cm:
-            print_banner(celery_app, False)
+            print_banner(celery_app, False, options.port)
 
-            self.assertTrue('INFO:flower.command:Visit me at http://0.0.0.0:5555' in cm.output)
+            self.assertTrue('INFO:flower.command:Visit me at http://127.0.0.1:5555' in cm.output)
             self.assertTrue('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//' in cm.output)
 
     def test_print_banner_with_ssl(self):
         celery_app = celery.Celery()
         with self.assertLogs('', level='INFO') as cm:
-            print_banner(celery_app, True)
+            print_banner(celery_app, True, options.port)
 
-            self.assertTrue('INFO:flower.command:Visit me at https://0.0.0.0:5555' in cm.output)
+            self.assertTrue('INFO:flower.command:Visit me at https://127.0.0.1:5555' in cm.output)
             self.assertTrue('INFO:flower.command:Broker: amqp://guest:**@localhost:5672//' in cm.output)
+
+    def test_print_banner_with_dynamic_port(self):
+        celery_app = celery.Celery()
+        with self.assertLogs('', level='INFO') as cm:
+            print_banner(celery_app, False, 52345)
+
+            self.assertTrue('INFO:flower.command:Visit me at http://127.0.0.1:52345' in cm.output)
+
+    def test_print_banner_with_address(self):
+        celery_app = celery.Celery()
+        with self.assertLogs('', level='INFO') as cm, self.mock_option('address', '0.0.0.0'):
+            print_banner(celery_app, False, options.port)
+
+            self.assertTrue('INFO:flower.command:Visit me at http://0.0.0.0:5555' in cm.output)
 
     def test_print_banner_unix_socket(self):
         celery_app = celery.Celery()
@@ -149,10 +174,21 @@ class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
 class TestConfOption(AsyncHTTPTestCase):
     def test_error_conf(self):
         with self.mock_option('conf', None):
-            self.assertRaises(IOError, apply_options,
+            self.assertRaises(FileNotFoundError, apply_options,
                               'flower', argv=['--conf=foo'])
-            self.assertRaises(IOError, apply_options,
+            self.assertRaises(FileNotFoundError, apply_options,
                               'flower', argv=['--conf=/tmp/flower/foo'])
+
+    def test_error_conf_with_default_filename(self):
+        with tempfile.TemporaryDirectory() as directory:
+            conf = os.path.join(directory, 'flowerconfig.py')
+            with self.mock_option('conf', None):
+                self.assertRaises(
+                    FileNotFoundError,
+                    apply_options,
+                    'flower',
+                    argv=['--conf=%s' % conf],
+                )
 
     def test_default_option(self):
         apply_options('flower', argv=[])

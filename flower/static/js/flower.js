@@ -1,18 +1,56 @@
 /*jslint browser: true */
-/*global $, WebSocket, jQuery */
+/*global $, WebSocket, jQuery, bootstrap */
 
 var flower = (function () {
     "use strict";
 
-    var alertContainer = document.getElementById('alert-container');
+    var toastContainer = document.getElementById('toast-container');
+
+    document.querySelectorAll('[data-flower-tooltip]').forEach(function (element) {
+        var tooltip = bootstrap.Tooltip.getOrCreateInstance(element);
+
+        element.addEventListener('show.bs.dropdown', function () {
+            tooltip.hide();
+        });
+    });
+
     function show_alert(message, type) {
-        var wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div class="alert alert-${type} alert-dismissible" role="alert">
-                <div>${message}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>`;
-        alertContainer.appendChild(wrapper);
+        var isError = type === 'danger',
+            toastElement = document.createElement('div'),
+            toastContent = document.createElement('div'),
+            toastBody = document.createElement('div'),
+            closeButton = document.createElement('button'),
+            toast;
+
+        toastElement.className = 'toast align-items-center text-bg-' + type + ' border-0';
+        toastElement.setAttribute('role', isError ? 'alert' : 'status');
+        toastElement.setAttribute('aria-live', isError ? 'assertive' : 'polite');
+        toastElement.setAttribute('aria-atomic', 'true');
+
+        toastContent.className = 'd-flex';
+        toastBody.className = 'toast-body';
+        toastBody.textContent = message;
+
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close btn-close-white me-2 m-auto';
+        closeButton.setAttribute('data-bs-dismiss', 'toast');
+        closeButton.setAttribute('aria-label', 'Close');
+
+        toastContent.appendChild(toastBody);
+        toastContent.appendChild(closeButton);
+        toastElement.appendChild(toastContent);
+        toastContainer.appendChild(toastElement);
+
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toast.dispose();
+            toastElement.remove();
+        });
+
+        toast = bootstrap.Toast.getOrCreateInstance(toastElement, {
+            autohide: true,
+            delay: isError ? 10000 : 5000
+        });
+        toast.show();
     }
 
     function url_prefix() {
@@ -31,8 +69,48 @@ var flower = (function () {
     //https://github.com/DataTables/DataTables/blob/1.10.11/media/js/jquery.dataTables.js#L14882
     function htmlEscapeEntities(d) {
         return typeof d === 'string' ?
-            d.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') :
+            d.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') :
             d;
+    }
+
+    function workerNameLink(workerName) {
+        var name = String(workerName),
+            escapedName = htmlEscapeEntities(name),
+            suffixLength = name.length > 12 ? 12 : 0,
+            prefix = htmlEscapeEntities(name.substr(0, name.length - suffixLength)),
+            suffix = suffixLength ? htmlEscapeEntities(name.substr(-suffixLength)) : '';
+
+        return '<a class="worker-name-link" href="' + url_prefix() + '/worker/' +
+            encodeURIComponent(name) + '" aria-label="Worker ' + escapedName + '" title="' + escapedName + '">' +
+            '<span class="worker-name-prefix">' + prefix + '</span>' +
+            '<span class="worker-name-suffix">' + suffix + '</span></a>';
+    }
+
+    function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+        }
+
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+        return Promise.resolve();
+    }
+
+    function showCopyConfirmation(button, copiedLabel, defaultLabel) {
+        button.classList.add('copied');
+        button.setAttribute('title', 'Copied');
+        button.setAttribute('aria-label', copiedLabel);
+        window.setTimeout(function () {
+            button.classList.remove('copied');
+            button.setAttribute('title', defaultLabel);
+            button.setAttribute('aria-label', defaultLabel);
+        }, 1500);
     }
 
     function active_page(name) {
@@ -141,7 +219,7 @@ var flower = (function () {
         event.stopPropagation();
 
         var workername = $('#workername').text(),
-            grow_size = $('#pool-size option:selected').html();
+            grow_size = $('#pool-size').val();
 
         $.ajax({
             type: 'POST',
@@ -165,7 +243,7 @@ var flower = (function () {
         event.stopPropagation();
 
         var workername = $('#workername').text(),
-            shrink_size = $('#pool-size option:selected').html();
+            shrink_size = $('#pool-size').val();
 
         $.ajax({
             type: 'POST',
@@ -363,7 +441,50 @@ var flower = (function () {
     });
 
     function sum(a, b) {
-        return parseInt(a, 10) + parseInt(b, 10);
+        var x = parseInt(a, 10), y = parseInt(b, 10);
+        return (isNaN(x) ? 0 : x) + (isNaN(y) ? 0 : y);
+    }
+
+    function workerMetricTotal(workers, name) {
+        return workers.reduce(function (total, worker) {
+            var value = Number(worker[name]);
+            return total + (isNaN(value) ? 0 : value);
+        }, 0);
+    }
+
+    function setWorkerMetric(id, value) {
+        document.getElementById(id).textContent = value.toLocaleString();
+    }
+
+    function updateWorkerSummary(workers) {
+        var online = workers.filter(function (worker) {
+            return worker.status;
+        }).length;
+
+        setWorkerMetric('workers-online', online);
+        setWorkerMetric('workers-active', workerMetricTotal(workers, 'active'));
+        setWorkerMetric('workers-succeeded', workerMetricTotal(workers, 'task-succeeded'));
+        setWorkerMetric('workers-failed', workerMetricTotal(workers, 'task-failed'));
+    }
+
+    function updateWorkerRefreshStatus(succeeded) {
+        var indicator = document.getElementById('workers-live-indicator'),
+            status = document.getElementById('workers-refresh-status');
+
+        indicator.classList.toggle('status-dot-live', succeeded);
+        indicator.classList.toggle('status-dot-error', !succeeded);
+        status.textContent = succeeded ?
+            'Updated ' + new Date().toLocaleTimeString() :
+            'Update failed';
+    }
+
+    function setWorkerColumnVisibility(table, mobile) {
+        var mobileColumns = [0, 1, 2];
+
+        table.columns().every(function (index) {
+            this.visible(!mobile || mobileColumns.indexOf(index) !== -1, false);
+        });
+        table.columns.adjust().draw(false);
     }
 
     function format_time(timestamp) {
@@ -377,6 +498,10 @@ var flower = (function () {
         return moment.unix(timestamp).tz(tz).format('YYYY-MM-DD HH:mm:ss.SSS');
     }
 
+    function usesNaturalTime() {
+        return $('#time').val().startsWith('natural-time');
+    }
+
     function isColumnVisible(name) {
         var columns = $('#columns').val();
         if (columns === "all")
@@ -388,6 +513,52 @@ var flower = (function () {
             return columns.indexOf(name) !== -1;
         }
         return true;
+    }
+
+    var taskColumnNames = [
+            'name', 'uuid', 'state', 'args', 'kwargs', 'result', 'received',
+            'started', 'runtime', 'worker', 'exchange', 'routing_key',
+            'retries', 'revoked', 'exception', 'expires', 'eta'
+        ],
+        defaultTaskColumns = 'name,uuid,state,args,kwargs,result,received,started,runtime,worker',
+        desktopTaskColumns = ['name', 'uuid', 'state', 'received', 'runtime', 'worker'],
+        mobileTaskColumns = ['name', 'state', 'runtime'];
+
+    function usesDefaultTaskColumns() {
+        return ($('#columns').val() || '').replace(/\s/g, '') === defaultTaskColumns;
+    }
+
+    function shouldShowTaskColumn(name, mobile) {
+        if (!isColumnVisible(name)) {
+            return false;
+        }
+        if (usesDefaultTaskColumns()) {
+            var responsiveColumns = mobile ? mobileTaskColumns : desktopTaskColumns;
+            return responsiveColumns.indexOf(name) !== -1;
+        }
+
+        // Custom column selections take precedence over the responsive defaults.
+        return true;
+    }
+
+    function setTaskColumnVisibility(table, mobile) {
+        taskColumnNames.forEach(function (name, index) {
+            table.column(index).visible(shouldShowTaskColumn(name, mobile), false);
+        });
+        table.columns.adjust().draw(false);
+    }
+
+    function updateTaskStateButtons(state) {
+        $('.task-state-filter').each(function () {
+            var selected = $(this).data('task-state') === state;
+            $(this).toggleClass('active', selected);
+            $(this).attr('aria-pressed', selected);
+        });
+    }
+
+    function taskStateFromSearch(search) {
+        var match = /(?:^|\s)state:(STARTED|SUCCESS|FAILURE|RETRY)(?:\s|$)/i.exec(search);
+        return match ? match[1].toUpperCase() : '';
     }
 
     $.urlParam = function (name) {
@@ -404,6 +575,21 @@ var flower = (function () {
             shiftWindow();
         }
         window.addEventListener("hashchange", shiftWindow);
+
+        $('.task-uuid-copy').on('click', function () {
+            var button = this;
+            copyText(button.getAttribute('data-task-uuid')).then(function () {
+                showCopyConfirmation(button, 'Task UUID copied', 'Copy task UUID');
+            });
+        });
+
+        $('.task-traceback-copy').on('click', function () {
+            var button = this,
+                traceback = button.closest('.detail-code-wrapper').querySelector('code').textContent;
+            copyText(traceback).then(function () {
+                showCopyConfirmation(button, 'Stack trace copied', 'Copy stack trace');
+            });
+        });
 
         // Make bootstrap tabs persistent
         $(document).ready(function () {
@@ -426,20 +612,36 @@ var flower = (function () {
             return;
         }
 
-        $('#workers-table').DataTable({
+        var mobileWorkers = window.matchMedia('(max-width: 767.98px)'),
+            workersTable = $('#workers-table').DataTable({
             rowId: 'name',
             searching: true,
             select: false,
             paging: true,
+            lengthChange: false,
             scrollCollapse: true,
-            lengthMenu: [15, 30, 50, 100],
             pageLength: 15,
             language: {
                 lengthMenu: 'Show _MENU_ workers',
                 info: 'Showing _START_ to _END_ of _TOTAL_ workers',
-                infoFiltered: '(filtered from _MAX_ total workers)'
+                infoFiltered: '(filtered from _MAX_ total workers)',
+                search: '<span class="visually-hidden">Search workers</span>',
+                searchPlaceholder: 'Search workers',
+                emptyTable: 'No workers are available.',
+                zeroRecords: 'No workers match your search.'
             },
-            ajax: url_prefix() + '/workers?json=1',
+            ajax: {
+                url: url_prefix() + '/workers?json=1',
+                dataSrc: function (response) {
+                    var workers = response.data || [];
+                    updateWorkerSummary(workers);
+                    updateWorkerRefreshStatus(true);
+                    return workers;
+                },
+                error: function () {
+                    updateWorkerRefreshStatus(false);
+                }
+            },
             order: [
                 [1, "des"]
             ],
@@ -461,7 +663,7 @@ var flower = (function () {
                 data: 'hostname',
                 type: 'natural',
                 render: function (data, type, full, meta) {
-                    return '<a href="' + url_prefix() + '/worker/' + encodeURIComponent(data) + '">' + data + '</a>';
+                    return type === 'display' ? workerNameLink(data) : data;
                 }
             }, {
                 targets: 1,
@@ -508,24 +710,41 @@ var flower = (function () {
             }, {
                 targets: 7,
                 data: 'loadavg',
-                width: "10%",
+                width: "18%",
                 className: "text-center text-nowrap",
                 render: function (data, type, full, meta) {
                     if (!full.status) {
                         return 'N/A';
                     }
                     if (Array.isArray(data)) {
-                        return data.join(', ');
+                        if (type !== 'display') {
+                            return data.join(' ');
+                        }
+                        var periods = ['1m', '5m', '15m'],
+                            values = data.slice(0, periods.length).map(function (value) {
+                                return '<span class="load-average-value">' +
+                                    htmlEscapeEntities(String(value)) + '</span>';
+                            });
+                        return '<span class="load-average" title="System load averages over 1, 5, and 15 minutes"' +
+                            ' aria-label="System load averages: ' + periods.map(function (period, index) {
+                                return period + ' ' + data[index];
+                            }).join(', ') + '">' +
+                            values.join('') + '</span>';
                     }
-                    return data;
+                    return data || 'N/A';
                 }
             }, ],
+        });
+
+        setWorkerColumnVisibility(workersTable, mobileWorkers.matches);
+        mobileWorkers.addEventListener('change', function (event) {
+            setWorkerColumnVisibility(workersTable, event.matches);
         });
 
         var autorefresh_interval = $.urlParam('autorefresh') || 1;
         if (autorefresh !== 0) {
             setInterval( function () {
-                $('#workers-table').DataTable().ajax.reload(null, false);
+                workersTable.ajax.reload(null, false);
             }, autorefresh_interval * 1000);
         }
 
@@ -536,37 +755,64 @@ var flower = (function () {
             return;
         }
 
-        $('#tasks-table').DataTable({
+        var initialState = $.urlParam('state') || '',
+            mobileTasks = window.matchMedia('(max-width: 767.98px)'),
+            tasksTable = $('#tasks-table').DataTable({
             rowId: 'uuid',
             searching: true,
+            searchDelay: 300,
             scrollX: true,
             scrollCollapse: true,
             processing: true,
             serverSide: true,
             colReorder: true,
-            lengthMenu: [15, 30, 50, 100],
+            lengthChange: false,
             pageLength: 15,
+            stateSave: true,
+            stateLoadParams: function (settings, data) {
+                if (initialState) {
+                    data.search.search = 'state:' + initialState;
+                }
+            },
             language: {
                 lengthMenu: 'Show _MENU_ tasks',
                 info: 'Showing _START_ to _END_ of _TOTAL_ tasks',
-                infoFiltered: '(filtered from _MAX_ total tasks)'
+                infoEmpty: 'No tasks to show',
+                infoFiltered: '(filtered from _MAX_ total tasks)',
+                search: '<span class="visually-hidden">Search tasks</span>',
+                searchPlaceholder: 'Search tasks',
+                emptyTable: 'No tasks have been received.',
+                zeroRecords: 'No tasks match your search.'
             },
             ajax: {
                 type: 'POST',
-                url: url_prefix() + '/tasks/datatable'
+                url: url_prefix() + '/tasks/datatable',
+                dataSrc: function (response) {
+                    var searchError = $('#task-search-error'),
+                        searchErrorMessage = $('#task-search-error-message');
+                    if (response.searchError) {
+                        searchErrorMessage.text(response.searchError);
+                        searchError.removeClass('d-none');
+                    } else {
+                        searchErrorMessage.text('');
+                        searchError.addClass('d-none');
+                    }
+                    return response.data;
+                }
             },
             order: [
                 [7, "desc"]
             ],
             oSearch: {
-                "sSearch": $.urlParam('state') ? 'state:' + $.urlParam('state') : ''
+                "sSearch": initialState ? 'state:' + initialState : ''
             },
             columnDefs: [{
                 targets: 0,
                 data: 'name',
                 visible: isColumnVisible('name'),
                 render: function (data, type, full, meta) {
-                    return data;
+                    return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(full.uuid) + '">' +
+                        htmlEscapeEntities(data) + '</a>';
                 }
             }, {
                 targets: 1,
@@ -575,7 +821,12 @@ var flower = (function () {
                 orderable: false,
                 className: "text-nowrap",
                 render: function (data, type, full, meta) {
-                    return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(data) + '">' + data + '</a>';
+                    if (type !== 'display') {
+                        return data;
+                    }
+                    var escapedUuid = htmlEscapeEntities(data);
+                    return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(data) +
+                        '" title="' + escapedUuid + '">' + escapedUuid + '</a>';
                 }
             }, {
                 targets: 2,
@@ -585,11 +836,15 @@ var flower = (function () {
                 render: function (data, type, full, meta) {
                     switch (data) {
                     case 'SUCCESS':
-                        return '<span class="badge bg-success">' + data + '</span>';
+                        return '<span class="badge text-bg-success">' + data + '</span>';
                     case 'FAILURE':
-                        return '<span class="badge bg-danger">' + data + '</span>';
+                        return '<span class="badge text-bg-danger">' + data + '</span>';
+                    case 'STARTED':
+                        return '<span class="badge task-state-started">' + data + '</span>';
+                    case 'RETRY':
+                        return '<span class="badge text-bg-warning">' + data + '</span>';
                     default:
-                        return '<span class="badge bg-secondary">' + data + '</span>';
+                        return '<span class="badge text-bg-secondary">' + data + '</span>';
                     }
                 }
             }, {
@@ -614,10 +869,19 @@ var flower = (function () {
                 targets: 6,
                 data: 'received',
                 className: "text-nowrap",
+                width: "1%",
                 visible: isColumnVisible('received'),
                 render: function (data, type, full, meta) {
                     if (data) {
-                        return format_time(data);
+                        if (type !== 'display') {
+                            return data;
+                        }
+                        if (usesNaturalTime()) {
+                            return format_time(data);
+                        }
+                        return '<time datetime="' + moment.unix(data).toISOString() +
+                            '" title="' + moment.unix(data).fromNow() + '">' +
+                            format_time(data) + '</time>';
                     }
                     return data;
                 }
@@ -638,14 +902,17 @@ var flower = (function () {
                 className: "text-center",
                 visible: isColumnVisible('runtime'),
                 render: function (data, type, full, meta) {
-                    return data ? data.toFixed(2) : data;
+                    return data === null || data === undefined ? '' : Number(data).toFixed(2) + ' s';
                 }
             }, {
                 targets: 9,
                 data: 'worker',
                 visible: isColumnVisible('worker'),
                 render: function (data, type, full, meta) {
-                    return '<a href="' + url_prefix() + '/worker/' + encodeURIComponent(data) + '">' + data + '</a>';
+                    if (!data) {
+                        return '';
+                    }
+                    return type === 'display' ? workerNameLink(data) : data;
                 }
             }, {
                 targets: 10,
@@ -685,6 +952,22 @@ var flower = (function () {
                 data: 'eta',
                 visible: isColumnVisible('eta')
             }, ],
+        });
+
+        setTaskColumnVisibility(tasksTable, mobileTasks.matches);
+        mobileTasks.addEventListener('change', function (event) {
+            setTaskColumnVisibility(tasksTable, event.matches);
+        });
+
+        updateTaskStateButtons(taskStateFromSearch(tasksTable.search()));
+        $('.task-state-filter').on('click', function () {
+            var state = $(this).data('task-state');
+            tasksTable.search(state ? 'state:' + state : '').draw();
+            updateTaskStateButtons(state);
+        });
+
+        tasksTable.on('search.dt', function () {
+            updateTaskStateButtons(taskStateFromSearch(tasksTable.search()));
         });
 
     });

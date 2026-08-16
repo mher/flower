@@ -1,27 +1,32 @@
 import sys
 import logging
+import time
 
 from concurrent.futures import ThreadPoolExecutor
+from functools import cached_property
 
 import celery
 import tornado.web
 
 from tornado import ioloop
 from tornado.httpserver import HTTPServer
+from tornado.netutil import bind_sockets
 from tornado.web import url
 
 from .urls import handlers as default_handlers
 from .events import Events
 from .inspector import Inspector
 from .options import default_options
+from .utils.blocking import BlockingOperationRunner
 
 
 logger = logging.getLogger(__name__)
 
 
-if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+if sys.platform.startswith('win'):
     import asyncio
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.set_event_loop_policy(
+        asyncio.WindowsSelectorEventLoopPolicy())  # pylint: disable=deprecated-class
 
 # pylint: disable=consider-using-f-string
 def rewrite_handler(handler, url_prefix):
@@ -51,6 +56,7 @@ class Flower(tornado.web.Application):
 
         self.executor = self.pool_executor_cls(max_workers=self.max_workers)
         self.io_loop.set_default_executor(self.executor)
+        self.blocking_runner = BlockingOperationRunner(self.executor)
 
         self.inspector = Inspector(self.io_loop, self.capp, self.options.inspect_timeout / 1000.0)
 
@@ -65,18 +71,28 @@ class Flower(tornado.web.Application):
             max_tasks_in_memory=self.options.max_tasks)
         self.started = False
 
+    def start_http_server(self):
+        if not self.options.unix_socket:
+            sockets = bind_sockets(
+                self.options.port,
+                address=self.options.address,
+            )
+            server = HTTPServer(
+                self,
+                ssl_options=self.ssl_options,
+                xheaders=self.options.xheaders,
+            )
+            server.add_sockets(sockets)
+            return sockets[0].getsockname()[1]
+
+        from tornado.netutil import bind_unix_socket
+        server = HTTPServer(self)
+        socket = bind_unix_socket(self.options.unix_socket, mode=0o777)
+        server.add_socket(socket)
+        return None
+
     def start(self):
         self.events.start()
-
-        if not self.options.unix_socket:
-            self.listen(self.options.port, address=self.options.address,
-                        ssl_options=self.ssl_options,
-                        xheaders=self.options.xheaders)
-        else:
-            from tornado.netutil import bind_unix_socket
-            server = HTTPServer(self)
-            socket = bind_unix_socket(self.options.unix_socket, mode=0o777)
-            server.add_socket(socket)
 
         self.started = True
         self.update_workers()
@@ -91,9 +107,20 @@ class Flower(tornado.web.Application):
             self.io_loop.stop()
             self.started = False
 
-    @property
+    @cached_property
+    def broker_uri(self):
+        with self.capp.connection() as conn:
+            return conn.as_uri()
+
+    @cached_property
+    def broker_uri_with_password(self):
+        with self.capp.connection() as conn:
+            return conn.as_uri(include_password=True)
+
+    @cached_property
     def transport(self):
-        return getattr(self.capp.connection().transport, 'driver_type', None)
+        with self.capp.connection() as conn:
+            return getattr(conn.transport, 'driver_type', None)
 
     @property
     def workers(self):
@@ -101,3 +128,32 @@ class Flower(tornado.web.Application):
 
     def update_workers(self, workername=None):
         return self.inspector.inspect(workername)
+
+    def purge_offline_worker_metrics(self):
+        threshold = self.options.purge_offline_workers
+        if threshold is None:
+            return
+
+        state = self.events.state
+        now = time.time()
+        worker_names = set(state.counter) | set(state.workers) | \
+            set(self.inspector.workers)
+        offline_workers = set()
+
+        for worker_name in worker_names:
+            worker = state.workers.get(worker_name)
+            if worker is None:
+                offline_workers.add(worker_name)
+                continue
+            if worker.alive:
+                continue
+            if not worker.heartbeats or \
+                    now - max(worker.heartbeats) > threshold:
+                offline_workers.add(worker_name)
+
+        if not offline_workers:
+            return
+
+        removed = state.metrics.remove_workers(offline_workers)
+        if removed:
+            logger.debug("Purged metrics for %d offline workers", removed)

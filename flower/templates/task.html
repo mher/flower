@@ -5,88 +5,105 @@
 {% end %}
 
 {% block container %}
-  <div id='task-page' class="container-fluid mt-3">
-    <div class="row-fluid">
-      <div class="col-lg-12">
-        <div class="page-header">
-          <p id="taskid" class="d-none">{{ task.uuid }}</p>
-          <h2>{{ getattr(task, 'name', None) }}
-            <small class="text-muted fs-5">{{ task.uuid }}</small>
-            {% if task.state == "STARTED" %}
-                <button class="btn btn-danger float-end" id="task-terminate">Terminate</button>
-            {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
-                <button class="btn btn-danger float-end" id="task-revoke">Revoke</button>
-            {% end %}
-          </h2>
-        </div>
-        <div class="row-fluid">
-          <div class="col-lg-6">
-            <table class="table table-bordered table-striped">
-              <tbody>
-              <tr>
-                <td>Name</td>
-                <td>{{ getattr(task, 'name', None) }}</td>
-              </tr>
-              <tr>
-                <td>UUID</td>
-                <td>{{ task.uuid }}</td>
-              </tr>
-              <tr>
-                <td>State</td>
-                <td>
-                  {% if task.state == "SUCCESS" %}
-                  <span class="badge bg-success">{{ task.state }}</span>
-                  {% elif task.state == "FAILURE" %}
-                  <span class="badge bg-danger">{{ task.state }}</span>
-                  {% else %}
-                  <span class="badge bg-secondary">{{ task.state }}</span>
-                  {% end %}
-                </td>
-              </tr>
-              <tr>
-                <td>args</td>
-                <td>{{ task.args }}</td>
-              </tr>
-              <tr>
-                <td>kwargs</td>
-                <td>{{ task.kwargs }}</td>
-              </tr>
-              <tr>
-                <td>Result</td>
-                <td>{{ getattr(task, 'result', '') }}</td>
-              </tr>
-              {% for name in task._fields %}
-                {% if name not in ['name', 'uuid', 'state', 'args', 'kwargs', 'result'] and getattr(task, name, None) is not None %}
-                <tr>
-                  <td>{{ humanize(name) }}</td>
-                  <td>
-                    {% if name in ['sent', 'received', 'started', 'succeeded', 'retried', 'timestamp', 'failed', 'revoked'] %}
-                    {{ humanize(getattr(task, name, None), type='time') }}
-                    {% elif name == 'worker' %}
-                    <a
-                        href="{{ reverse_url('worker', task.worker.hostname) }}">{{ task.worker.hostname }}</a>
-                    {% elif name == 'traceback' %}
-                    <pre>{{ getattr(task, name, None) }}</pre>
-                    {% elif name in ['parent_id', 'root_id'] %}
-                    <a
-                        href="{{ reverse_url('task', getattr(task, name, None)) }}">{{ getattr(task, name, None) }}</a>
-                    {% elif name == 'children' %}
-                      {% for child in getattr(task, name, {}) %}
-                        <a href="{{ reverse_url('task', child.id) }}">{{ child.id }}</a>
-                        <br>
-                      {% end %}
-                    {% else %}
-                      {{ getattr(task, name, None) }}
-                    {% end %}
-                  </td>
-                </tr>
-                {% end %}
-              {% end %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+<div id="task-page" class="detail-page page-section">
+  <p id="taskid" class="d-none">{{ task.uuid }}</p>
+
+  <header class="detail-page-header">
+    <p class="page-eyebrow">Task detail</p>
+    <div class="detail-actions">
+      {% if not read_only %}
+      {% if task.state == "STARTED" %}
+      <button class="btn btn-danger" id="task-terminate">Terminate</button>
+      {% elif task.state == "RECEIVED" or task.state == "RETRY" %}
+      <button class="btn btn-danger" id="task-revoke">Revoke</button>
+      {% end %}
+      {% end %}
     </div>
-  </div>
+  </header>
+
+  <section class="detail-card task-details-card" aria-label="Task details">
+    <dl class="detail-list">
+      <div class="detail-row task-data-row">
+        <dt>Name</dt>
+        <dd class="task-name-value">{{ getattr(task, 'name', None) }}</dd>
+      </div>
+      <div class="detail-row task-data-row">
+        <dt>UUID</dt>
+        <dd class="task-uuid-value">
+          <code class="text-body-secondary">{{ task.uuid }}</code>
+          <button type="button" class="task-uuid-copy" data-task-uuid="{{ task.uuid }}"
+                  title="Copy task UUID" aria-label="Copy task UUID">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h7A1.5 1.5 0 0 1 14 2.5v7a1.5 1.5 0 0 1-1.5 1.5H11V5.5A2.5 2.5 0 0 0 8.5 3H4V2.5Z"/>
+              <path d="M2.5 4h6A1.5 1.5 0 0 1 10 5.5v8A1.5 1.5 0 0 1 8.5 15h-6A1.5 1.5 0 0 1 1 13.5v-8A1.5 1.5 0 0 1 2.5 4Zm0 1a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5v-8a.5.5 0 0 0-.5-.5h-6Z"/>
+            </svg>
+            <span class="visually-hidden">Copy task UUID</span>
+          </button>
+        </dd>
+      </div>
+      <div class="detail-row task-data-row">
+        <dt>Status</dt>
+        <dd>
+          {% if task.state == "SUCCESS" %}
+          <span class="badge text-bg-success">{{ task.state }}</span>
+          {% elif task.state == "FAILURE" %}
+          <span class="badge text-bg-danger">{{ task.state }}</span>
+          {% elif task.state == "STARTED" %}
+          <span class="badge task-state-started">{{ task.state }}</span>
+          {% elif task.state == "RETRY" %}
+          <span class="badge text-bg-warning">{{ task.state }}</span>
+          {% else %}
+          <span class="badge text-bg-secondary">{{ task.state }}</span>
+          {% end %}
+        </dd>
+      </div>
+      <div class="detail-row detail-row-code task-data-row">
+        <dt>Arguments</dt>
+        <dd><pre class="detail-code"><code>{{ task.args }}</code></pre></dd>
+      </div>
+      <div class="detail-row detail-row-code task-data-row">
+        <dt>Keyword arguments</dt>
+        <dd><pre class="detail-code"><code>{{ task.kwargs }}</code></pre></dd>
+      </div>
+      <div class="detail-row detail-row-code task-data-row">
+        <dt>Result</dt>
+        <dd><pre class="detail-code"><code>{{ getattr(task, 'result', '') }}</code></pre></dd>
+      </div>
+      {% for name in task._fields %}
+      {% if name not in ['name', 'uuid', 'state', 'args', 'kwargs', 'result'] and getattr(task, name, None) is not None %}
+      <div class="detail-row{% if name == 'traceback' %} detail-row-code{% end %}">
+        <dt>{{ humanize(name) }}</dt>
+        <dd>
+          {% if name in ['sent', 'received', 'started', 'succeeded', 'retried', 'timestamp', 'failed', 'revoked'] %}
+          {{ humanize(getattr(task, name, None), type='time') }}
+          {% elif name == 'worker' %}
+          <a href="{{ reverse_url('worker', task.worker.hostname) }}">{{ task.worker.hostname }}</a>
+          {% elif name == 'traceback' %}
+          <div class="detail-code-wrapper">
+            <button type="button" class="task-traceback-copy"
+                    title="Copy stack trace" aria-label="Copy stack trace">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h7A1.5 1.5 0 0 1 14 2.5v7a1.5 1.5 0 0 1-1.5 1.5H11V5.5A2.5 2.5 0 0 0 8.5 3H4V2.5Z"/>
+                <path d="M2.5 4h6A1.5 1.5 0 0 1 10 5.5v8A1.5 1.5 0 0 1 8.5 15h-6A1.5 1.5 0 0 1 1 13.5v-8A1.5 1.5 0 0 1 2.5 4Zm0 1a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5v-8a.5.5 0 0 0-.5-.5h-6Z"/>
+              </svg>
+              <span class="visually-hidden">Copy stack trace</span>
+            </button>
+            <pre class="detail-code"><code>{{ getattr(task, name, None) }}</code></pre>
+          </div>
+          {% elif name in ['parent_id', 'root_id'] %}
+          <a href="{{ reverse_url('task', getattr(task, name, None)) }}">{{ getattr(task, name, None) }}</a>
+          {% elif name == 'children' %}
+            {% for child in getattr(task, name, {}) %}
+            <a href="{{ reverse_url('task', child.id) }}">{{ child.id }}</a><br>
+            {% end %}
+          {% else %}
+          {{ getattr(task, name, None) }}
+          {% end %}
+        </dd>
+      </div>
+      {% end %}
+      {% end %}
+    </dl>
+  </section>
+</div>
 {% end %}

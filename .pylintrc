@@ -11,6 +11,7 @@ disable=
     C0415, # import-outside-toplevel
     W0718, # broad-exception-caught
     R1735, # use-dict-literal
+    R0917, # too-many-positional-arguments
 
 [BASIC]
 good-names=i,e,n,x,logger,tz,db,dt

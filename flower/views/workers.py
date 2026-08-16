@@ -24,7 +24,11 @@ class WorkerView(BaseHandler):
         if 'stats' not in worker:
             raise web.HTTPError(404, f"Unable to get stats for '{name}' worker")
 
-        self.render("worker.html", worker=dict(worker, name=name))
+        self.render(
+            "worker.html",
+            worker=dict(worker, name=name),
+            read_only=self.application.options.read_only,
+        )
 
 
 class WorkersView(BaseHandler):
@@ -71,7 +75,7 @@ class WorkersView(BaseHandler):
         else:
             self.render("workers.html",
                         workers=workers,
-                        broker=self.application.capp.connection().as_uri(),
+                        broker=self.application.broker_uri,
                         autorefresh=1 if self.application.options.auto_refresh else 0)
 
     @classmethod

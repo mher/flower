@@ -221,7 +221,7 @@ to be used by Flower for storing task results, events, or other persistent data.
 
 Example::
 
-    $ celery flower persistent=True --db ="flower_db"
+    $ celery flower --persistent=True --db="flower_db"
 
 .. _debug:
 
@@ -477,7 +477,8 @@ To enable authentication and specify an authentication provider, set the `auth_p
   - GitLab `flower.views.auth.GitLabLoginHandler`
   - Okta `flower.views.auth.OktaLoginHandler`
 
-See also :ref:`Authentication` for usage examples
+Custom handlers can be specified by their fully qualified import path. See
+:ref:`custom-authentication` for an example.
 
 .. _purge_offline_workers:
 
@@ -540,3 +541,19 @@ Default: None
 Sets the URI to which an OAuth 2.0 server redirects the user after successful authentication and authorization.
 
 `oauth2_redirect_uri` option should be used with :ref:`auth`, :ref:`auth_provider`, :ref:`oauth2_key` and :ref:`oauth2_secret` options.
+
+.. _read_only:
+
+read_only
+~~~~~~~~~
+
+Default: False
+
+Enables read only mode, disabling all control operations in the UI and API.
+
+When read only mode is enabled, Flower will not allow any control operations to be performed on the system.
+
+Example::
+
+    $ celery flower --read_only
+
