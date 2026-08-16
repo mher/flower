@@ -92,6 +92,7 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
         "FLOWER_GITHUB_OAUTH_DOMAIN", "github.com")
     _OAUTH_AUTHORIZE_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/authorize'
     _OAUTH_ACCESS_TOKEN_URL = f'https://{_OAUTH_DOMAIN}/login/oauth/access_token'
+    _OAUTH_DEVICE_CODE_URL = f'https://{_OAUTH_DOMAIN}/login/device/code'
     _OAUTH_NO_CALLBACKS = False
     _OAUTH_SETTINGS_KEY = 'oauth'
 
@@ -115,7 +116,29 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
 
         return json.loads(response.body.decode('utf-8'))
 
+    async def post(self):
+        body = urlencode({
+            'client_id': self.settings[self._OAUTH_SETTINGS_KEY]['key'],
+            'scope': 'user:email',
+        })
+        response = await self.get_auth_http_client().fetch(
+            self._OAUTH_DEVICE_CODE_URL,
+            method='POST',
+            headers={'Content-Type': 'application/x-www-form-urlencoded',
+                     'Accept': 'application/json'},
+            body=body,
+        )
+        if response.error:
+            raise tornado.web.HTTPError(502, 'GitHub device code request failed')
+        self.set_header('Content-Type', 'application/json')
+        self.write(response.body)
+
     async def get(self):
+        device_code = self.get_argument('device_code', None)
+        if device_code:
+            await self._device_poll(device_code)
+            return
+
         redirect_uri = self.settings[self._OAUTH_SETTINGS_KEY]['redirect_uri']
         if self.get_argument('code', False):
             user = await self.get_authenticated_user(
@@ -131,6 +154,35 @@ class GithubLoginHandler(BaseHandler, tornado.auth.OAuth2Mixin):
                 response_type='code',
                 extra_params={'approval_prompt': ''}
             )
+
+    async def _device_poll(self, device_code):
+        body = urlencode({
+            'client_id': self.settings[self._OAUTH_SETTINGS_KEY]['key'],
+            'device_code': device_code,
+            'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+        })
+        response = await self.get_auth_http_client().fetch(
+            self._OAUTH_ACCESS_TOKEN_URL,
+            method='POST',
+            headers={'Content-Type': 'application/x-www-form-urlencoded',
+                     'Accept': 'application/json'},
+            body=body,
+        )
+        if response.error:
+            raise tornado.web.HTTPError(502, 'GitHub token poll failed')
+
+        data = json.loads(response.body.decode('utf-8'))
+        error = data.get('error')
+        if error in ('authorization_pending', 'slow_down'):
+            # User has not yet approved; caller should retry after `interval`.
+            self.set_status(202)
+            self.set_header('Content-Type', 'application/json')
+            self.write(response.body)
+            return
+        if error:
+            raise tornado.web.HTTPError(403, f'GitHub device auth error: {error}')
+
+        await self._on_auth(data)
 
     async def _on_auth(self, user):
         if not user:

@@ -1,3 +1,6 @@
+import json
+from unittest.mock import AsyncMock, MagicMock, patch
+
 from flower.views.auth import authenticate, validate_auth_option
 from tests.unit import AsyncHTTPTestCase
 
@@ -59,4 +62,68 @@ class AuthTests(AsyncHTTPTestCase):
         self.assertTrue(authenticate("one.*@example.com", "one.two@example.com"))
         self.assertFalse(authenticate(".*@example.com", "attacker@example.com.attacker.com"))
         self.assertFalse(authenticate(".*@corp.example.com", "attacker@corpZexample.com"))
-        self.assertFalse(authenticate(".*@corp\.example\.com", "attacker@corpZexample.com"))
+        self.assertFalse(authenticate(".*@corp\\.example\\.com", "attacker@corpZexample.com"))
+
+
+_OAUTH_SETTINGS = {
+    'key': 'test-client-id',
+    'secret': 'test-client-secret',
+    'redirect_uri': 'http://localhost:5555/login',
+}
+
+
+class GithubLoginHandlerDeviceFlowTests(AsyncHTTPTestCase):
+    def setUp(self):
+        super().setUp()
+        self._app.settings['oauth'] = _OAUTH_SETTINGS
+
+    def test_post_returns_device_code_json(self):
+        client = MagicMock()
+        client.fetch = AsyncMock(return_value=MagicMock(
+            error=None,
+            body=json.dumps({'user_code': 'ABCD-1234'}).encode(),
+        ))
+        with self.mock_option('auth_provider', 'flower.views.auth.GithubLoginHandler'), \
+             self.mock_option('auth', '.*@example.com'), \
+             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client):
+            r = self.fetch('/login', method='POST', body='')
+            self.assertEqual(200, r.code)
+            self.assertEqual('ABCD-1234', json.loads(r.body)['user_code'])
+
+    def test_get_authorization_pending_returns_202(self):
+        client = MagicMock()
+        client.fetch = AsyncMock(return_value=MagicMock(
+            error=None,
+            body=json.dumps({'error': 'authorization_pending'}).encode(),
+        ))
+        with self.mock_option('auth_provider', 'flower.views.auth.GithubLoginHandler'), \
+             self.mock_option('auth', '.*@example.com'), \
+             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client):
+            r = self.fetch('/login?device_code=dev123')
+            self.assertEqual(202, r.code)
+
+    def test_get_device_auth_error_returns_403(self):
+        client = MagicMock()
+        client.fetch = AsyncMock(return_value=MagicMock(
+            error=None,
+            body=json.dumps({'error': 'expired_token'}).encode(),
+        ))
+        with self.mock_option('auth_provider', 'flower.views.auth.GithubLoginHandler'), \
+             self.mock_option('auth', '.*@example.com'), \
+             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client):
+            r = self.fetch('/login?device_code=dev123')
+            self.assertEqual(403, r.code)
+
+    def test_get_successful_auth_sets_cookie_and_redirects(self):
+        client = MagicMock()
+        client.fetch = AsyncMock(side_effect=[
+            MagicMock(error=None, body=json.dumps({'access_token': 'tok123'}).encode()),
+            MagicMock(error=None, body=json.dumps(
+                [{'email': 'user@example.com', 'verified': True}]).encode()),
+        ])
+        with self.mock_option('auth_provider', 'flower.views.auth.GithubLoginHandler'), \
+             self.mock_option('auth', '.*@example.com'), \
+             patch('flower.views.auth.GithubLoginHandler.get_auth_http_client', return_value=client):
+            r = self.fetch('/login?device_code=dev123', follow_redirects=False)
+            self.assertEqual(302, r.code)
+            self.assertIn('user', r.headers.get('Set-Cookie', ''))
