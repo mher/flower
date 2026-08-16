@@ -2,4 +2,3 @@
 Sphinx
 sphinxcontrib-fulltoc
 sphinxcontrib-httpdomain
-sphinxcontrib-redoc
