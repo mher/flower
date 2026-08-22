@@ -97,14 +97,33 @@ Okta OAuth
 ----------
 
 Flower also supports Okta OAuth. Before getting started, you need to register Flower in `Okta`_.
-Okta OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.OktaLoginHandler`.
+Okta OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.OktaLoginHandler`.
 
-Okta OAuth requires `oauth2_key`, `oauth2_secret` and `oauth2_redirect_uri` options which should be obtained from Okta.
-Okta OAuth also uses `FLOWER_OAUTH2_OKTA_BASE_URL` environment variable.
+
+1. `oauth2_okta_base_url` should be set to the authorization server, for example:
+
+    .. code-block:: text
+
+        https://example.okta.com/oauth2/default
+
+   for more info see: `Okta authorization servers`_
+2. `oauth2_key` should be set to the client ID of an Okta app
+3. `oauth2_secret` should be set to the client secret of an Okta app, this can be optional if PKCE is enabled,
+   however, it's strongly recommended to always use client secret authentication.
+4. `oauth2_redirect_uri` should be set to the login page of the Flower server,
+   this also need to be configured in Okta apps' `Sign-in redirect URIs`, for example:
+
+   .. code-block:: text
+
+       https://flower.example.com/login
+
+5. (Optional) `oauth2_okta_enable_pkce` whether to enable PKCE, default is `false`
+6. (Optional) `oauth2_okta_login_timeout` user must complete sign in within this duration, in seconds. default is 300
 
 See Okta `Okta OAuth API`_ docs for more info.
 
-.. _Okta: https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/main/
+.. _Okta: https://help.okta.com/en-us/content/topics/apps/apps_app_integration_wizard_oidc.htm
+.. _Okta authorization servers: https://developer.okta.com/docs/concepts/auth-servers/
 .. _Okta OAuth API: https://developer.okta.com/docs/reference/api/oidc/
 
 .. _gitlab-oauth:
