@@ -101,14 +101,12 @@ var flower = (function () {
 
     var MISSING_VALUE = '<span class="value-missing">\u2014</span>';
 
-    function tasksPageUrl(worker, state) {
-        var params = [];
-        if (worker) {
-            params.push('worker=' + encodeURIComponent(worker));
-        }
-        if (state) {
-            params.push('state=' + state);
-        }
+    function tasksPageUrl(filters) {
+        var params = ['worker', 'state', 'name'].filter(function (key) {
+            return filters[key];
+        }).map(function (key) {
+            return key + '=' + encodeURIComponent(filters[key]);
+        });
         return url_prefix() + '/tasks' + (params.length ? '?' + params.join('&') : '');
     }
 
@@ -119,7 +117,7 @@ var flower = (function () {
             if (type !== 'display' || !count) {
                 return count;
             }
-            return '<a href="' + tasksPageUrl(full.hostname, state) + '">' + count + '</a>';
+            return '<a href="' + tasksPageUrl({worker: full.hostname, state: state}) + '">' + count + '</a>';
         };
     }
 
@@ -724,7 +722,7 @@ var flower = (function () {
                     var total = api.column(column).data().reduce(sum, 0);
                     var footer = total;
                     if (total !== 0) {
-                        footer = '<a href="' + tasksPageUrl(null, state) + '">' + total + '</a>';
+                        footer = '<a href="' + tasksPageUrl({state: state}) + '">' + total + '</a>';
                     }
                     $(api.column(column).footer()).html(footer);
                 }
@@ -829,12 +827,10 @@ var flower = (function () {
             return;
         }
 
-        var initialState = $.urlParam('state') || '',
-            initialWorker = decodeURIComponent($.urlParam('worker') || ''),
-            initialSearch = [
-                initialState ? 'state:' + initialState : '',
-                initialWorker ? 'worker:' + initialWorker : ''
-            ].filter(Boolean).join(' '),
+        var initialSearch = ['state', 'worker', 'name'].map(function (key) {
+                var value = decodeURIComponent($.urlParam(key) || '');
+                return value ? key + ':' + value : '';
+            }).filter(Boolean).join(' '),
             tasksTable = $('#tasks-table').DataTable({
             rowId: 'uuid',
             searching: true,
@@ -893,8 +889,8 @@ var flower = (function () {
                 data: 'name',
                 visible: isColumnVisible('name'),
                 render: function (data, type, full, meta) {
-                    return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(full.uuid) + '">' +
-                        htmlEscapeEntities(data) + '</a>';
+                    // The uuid column opens the task, the name lists its siblings
+                    return '<a href="' + tasksPageUrl({name: data}) + '">' + htmlEscapeEntities(data) + '</a>';
                 }
             }, {
                 targets: 1,

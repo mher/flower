@@ -50,6 +50,11 @@ class TaskControlsTest(AsyncHTTPTestCase):
     def started_event():
         return Event('task-started', uuid='123', hostname='worker1')
 
+    def test_task_name_links_to_tasks_with_that_name(self):
+        r = self.render_task(self.received_event(), self.started_event())
+        self.assertEqual(200, r.code)
+        self.assertIn('<a href="/tasks?name=task1">task1</a>', str(r.body))
+
     def test_started_task_has_terminate_button(self):
         r = self.render_task(self.received_event(), self.started_event())
         self.assertEqual(200, r.code)
