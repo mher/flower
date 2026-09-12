@@ -2,6 +2,7 @@ import asyncio
 import dbm
 import dbm.dumb
 import os
+import pickle
 import shelve
 import tempfile
 import time
@@ -57,7 +58,7 @@ class PersistenceTests(AsyncTestCase):
 
             events.state.counter['worker1']['task-received'] = 5
             events.state.counter['worker1']['unpicklable'] = lambda: None
-            with self.assertRaises(Exception):
+            with self.assertRaises(pickle.PicklingError):
                 events.save_state()
 
             restored = self.events(db)

@@ -1,5 +1,6 @@
 import ssl
 import unittest
+from typing import ClassVar
 from unittest import mock
 
 from flower.utils import broker
@@ -294,7 +295,7 @@ class TestRedisSentinel(unittest.TestCase):
 
 class TestRedisSsl(unittest.TestCase):
 
-    BROKER_USE_SSL_OPTIONS = {
+    BROKER_USE_SSL_OPTIONS: ClassVar[dict] = {
         'ssl_cert_reqs': 0,
         'ssl_certfile': '/path/to/ssl_cert_file',
         'ssl_keyfile': '/path/to/ssl_key_file',

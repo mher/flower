@@ -1,6 +1,6 @@
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from celery.events import Event
 from kombu import uuid
@@ -141,7 +141,7 @@ class PrometheusTests(AsyncHTTPTestCase):
         state.get_or_create_worker(worker_name)
         events = [Event('worker-online', hostname=worker_name)]
         events += task_succeeded_events(
-            worker=worker_name, name=task_name, id='567', eta=datetime.now() + timedelta(hours=4)
+            worker=worker_name, name=task_name, id='567', eta=datetime.now(timezone.utc) + timedelta(hours=4)
         )
         for i, e in enumerate(events):
             e['clock'] = i

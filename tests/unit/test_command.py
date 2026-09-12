@@ -21,31 +21,33 @@ from tests.unit import AsyncHTTPTestCase
 
 
 class TestFlowerCommand(AsyncHTTPTestCase):
-    # prometheus ships its defaults as a tuple, the option holds a list
-    DEFAULT_BUCKETS = list(Histogram.DEFAULT_BUCKETS)
+    @staticmethod
+    def default_buckets():
+        # prometheus ships its defaults as a tuple, the option holds a list
+        return list(Histogram.DEFAULT_BUCKETS)
 
     def test_task_runtime_metric_buckets_read_from_cmd_line(self):
-        with self.mock_option('task_runtime_metric_buckets', self.DEFAULT_BUCKETS):
+        with self.mock_option('task_runtime_metric_buckets', self.default_buckets()):
             apply_options('flower', argv=['--task-runtime-metric-buckets=1,10,inf'])
             self.assertEqual([1.0, 10.0, float('inf')], options.task_runtime_metric_buckets)
 
     def test_task_runtime_metric_buckets_no_cmd_line_arg(self):
-        with self.mock_option('task_runtime_metric_buckets', self.DEFAULT_BUCKETS):
+        with self.mock_option('task_runtime_metric_buckets', self.default_buckets()):
             apply_options('flower', argv=[])
-            self.assertEqual(self.DEFAULT_BUCKETS, options.task_runtime_metric_buckets)
+            self.assertEqual(self.default_buckets(), options.task_runtime_metric_buckets)
 
     def test_task_runtime_metric_buckets_read_from_env(self):
-        with self.mock_option('task_runtime_metric_buckets', self.DEFAULT_BUCKETS), \
+        with self.mock_option('task_runtime_metric_buckets', self.default_buckets()), \
                 patch.dict(os.environ, {"FLOWER_TASK_RUNTIME_METRIC_BUCKETS": "2,5,inf"}):
             apply_env_options()
             self.assertEqual([2.0, 5.0, float('inf')], options.task_runtime_metric_buckets)
 
     def test_task_runtime_metric_buckets_no_env_value_provided(self):
-        with self.mock_option('task_runtime_metric_buckets', self.DEFAULT_BUCKETS), \
+        with self.mock_option('task_runtime_metric_buckets', self.default_buckets()), \
                 patch.dict(os.environ, {}, clear=False):
             os.environ.pop('FLOWER_TASK_RUNTIME_METRIC_BUCKETS', None)
             apply_env_options()
-            self.assertEqual(self.DEFAULT_BUCKETS, options.task_runtime_metric_buckets)
+            self.assertEqual(self.default_buckets(), options.task_runtime_metric_buckets)
 
     def test_port(self):
         with self.mock_option('port', 5555):
