@@ -1,24 +1,24 @@
 Prometheus Integration
 ======================
 
-Flower exports several celery worker and task metrics in Prometheus' format.
-The ``/metrics`` endpoint is available from the get go after you have installed Flower.
+Flower exports several celery worker and task metrics in Prometheus format.
+The ``/metrics`` endpoint is available as soon as Flower is running.
 
 By default on your local machine Flower's metrics are available at: ``localhost:5555/metrics``.
 
-Read further for more information about configuration and available metrics please.
+Read on for configuration details and the list of available metrics.
 
-Complete guide on integration of Celery, Flower, Prometheus and Grafana is here: `Grafana Integration Guide`_.
+For a complete walkthrough of Celery, Flower, Prometheus and Grafana, see the `Grafana Integration Guide`_.
 
 Configure Prometheus to scrape Flower metrics
 ---------------------------------------------
 
-To integrate with Prometheus you have to add Flower as the target in Prometheus's configuration.
+To integrate with Prometheus you have to add Flower as a target in the Prometheus configuration.
 In this example we are assuming your Flower and Prometheus are installed on your local machine
 with their defaults and available at ``localhost:<port number>``.
 
-To add Flower's metrics to Prometheus go to its config file ``prometheus.yml`` which initially
-will look like this:
+To add Flower's metrics to Prometheus open its config file ``prometheus.yml``, which initially
+looks like this:
 
 .. code-block:: yaml
 
@@ -44,14 +44,14 @@ and alter the ``scrape_configs`` definition to be:
           - targets: ['localhost:5555']
 
 You can also just point Prometheus at the example ``prometheus.yml`` file in the root of the `Flower repository <https://github.com/mher/flower/blob/master/prometheus.yml>`_
-when you start it from the command line (note that you would have to set ``flower`` to point at ``localhost`` in your ``etc/hosts`` config for the DNS to resolve correctly)::
+when you start it from the command line (note that ``flower`` must resolve to ``localhost``, for example through ``/etc/hosts``)::
 
     ./prometheus --config.file=prometheus.yml
 
 Available Metrics
 -----------------
 
-Below you will find a table of available Prometheus metrics exposed by Flower.
+The table below lists the Prometheus metrics exposed by Flower.
 
 +---------------------------------------------------+----------------------------------------------------------------------+--------------------+-----------------+
 | Name                                              | Description                                                          |  Labels            | Instrument Type |
@@ -72,28 +72,27 @@ Below you will find a table of available Prometheus metrics exposed by Flower.
 Using Metric Labels
 -------------------
 
-You can filter received data in prometheus using ``promql`` syntax to present information only for selected labels.
-We have the following labels available:
+You can filter the data in Prometheus using PromQL to show only selected labels.
+The following labels are available:
 
-* **task** - task name, i.e. ``tasks.add``, ``tasks.multiply``.
-* **type** - task event type, i.e. ``task-started``, ``task-succeeded``. Note that worker related events **will not be counted**.
+* **task** - task name, e.g. ``tasks.add``, ``tasks.multiply``.
+* **type** - task event type, e.g. ``task-started``, ``task-succeeded``. Note that worker related events **will not be counted**.
   For more info on task event types see: `task events in celery <https://docs.celeryq.dev/en/stable/userguide/monitoring.html#task-events>`_.
-* **worker** - celery worker name, i.e ``celery@<your computer name>``.
+* **worker** - celery worker name, e.g. ``celery@<your computer name>``.
 
 Example Prometheus Alerts
 -------------------------
 
-See example `Prometheus alerts <https://github.com/mher/flower/tree/master/examples/prometheus-alerts.yaml>`_.
+See the example `Prometheus alerts <https://github.com/mher/flower/tree/master/examples/prometheus-alerts.yaml>`_.
 Add the rules to your ``alertmanager.yml`` config as in the `alert manager's documentation <https://prometheus.io/docs/alerting/latest/configuration/>`_.
 
 
 Example Grafana Dashboard
 -------------------------
 
-See example `Grafana dashboard <https://github.com/mher/flower/tree/master/examples/celery-monitoring-grafana-dashboard.json>`_.
-You can import it easily in Grafana.
-Hover over the + button in the side bar menu -> Import -> Upload JSON file.
-The dashboard should give you a nice starting point for monitoring of your celery cluster.
+See the example `Grafana dashboard <https://github.com/mher/flower/tree/master/examples/celery-monitoring-grafana-dashboard.json>`_.
+The `Grafana Integration Guide`_ below shows how to import it.
+The dashboard is a good starting point for monitoring your Celery cluster.
 
 Grafana Integration Guide
 =========================

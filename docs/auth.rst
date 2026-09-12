@@ -16,7 +16,7 @@ The following endpoints are exempt from authentication:
 HTTP Basic Authentication
 -------------------------
 
-Flower supports Basic Authentication as a built-in authentication method, allowing you to secure access to the
+Flower supports Basic Authentication as a built-in authentication method, allowing you to secure access to
 Flower using simple username and password credentials. This authentication method is commonly used for
 straightforward authentication requirements.
 
@@ -73,9 +73,9 @@ Follow the steps below to configure and use Google OAuth authentication:
 3. In the sidebar on the left, select Credentials.
 4. Click CREATE CREDENTIALS and click OAuth client ID.
 5. Under Application type, select Web application.
-6. Name OAuth 2.0 client and click Create.
-7. Copy the "Client secret" and "Client ID"
-8. Add redirect URI to the list of Authorized redirect URIs
+6. Name the OAuth 2.0 client and click Create.
+7. Copy the "Client secret" and "Client ID".
+8. Add the redirect URI to the list of Authorized redirect URIs.
 
 Here's an example configuration file with the Google OAuth options:
 
@@ -87,7 +87,7 @@ Here's an example configuration file with the Google OAuth options:
     oauth2_secret="<your_client_secret>"
     oauth2_redirect_uri="http://localhost:5555/login"
 
-Replace `<your_client_id>` and `<your_client_secret>` with the actual  Client ID and secret obtained from
+Replace `<your_client_id>` and `<your_client_secret>` with the Client ID and secret obtained from
 the Google Developer Console.
 
 .. _Google Developer Console: https://console.developers.google.com
@@ -98,10 +98,10 @@ GitHub OAuth
 ------------
 
 Flower also supports GitHub OAuth. Before getting started, Flower should be registered in
-`Github Settings`_.
+`GitHub Settings`_.
 
-Github OAuth is activated by setting :ref:`auth_provider` to `flower.views.auth.GithubLoginHandler`.
-Here's an example configuration file with the Github OAuth options:
+GitHub OAuth is activated by setting :ref:`auth_provider` to `flower.views.auth.GithubLoginHandler`.
+Here's an example configuration file with the GitHub OAuth options:
 
 .. code-block:: python
 
@@ -111,12 +111,12 @@ Here's an example configuration file with the Github OAuth options:
     oauth2_secret="<your_client_secret>"
     oauth2_redirect_uri="http://localhost:5555/login"
 
-Replace `<your_client_id>` and `<your_client_secret>` with the actual  Client ID and secret obtained from
-the Github Settings.
+Replace `<your_client_id>` and `<your_client_secret>` with the Client ID and secret obtained from
+`GitHub Settings`_.
 
 See `GitHub OAuth API`_ docs for more info.
 
-.. _Github Settings: https://github.com/settings/applications/new
+.. _GitHub Settings: https://github.com/settings/applications/new
 .. _GitHub OAuth API: https://developer.github.com/v3/oauth/
 
 .. _okta-oauth:
@@ -127,10 +127,10 @@ Okta OAuth
 Flower also supports Okta OAuth. Before getting started, you need to register Flower in `Okta`_.
 Okta OAuth is activated by setting :ref:`auth_provider` option to `flower.views.auth.OktaLoginHandler`.
 
-Okta OAuth requires `oauth2_key`, `oauth2_secret` and `oauth2_redirect_uri` options which should be obtained from Okta.
+Okta OAuth requires the `oauth2_key`, `oauth2_secret` and `oauth2_redirect_uri` options, which are obtained from Okta.
 Okta OAuth also uses `FLOWER_OAUTH2_OKTA_BASE_URL` environment variable.
 
-See Okta `Okta OAuth API`_ docs for more info.
+See the `Okta OAuth API`_ docs for more info.
 
 .. _Okta: https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/main/
 .. _Okta OAuth API: https://developer.okta.com/docs/reference/api/oidc/

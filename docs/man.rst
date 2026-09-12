@@ -12,7 +12,7 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-Flower is a web based tool for monitoring and administrating Celery clusters.
+Flower is a web-based tool for monitoring and administrating Celery clusters.
 It has these features:
 
 - Real-time monitoring using Celery Events
@@ -48,7 +48,7 @@ OPTIONS
   --auth                           regexp of emails to grant access
   --auth-provider                  sets authentication provider class
   --auto-refresh                   refresh workers automatically (default *True*)
-  --basic-auth                     colon separated user-password to enable
+  --basic-auth                     colon-separated user-password to enable
                                    basic auth
   --broker-api                     inspect broker e.g.
                                    http://guest:guest@localhost:15672/api/

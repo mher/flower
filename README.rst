@@ -72,7 +72,7 @@ In this example, Flower is using the `tasks.app` defined in the `examples/tasks.
 API
 ---
 
-Flower API enables to manage the cluster via HTTP `REST API`.
+The Flower API lets you manage the cluster over HTTP.
 
 For example you can grow a worker's pool by: ::
 
@@ -82,11 +82,11 @@ Or call a task by: ::
 
     $ curl -X POST -d '{"args":[1,2]}' http://localhost:5555/api/task/async-apply/tasks.add
 
-Or terminate executing task by: ::
+Or terminate a running task by: ::
 
     $ curl -X POST -d 'terminate=True' http://localhost:5555/api/task/revoke/8a4da87b-e12b-4547-b89a-e92e4d1f8efd
 
-For more info checkout `API Reference`_
+For more info, see the `API Reference`_
 
 .. _API Reference: https://flower.readthedocs.io/en/latest/api.html
 

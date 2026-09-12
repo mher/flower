@@ -239,9 +239,9 @@ debug
 
 Default: False
 
-Enables the debug mode
+Enables debug mode.
 
-.. Note:: When debug mode is enabled, Flower may print sensitive information
+.. Note:: When debug mode is enabled, Flower may print sensitive information.
 
 .. _enable_events:
 
@@ -255,7 +255,7 @@ Enabling Celery events allows Flower to receive real-time updates about task eve
 from the Celery workers.
 
 You can also enable events directly when running Celery workers by using the `-E` flag.
-For more information, refer to the `Celery documentation <https://docs.celeryq.dev/en/stable/reference/cli.html#cmdoption-celery-worker-E>`_:
+For more information, refer to the `Celery documentation <https://docs.celeryq.dev/en/stable/reference/cli.html#cmdoption-celery-worker-E>`_.
 
 .. _format_task:
 
@@ -266,12 +266,12 @@ Default: None
 
 Modifies the default task formatting.
 
-The `format_task` function allows to modify the default formatting of tasks.
+The `format_task` function allows you to modify the default formatting of tasks.
 By defining the `format_task` function in the `flowerconfig.py` configuration file,
 you can customize the task object before it is displayed. The `format_task` function accepts a task object
 as a parameter and should return the modified version of the task.
 
-This function is particularly useful for filtering out sensitive information or limiting display lengths of task arguments, kwargs, or results.
+This function is particularly useful for filtering out sensitive information or limiting the display length of task arguments, kwargs, or results.
 
 The example below shows how to filter arguments and limit display lengths:
 
@@ -315,7 +315,7 @@ max_workers
 
 Default: 5000
 
-Sets the maximum number of workers to keep in memory
+Sets the maximum number of workers to keep in memory.
 
 .. _max_tasks:
 
@@ -324,7 +324,7 @@ max_tasks
 
 Default: 100000
 
-Sets the maximum number of tasks to keep in memory
+Sets the maximum number of tasks to keep in memory.
 
 .. _natural_time:
 
@@ -368,7 +368,7 @@ Default: 0
 
 Sets the interval for saving the Flower state.
 
-Flower state includes information about workers, tasks. The state is saved periodically to ensure data persistence and recovery upon restart.
+Flower state includes information about workers and tasks. The state is saved periodically to ensure data persistence and recovery upon restart.
 
 By default, periodic saving is disabled. Flower will not automatically save its state at regular intervals.
 If you want to enable periodic state saving, set the `state_save_interval` option to a positive integer value representing the interval in milliseconds.
@@ -465,7 +465,7 @@ Sets a secret key for signing cookies.
 
 The `cookie_secret` option allows you to set a secret key used for signing cookies in Flower.
 
-By default, the `cookie_secret` option is set to 'token_urlsafe(64)', which generates a random string of length 64 characters as the secret key.
+By default, the `cookie_secret` option is set to 'token_urlsafe(64)', which generates a random string as the secret key.
 This provides a good level of security for signing cookies. If you want to specify a custom secret key, you can set the `cookie_secret` option to the desired string.
 
 .. _auth_provider:
@@ -526,7 +526,7 @@ oauth2_key
 
 Default: None
 
-Sets the OAuth 2.0 key (client ID) issued by the OAuth 2.0 provider
+Sets the OAuth 2.0 key (client ID) issued by the OAuth 2.0 provider.
 
 `oauth2_key` option should be used with :ref:`auth`, :ref:`auth_provider`, :ref:`oauth2_redirect_uri` and :ref:`oauth2_secret` options.
 
@@ -537,7 +537,7 @@ oauth2_secret
 
 Default: None
 
-Sets the OAuth 2.0 secret issued by the OAuth 2.0 provider
+Sets the OAuth 2.0 secret issued by the OAuth 2.0 provider.
 
 `oauth2_secret` option should be used with :ref:`auth`, :ref:`auth_provider`, :ref:`oauth2_redirect_uri` and :ref:`oauth2_key` options.
 
