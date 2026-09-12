@@ -306,18 +306,30 @@ class TaskAbortTests(BaseApiTestCase):
         self.assertEqual(503, r.code)
 
 
-class MockTasks:
-
-    @staticmethod
-    def get_task_by_id(events, task_id):
-        from celery.events.state import Task
-        return Task()
-
-
 class TaskTests(BaseApiTestCase):
-    @patch('flower.api.tasks.tasks', new=MockTasks)
     def test_task_info(self):
-        self.get('/api/task/info/123')
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        events = [Event('worker-online', hostname='worker1')]
+        events += task_succeeded_events(worker='worker1', name='task1', id='123')
+        for i, e in enumerate(events):
+            e['clock'] = i
+            e['local_received'] = time.time()
+            state.event(e)
+        self._app.events.state = state
+
+        r = self.get('/api/task/info/123')
+
+        self.assertEqual(200, r.code)
+        info = json.loads(r.body)
+        self.assertEqual('123', info['uuid'])
+        self.assertEqual('task1', info['name'])
+        self.assertEqual(states.SUCCESS, info['state'])
+        self.assertEqual('(2, 2)', info['args'])
+        self.assertEqual("{'foo': 'bar'}", info['kwargs'])
+        self.assertEqual('4', info['result'])
+        self.assertEqual(0.1234, info['runtime'])
+        self.assertEqual('worker1', info['worker'])
 
     def test_unknown_task_error_preserves_percent(self):
         r = self.get('/api/task/info/foo%25bar')
