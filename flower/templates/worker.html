@@ -227,7 +227,7 @@
                 {% for name,value in worker['stats']['total'].items() %}
                 <tr>
                   <td>{{ name }}</td>
-                  <td>{{ value }}</td>
+                  <td>{{ format_count(value) }}</td>
                 </tr>
                 {% end %}
               </tbody>

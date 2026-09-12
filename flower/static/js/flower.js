@@ -117,7 +117,7 @@ var flower = (function () {
             if (type !== 'display' || !count) {
                 return count;
             }
-            return '<a href="' + tasksPageUrl({worker: full.hostname, state: state}) + '">' + count + '</a>';
+            return '<a href="' + tasksPageUrl({worker: full.hostname, state: state}) + '">' + count.toLocaleString() + '</a>';
         };
     }
 
@@ -720,9 +720,9 @@ var flower = (function () {
                 var columns = {2:"STARTED", 3:"", 4:"FAILURE", 5:"SUCCESS"};
                 for (const [column, state] of Object.entries(columns)) {
                     var total = api.column(column).data().reduce(sum, 0);
-                    var footer = total;
+                    var footer = total.toLocaleString();
                     if (total !== 0) {
-                        footer = '<a href="' + tasksPageUrl({state: state}) + '">' + total + '</a>';
+                        footer = '<a href="' + tasksPageUrl({state: state}) + '">' + footer + '</a>';
                     }
                     $(api.column(column).footer()).html(footer);
                 }

@@ -395,6 +395,13 @@ class WorkersTests(AsyncHTTPTestCase):
         self.assertIn('task-9<', body)
         self.assertNotIn('task-10<', body)
 
+    def test_processed_counts_use_thousands_separators(self):
+        self.app.inspector.workers['worker1'] = {
+            'stats': {'total': {'tasks.add': 141372}, 'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
+        with patch.object(self.get_app(), "update_workers"):
+            body = self.get('/worker/worker1').body.decode('utf-8')
+        self.assertIn('<td>141,372</td>', body)
+
     def test_invalid_limit_is_rejected(self):
         self.assertEqual(400, self.worker_page(query='?limit=many').code)
 

@@ -36,6 +36,10 @@ def task_link(url, uuid):
             f'<span class="task-uuid-short">{uuid[:8]}</span></a>')
 
 
+def format_count(value):
+    return f'{int(value or 0):,}'
+
+
 def format_value(value):
     if value is None:
         return '<span class="value-missing">&mdash;</span>'

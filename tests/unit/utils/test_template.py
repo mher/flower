@@ -3,7 +3,8 @@ import unittest
 
 from pytz import utc
 
-from flower.utils.template import format_duration, format_time, format_value, humanize, task_link
+from flower.utils.template import (format_count, format_duration, format_time, format_value,
+                                   humanize, task_link)
 
 
 class TestHumanize(unittest.TestCase):
@@ -125,3 +126,14 @@ class TestFormatValue(unittest.TestCase):
 
     def test_escapes_markup(self):
         self.assertEqual('&lt;b&gt;', format_value('<b>'))
+
+
+class TestFormatCount(unittest.TestCase):
+    def test_thousands_separator(self):
+        self.assertEqual('141,372', format_count(141372))
+
+    def test_small_number(self):
+        self.assertEqual('12', format_count(12))
+
+    def test_missing_is_zero(self):
+        self.assertEqual('0', format_count(None))

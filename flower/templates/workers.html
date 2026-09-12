@@ -56,10 +56,10 @@
         <tr id="{{ url_escape(name) }}">
           <td>{{ name }}</td>
           <td>{{ info.get('status', None) }}</td>
-          <td>{{ info.get('active', 0) or 0 }}</td>
-          <td>{{ info.get('task-received', 0) }}</td>
-          <td>{{ info.get('task-failed', 0) }}</td>
-          <td>{{ info.get('task-succeeded', 0) }}</td>
+          <td>{{ format_count(info.get('active')) }}</td>
+          <td>{{ format_count(info.get('task-received')) }}</td>
+          <td>{{ format_count(info.get('task-failed')) }}</td>
+          <td>{{ format_count(info.get('task-succeeded')) }}</td>
           <td>{% raw format_value(info.get('loadavg')) %}</td>
         </tr>
         {% end %}
