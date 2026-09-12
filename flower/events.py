@@ -234,15 +234,12 @@ class Events(threading.Thread):
     def load_state(self):
         logger.debug("Loading state from '%s'...", self.db)
         try:
-            state = shelve.open(self.db)
-            try:
+            with shelve.open(self.db) as state:
                 if not state:
                     return None
                 events = state['events']
                 events.counter.update(state.get('counter', {}))
                 return events
-            finally:
-                state.close()
         except Exception as e:
             logger.error("Failed to load state from '%s', moving it aside "
                          "and starting fresh: %s", self.db, e)
@@ -257,12 +254,9 @@ class Events(threading.Thread):
         logger.debug("Saving state to '%s'...", self.db)
         started = time.monotonic()
         tmp = f'{self.db}.tmp'
-        state = shelve.open(tmp, flag='n')
-        try:
+        with shelve.open(tmp, flag='n') as state:
             state['events'] = self.state
             state['counter'] = dict(self.state.counter)
-        finally:
-            state.close()
         # dbm backends may add suffixes like .db or .dat to the actual files
         for name in glob.glob(glob.escape(tmp) + '*'):
             os.replace(name, self.db + name[len(tmp):])
