@@ -20,24 +20,26 @@ from . import BaseApiTestCase
 
 class ApplyTests(BaseApiTestCase):
     def test_apply(self):
-        result = 'result'
-        with patch('celery.result.AsyncResult.state', new_callable=PropertyMock) as mock_state:
-            with patch('celery.result.AsyncResult.result', new_callable=PropertyMock) as mock_result:
-                mock_state.return_value = states.SUCCESS
-                mock_result.return_value = result
-
-                ar = AsyncResult(123)
-                ar.get = Mock(return_value=result)
-
+        for args, kwargs in (
+                ([], {}),
+                ([7, 'customer-42'], {'notify': True, 'label': '<order> & "quoted"'})):
+            with self.subTest(args=args, kwargs=kwargs):
+                ar = Mock(spec=AsyncResult, task_id='applied-task-id',
+                          state=states.SUCCESS, result='result',
+                          backend=Mock(connection_errors=()))
                 task = self._app.capp.tasks['foo'] = Mock()
-                task.apply_async = Mock(return_value=ar)
+                task.apply_async.return_value = ar
 
-                r = self.post('/api/task/apply/foo', body='')
+                body = json.dumps({'args': args, 'kwargs': kwargs}) if args or kwargs else ''
+                r = self.post('/api/task/apply/foo', body=body,
+                              headers={'Content-Type': 'application/json'})
 
-        self.assertEqual(200, r.code)
-        body = bytes.decode(r.body)
-        self.assertEqual(result, json.loads(body)['result'])
-        task.apply_async.assert_called_once_with(args=[], kwargs={})
+                self.assertEqual(200, r.code)
+                self.assertEqual({'task-id': 'applied-task-id',
+                                  'state': states.SUCCESS, 'result': 'result'},
+                                 json.loads(r.body))
+                task.apply_async.assert_called_once_with(args=args, kwargs=kwargs)
+                ar.get.assert_called_once_with(propagate=False, timeout=None)
 
     def test_apply_unserializable_result_returns_repr(self):
         result = object()
@@ -97,12 +99,25 @@ class ApplyTests(BaseApiTestCase):
 
 class AsyncApplyTests(BaseApiTestCase):
     def test_async_apply(self):
-        task = self._app.capp.tasks['foo'] = Mock()
-        task.apply_async = Mock(return_value=AsyncResult(123))
-        r = self.post('/api/task/async-apply/foo', body={})
+        for args, kwargs in (
+                ([], {}),
+                ([7, 'customer-42'], {'notify': True, 'label': '<order> & "quoted"'})):
+            with self.subTest(args=args, kwargs=kwargs):
+                result = Mock(spec=AsyncResult, task_id='async-task-id',
+                              state=states.PENDING,
+                              backend=Mock(connection_errors=()))
+                task = self._app.capp.tasks['foo'] = Mock()
+                task.apply_async.return_value = result
 
-        self.assertEqual(200, r.code)
-        task.apply_async.assert_called_once_with(args=[], kwargs={})
+                body = json.dumps({'args': args, 'kwargs': kwargs}) if args or kwargs else ''
+                r = self.post('/api/task/async-apply/foo', body=body,
+                              headers={'Content-Type': 'application/json'})
+
+                self.assertEqual(200, r.code)
+                self.assertEqual({'task-id': 'async-task-id', 'state': states.PENDING},
+                                 json.loads(r.body))
+                task.apply_async.assert_called_once_with(args=args, kwargs=kwargs)
+                result.get.assert_not_called()
 
     def test_broker_connection_failure_returns_service_unavailable(self):
         task = self._app.capp.tasks['foo'] = Mock()
@@ -166,14 +181,25 @@ class AsyncApplyTests(BaseApiTestCase):
 
 class SendTaskTests(BaseApiTestCase):
     def test_send_task(self):
-        result = AsyncResult(123)
-        self._app.capp.send_task = Mock(return_value=result)
+        for args, kwargs in (
+                ([], {}),
+                ([7, 'customer-42'], {'notify': True, 'label': '<order> & "quoted"'})):
+            with self.subTest(args=args, kwargs=kwargs):
+                result = Mock(spec=AsyncResult, task_id='sent-task-id',
+                              state=states.PENDING,
+                              backend=Mock(connection_errors=()))
+                self._app.capp.send_task = Mock(return_value=result)
 
-        r = self.post('/api/task/send-task/foo', body={})
+                body = json.dumps({'args': args, 'kwargs': kwargs}) if args or kwargs else ''
+                r = self.post('/api/task/send-task/foo', body=body,
+                              headers={'Content-Type': 'application/json'})
 
-        self.assertEqual(200, r.code)
-        self._app.capp.send_task.assert_called_once_with(
-            'foo', args=[], kwargs={})
+                self.assertEqual(200, r.code)
+                self.assertEqual({'task-id': 'sent-task-id', 'state': states.PENDING},
+                                 json.loads(r.body))
+                self._app.capp.send_task.assert_called_once_with(
+                    'foo', args=args, kwargs=kwargs)
+                result.get.assert_not_called()
 
     def test_broker_connection_failure_returns_service_unavailable(self):
         self._app.capp.send_task = Mock(
@@ -182,6 +208,35 @@ class SendTaskTests(BaseApiTestCase):
         r = self.post('/api/task/send-task/foo', body={})
 
         self.assertEqual(503, r.code)
+
+
+class TaskPublishValidationTests(BaseApiTestCase):
+    def assert_invalid_request(self, body, error=None):
+        for route in ('apply', 'async-apply', 'send-task'):
+            with self.subTest(route=route, body=body):
+                task = self._app.capp.tasks['foo'] = Mock()
+                self._app.capp.send_task = Mock()
+
+                r = self.post(f'/api/task/{route}/foo', body=body,
+                              headers={'Content-Type': 'application/json'})
+
+                self.assertEqual(400, r.code)
+                if error is not None:
+                    self.assertIn(error, r.body.decode('utf-8'))
+                task.apply_async.assert_not_called()
+                self._app.capp.send_task.assert_not_called()
+
+    def test_malformed_json_is_not_published(self):
+        for body in ('{', '{"args": [1,]}', '{"args": [1]'):
+            self.assert_invalid_request(body)
+
+    def test_non_object_body_is_not_published(self):
+        for payload in ([], None, 'not-an-object', 42, True):
+            self.assert_invalid_request(json.dumps(payload), 'invalid options')
+
+    def test_invalid_args_are_not_published(self):
+        for args in (None, False, 42, 'not-an-array', {'key': 'value'}):
+            self.assert_invalid_request(json.dumps({'args': args}), 'args must be an array')
 
 
 class TaskResultTests(BaseApiTestCase):
