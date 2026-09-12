@@ -247,7 +247,7 @@
                 {% for task in worker.get('active', {}) %}
                 <tr>
                   <td>{{ task['name'] }}</td>
-                  <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
+                  <td>{% raw task_link(reverse_url('task', task['id']), task['id']) %}</td>
                   <td>{{ task['acknowledged'] }}</td>
                   <td>{{ task['worker_pid'] }}</td>
                   <td><span class="worker-task-args" title="{{ task.get('args', 'N/A') }}">{{ task.get('args', 'N/A') }}</span></td>
@@ -271,7 +271,7 @@
                 {% for task in worker.get('scheduled', {}) %}
                 <tr>
                   <td>{{ task['request']['name'] }}</td>
-                  <td><a href="{{ reverse_url('task', task['request']['id']) }}">{{ task['request']['id'] }}</a></td>
+                  <td>{% raw task_link(reverse_url('task', task['request']['id']), task['request']['id']) %}</td>
                   <td><span class="worker-task-args" title="{{ task['request']['args'] }}">{{ task['request']['args'] }}</span></td>
                   <td><span class="worker-task-args" title="{{ task['request']['kwargs'] }}">{{ task['request']['kwargs'] }}</span></td>
                 </tr>
@@ -293,7 +293,7 @@
                 {% for task in worker.get('reserved', {}) %}
                 <tr>
                   <td>{{ task['name'] }}</td>
-                  <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
+                  <td>{% raw task_link(reverse_url('task', task['id']), task['id']) %}</td>
                   <td><span class="worker-task-args" title="{{ task['args'] }}">{{ task['args'] }}</span></td>
                   <td><span class="worker-task-args" title="{{ task['kwargs'] }}">{{ task['kwargs'] }}</span></td>
                 </tr>
@@ -311,7 +311,7 @@
               <tbody>
                 {% for task in worker.get('revoked', []) %}
                 <tr>
-                  <td><a href="{{ reverse_url('task', task) }}">{{ task }}</a></td>
+                  <td>{% raw task_link(reverse_url('task', task), task) %}</td>
                 </tr>
                 {% end %}
               </tbody>

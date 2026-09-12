@@ -869,6 +869,14 @@ body.app-body {
   text-decoration: none;
 }
 
+.task-uuid-full {
+  white-space: nowrap;
+}
+
+.task-uuid-short {
+  display: none;
+}
+
 .workers-table a:hover,
 .tasks-table a:hover {
   text-decoration: underline;
@@ -898,6 +906,7 @@ body.app-body {
   font-variant-numeric: tabular-nums;
 }
 
+.workers-page .dataTables_scroll,
 .tasks-page .dataTables_scroll {
   border-top: 1px solid var(--bs-border-color);
 }
@@ -986,6 +995,18 @@ div.dataTables_wrapper .dataTables_filter input {
 @media (max-width: 767.98px) {
   .page-header {
     align-items: flex-start;
+  }
+
+  .workers-table {
+    min-width: 44rem;
+  }
+
+  .task-uuid-full {
+    display: none;
+  }
+
+  .task-uuid-short {
+    display: inline;
   }
 
   .metric-grid {

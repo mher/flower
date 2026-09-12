@@ -515,15 +515,6 @@ var flower = (function () {
             'Update failed';
     }
 
-    function setWorkerColumnVisibility(table, mobile) {
-        var mobileColumns = [0, 1, 2];
-
-        table.columns().every(function (index) {
-            this.visible(!mobile || mobileColumns.indexOf(index) !== -1, false);
-        });
-        table.columns.adjust().draw(false);
-    }
-
     function format_time(timestamp) {
         var time = $('#time').val(),
             prefix = time.startsWith('natural-time') ? 'natural-time' : 'time',
@@ -558,29 +549,27 @@ var flower = (function () {
             'retries', 'revoked', 'exception', 'expires', 'eta'
         ],
         defaultTaskColumns = 'name,uuid,state,args,kwargs,result,received,started,runtime,worker',
-        desktopTaskColumns = ['name', 'uuid', 'state', 'received', 'runtime', 'worker'],
-        mobileTaskColumns = ['name', 'state', 'runtime'];
+        defaultVisibleTaskColumns = ['name', 'uuid', 'state', 'received', 'runtime', 'worker'];
 
     function usesDefaultTaskColumns() {
         return ($('#columns').val() || '').replace(/\s/g, '') === defaultTaskColumns;
     }
 
-    function shouldShowTaskColumn(name, mobile) {
+    function shouldShowTaskColumn(name) {
         if (!isColumnVisible(name)) {
             return false;
         }
         if (usesDefaultTaskColumns()) {
-            var responsiveColumns = mobile ? mobileTaskColumns : desktopTaskColumns;
-            return responsiveColumns.indexOf(name) !== -1;
+            return defaultVisibleTaskColumns.indexOf(name) !== -1;
         }
 
-        // Custom column selections take precedence over the responsive defaults.
+        // A custom column selection shows every column it names
         return true;
     }
 
-    function setTaskColumnVisibility(table, mobile) {
+    function setTaskColumnVisibility(table) {
         taskColumnNames.forEach(function (name, index) {
-            table.column(index).visible(shouldShowTaskColumn(name, mobile), false);
+            table.column(index).visible(shouldShowTaskColumn(name), false);
         });
         table.columns.adjust().draw(false);
     }
@@ -649,13 +638,13 @@ var flower = (function () {
             return;
         }
 
-        var mobileWorkers = window.matchMedia('(max-width: 767.98px)'),
-            workersTable = $('#workers-table').DataTable({
+        var workersTable = $('#workers-table').DataTable({
             rowId: 'name',
             searching: true,
             select: false,
             paging: true,
             lengthChange: false,
+            scrollX: true,
             scrollCollapse: true,
             pageLength: 15,
             language: {
@@ -773,11 +762,6 @@ var flower = (function () {
             }, ]),
         });
 
-        setWorkerColumnVisibility(workersTable, mobileWorkers.matches);
-        mobileWorkers.addEventListener('change', function (event) {
-            setWorkerColumnVisibility(workersTable, event.matches);
-        });
-
         var autorefresh_interval = $.urlParam('autorefresh') || 1;
         if (autorefresh !== 0) {
             setInterval( function () {
@@ -793,7 +777,6 @@ var flower = (function () {
         }
 
         var initialState = $.urlParam('state') || '',
-            mobileTasks = window.matchMedia('(max-width: 767.98px)'),
             tasksTable = $('#tasks-table').DataTable({
             rowId: 'uuid',
             searching: true,
@@ -866,8 +849,11 @@ var flower = (function () {
                         return data;
                     }
                     var escapedUuid = htmlEscapeEntities(data);
+                    // Phone width shows only the first uuid block, the link keeps the full id
                     return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(data) +
-                        '" title="' + escapedUuid + '">' + escapedUuid + '</a>';
+                        '" title="' + escapedUuid + '">' +
+                        '<span class="task-uuid-full">' + escapedUuid + '</span>' +
+                        '<span class="task-uuid-short">' + escapedUuid.slice(0, 8) + '</span></a>';
                 }
             }, {
                 targets: 2,
@@ -1003,10 +989,7 @@ var flower = (function () {
             }, ]),
         });
 
-        setTaskColumnVisibility(tasksTable, mobileTasks.matches);
-        mobileTasks.addEventListener('change', function (event) {
-            setTaskColumnVisibility(tasksTable, event.matches);
-        });
+        setTaskColumnVisibility(tasksTable);
 
         updateTaskStateButtons(taskStateFromSearch(tasksTable.search()));
         $('.task-state-filter').on('click', function () {

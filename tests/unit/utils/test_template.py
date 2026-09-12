@@ -3,7 +3,7 @@ import unittest
 
 from pytz import utc
 
-from flower.utils.template import format_time, humanize
+from flower.utils.template import format_time, humanize, task_link
 
 
 class TestHumanize(unittest.TestCase):
@@ -64,3 +64,19 @@ class TestHumanize(unittest.TestCase):
                          humanize('max_tasks_per_child'))
         self.assertEqual('URI prefix', humanize('uri_prefix'))
         self.assertEqual('Max concurrency', humanize('max-concurrency'))
+
+
+class TestTaskLink(unittest.TestCase):
+    def test_full_and_short_spans(self):
+        html = task_link('/task/abc', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890')
+        self.assertIn('<span class="task-uuid-full">a1b2c3d4-e5f6-7890-abcd-ef1234567890</span>', html)
+        self.assertIn('<span class="task-uuid-short">a1b2c3d4</span>', html)
+
+    def test_link_target_and_title(self):
+        html = task_link('/prefix/task/abc', 'abc')
+        self.assertTrue(html.startswith('<a href="/prefix/task/abc" title="abc">'))
+
+    def test_escapes_uuid(self):
+        html = task_link('/task/x', '<script>')
+        self.assertNotIn('<script>', html)
+        self.assertIn('&lt;script&gt;', html)

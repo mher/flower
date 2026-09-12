@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from celery import current_app
 from humanize import naturaltime
 from pytz import timezone, utc
+from tornado.escape import xhtml_escape
 
 KEYWORDS_UP = ('ssl', 'uri', 'url', 'uuid', 'eta')
 KEYWORDS_DOWN = ('args', 'kwargs')
@@ -13,6 +14,13 @@ UUID_REGEX = re.compile(r'^[\w]{8}(-[\w]{4}){3}-[\w]{12}$')
 def format_time(time, tz):
     dt = datetime.fromtimestamp(time, tz=tz)
     return dt.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
+
+
+def task_link(url, uuid):
+    uuid = xhtml_escape(str(uuid))
+    return (f'<a href="{xhtml_escape(url)}" title="{uuid}">'
+            f'<span class="task-uuid-full">{uuid}</span>'
+            f'<span class="task-uuid-short">{uuid[:8]}</span></a>')
 
 
 def humanize(obj, type=None):
