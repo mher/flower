@@ -19,7 +19,6 @@ It has these features:
 
     - Task progress and history
     - Ability to show task details (arguments, start time, runtime, and more)
-    - Graphs and statistics
 
 - Remote Control
 
@@ -31,16 +30,14 @@ It has these features:
     - View scheduled tasks (ETA/countdown)
     - View reserved and revoked tasks
     - Apply time and rate limits
-    - Configuration viewer
     - Revoke or terminate tasks
 
 - Broker monitoring
 
     - View statistics for all Celery queues
-    - Queue length graphs
 
 - HTTP API
-- Basic Auth and Google OpenID authentication
+- HTTP Basic Auth, Google, GitHub, GitLab and Okta OAuth
 - Prometheus integration
 
 
@@ -48,7 +45,7 @@ OPTIONS
 =======
 
   --address                        run on the given address
-  --auth                           regexp  of emails to grant access
+  --auth                           regexp of emails to grant access
   --auth-provider                  sets authentication provider class
   --auto-refresh                   refresh workers automatically (default *True*)
   --basic-auth                     colon separated user-password to enable
@@ -72,18 +69,24 @@ OPTIONS
   --max-tasks                      maximum number of tasks to keep in memory
                                    (default *100000*)
   --natural-time                   show time in relative format (default *False*)
+  --oauth2-key                     OAuth2 key (client ID) (requires --auth)
+  --oauth2-secret                  OAuth2 secret (requires --auth)
+  --oauth2-redirect-uri            OAuth2 redirect uri (requires --auth)
   --persistent                     enable persistent mode (default *False*)
   --port                           run on the given port (default *5555*)
   --purge-offline-workers          time (in seconds) after which offline workers are purged
                                    from workers
+  --read-only                      enable read only mode, disabling all control
+                                   operations (default *False*)
   --state-save-interval            state save interval (in milliseconds) (default *0*)
-  --tasks-columns                  slugs of columns on /tasks/ page, delimited by comma
-                                   (default *name,uuid,state,args,kwargs,result,received,started,runtime,worker*)
+  --task-runtime-metric-buckets    task runtime prometheus latency metric buckets (default prometheus latency buckets)
+  --tasks-columns                  slugs of columns on /tasks/ page in display order,
+                                   delimited by comma
+                                   (default *name,uuid,state,received,runtime,worker*)
   --unix-socket                    path to unix socket to bind flower server to
   --url-prefix                     base url prefix
   --xheaders                       enable support for the 'X-Real-Ip' and
                                    'X-Scheme' headers. (default *False*)
-  --task-runtime-metric-buckets    task runtime prometheus latency metric buckets (default prometheus latency buckets)
 
 TORNADO OPTIONS
 ===============
