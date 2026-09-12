@@ -89,6 +89,34 @@ class TasksDataTable(BaseHandler):
         return uuid, args
 
 
+# Every column the tasks page can show, slug to header label
+TASK_COLUMNS = {
+    'name': 'Name',
+    'uuid': 'UUID',
+    'state': 'State',
+    'args': 'args',
+    'kwargs': 'kwargs',
+    'result': 'Result',
+    'received': 'Received',
+    'started': 'Started',
+    'runtime': 'Runtime',
+    'worker': 'Worker',
+    'exchange': 'Exchange',
+    'routing_key': 'Routing Key',
+    'retries': 'Retries',
+    'revoked': 'Revoked',
+    'exception': 'Exception',
+    'expires': 'Expires',
+    'eta': 'ETA',
+}
+
+
+def visible_task_columns(tasks_columns):
+    "Slug and label of each column the tasks page shows, in the order tasks_columns lists them"
+    return [(name, TASK_COLUMNS[name])
+            for name in map(str.strip, tasks_columns.split(',')) if name in TASK_COLUMNS]
+
+
 class TasksView(BaseHandler):
     @web.authenticated
     def get(self):
@@ -101,7 +129,6 @@ class TasksView(BaseHandler):
 
         self.render(
             "tasks.html",
-            tasks=[],
-            columns=app.options.tasks_columns,
+            columns=visible_task_columns(app.options.tasks_columns),
             time=time,
         )

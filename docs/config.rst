@@ -384,12 +384,13 @@ These headers are commonly used in proxy or load balancer configurations to pres
 tasks_columns
 ~~~~~~~~~~~~~
 
-Default: name,uuid,state,args,kwargs,result,received,started,runtime,worker
+Default: name,uuid,state,received,runtime,worker
 
-Specifies the list of comma-delimited columns to display on the `/tasks` page.
+Specifies the list of comma-delimited columns to display on the `/tasks` page, in the order
+they should appear.
 
 The `tasks_columns` option allows you to customize the columns displayed on the `/tasks` page in Flower.
-By default, the specified columns are: name, uuid, state, args, kwargs, result, received, started, runtime, and worker.
+By default, the specified columns are: name, uuid, state, received, runtime, and worker.
 
 Available columns are:
 

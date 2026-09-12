@@ -571,49 +571,131 @@ var flower = (function () {
         return $('#time').val().startsWith('natural-time');
     }
 
-    function isColumnVisible(name) {
-        var columns = $('#columns').val();
-        if (columns === "all")
-            return true;
-        if (columns) {
-            columns = columns.split(',').map(function (e) {
-                return e.trim();
-            });
-            return columns.indexOf(name) !== -1;
+    // Column definitions for the tasks table, keyed by column slug
+    var taskColumns = {
+        name: {
+            render: function (data, type, full, meta) {
+                // The uuid column opens the task, the name lists its siblings
+                return '<a href="' + tasksPageUrl({name: data}) + '">' + htmlEscapeEntities(data) + '</a>';
+            }
+        },
+        uuid: {
+            orderable: false,
+            className: "text-nowrap",
+            render: function (data, type, full, meta) {
+                if (type !== 'display') {
+                    return data;
+                }
+                var escapedUuid = htmlEscapeEntities(data);
+                // Mobile width shows only the first uuid block, the link keeps the full id
+                return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(data) +
+                    '" title="' + escapedUuid + '">' +
+                    '<span class="task-uuid-full">' + escapedUuid + '</span>' +
+                    '<span class="task-uuid-short">' + escapedUuid.slice(0, 8) + '</span></a>';
+            }
+        },
+        state: {
+            className: "text-center",
+            render: function (data, type, full, meta) {
+                var badge;
+                switch (data) {
+                case 'SUCCESS':
+                    badge = 'text-bg-success';
+                    break;
+                case 'FAILURE':
+                    badge = 'text-bg-danger';
+                    break;
+                case 'STARTED':
+                    badge = 'task-state-started';
+                    break;
+                case 'RETRY':
+                    badge = 'text-bg-warning';
+                    break;
+                default:
+                    badge = 'text-bg-secondary';
+                }
+                // celery reports unknown task-* events as custom states
+                return '<span class="badge ' + badge + '">' +
+                    htmlEscapeEntities(data) + '</span>';
+            }
+        },
+        args: {
+            className: "text-nowrap overflow-auto",
+            render: htmlEscapeEntities
+        },
+        kwargs: {
+            className: "text-nowrap overflow-auto",
+            render: htmlEscapeEntities
+        },
+        result: {
+            className: "text-nowrap overflow-auto",
+            render: htmlEscapeEntities
+        },
+        received: {
+            className: "text-center text-nowrap",
+            width: "1%",
+            render: function (data, type, full, meta) {
+                if (data) {
+                    if (type !== 'display') {
+                        return data;
+                    }
+                    if (usesNaturalTime()) {
+                        return format_time(data);
+                    }
+                    return '<time datetime="' + moment.unix(data).toISOString() +
+                        '" title="' + moment.unix(data).fromNow() + '">' +
+                        format_time(data) + '</time>';
+                }
+                return data;
+            }
+        },
+        started: {
+            className: "text-center text-nowrap",
+            render: function (data, type, full, meta) {
+                if (data) {
+                    return format_time(data);
+                }
+                return data;
+            }
+        },
+        runtime: {
+            className: "text-center text-nowrap",
+            render: function (data, type, full, meta) {
+                return data === null || data === undefined ? '' : formatDuration(data);
+            }
+        },
+        worker: {
+            render: function (data, type, full, meta) {
+                if (!data) {
+                    return '';
+                }
+                return type === 'display' ? workerNameLink(data) : data;
+            }
+        },
+        exchange: {},
+        routing_key: {},
+        retries: {
+            className: "text-center"
+        },
+        revoked: {
+            className: "text-center text-nowrap",
+            render: function (data, type, full, meta) {
+                if (data) {
+                    return format_time(data);
+                }
+                return data;
+            }
+        },
+        exception: {
+            className: "text-nowrap"
+        },
+        expires: {
+            className: "text-center"
+        },
+        eta: {
+            className: "text-center"
         }
-        return true;
-    }
-
-    var taskColumnNames = [
-            'name', 'uuid', 'state', 'args', 'kwargs', 'result', 'received',
-            'started', 'runtime', 'worker', 'exchange', 'routing_key',
-            'retries', 'revoked', 'exception', 'expires', 'eta'
-        ],
-        defaultTaskColumns = 'name,uuid,state,args,kwargs,result,received,started,runtime,worker',
-        defaultVisibleTaskColumns = ['name', 'uuid', 'state', 'received', 'runtime', 'worker'];
-
-    function usesDefaultTaskColumns() {
-        return ($('#columns').val() || '').replace(/\s/g, '') === defaultTaskColumns;
-    }
-
-    function shouldShowTaskColumn(name) {
-        if (!isColumnVisible(name)) {
-            return false;
-        }
-        if (usesDefaultTaskColumns()) {
-            return defaultVisibleTaskColumns.indexOf(name) !== -1;
-        }
-
-        // A custom column selection shows every column it names
-        return true;
-    }
-
-    function setTaskColumnVisibility(table) {
-        taskColumnNames.forEach(function (name, index) {
-            table.column(index).visible(shouldShowTaskColumn(name), false);
-        });
-        table.columns.adjust().draw(false);
-    }
+    };
 
     function updateTaskStateButtons(state) {
         $('.task-state-filter').each(function () {
@@ -824,6 +906,12 @@ var flower = (function () {
                 var value = decodeURIComponent($.urlParam(key) || '');
                 return value ? key + ':' + value : '';
             }).filter(Boolean).join(' '),
+            // The server renders the header in the configured order
+            headerColumns = $('#tasks-table thead th').map(function () {
+                return $(this).data('column');
+            }).get(),
+            layout = headerColumns.join(','),
+            sortColumn = Math.max(headerColumns.indexOf('received'), 0),
             tasksTable = $('#tasks-table').DataTable({
             rowId: 'uuid',
             searching: true,
@@ -832,12 +920,18 @@ var flower = (function () {
             scrollCollapse: true,
             processing: true,
             serverSide: true,
-            colReorder: true,
             dom: "frt<'dt-footer'lip>",
             lengthMenu: [15, 30, 50, 100],
             pageLength: 15,
             stateSave: true,
+            stateSaveParams: function (settings, data) {
+                data.layout = layout;
+            },
             stateLoadParams: function (settings, data) {
+                // Sort and visibility saved under another column layout point at the wrong columns
+                if (data.layout !== layout) {
+                    return false;
+                }
                 if (initialSearch) {
                     data.search.search = initialSearch;
                 }
@@ -872,171 +966,15 @@ var flower = (function () {
                 }
             },
             order: [
-                [7, "desc"]
+                [sortColumn, "desc"]
             ],
             oSearch: {
                 "sSearch": initialSearch
             },
-            columnDefs: withDefaultRenderer([{
-                targets: 0,
-                data: 'name',
-                visible: isColumnVisible('name'),
-                render: function (data, type, full, meta) {
-                    // The uuid column opens the task, the name lists its siblings
-                    return '<a href="' + tasksPageUrl({name: data}) + '">' + htmlEscapeEntities(data) + '</a>';
-                }
-            }, {
-                targets: 1,
-                data: 'uuid',
-                visible: isColumnVisible('uuid'),
-                orderable: false,
-                className: "text-nowrap",
-                render: function (data, type, full, meta) {
-                    if (type !== 'display') {
-                        return data;
-                    }
-                    var escapedUuid = htmlEscapeEntities(data);
-                    // Phone width shows only the first uuid block, the link keeps the full id
-                    return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(data) +
-                        '" title="' + escapedUuid + '">' +
-                        '<span class="task-uuid-full">' + escapedUuid + '</span>' +
-                        '<span class="task-uuid-short">' + escapedUuid.slice(0, 8) + '</span></a>';
-                }
-            }, {
-                targets: 2,
-                data: 'state',
-                visible: isColumnVisible('state'),
-                className: "text-center",
-                render: function (data, type, full, meta) {
-                    var badge;
-                    switch (data) {
-                    case 'SUCCESS':
-                        badge = 'text-bg-success';
-                        break;
-                    case 'FAILURE':
-                        badge = 'text-bg-danger';
-                        break;
-                    case 'STARTED':
-                        badge = 'task-state-started';
-                        break;
-                    case 'RETRY':
-                        badge = 'text-bg-warning';
-                        break;
-                    default:
-                        badge = 'text-bg-secondary';
-                    }
-                    // celery reports unknown task-* events as custom states
-                    return '<span class="badge ' + badge + '">' +
-                        htmlEscapeEntities(data) + '</span>';
-                }
-            }, {
-                targets: 3,
-                data: 'args',
-                className: "text-nowrap overflow-auto",
-                visible: isColumnVisible('args'),
-                render: htmlEscapeEntities
-            }, {
-                targets: 4,
-                data: 'kwargs',
-                className: "text-nowrap overflow-auto",
-                visible: isColumnVisible('kwargs'),
-                render: htmlEscapeEntities
-            }, {
-                targets: 5,
-                data: 'result',
-                visible: isColumnVisible('result'),
-                className: "text-nowrap overflow-auto",
-                render: htmlEscapeEntities
-            }, {
-                targets: 6,
-                data: 'received',
-                className: "text-nowrap",
-                width: "1%",
-                visible: isColumnVisible('received'),
-                render: function (data, type, full, meta) {
-                    if (data) {
-                        if (type !== 'display') {
-                            return data;
-                        }
-                        if (usesNaturalTime()) {
-                            return format_time(data);
-                        }
-                        return '<time datetime="' + moment.unix(data).toISOString() +
-                            '" title="' + moment.unix(data).fromNow() + '">' +
-                            format_time(data) + '</time>';
-                    }
-                    return data;
-                }
-            }, {
-                targets: 7,
-                data: 'started',
-                className: "text-nowrap",
-                visible: isColumnVisible('started'),
-                render: function (data, type, full, meta) {
-                    if (data) {
-                        return format_time(data);
-                    }
-                    return data;
-                }
-            }, {
-                targets: 8,
-                data: 'runtime',
-                className: "text-center text-nowrap",
-                visible: isColumnVisible('runtime'),
-                render: function (data, type, full, meta) {
-                    return data === null || data === undefined ? '' : formatDuration(data);
-                }
-            }, {
-                targets: 9,
-                data: 'worker',
-                visible: isColumnVisible('worker'),
-                render: function (data, type, full, meta) {
-                    if (!data) {
-                        return '';
-                    }
-                    return type === 'display' ? workerNameLink(data) : data;
-                }
-            }, {
-                targets: 10,
-                data: 'exchange',
-                visible: isColumnVisible('exchange')
-            }, {
-                targets: 11,
-                data: 'routing_key',
-                visible: isColumnVisible('routing_key')
-            }, {
-                targets: 12,
-                data: 'retries',
-                className: "text-center",
-                visible: isColumnVisible('retries')
-            }, {
-                targets: 13,
-                data: 'revoked',
-                className: "text-nowrap",
-                visible: isColumnVisible('revoked'),
-                render: function (data, type, full, meta) {
-                    if (data) {
-                        return format_time(data);
-                    }
-                    return data;
-                }
-            }, {
-                targets: 14,
-                data: 'exception',
-                className: "text-nowrap",
-                visible: isColumnVisible('exception')
-            }, {
-                targets: 15,
-                data: 'expires',
-                visible: isColumnVisible('expires')
-            }, {
-                targets: 16,
-                data: 'eta',
-                visible: isColumnVisible('eta')
-            }, ]),
+            columns: withDefaultRenderer(headerColumns.map(function (name) {
+                return $.extend({data: name}, taskColumns[name]);
+            })),
         });
-
-        setTaskColumnVisibility(tasksTable);
 
         updateTaskStateButtons(taskStateFromSearch(tasksTable.search()));
         $('.task-state-filter').on('click', function () {

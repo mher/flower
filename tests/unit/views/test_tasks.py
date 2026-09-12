@@ -1,10 +1,12 @@
 import json
+import re
 import time
 from urllib.parse import urlencode
 
 from celery.events import Event
 
 from flower.events import EventsState
+from flower.views.tasks import visible_task_columns
 from tests.unit import AsyncHTTPTestCase
 from tests.unit.utils import task_failed_events, task_succeeded_events
 
@@ -396,3 +398,26 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('task2', tasks[0]['name'])
         self.assertEqual('456', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
+
+
+class TaskColumnsTest(AsyncHTTPTestCase):
+    def header_columns(self):
+        r = self.get('/tasks')
+        self.assertEqual(200, r.code)
+        return re.findall(r'<th data-column="(\w+)"', r.body.decode('utf-8'))
+
+    def test_listed_columns_keep_the_given_order(self):
+        self.assertEqual([('worker', 'Worker'), ('name', 'Name'), ('state', 'State')],
+                         visible_task_columns('worker,name,state'))
+
+    def test_unknown_columns_are_dropped(self):
+        self.assertEqual([('uuid', 'UUID'), ('name', 'Name')],
+                         visible_task_columns(' uuid, bogus,name'))
+
+    def test_header_renders_the_selected_columns_in_order(self):
+        with self.mock_option('tasks_columns', 'worker,name,state'):
+            self.assertEqual(['worker', 'name', 'state'], self.header_columns())
+
+    def test_default_header(self):
+        self.assertEqual(['name', 'uuid', 'state', 'received', 'runtime', 'worker'],
+                         self.header_columns())
