@@ -55,7 +55,7 @@ For example, to set the basic_auth option to foo:bar, you would set the
     export FLOWER_BASIC_AUTH=foo:bar
     celery flower
 
-.. _options_referance:
+.. _options_reference:
 
 Option Reference
 -----------------
@@ -102,13 +102,19 @@ Enables authentication. `auth` is a regular expression of emails to grant access
 
 The `auth` option allows you to enable authentication in Flower. By default, the `auth` option is set to an empty string, indicating that authentication is disabled.
 
-To enable authentication and restrict access to specific email addresses, set the `auth` option to a regular expression pattern that matches the desired email addresses. The `auth` option supports a basic regex syntax, including:
+To enable authentication and restrict access to specific email addresses, set the `auth` option to one of the following patterns:
 
   - Single email: Use a single email address, such as `user@example.com`.
-  - Wildcard: Use a wildcard pattern with `.*` to match multiple email addresses with the same domain, such as `.*@example.com`.
+  - Wildcard: Use `.*` to match multiple email addresses with the same domain, such as `.*@example.com`.
   - List of emails: Use a list of emails separated by pipes (`|`), such as `one@example.com|two@example.com`.
 
-Please note that for security reasons, the `auth` option only supports a basic regex syntax and does not provide advanced regex features.
+For security reasons, the `auth` option does not accept arbitrary regular expressions. The following rules apply:
+
+  - Only one `.*` wildcard is allowed.
+  - The wildcard must be in the local part of the address. It cannot match the domain, so `user@.*` is rejected.
+  - A wildcard cannot be combined with a pipe-separated list.
+
+Flower refuses to start with an `Invalid '--auth' option` error when the pattern breaks any of these rules.
 
 For more information and detailed usage examples, refer to the :ref:`Authentication` section of the Flower documentation.
 
@@ -275,7 +281,7 @@ The example below shows how to filter arguments and limit display lengths:
 
     def format_task(task):
         task.args = humanize(task.args, length=10)
-        task.kwargs.pop('credit_card_number')
+        task.kwargs.pop('credit_card_number', None)
         task.result = humanize(task.result, length=20)
         return task
 
