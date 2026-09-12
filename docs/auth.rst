@@ -117,7 +117,7 @@ Replace `<your_client_id>` and `<your_client_secret>` with the Client ID and sec
 See `GitHub OAuth API`_ docs for more info.
 
 .. _GitHub Settings: https://github.com/settings/applications/new
-.. _GitHub OAuth API: https://developer.github.com/v3/oauth/
+.. _GitHub OAuth API: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
 
 .. _okta-oauth:
 
@@ -133,7 +133,7 @@ Okta OAuth also uses `FLOWER_OAUTH2_OKTA_BASE_URL` environment variable.
 See the `Okta OAuth API`_ docs for more info.
 
 .. _Okta: https://developer.okta.com/docs/guides/add-an-external-idp/openidconnect/main/
-.. _Okta OAuth API: https://developer.okta.com/docs/reference/api/oidc/
+.. _Okta OAuth API: https://developer.okta.com/docs/api/openapi/okta-oauth/guides/overview
 
 .. _gitlab-oauth:
 
@@ -174,7 +174,7 @@ See `GitLab OAuth2 API`_ and `Group members API`_ documentation for more info.
 .. _GitLab OAuth documentation: https://docs.gitlab.com/integration/oauth_provider/
 .. _GitLab OAuth2 API: https://docs.gitlab.com/api/oauth2/
 .. _Group members API: https://docs.gitlab.com/api/group_members/
-.. _access level: https://docs.gitlab.com/api/access_requests/#valid-access-levels
+.. _access level: https://docs.gitlab.com/api/access_requests/
 
 Logging out
 -----------

@@ -83,14 +83,14 @@ The following labels are available:
 Example Prometheus Alerts
 -------------------------
 
-See the example `Prometheus alerts <https://github.com/mher/flower/tree/master/examples/prometheus-alerts.yaml>`_.
+See the example `Prometheus alerts <https://github.com/mher/flower/blob/master/examples/prometheus-alerts.yaml>`_.
 Add the rules to your ``alertmanager.yml`` config as in the `alert manager's documentation <https://prometheus.io/docs/alerting/latest/configuration/>`_.
 
 
 Example Grafana Dashboard
 -------------------------
 
-See the example `Grafana dashboard <https://github.com/mher/flower/tree/master/examples/celery-monitoring-grafana-dashboard.json>`_.
+See the example `Grafana dashboard <https://github.com/mher/flower/blob/master/examples/celery-monitoring-grafana-dashboard.json>`_.
 The `Grafana Integration Guide`_ below shows how to import it.
 The dashboard is a good starting point for monitoring your Celery cluster.
 

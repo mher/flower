@@ -171,7 +171,7 @@ Example::
 
 For more information refer to the `RabbitMQ Management Plugin`_ documentation.
 
-.. _`RabbitMQ Management Plugin`: https://www.rabbitmq.com/management.html
+.. _`RabbitMQ Management Plugin`: https://www.rabbitmq.com/docs/management
 
 .. _ca_certs:
 
