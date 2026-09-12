@@ -28,6 +28,34 @@ only allow access to users providing the username user and the password pswd::
 
     $ celery flower --basic-auth=user:pswd
 
+By default ``/metrics`` is unauthenticated. To require basic auth for ``/metrics``, add this to your
+config file:
+
+.. code-block:: python
+
+    # flowerconfig.py
+    import tornado.web
+    from flower.views.monitor import Metrics
+
+    Metrics.get = tornado.web.authenticated(Metrics.get)
+
+and run Flower with the :ref:`conf` option::
+
+    $ celery flower --basic-auth=user:pswd --conf=flowerconfig.py
+
+To disable ``/metrics`` entirely:
+
+.. code-block:: python
+
+    # flowerconfig.py
+    import tornado.web
+    from flower.views.monitor import Metrics
+
+    async def disabled(self):
+        raise tornado.web.HTTPError(404)
+
+    Metrics.get = disabled
+
 See also :ref:`reverse-proxy`
 
 .. _google-oauth:
