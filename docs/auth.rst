@@ -140,27 +140,41 @@ See Okta `Okta OAuth API`_ docs for more info.
 GitLab OAuth
 ------------
 
-Flower also supports GitLab OAuth for authentication. To enable GitLab OAuth, follow the steps below:
+Flower also supports GitLab OAuth. Before getting started, Flower should be registered as an
+application in GitLab, see the `GitLab OAuth documentation`_ for the steps.
 
-1. Register Flower as an application at GitLab. You can refer to the `GitLab OAuth documentation`_ for detailed instructions on how to do this.
-2. Once registered, you will obtain the credentials for Flower configuration.
-3. In your Flower configuration, set the following options to activate GitLab OAuth:
-    - :ref:`auth_provider` to `flower.views.auth.GitLabLoginHandler`.
-    - :ref:`oauth2_key` to the "Application ID" obtained from GitLab.
-    - :ref:`oauth2_secret` to the "Secret" obtained from GitLab.
-    - :ref:`oauth2_redirect_uri`: Set this to the redirect URI configured in GitLab.
-4. (Optional) To restrict access to specific GitLab groups, you can utilize the `FLOWER_GITLAB_AUTH_ALLOWED_GROUPS` environment variable. Set it to a comma-separated list of allowed groups. You can include subgroups by using the `/` character. For example: `group1,group2/subgroup`.
-5. (Optional) The default minimum required group access level can be adjusted using the `FLOWER_GITLAB_MIN_ACCESS_LEVEL` environment variable.
-6. (Optional) The custom GitHub Domain can be adjusted using the `FLOWER_GITLAB_OAUTH_DOMAIN` environment variable.
+GitLab OAuth is activated by setting :ref:`auth_provider` to `flower.views.auth.GitLabLoginHandler`.
+Here's an example configuration file with the GitLab OAuth options:
 
-For further details on GitLab OAuth and its implementation, refer to the `Group and project members API`_ documentation.
-It provides comprehensive information and guidelines on working with GitLab's OAuth functionality.
+.. code-block:: python
 
-See also `GitLab OAuth2 API`_ documentation for more info.
+    auth_provider="flower.views.auth.GitLabLoginHandler"
+    auth=".*@example.com"
+    oauth2_key="<your_application_id>"
+    oauth2_secret="<your_secret>"
+    oauth2_redirect_uri="http://localhost:5555/login"
 
-.. _GitLab OAuth documentation: https://docs.gitlab.com/ee/integration/oauth_provider.htm
-.. _GitLab OAuth2 API: https://docs.gitlab.com/ee/api/oauth2.html
-.. _Group and project members API: https://docs.gitlab.com/ee/api/members.html
+Replace `<your_application_id>` and `<your_secret>` with the "Application ID" and "Secret" obtained
+from GitLab, and set `oauth2_redirect_uri` to the redirect URI configured there.
+The :ref:`auth` option is matched against the email address of the GitLab user.
+
+The following environment variables are optional:
+
+- `FLOWER_GITLAB_AUTH_ALLOWED_GROUPS` restricts access to members of the listed groups.
+  Set it to a comma-separated list of group paths. Subgroups are written with a `/`,
+  for example `group1,group2/subgroup`. By default, any group membership is accepted.
+- `FLOWER_GITLAB_MIN_ACCESS_LEVEL` sets the minimum `access level`_ a user must have in one of
+  the allowed groups. The default is `20` (Reporter). It only applies when
+  `FLOWER_GITLAB_AUTH_ALLOWED_GROUPS` is set.
+- `FLOWER_GITLAB_OAUTH_DOMAIN` sets the domain of a self-managed GitLab instance.
+  The default is `gitlab.com`.
+
+See `GitLab OAuth2 API`_ and `Group members API`_ documentation for more info.
+
+.. _GitLab OAuth documentation: https://docs.gitlab.com/integration/oauth_provider/
+.. _GitLab OAuth2 API: https://docs.gitlab.com/api/oauth2/
+.. _Group members API: https://docs.gitlab.com/api/group_members/
+.. _access level: https://docs.gitlab.com/api/access_requests/#valid-access-levels
 
 Logging out
 -----------
