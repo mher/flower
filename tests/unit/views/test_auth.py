@@ -8,8 +8,12 @@ from tornado.web import create_signed_value
 from flower.urls import settings
 from flower.utils.authentication import authenticate, validate_auth_option
 from flower.views import BaseHandler
-from flower.views.auth import (GithubLoginHandler, OAuth2StateMixin,
-                               get_next_url, is_safe_redirect)
+from flower.views.auth import (
+    GithubLoginHandler,
+    OAuth2StateMixin,
+    get_next_url,
+    is_safe_redirect,
+)
 from tests.unit import AsyncHTTPTestCase
 
 

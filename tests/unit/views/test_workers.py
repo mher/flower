@@ -11,8 +11,7 @@ from flower.events import EventsState
 from flower.inspector import Inspector
 from flower.views.workers import WorkerView
 from tests.unit import AsyncHTTPTestCase
-from tests.unit.utils import (HtmlTableParser, task_failed_events,
-                              task_succeeded_events)
+from tests.unit.utils import HtmlTableParser, task_failed_events, task_succeeded_events
 
 
 class WorkersTests(AsyncHTTPTestCase):

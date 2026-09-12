@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 from urllib.parse import urlencode
 
-import celery.states as states
+from celery import states
 from celery.events import Event
 from celery.exceptions import TimeoutError as CeleryTimeoutError
 from celery.result import AsyncResult

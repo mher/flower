@@ -3,8 +3,14 @@ import unittest
 
 from pytz import utc
 
-from flower.utils.template import (format_count, format_duration, format_time, format_value,
-                                   humanize, task_link)
+from flower.utils.template import (
+    format_count,
+    format_duration,
+    format_time,
+    format_value,
+    humanize,
+    task_link,
+)
 
 
 class TestHumanize(unittest.TestCase):

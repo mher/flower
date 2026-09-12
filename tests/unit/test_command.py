@@ -10,9 +10,13 @@ from prometheus_client import Histogram
 from tornado.options import options
 
 from flower import options as flower_options
-from flower.command import (apply_env_options, apply_options, extract_settings,
-                            print_banner,
-                            warn_about_celery_args_used_in_flower_command)
+from flower.command import (
+    apply_env_options,
+    apply_options,
+    extract_settings,
+    print_banner,
+    warn_about_celery_args_used_in_flower_command,
+)
 from tests.unit import AsyncHTTPTestCase
 
 
@@ -238,7 +242,7 @@ class TestConfOption(unittest.TestCase):
     def test_conf_abs(self):
         with tempfile.NamedTemporaryFile() as cf:
             with patch.object(options.mockable(), 'conf', cf.name), patch.object(options.mockable(), 'debug', False):
-                cf.write('debug=True\n'.encode('utf-8'))
+                cf.write(b'debug=True\n')
                 cf.flush()
                 apply_options('flower', argv=['--conf=%s' % cf.name])
                 self.assertEqual(cf.name, options.conf)
@@ -247,7 +251,7 @@ class TestConfOption(unittest.TestCase):
     def test_conf_relative(self):
         with tempfile.NamedTemporaryFile(dir='.') as cf:
             with patch.object(options.mockable(), 'conf', cf.name), patch.object(options.mockable(), 'debug', False):
-                cf.write('debug=True\n'.encode('utf-8'))
+                cf.write(b'debug=True\n')
                 cf.flush()
                 apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])
                 self.assertTrue(options.debug)
@@ -255,7 +259,7 @@ class TestConfOption(unittest.TestCase):
     def test_all_options_documented(self):
         defined = set(options.group_dict(flower_options.__file__))
         config_rst = Path(__file__).resolve().parents[2] / 'docs' / 'config.rst'
-        documented = set(re.findall(r'^([a-z0-9_]+)\n~+$', config_rst.read_text(), re.M))
+        documented = set(re.findall(r'^([a-z0-9_]+)\n~+$', config_rst.read_text(), re.MULTILINE))
         self.assertEqual(defined, documented,
                          msg='Every option must have a section in docs/config.rst '
                              'and every section must be an option')

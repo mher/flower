@@ -3,9 +3,16 @@ import unittest
 from unittest import mock
 
 from flower.utils import broker
-from flower.utils.broker import (Broker, RabbitMQ, Redis, RedisBase,
-                                 RedisSentinel, RedisSocket, RedisSsl,
-                                 validate_broker_api)
+from flower.utils.broker import (
+    Broker,
+    RabbitMQ,
+    Redis,
+    RedisBase,
+    RedisSentinel,
+    RedisSocket,
+    RedisSsl,
+    validate_broker_api,
+)
 
 
 class TestRabbitMQ(unittest.TestCase):

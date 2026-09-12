@@ -1,5 +1,4 @@
 from flower.views import BaseHandler
-
 from tests.unit import AsyncHTTPTestCase
 
 

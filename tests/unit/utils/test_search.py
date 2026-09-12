@@ -6,8 +6,15 @@ from types import SimpleNamespace
 from celery.events import Event
 
 from flower.events import EventsState
-from flower.utils.search import (And, MatchAll, Or, QuerySyntaxError,
-                                 TaskSearchEngine, Term, parse_query)
+from flower.utils.search import (
+    And,
+    MatchAll,
+    Or,
+    QuerySyntaxError,
+    TaskSearchEngine,
+    Term,
+    parse_query,
+)
 
 
 class TestQueryParser(unittest.TestCase):
