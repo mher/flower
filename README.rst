@@ -74,9 +74,9 @@ API
 
 Flower API enables to manage the cluster via HTTP `REST API`.
 
-For example you can restart worker's pool by: ::
+For example you can grow a worker's pool by: ::
 
-    $ curl -X POST http://localhost:5555/api/worker/pool/restart/myworker
+    $ curl -X POST -d 'n=1' http://localhost:5555/api/worker/pool/grow/celery@$(hostname)
 
 Or call a task by: ::
 
