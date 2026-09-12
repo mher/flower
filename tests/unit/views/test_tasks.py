@@ -96,14 +96,14 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertIn('tasks_filter.html', str(r.body))
 
     def test_invalid_search_returns_inline_error(self):
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = 'ab'
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode('utf-8'))
         self.assertEqual(200, r.code)
@@ -127,14 +127,14 @@ class TasksTest(AsyncHTTPTestCase):
             state.event(e)
         self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -148,7 +148,7 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('worker1', tasks[0]['worker'])
 
     def datatable_rows(self, search):
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = search
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
@@ -190,14 +190,14 @@ class TasksTest(AsyncHTTPTestCase):
         state.event(event)
         self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = 'needle'
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode('utf-8'))
         self.assertEqual(200, r.code)
@@ -217,14 +217,14 @@ class TasksTest(AsyncHTTPTestCase):
             state.event(e)
         self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -255,14 +255,14 @@ class TasksTest(AsyncHTTPTestCase):
             state.event(e)
         self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'runtime'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -303,14 +303,14 @@ class TasksTest(AsyncHTTPTestCase):
             state.event(e)
         self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'runtime'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -344,7 +344,7 @@ class TasksTest(AsyncHTTPTestCase):
             state.event(e)
         self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
@@ -353,7 +353,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['length'] = '1'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -371,7 +371,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['length'] = '1'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)

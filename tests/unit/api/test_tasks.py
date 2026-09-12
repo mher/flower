@@ -132,7 +132,7 @@ class AsyncApplyTests(BaseApiTestCase):
         task.apply_async = Mock(return_value=AsyncResult(123))
         tomorrow = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
         r = self.post('/api/task/async-apply/foo',
-                      body='{"eta": "%s"}' % tomorrow)
+                      body=f'{{"eta": "{tomorrow}"}}')
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
@@ -163,7 +163,7 @@ class AsyncApplyTests(BaseApiTestCase):
         task.apply_async = Mock(return_value=AsyncResult(123))
         tomorrow = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
         r = self.post('/api/task/async-apply/foo',
-                      body='{"expires": "%s"}' % tomorrow)
+                      body=f'{{"expires": "{tomorrow}"}}')
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
@@ -357,91 +357,91 @@ class TaskTests(BaseApiTestCase):
         self._app.events.state = state
 
         # Test limit 4 and offset 0
-        params = dict(limit=4, offset=0, sort_by='name')
+        params = {'limit': 4, 'offset': 0, 'sort_by': 'name'}
 
         r = self.get('/api/tasks?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
-        firstFetchedTaskName = table[list(table)[0]]['name']
+        firstFetchedTaskName = table[next(iter(table))]['name']
         lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
         self.assertEqual("task4", lastFetchedTaskName)
 
         # Test limit 4 and offset 1
-        params = dict(limit=4, offset=1, sort_by='name')
+        params = {'limit': 4, 'offset': 1, 'sort_by': 'name'}
 
         r = self.get('/api/tasks?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(3, len(table))
-        firstFetchedTaskName = table[list(table)[0]]['name']
+        firstFetchedTaskName = table[next(iter(table))]['name']
         lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task2", firstFetchedTaskName)
         self.assertEqual("task4", lastFetchedTaskName)
 
         # Test limit 4 and offset -1 (-1 should act as 0)
-        params = dict(limit=4, offset=-1, sort_by="name")
+        params = {'limit': 4, 'offset': -1, 'sort_by': "name"}
 
         r = self.get('/api/tasks?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
-        firstFetchedTaskName = table[list(table)[0]]['name']
+        firstFetchedTaskName = table[next(iter(table))]['name']
         lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
         self.assertEqual("task4", lastFetchedTaskName)
 
         # Test limit 2 and offset 1
-        params = dict(limit=2, offset=1, sort_by='name')
+        params = {'limit': 2, 'offset': 1, 'sort_by': 'name'}
 
         r = self.get('/api/tasks?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table))
-        firstFetchedTaskName = table[list(table)[0]]['name']
+        firstFetchedTaskName = table[next(iter(table))]['name']
         lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task2", firstFetchedTaskName)
         self.assertEqual("task3", lastFetchedTaskName)
 
         # Test limit 4 with search
-        params = dict(limit=4, offset=0, sort_by='name', search='task')
+        params = {'limit': 4, 'offset': 0, 'sort_by': 'name', 'search': 'task'}
 
         r = self.get('/api/tasks?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
-        firstFetchedTaskName = table[list(table)[0]]['name']
+        firstFetchedTaskName = table[next(iter(table))]['name']
         lastFetchedTaskName = table[list(table)[-1]]['name']
         self.assertEqual("task1", firstFetchedTaskName)
         self.assertEqual("task4", lastFetchedTaskName)
 
         # Test limit 4 with search
-        params = dict(limit=4, offset=0, sort_by='name', search='task1')
+        params = {'limit': 4, 'offset': 0, 'sort_by': 'name', 'search': 'task1'}
 
         r = self.get('/api/tasks?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"), object_pairs_hook=OrderedDict)
 
         self.assertEqual(200, r.code)
         self.assertEqual(1, len(table))
-        firstFetchedTaskName = table[list(table)[0]]['name']
+        firstFetchedTaskName = table[next(iter(table))]['name']
         self.assertEqual("task1", firstFetchedTaskName)
 
     def test_invalid_sort_by(self):

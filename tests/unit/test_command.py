@@ -227,7 +227,7 @@ class TestConfOption(unittest.TestCase):
                     FileNotFoundError,
                     apply_options,
                     'flower',
-                    argv=['--conf=%s' % conf],
+                    argv=[f'--conf={conf}'],
                 )
 
     def test_default_option(self):
@@ -244,7 +244,7 @@ class TestConfOption(unittest.TestCase):
             with patch.object(options.mockable(), 'conf', cf.name), patch.object(options.mockable(), 'debug', False):
                 cf.write(b'debug=True\n')
                 cf.flush()
-                apply_options('flower', argv=['--conf=%s' % cf.name])
+                apply_options('flower', argv=[f'--conf={cf.name}'])
                 self.assertEqual(cf.name, options.conf)
                 self.assertTrue(options.debug)
 
@@ -253,7 +253,7 @@ class TestConfOption(unittest.TestCase):
             with patch.object(options.mockable(), 'conf', cf.name), patch.object(options.mockable(), 'debug', False):
                 cf.write(b'debug=True\n')
                 cf.flush()
-                apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])
+                apply_options('flower', argv=[f'--conf={os.path.basename(cf.name)}'])
                 self.assertTrue(options.debug)
 
     def test_all_options_documented(self):
