@@ -15,6 +15,12 @@ from flower.events import Events
 from tests.unit.utils import task_succeeded_events
 
 
+class Unpicklable:
+    # local lambdas raise different errors per Python version, this fails the same way everywhere
+    def __reduce__(self):
+        raise pickle.PicklingError('not picklable')
+
+
 class PersistenceTests(AsyncTestCase):
     def events(self, db, max_tasks_in_memory=10, **kwargs):
         return Events(Mock(), self.io_loop, db=db, persistent=True,
@@ -57,7 +63,7 @@ class PersistenceTests(AsyncTestCase):
             events.save_state()
 
             events.state.counter['worker1']['task-received'] = 5
-            events.state.counter['worker1']['unpicklable'] = lambda: None
+            events.state.counter['worker1']['unpicklable'] = Unpicklable()
             with self.assertRaises(pickle.PicklingError):
                 events.save_state()
 
