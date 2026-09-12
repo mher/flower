@@ -79,9 +79,8 @@ class TestQueryParser(unittest.TestCase):
         }
 
         for query, message in invalid_queries.items():
-            with self.subTest(query=query):
-                with self.assertRaisesRegex(QuerySyntaxError, message):
-                    parse_query(query)
+            with self.subTest(query=query), self.assertRaisesRegex(QuerySyntaxError, message):
+                parse_query(query)
 
     def test_query_size_and_nesting_limits(self):
         with self.assertRaisesRegex(QuerySyntaxError, 'exceeds 2048 characters'):

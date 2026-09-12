@@ -240,21 +240,27 @@ class TestConfOption(unittest.TestCase):
             self.assertEqual('/dev/null', options.conf)
 
     def test_conf_abs(self):
-        with tempfile.NamedTemporaryFile() as cf:
-            with patch.object(options.mockable(), 'conf', cf.name), patch.object(options.mockable(), 'debug', False):
-                cf.write(b'debug=True\n')
-                cf.flush()
-                apply_options('flower', argv=[f'--conf={cf.name}'])
-                self.assertEqual(cf.name, options.conf)
-                self.assertTrue(options.debug)
+        with (
+            tempfile.NamedTemporaryFile() as cf,
+            patch.object(options.mockable(), 'conf', cf.name),
+            patch.object(options.mockable(), 'debug', False),
+        ):
+            cf.write(b'debug=True\n')
+            cf.flush()
+            apply_options('flower', argv=[f'--conf={cf.name}'])
+            self.assertEqual(cf.name, options.conf)
+            self.assertTrue(options.debug)
 
     def test_conf_relative(self):
-        with tempfile.NamedTemporaryFile(dir='.') as cf:
-            with patch.object(options.mockable(), 'conf', cf.name), patch.object(options.mockable(), 'debug', False):
-                cf.write(b'debug=True\n')
-                cf.flush()
-                apply_options('flower', argv=[f'--conf={os.path.basename(cf.name)}'])
-                self.assertTrue(options.debug)
+        with (
+            tempfile.NamedTemporaryFile(dir='.') as cf,
+            patch.object(options.mockable(), 'conf', cf.name),
+            patch.object(options.mockable(), 'debug', False),
+        ):
+            cf.write(b'debug=True\n')
+            cf.flush()
+            apply_options('flower', argv=[f'--conf={os.path.basename(cf.name)}'])
+            self.assertTrue(options.debug)
 
     def test_all_options_documented(self):
         defined = set(options.group_dict(flower_options.__file__))

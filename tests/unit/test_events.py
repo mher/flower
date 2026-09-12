@@ -142,18 +142,22 @@ class PersistenceTests(AsyncTestCase):
             db = os.path.join(tmpdir, 'flower')
             events = self.events(db, state_save_interval=1000)
 
-            with patch('flower.events.time.monotonic', side_effect=[0, 0.01]):
-                with self.assertNoLogs('flower.events', level='WARNING'):
-                    events.save_state()
+            with (
+                patch('flower.events.time.monotonic', side_effect=[0, 0.01]),
+                self.assertNoLogs('flower.events', level='WARNING'),
+            ):
+                events.save_state()
 
     def test_no_warning_without_save_timer(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             db = os.path.join(tmpdir, 'flower')
             events = self.events(db)
 
-            with patch('flower.events.time.monotonic', side_effect=[0, 60]):
-                with self.assertNoLogs('flower.events', level='WARNING'):
-                    events.save_state()
+            with (
+                patch('flower.events.time.monotonic', side_effect=[0, 60]),
+                self.assertNoLogs('flower.events', level='WARNING'),
+            ):
+                events.save_state()
 
     def receive_tasks(self, events, count):
         for _ in range(count):

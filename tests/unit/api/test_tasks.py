@@ -43,18 +43,20 @@ class ApplyTests(BaseApiTestCase):
 
     def test_apply_unserializable_result_returns_repr(self):
         result = object()
-        with patch('celery.result.AsyncResult.state', new_callable=PropertyMock) as mock_state:
-            with patch('celery.result.AsyncResult.result', new_callable=PropertyMock) as mock_result:
-                mock_state.return_value = states.SUCCESS
-                mock_result.return_value = result
+        with (
+            patch('celery.result.AsyncResult.state', new_callable=PropertyMock) as mock_state,
+            patch('celery.result.AsyncResult.result', new_callable=PropertyMock) as mock_result,
+        ):
+            mock_state.return_value = states.SUCCESS
+            mock_result.return_value = result
 
-                ar = AsyncResult(123)
-                ar.get = Mock(return_value=result)
+            ar = AsyncResult(123)
+            ar.get = Mock(return_value=result)
 
-                task = self._app.capp.tasks['foo'] = Mock()
-                task.apply_async = Mock(return_value=ar)
+            task = self._app.capp.tasks['foo'] = Mock()
+            task.apply_async = Mock(return_value=ar)
 
-                r = self.post('/api/task/apply/foo', body='')
+            r = self.post('/api/task/apply/foo', body='')
 
         self.assertEqual(200, r.code)
         body = json.loads(r.body.decode('utf-8'))
