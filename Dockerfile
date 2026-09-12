@@ -1,13 +1,14 @@
 FROM python:alpine
 
-# Get latest root certificates and update openssl to fix vulnerabilities
+# Get latest root certificates and patch every base package
 RUN apk add --no-cache ca-certificates tzdata && \
-    apk upgrade --no-cache openssl && \
+    apk upgrade --no-cache && \
     update-ca-certificates
 
 # Install flower from the build context so the image always matches the checkout
 COPY . /opt/flower
-RUN pip install --no-cache-dir redis /opt/flower
+RUN pip install --no-cache-dir redis /opt/flower && \
+    pip uninstall -y pip
 
 # PYTHONUNBUFFERED: Force stdin, stdout and stderr to be totally unbuffered. (equivalent to `python -u`)
 # PYTHONHASHSEED: Enable hash randomization (equivalent to `python -R`)
