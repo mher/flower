@@ -696,7 +696,7 @@ var flower = (function () {
                 info: 'Showing _START_ to _END_ of _TOTAL_ workers',
                 infoFiltered: '(filtered from _MAX_ total workers)',
                 search: '<span class="visually-hidden">Search workers</span>',
-                searchPlaceholder: 'Search workers',
+                searchPlaceholder: 'celery@hostname or online',
                 emptyTable: 'No workers are available.',
                 zeroRecords: 'No workers match your search.'
             },
@@ -851,7 +851,7 @@ var flower = (function () {
                 infoEmpty: 'No tasks to show',
                 infoFiltered: '(filtered from _MAX_ total tasks)',
                 search: '<span class="visually-hidden">Search tasks</span>',
-                searchPlaceholder: 'Search tasks',
+                searchPlaceholder: 'state:FAILURE worker:celery@hostname',
                 emptyTable: 'No tasks have been received.',
                 zeroRecords: 'No tasks match your search.'
             },

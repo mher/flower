@@ -17,7 +17,7 @@ parentheses when either condition may match.
  - ``kwargs:queue=priority`` searches for an exact keyword/value pair
  - ``result:timeout`` searches for timeout anywhere in task results
  - ``name:send_email`` finds task names containing send_email
- - ``worker:celery@host`` finds worker names containing celery@host
+ - ``worker:celery@hostname`` finds worker names containing celery@hostname
  - ``state:FAILURE`` finds failed tasks
  - ``(state:FAILURE OR state:RETRY)`` finds failed or retried tasks
 
