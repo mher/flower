@@ -98,152 +98,71 @@ The dashboard should give you a nice starting point for monitoring of your celer
 Grafana Integration Guide
 =========================
 
-In this guide you will learn how to setup each part of the stack to make it talk to the next one and achieve Celery
-monitoring solution with help of Flower.
+The quickest way to see the whole stack working is the `docker-compose.yml`_ file in the root of
+the Flower repository. It starts Redis, a Celery worker, Flower, Prometheus and Grafana.
+Prometheus is configured to scrape Flower, and Grafana is provisioned with the Prometheus data
+source and the Celery monitoring dashboard, so nothing has to be set up by hand.
 
-Same as above we assume localhost usage and for ease of deployment I will use Pycharm configurations to start docker
-containers with necessary images. If you do not have docker installed on your system: `download and install it please <https://www.docker.com/get-started>`_.
+.. _docker-compose.yml: https://github.com/mher/flower/blob/master/docker-compose.yml
 
-Start Celery Broker
--------------------
+Start the stack
+---------------
 
-Easiest is to use `Redis Pycharm run configuration <https://github.com/mher/flower/tree/master/examples/pycharm-configurations/Redis.run.xml>`_.
+From a checkout of the repository run::
 
-Or run::
+    docker compose up --build
 
-    docker run --name redis -d -p 6379:6379 redis
+Once the containers are up, the services are available at:
 
+- Flower at http://localhost:5555
+- Prometheus at http://localhost:9090
+- Grafana at http://localhost:3000
 
-Set Up Your Celery Application
--------------------------------
+Submit a few tasks so there is something to look at::
 
-We are assuming that your Celery application has tasks in `tasks.py` file. The `-E` argument makes Celery send events
-which are required to produce Prometheus metrics.
+    curl -X POST -d '{"args":[1,2]}' http://localhost:5555/api/task/async-apply/tasks.add
 
-Create `celeryconfig.py` in root of your Celery app. We are setting Celery to use Redis DB as the broker/backend in this
-example. Skip this if you configure your broker/backend already in another way (make sure to adjust further steps to that).
+Check Prometheus
+----------------
 
-.. code-block:: python
-
-    broker_url = 'redis://localhost:6379/0'
-    celery_result_backend = 'redis://localhost:6379/0'
-
-Or download it from `here <https://github.com/mher/flower/tree/master/examples/celeryconfig.py>`_.
-
-Start your Celery app::
-
-    celery -A tasks worker -l INFO -E
-
-When the app starts you should see this line::
-
-    -- ******* ---- .> task events: ON
-
-
-Start Flower Monitoring
------------------------
-
-In your Celery application folder run this command (Flower needs to be installed)::
-
-    celery -A tasks --broker=redis://localhost:6379/0 flower
-
-Configure and Start Prometheus
-------------------------------
-
-Create `prometheus.yml` file. Note its absolute path - we will use it to start the Prometheus docker image.
-For ease of use put it in the root of your Celery project (so that you can use Pycharm configuration below without any changes).
-
-.. code-block:: yaml
-
-    global:
-      scrape_interval:     15s
-      evaluation_interval: 15s
-
-    scrape_configs:
-      - job_name: prometheus
-        static_configs:
-          - targets: ['localhost:9090']
-      - job_name: flower
-        static_configs:
-          - targets: ['localhost:5555']
-
-Run Prometheus inside docker:
-
-You can use `Prometheus Pycharm run configuration <https://github.com/mher/flower/tree/master/examples/pycharm-configurations/Prometheus.run.xml>`_ (may need to adjust the `prometheus.yml` path if it is not in root of your Celery project).
-
-Or just start it via command line::
-
-    docker run --name Prometheus -v <ABSOLUTE PATH TO YOUR prometheus.yml FILE>:/etc/prometheus/prometheus.yml -p 9090:9090 --network host prom/prometheus
-
-
-Now go to `localhost:9090` and check that Prometheus is running.
-If everything so far was set up and started correctly, you should be able to see metrics provided by Flower in your
-Prometheus's GUI. Go to `Graph` tab and start typing `flower` - the autocomplete should show you all available metrics.
+Open http://localhost:9090, go to the `Graph` tab and start typing `flower`. The autocomplete
+lists all metrics exported by Flower.
 
 .. image:: screenshots/flower-metrics-in-prometheus.png
    :width: 100%
 
-Start Grafana
--------------
+Open the dashboard in Grafana
+-----------------------------
 
-You can use `Grafana Pycharm run configuration <https://github.com/mher/flower/tree/master/examples/pycharm-configurations/Grafana.run.xml>`_.
+Open http://localhost:3000. Anonymous access is enabled and the Celery monitoring dashboard is
+the home page, so no login is needed.
 
-Or run it from the terminal::
-
-    docker run --name Grafana -d -v grafana-storage:/var/lib/grafana -p 3000:3000 --network host grafana/grafana
-
-try to access its web GUI now by going to `localhost:3000`, use `admin/admin` for credentials. It will ask you to set up
-a new password - you may click skip for now.
-
-
-Add Prometheus As a Data Source In Grafana
-------------------------------------------
-
-Click `Configuration` (settings icon) in the left side-bar. Then the blue `Add data source` button.
-
-.. image:: screenshots/grafana-add-data-source.png
+.. image:: screenshots/grafana-dashboard.png
    :width: 100%
 
-Search for Prometheus data source and click it (it should be at the top).
+Import the dashboard into an existing Grafana
+---------------------------------------------
 
-.. image:: screenshots/grafana-add-prometheus-data-source.png
-   :width: 100%
+If you already run Prometheus and Grafana, add Flower as a scrape target as described in
+`Configure Prometheus to scrape Flower metrics`_ and add Prometheus as a data source in Grafana
+following the `Grafana data source documentation`_. Then import the dashboard.
 
-Once in Prometheus data source configuration, use all defaults and enter the HTTP/URL parameter as below (which is the placeholder by the way)::
+Download the `Grafana dashboard`_ JSON file.
 
-    http://localhost:9090
-
-.. image:: screenshots/grafana-configure-prometheus-data-source.png
-   :width: 100%
-
-Scroll down and click `Save & Test`, if all is good a green banner will pop up saying `Data source is working`
-
-.. image:: screenshots/grafana-test-prometheus-data-source.png
-   :width: 100%
-
-
-Import The Celery Monitoring Dashboard In Grafana
--------------------------------------------------
-
-Download `Grafana dashboard <https://github.com/mher/flower/tree/master/examples/celery-monitoring-grafana-dashboard.json>`_.
-
-Hover over the `+` icon in the left side-bar and click `Import` button.
+Hover over the `+` icon in the left side-bar and click `Import`.
 
 .. image:: screenshots/grafana-import-dashboard.png
    :width: 30%
 
-Click `Upload JSON file` button and select the `celery-monitoring-grafana-dashboard.json` you have just downloaded.
+Click `Upload JSON file` and select the `celery-monitoring-grafana-dashboard.json` file.
 
 .. image:: screenshots/grafana-import-celery-monitoring-dashboard.png
    :width: 100%
 
-Click on the `Prometheus` field and select a Prometheus data source.
+Select your Prometheus data source in the `Prometheus` field and click `Import`.
 
 .. image:: screenshots/grafana-configure-imported-dashboard.png
    :width: 100%
 
-Click `Import` to finish the process.
-
-You should see a dashboard as on the image below. Congratulations!
-
-.. image:: screenshots/grafana-dashboard.png
-   :width: 100%
+.. _Grafana dashboard: https://github.com/mher/flower/blob/master/examples/celery-monitoring-grafana-dashboard.json
+.. _Grafana data source documentation: https://grafana.com/docs/grafana/latest/datasources/prometheus/configure/
