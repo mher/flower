@@ -56,6 +56,10 @@ class TaskControlsTest(AsyncHTTPTestCase):
         self.assertEqual(200, r.code)
         self.assertIn('<a href="/tasks?name=task1">task1</a>', str(r.body))
 
+    def test_task_page_title_has_name_and_short_id(self):
+        r = self.render_task(self.received_event(), self.started_event())
+        self.assertIn('<title>task1 123 · Flower</title>', r.body.decode('utf-8'))
+
     def test_started_task_has_terminate_button(self):
         r = self.render_task(self.received_event(), self.started_event())
         self.assertEqual(200, r.code)
@@ -91,6 +95,7 @@ class TasksTest(AsyncHTTPTestCase):
         r = self.get('/tasks')
         self.assertEqual(200, r.code)
         self.assertTrue('UUID' in str(r.body))
+        self.assertIn('<title>Tasks · Flower</title>', r.body.decode('utf-8'))
         self.assertNotIn('<tr id=', str(r.body))
         self.assertIn('tasks_filter.html', str(r.body))
 

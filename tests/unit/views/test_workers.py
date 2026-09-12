@@ -28,6 +28,7 @@ class WorkersTests(AsyncHTTPTestCase):
     def test_no_workers(self):
         r = self.get('/workers')
         self.assertEqual(200, r.code)
+        self.assertIn('<title>Workers · Flower</title>', r.body.decode('utf-8'))
         self.assertIn('Load Average', str(r.body))
         self.assertNotIn('<tr id=', str(r.body))
 
@@ -359,6 +360,7 @@ class WorkersTests(AsyncHTTPTestCase):
         with patch.object(self.get_app(), "update_workers") as update_workers_mock:
             res = self.get('/worker/worker1')
             self.assertEqual(200, res.code)
+            self.assertIn('<title>worker1 · Flower</title>', res.body.decode('utf-8'))
             update_workers_mock.assert_called_once_with(workername='worker1')
 
         with patch.object(self.get_app(), "update_workers") as update_workers_mock:

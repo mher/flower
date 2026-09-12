@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{ task.name }} {{ task.uuid[:8] }} · Flower{% end %}
+
 {% block navbar %}
   {% module Template("navbar.html", active_tab="tasks") %}
 {% end %}
@@ -9,7 +11,7 @@
   <p id="taskid" class="d-none">{{ task.uuid }}</p>
 
   <header class="detail-page-header">
-    <p class="page-eyebrow">Task detail</p>
+    <p class="page-eyebrow">Task details</p>
     <div class="detail-actions">
       {% if not read_only %}
       {% if task.state == "STARTED" %}

@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{ worker['name'] }} · Flower{% end %}
+
 {% block navbar %}
 {% module Template("navbar.html", active_tab="workers") %}
 {% end %}
@@ -12,7 +14,7 @@
 <div class="page-section worker-detail-page">
   <header class="worker-detail-header">
     <div>
-      <p class="page-eyebrow">Worker detail</p>
+      <p class="page-eyebrow">Worker details</p>
       <h1 id="workername">{{ worker['name'] }}</h1>
     </div>
 
