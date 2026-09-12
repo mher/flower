@@ -25,13 +25,6 @@ class TaskTest(AsyncHTTPTestCase):
 
 
 class TaskControlsTest(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def render_task(self, *task_events):
         state = EventsState()
         state.get_or_create_worker('worker1')
@@ -40,7 +33,7 @@ class TaskControlsTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
         return self.get('/task/123')
 
     @staticmethod
@@ -94,13 +87,6 @@ class TaskControlsTest(AsyncHTTPTestCase):
 
 
 class TasksTest(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def test_no_task(self):
         r = self.get('/tasks')
         self.assertEqual(200, r.code)
@@ -139,7 +125,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
@@ -178,7 +164,7 @@ class TasksTest(AsyncHTTPTestCase):
                 'task-received', uuid=uuid, name='task1', args=args, kwargs={},
                 retries=0, eta=None, hostname='worker1', clock=int(uuid),
                 local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         table = self.datatable_rows('args:"hello world"')
         self.assertEqual(['1'], [task['uuid'] for task in table['data']])
@@ -190,7 +176,7 @@ class TasksTest(AsyncHTTPTestCase):
                 'task-received', uuid=uuid, name='task1', args=args, kwargs={},
                 retries=0, eta=None, hostname='worker1', clock=int(uuid),
                 local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         table = self.datatable_rows('args:<order>')
         self.assertEqual(['1'], [task['uuid'] for task in table['data']])
@@ -202,7 +188,7 @@ class TasksTest(AsyncHTTPTestCase):
             args=['needle', 2], kwargs={}, retries=0, eta=None,
             hostname='worker1', clock=1, local_received=time.time())
         state.event(event)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = 'needle'
@@ -229,7 +215,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
@@ -267,7 +253,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
@@ -315,7 +301,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''
@@ -356,7 +342,7 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         params = dict(draw=1, start=0, length=10)
         params['search[value]'] = ''

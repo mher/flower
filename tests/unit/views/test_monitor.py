@@ -11,13 +11,6 @@ from tests.unit.utils import task_failed_events, task_succeeded_events
 
 
 class PrometheusTests(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def test_metrics(self):
         state = EventsState()
         worker_name = 'worker1'
@@ -32,7 +25,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
         events = dict(re.findall('flower_events_total{task="task1",type="(task-.*)",worker="worker1"} (.*)', metrics))
@@ -55,7 +48,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -83,7 +76,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -108,7 +101,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -133,7 +126,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -154,7 +147,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -171,7 +164,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -192,8 +185,8 @@ class PrometheusTests(AsyncHTTPTestCase):
         state.metrics.prefetch_time.labels(worker_name, task_name).set(1)
         state.metrics.number_of_prefetched_tasks.labels(
             worker_name, task_name).set(1)
-        self.app.events.state = state
-        self.app.inspector.workers[worker_name] = {'stats': {}}
+        self._app.events.state = state
+        self._app.inspector.workers[worker_name] = {'stats': {}}
 
         self.assertFalse(state.workers[worker_name].alive)
         with self.mock_option('purge_offline_workers', 60):
@@ -204,7 +197,7 @@ class PrometheusTests(AsyncHTTPTestCase):
         self.assertNotIn(worker_name, next_metrics)
         self.assertIn(worker_name, state.counter)
         self.assertIn(worker_name, state.workers)
-        self.assertIn(worker_name, self.app.inspector.workers)
+        self.assertIn(worker_name, self._app.inspector.workers)
 
     def test_metrics_keep_live_worker(self):
         state = EventsState()
@@ -214,8 +207,8 @@ class PrometheusTests(AsyncHTTPTestCase):
             'worker-heartbeat', hostname=worker_name,
             timestamp=timestamp, local_received=timestamp,
             freq=2, active=1))
-        self.app.events.state = state
-        self.app.inspector.workers[worker_name] = {'stats': {}}
+        self._app.events.state = state
+        self._app.inspector.workers[worker_name] = {'stats': {}}
 
         with self.mock_option('purge_offline_workers', 60):
             metrics = self.get('/metrics').body.decode('utf-8')
@@ -224,7 +217,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             f'flower_worker_online{{worker="{worker_name}"}} 1.0', metrics)
         self.assertIn(worker_name, state.counter)
         self.assertIn(worker_name, state.workers)
-        self.assertIn(worker_name, self.app.inspector.workers)
+        self.assertIn(worker_name, self._app.inspector.workers)
 
     def test_metrics_purge_worker_without_heartbeat_metric(self):
         state = EventsState()
@@ -234,7 +227,7 @@ class PrometheusTests(AsyncHTTPTestCase):
         state.counter[worker_name]['task-succeeded'] += 1
         state.metrics.events.labels(
             worker_name, 'task-succeeded', task_name).inc()
-        self.app.events.state = state
+        self._app.events.state = state
 
         with self.mock_option('purge_offline_workers', 60):
             metrics = self.get('/metrics').body.decode('utf-8')
@@ -275,7 +268,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -294,7 +287,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             event['clock'] = i
             event['local_received'] = time.time()
             state.event(event)
-        self.app.events.state = state
+        self._app.events.state = state
         metrics = self.get('/metrics').body.decode('utf-8')
         line = next(l for l in metrics.splitlines()
                     if l.startswith(f'flower_worker_prefetched_tasks{{task="{task_name}",worker="worker1"}}'))
@@ -321,13 +314,6 @@ class PrometheusTests(AsyncHTTPTestCase):
 
 
 class HealthcheckTests(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def test_healthcheck_route(self):
         response = self.get('/healthcheck').body.decode('utf-8')
         self.assertEqual(response, 'OK')

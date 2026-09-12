@@ -1,12 +1,14 @@
 import asyncio
 import json
 import time
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from celery.events import Event
 from celery.utils import uuid
+from kombu.exceptions import OperationalError
 
 from flower.events import EventsState
+from flower.inspector import Inspector
 from flower.views.workers import WorkerView
 from tests.unit import AsyncHTTPTestCase
 from tests.unit.utils import (HtmlTableParser, task_failed_events,
@@ -14,13 +16,6 @@ from tests.unit.utils import (HtmlTableParser, task_failed_events,
 
 
 class WorkersTests(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def test_default_page(self):
         r1 = self.get('/')
         r2 = self.get('/workers')
@@ -34,10 +29,14 @@ class WorkersTests(AsyncHTTPTestCase):
         self.assertNotIn('<tr id=', str(r.body))
 
     def test_unknown_worker(self):
-        with self.mock_option("inspect_timeout", 1.0):
+        # the broker is down: inspection fails fast and the worker stays unknown
+        inspect = MagicMock(**{f'return_value.{method}.side_effect': OperationalError('broker down')
+                               for method in Inspector.inspect_methods})
+        with patch.object(self._app.capp.control, 'inspect', inspect):
             r = self.get('/worker/unknown')
-            self.assertEqual(404, r.code)
-            self.assertIn('Unknown worker', str(r.body))
+        self.assertEqual(404, r.code)
+        self.assertIn('Unknown worker', str(r.body))
+        inspect.assert_called_with(timeout=self._app.inspector.timeout, destination=['unknown'])
 
     def test_single_workers_offline(self):
         state = EventsState()
@@ -46,7 +45,7 @@ class WorkersTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         state.event(Event('worker-offline', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
         table = HtmlTableParser()
@@ -66,7 +65,7 @@ class WorkersTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         state.event(Event('worker-offline', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         with patch('flower.views.workers.options') as mock_options:
             mock_options.purge_offline_workers = 0
@@ -85,7 +84,7 @@ class WorkersTests(AsyncHTTPTestCase):
                           local_received=time.time()))
         state.event(Event('worker-offline', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         with patch('flower.views.workers.options') as mock_options:
             mock_options.purge_offline_workers = 120
@@ -103,7 +102,7 @@ class WorkersTests(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -131,7 +130,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -161,7 +160,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -193,7 +192,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -225,7 +224,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -259,7 +258,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -292,7 +291,7 @@ class WorkersTests(AsyncHTTPTestCase):
             e['local_received'] = time.time()
             state.event(e)
 
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/workers')
 
@@ -314,7 +313,7 @@ class WorkersTests(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         res = self.get('/workers?json=1')
         self.assertEqual(200, res.code)
@@ -326,9 +325,9 @@ class WorkersTests(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
-        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+        with patch.object(self._app, "update_workers") as update_workers_mock:
             res = self.get('/workers?refresh=1')
             self.assertEqual(200, res.code)
             update_workers_mock.assert_called()
@@ -339,12 +338,12 @@ class WorkersTests(AsyncHTTPTestCase):
                             'virtual_host': '/', 'port': 6379}}
 
         async def populate(workername=None):
-            self.app.inspector.workers[workername]['stats'] = stats
+            self._app.inspector.workers[workername]['stats'] = stats
 
         def inspect(workername=None):
             return asyncio.ensure_future(populate(workername))
 
-        with patch.object(self.get_app(), "update_workers", side_effect=inspect):
+        with patch.object(self._app, "update_workers", side_effect=inspect):
             res = self.get('/worker/worker1')
             self.assertEqual(200, res.code)
 
@@ -353,27 +352,27 @@ class WorkersTests(AsyncHTTPTestCase):
         state.get_or_create_worker('worker1')
         state.event(Event('worker-online', hostname='worker1',
                           local_received=time.time()))
-        self.app.events.state = state
-        self.app.inspector.workers['worker1'] = {'registeres': [], 'active_queues': [],
+        self._app.events.state = state
+        self._app.inspector.workers['worker1'] = {'registeres': [], 'active_queues': [],
                                                  'stats': {'total': {'tasks.add': 10, 'tasks.sleep': 1, 'tasks.error': 1},
                                                            'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
 
-        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+        with patch.object(self._app, "update_workers", new_callable=AsyncMock) as update_workers_mock:
             res = self.get('/worker/worker1')
             self.assertEqual(200, res.code)
             self.assertIn('<title>worker1 · Flower</title>', res.body.decode('utf-8'))
-            update_workers_mock.assert_called_once_with(workername='worker1')
+            update_workers_mock.assert_awaited_once_with(workername='worker1')
 
-        with patch.object(self.get_app(), "update_workers") as update_workers_mock:
+        with patch.object(self._app, "update_workers", new_callable=AsyncMock) as update_workers_mock:
             res = self.get('/worker/worker2')
             self.assertEqual(404, res.code)
-            update_workers_mock.assert_called_once_with(workername='worker2')
+            update_workers_mock.assert_awaited_once_with(workername='worker2')
 
     def worker_page(self, revoked=(), query=''):
-        self.app.inspector.workers['worker1'] = {
+        self._app.inspector.workers['worker1'] = {
             'revoked': list(revoked),
             'stats': {'total': {}, 'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
-        with patch.object(self.get_app(), "update_workers"):
+        with patch.object(self._app, "update_workers", new_callable=AsyncMock):
             return self.get('/worker/worker1' + query)
 
     def test_long_list_is_cut_to_the_default_limit(self):
@@ -396,9 +395,9 @@ class WorkersTests(AsyncHTTPTestCase):
         self.assertNotIn('task-10<', body)
 
     def test_processed_counts_use_thousands_separators(self):
-        self.app.inspector.workers['worker1'] = {
+        self._app.inspector.workers['worker1'] = {
             'stats': {'total': {'tasks.add': 141372}, 'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
-        with patch.object(self.get_app(), "update_workers"):
+        with patch.object(self._app, "update_workers", new_callable=AsyncMock):
             body = self.get('/worker/worker1').body.decode('utf-8')
         self.assertIn('<td>141,372</td>', body)
 
@@ -407,15 +406,15 @@ class WorkersTests(AsyncHTTPTestCase):
 
     def test_worker_page_waits_for_task_lists(self):
         # stats alone come from the global refresh, the page needs the full inspect
-        self.app.inspector.workers['worker1'] = {
+        self._app.inspector.workers['worker1'] = {
             'stats': {'total': {}, 'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
 
         async def populate(workername=None):
-            self.app.inspector.workers[workername].update(
+            self._app.inspector.workers[workername].update(
                 active_queues=[], registered=[], conf={}, scheduled=[], active=[], reserved=[],
                 revoked=['task-from-full-inspect'])
 
-        with patch.object(self.get_app(), "update_workers", side_effect=lambda workername=None: asyncio.ensure_future(populate(workername))):
+        with patch.object(self._app, "update_workers", side_effect=lambda workername=None: asyncio.ensure_future(populate(workername))):
             body = self.get('/worker/worker1').body.decode('utf-8')
 
         self.assertIn('task-from-full-inspect', body)

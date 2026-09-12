@@ -315,13 +315,6 @@ class MockTasks:
 
 
 class TaskTests(BaseApiTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     @patch('flower.api.tasks.tasks', new=MockTasks)
     def test_task_info(self):
         self.get('/api/task/info/123')
@@ -349,7 +342,7 @@ class TaskTests(BaseApiTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         # Test limit 4 and offset 0
         params = dict(limit=4, offset=0, sort_by='name')
@@ -468,7 +461,7 @@ class TaskTests(BaseApiTestCase):
                 'task-received', uuid=uuid, name='task1', args=args, kwargs={},
                 retries=0, eta=None, hostname='worker1', clock=int(uuid),
                 local_received=time.time()))
-        self.app.events.state = state
+        self._app.events.state = state
 
         r = self.get('/api/tasks?' + urlencode({'search': 'args:"hello world"'}))
 
