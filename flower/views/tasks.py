@@ -33,7 +33,7 @@ class TasksDataTable(BaseHandler):
         draw = self.get_argument('draw', type=int, required=True)
         start = self.get_argument('start', type=int, required=True)
         length = self.get_argument('length', type=int, required=True)
-        search = self.get_argument('search[value]', '', type=str)
+        search = self.get_argument('search[value]', '', escape=False)
 
         column = self.get_argument('order[0][column]', type=int, required=True)
         sort_by = self.get_argument(f'columns[{column}][data]', '', type=str)

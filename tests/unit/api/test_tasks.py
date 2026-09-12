@@ -3,6 +3,7 @@ import time
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from urllib.parse import urlencode
 
 import celery.states as states
 from celery.events import Event
@@ -404,6 +405,20 @@ class TaskTests(BaseApiTestCase):
 
         self.assertEqual(400, r.code)
         self.assertIn('received_start', r.body.decode('utf-8'))
+
+    def test_search_with_quoted_phrase(self):
+        state = EventsState()
+        for uuid, args in (('1', ['hello world']), ('2', ['hello there'])):
+            state.event(Event(
+                'task-received', uuid=uuid, name='task1', args=args, kwargs={},
+                retries=0, eta=None, hostname='worker1', clock=int(uuid),
+                local_received=time.time()))
+        self.app.events.state = state
+
+        r = self.get('/api/tasks?' + urlencode({'search': 'args:"hello world"'}))
+
+        self.assertEqual(200, r.code)
+        self.assertEqual(['1'], list(json.loads(r.body.decode('utf-8'))))
 
     def test_invalid_search(self):
         r = self.get('/api/tasks?search=ab')

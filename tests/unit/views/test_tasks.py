@@ -1,5 +1,6 @@
 import json
 import time
+from urllib.parse import urlencode
 
 from celery.events import Event
 
@@ -144,6 +145,40 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('task1', tasks[0]['name'])
         self.assertEqual('123', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
+
+    def datatable_rows(self, search):
+        params = dict(draw=1, start=0, length=10)
+        params['search[value]'] = search
+        params['order[0][column]'] = 0
+        params['columns[0][data]'] = 'name'
+        params['order[0][dir]'] = 'asc'
+        r = self.get('/tasks/datatable?' + urlencode(params))
+        self.assertEqual(200, r.code)
+        return json.loads(r.body.decode('utf-8'))
+
+    def test_search_with_quoted_phrase(self):
+        state = EventsState()
+        for uuid, args in (('1', ['hello world']), ('2', ['hello there'])):
+            state.event(Event(
+                'task-received', uuid=uuid, name='task1', args=args, kwargs={},
+                retries=0, eta=None, hostname='worker1', clock=int(uuid),
+                local_received=time.time()))
+        self.app.events.state = state
+
+        table = self.datatable_rows('args:"hello world"')
+        self.assertEqual(['1'], [task['uuid'] for task in table['data']])
+
+    def test_search_with_special_characters(self):
+        state = EventsState()
+        for uuid, args in (('1', ['<order>']), ('2', ['order'])):
+            state.event(Event(
+                'task-received', uuid=uuid, name='task1', args=args, kwargs={},
+                retries=0, eta=None, hostname='worker1', clock=int(uuid),
+                local_received=time.time()))
+        self.app.events.state = state
+
+        table = self.datatable_rows('args:<order>')
+        self.assertEqual(['1'], [task['uuid'] for task in table['data']])
 
     def test_search_task_with_list_args(self):
         state = EventsState()

@@ -562,7 +562,7 @@ List tasks
         received_start = self.get_argument('received_start', None)
         received_end = self.get_argument('received_end', None)
         sort_by = self.get_argument('sort_by', None)
-        search = self.get_argument('search', None)
+        search = self.get_argument('search', None, escape=False)
 
         offset = max(offset, 0)
         worker = worker if worker != 'All' else None

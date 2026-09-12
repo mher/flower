@@ -154,12 +154,14 @@ class BaseHandler(tornado.web.RequestHandler):
                 return user
         return None
 
+    # pylint: disable=too-many-arguments
     def get_argument(self, name, default=None, strip=True, type=None,
-                     required=False):
+                     required=False, escape=True):
         arg = super().get_argument(name, default, strip)
         if required and (arg is None or arg == ''):
             raise tornado.web.HTTPError(400, f"Missing argument {name}")
-        if arg and isinstance(arg, str):
+        # Values that are only parsed, like search queries, must keep quotes and brackets
+        if escape and arg and isinstance(arg, str):
             arg = tornado.escape.xhtml_escape(arg)
         if type is not None:
             try:
