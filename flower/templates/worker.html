@@ -158,7 +158,7 @@
                   {% for name,value in (worker['stats'].get('consumer', None) or worker['stats'])['broker'].items() %}
                   <tr>
                     <td>{{ humanize(name) }}</td>
-                    <td>{{ value }}</td>
+                    <td class="worker-long-value">{{ value }}</td>
                   </tr>
                   {% end %}
                 </tbody>
@@ -250,8 +250,8 @@
                   <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
                   <td>{{ task['acknowledged'] }}</td>
                   <td>{{ task['worker_pid'] }}</td>
-                  <td class="text-nowrap overflow-auto">{{ task.get('args', 'N/A') }}</td>
-                  <td class="text-nowrap overflow-auto">{{ task.get('kwargs', 'N/A') }}</td>
+                  <td><span class="worker-task-args" title="{{ task.get('args', 'N/A') }}">{{ task.get('args', 'N/A') }}</span></td>
+                  <td><span class="worker-task-args" title="{{ task.get('kwargs', 'N/A') }}">{{ task.get('kwargs', 'N/A') }}</span></td>
                 </tr>
                 {% end %}
               </tbody>
@@ -272,8 +272,8 @@
                 <tr>
                   <td>{{ task['request']['name'] }}</td>
                   <td><a href="{{ reverse_url('task', task['request']['id']) }}">{{ task['request']['id'] }}</a></td>
-                  <td class="text-nowrap overflow-auto">{{ task['request']['args'] }}</td>
-                  <td class="text-nowrap overflow-auto">{{ task['request']['kwargs'] }}</td>
+                  <td><span class="worker-task-args" title="{{ task['request']['args'] }}">{{ task['request']['args'] }}</span></td>
+                  <td><span class="worker-task-args" title="{{ task['request']['kwargs'] }}">{{ task['request']['kwargs'] }}</span></td>
                 </tr>
                 {% end %}
               </tbody>
@@ -294,8 +294,8 @@
                 <tr>
                   <td>{{ task['name'] }}</td>
                   <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
-                  <td class="text-nowrap overflow-auto">{{ task['args'] }}</td>
-                  <td class="text-nowrap overflow-auto">{{ task['kwargs'] }}</td>
+                  <td><span class="worker-task-args" title="{{ task['args'] }}">{{ task['args'] }}</span></td>
+                  <td><span class="worker-task-args" title="{{ task['kwargs'] }}">{{ task['kwargs'] }}</span></td>
                 </tr>
                 {% end %}
               </tbody>
@@ -373,7 +373,7 @@
                     <td><a
                         href="https://docs.celeryq.dev/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}"
                         target="_blank">{{ name }}</a></td>
-                    <td>{{ value }}</td>
+                    <td class="worker-long-value">{{ value }}</td>
                   </tr>
                   {% end %}
                   {% end %}
@@ -391,7 +391,7 @@
                   {% for name, value in worker['stats']['rusage'].items() %}
                   <tr>
                     <td>{{ name }}</td>
-                    <td>{{ value }}</td>
+                    <td class="worker-long-value">{{ value }}</td>
                   </tr>
                   {% end %}
                   {% end %}
@@ -409,7 +409,7 @@
                   {% for name, value in other.items() %}
                   <tr>
                     <td>{{ name }}</td>
-                    <td>{{ value }}</td>
+                    <td class="worker-long-value">{{ value }}</td>
                   </tr>
                   {% end %}
                 </tbody>

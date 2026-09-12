@@ -444,7 +444,20 @@ body.app-body {
 
 .worker-tab-content .table > :not(caption) > * > * {
   padding: 0.75rem;
+  overflow-wrap: break-word;
+}
+
+.worker-tab-content .table .worker-long-value {
+  min-width: 12rem;
   overflow-wrap: anywhere;
+}
+
+.worker-tab-content .worker-task-args {
+  display: block;
+  max-width: 24rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .worker-tab-content .table caption {
