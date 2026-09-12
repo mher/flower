@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class WorkerView(BaseHandler):
+    list_limit = 50
+
     @web.authenticated
     async def get(self, name):
         try:
@@ -28,9 +30,16 @@ class WorkerView(BaseHandler):
         if 'stats' not in worker:
             raise web.HTTPError(404, f"Unable to get stats for '{name}' worker")
 
+        worker = dict(worker, name=name)
+        # Scheduled and revoked lists can hold thousands of entries, show the head
+        limit = self.get_argument('limit', self.list_limit, type=int)
+        for key, value in worker.items():
+            if isinstance(value, list):
+                worker[key] = value[:limit]
+
         self.render(
             "worker.html",
-            worker=dict(worker, name=name),
+            worker=worker,
             read_only=self.application.options.read_only,
         )
 

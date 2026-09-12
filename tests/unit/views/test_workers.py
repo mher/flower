@@ -7,6 +7,7 @@ from celery.events import Event
 from celery.utils import uuid
 
 from flower.events import EventsState
+from flower.views.workers import WorkerView
 from tests.unit import AsyncHTTPTestCase
 from tests.unit.utils import (HtmlTableParser, task_failed_events,
                               task_succeeded_events)
@@ -367,3 +368,32 @@ class WorkersTests(AsyncHTTPTestCase):
             res = self.get('/worker/worker2')
             self.assertEqual(404, res.code)
             update_workers_mock.assert_called_once_with(workername='worker2')
+
+    def worker_page(self, revoked=(), query=''):
+        self.app.inspector.workers['worker1'] = {
+            'revoked': list(revoked),
+            'stats': {'total': {}, 'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
+        with patch.object(self.get_app(), "update_workers"):
+            return self.get('/worker/worker1' + query)
+
+    def test_long_list_is_cut_to_the_default_limit(self):
+        limit = WorkerView.list_limit
+        body = self.worker_page(revoked=[f'task-{i}' for i in range(limit + 10)]).body.decode('utf-8')
+        self.assertIn(f'task-{limit - 1}<', body)
+        self.assertNotIn(f'task-{limit}<', body)
+
+    def test_short_list_is_complete(self):
+        body = self.worker_page(revoked=['task-0', 'task-1']).body.decode('utf-8')
+        self.assertIn('task-1<', body)
+
+    def test_limit_parameter_raises_the_cut(self):
+        body = self.worker_page(revoked=[f'task-{i}' for i in range(60)], query='?limit=60').body.decode('utf-8')
+        self.assertIn('task-59<', body)
+
+    def test_limit_parameter_lowers_the_cut(self):
+        body = self.worker_page(revoked=[f'task-{i}' for i in range(60)], query='?limit=10').body.decode('utf-8')
+        self.assertIn('task-9<', body)
+        self.assertNotIn('task-10<', body)
+
+    def test_invalid_limit_is_rejected(self):
+        self.assertEqual(400, self.worker_page(query='?limit=many').code)
