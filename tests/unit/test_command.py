@@ -1,14 +1,15 @@
 import os
-import subprocess
-import sys
+import re
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import celery
 from prometheus_client import Histogram
 from tornado.options import options
 
+from flower import options as flower_options
 from flower.command import (apply_env_options, apply_options, extract_settings,
                             print_banner,
                             warn_about_celery_args_used_in_flower_command)
@@ -251,14 +252,10 @@ class TestConfOption(unittest.TestCase):
                 apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])
                 self.assertTrue(options.debug)
 
-    @unittest.skipUnless(not sys.platform.startswith("win"), 'skip windows')
     def test_all_options_documented(self):
-        def grep(patter, filename):
-            return int(subprocess.check_output(
-                'grep "%s" %s|wc -l' % (patter, filename), shell=True))
-
-        defined = grep('^define(', 'flower/options.py')
-        documented = grep('^~~', 'docs/config.rst')
+        defined = set(options.group_dict(flower_options.__file__))
+        config_rst = Path(__file__).resolve().parents[2] / 'docs' / 'config.rst'
+        documented = set(re.findall(r'^([a-z0-9_]+)\n~+$', config_rst.read_text(), re.M))
         self.assertEqual(defined, documented,
-                         msg='Missing option documentation. Make sure all options '
-                             'are documented in docs/config.rst')
+                         msg='Every option must have a section in docs/config.rst '
+                             'and every section must be an option')
