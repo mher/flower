@@ -48,12 +48,12 @@ class TasksDataTable(BaseHandler):
                 offset=start,
                 limit=length)
         except QuerySyntaxError as exc:
-            self.write(dict(
-                draw=draw,
-                data=[],
-                recordsTotal=len(app.events.state.tasks),
-                recordsFiltered=0,
-                searchError=str(exc)))
+            self.write({
+                "draw": draw,
+                "data": [],
+                "recordsTotal": len(app.events.state.tasks),
+                "recordsFiltered": 0,
+                "searchError": str(exc)})
             return
 
         filtered_tasks = []
@@ -69,9 +69,9 @@ class TasksDataTable(BaseHandler):
 
             filtered_tasks.append(task_dict)
 
-        self.write(dict(draw=draw, data=filtered_tasks,
-                        recordsTotal=page.total_count,
-                        recordsFiltered=page.filtered_count))
+        self.write({"draw": draw, "data": filtered_tasks,
+                    "recordsTotal": page.total_count,
+                    "recordsFiltered": page.filtered_count})
 
     @web.authenticated
     def post(self):

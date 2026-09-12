@@ -10,14 +10,14 @@ from .views.error import NotFoundErrorHandler
 from .views.tasks import TasksDataTable, TasksView, TaskView
 from .views.workers import WorkersView, WorkerView
 
-settings = dict(
-    template_path=os.path.join(os.path.dirname(__file__), "templates"),
-    static_path=os.path.join(os.path.dirname(__file__), "static"),
-    cookie_secret=gen_cookie_secret(),
-    static_url_prefix='/static/',
-    login_url='/login',
-    xsrf_cookies=True,
-)
+settings = {
+    "template_path": os.path.join(os.path.dirname(__file__), "templates"),
+    "static_path": os.path.join(os.path.dirname(__file__), "static"),
+    "cookie_secret": gen_cookie_secret(),
+    "static_url_prefix": '/static/',
+    "login_url": '/login',
+    "xsrf_cookies": True,
+}
 
 
 handlers = [

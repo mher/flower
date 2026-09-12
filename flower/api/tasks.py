@@ -416,7 +416,7 @@ Abort a running task
             'task.abort', taskid, result.abort,
             connection_errors=self.backend_connection_errors(result))
 
-        self.write(dict(message=f"Aborted '{taskid}'"))
+        self.write({'message': f"Aborted '{taskid}'"})
 
 
 class GetQueueLengths(BaseTaskHandler):

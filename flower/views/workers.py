@@ -86,7 +86,7 @@ class WorkersView(BaseHandler):
                 workers.pop(name)
 
         if json:
-            self.write(dict(data=list(workers.values())))
+            self.write({"data": list(workers.values())})
         else:
             self.render("workers.html",
                         workers=workers,
@@ -95,4 +95,4 @@ class WorkersView(BaseHandler):
 
     @classmethod
     def _as_dict(cls, worker):
-        return dict((k, getattr(worker, k)) for k in worker._fields)
+        return {k: getattr(worker, k) for k in worker._fields}

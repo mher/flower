@@ -1,17 +1,16 @@
-import inspect
-import traceback
 import copy
-import logging
 import hmac
+import inspect
+import logging
 import os
-
+import traceback
 from base64 import b64decode
 from urllib.parse import urlparse
 
 import tornado
 import tornado.auth
 
-from ..utils import template, bugreport, strtobool
+from ..utils import bugreport, strtobool, template
 from ..utils.authentication import authenticate
 from ..utils.broker import Broker
 
@@ -43,7 +42,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # Set the _xsrf cookie so the UI's AJAX calls can echo the token back
         _ = self.xsrf_token
         functions = inspect.getmembers(template, inspect.isfunction)
-        assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
+        assert not {x[0] for x in functions} & set(kwargs.keys())
         kwargs.update(functions)
         kwargs.update(url_prefix=app_options.url_prefix)
         super().render(*args, **kwargs)
@@ -205,12 +204,12 @@ class BaseHandler(tornado.web.RequestHandler):
                 404, f"'{app.transport}' broker is not supported") from exc
 
     def get_active_queue_names(self):
-        queues = set([])
-        for _, info in self.application.workers.items():
+        queues = set()
+        for info in self.application.workers.values():
             for queue in info.get('active_queues', []):
                 queues.add(queue['name'])
 
         if not queues:
-            queues = set([self.capp.conf.task_default_queue]) |\
+            queues = {self.capp.conf.task_default_queue} |\
                 {q.name for q in self.capp.conf.task_queues or [] if q.name}
         return sorted(queues)

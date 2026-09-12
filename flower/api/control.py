@@ -64,7 +64,7 @@ Shut down a worker
         await self.run_blocking(
             'worker.shutdown', workername, self.capp.control.broadcast,
             'shutdown', destination=[workername])
-        self.write(dict(message="Shutting down!"))
+        self.write({"message": "Shutting down!"})
 
 
 class WorkerPoolRestart(ControlHandler):
@@ -111,7 +111,7 @@ Restart worker's pool
             'pool_restart', arguments={'reload': False},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=f"Restarting '{workername}' worker's pool"))
+            self.write({"message": f"Restarting '{workername}' worker's pool"})
         else:
             logger.error(response)
             self.set_status(403)
@@ -166,7 +166,7 @@ Grow worker's pool
             'worker.pool_grow', workername, self.capp.control.pool_grow,
             n=n, reply=True, destination=[workername])
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=f"Growing '{workername}' worker's pool by {n}"))
+            self.write({"message": f"Growing '{workername}' worker's pool by {n}"})
         else:
             logger.error(response)
             self.set_status(403)
@@ -221,7 +221,7 @@ Shrink worker's pool
             'worker.pool_shrink', workername, self.capp.control.pool_shrink,
             n=n, reply=True, destination=[workername])
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=f"Shrinking '{workername}' worker's pool by {n}"))
+            self.write({"message": f"Shrinking '{workername}' worker's pool by {n}"})
         else:
             logger.error(response)
             self.set_status(403)
@@ -281,8 +281,8 @@ Autoscale worker pool
             'autoscale', arguments={'min': min, 'max': max},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=f"Autoscaling '{workername}' worker "
-                                    f"(min={min}, max={max})"))
+            self.write({"message": f"Autoscaling '{workername}' worker "
+                                    f"(min={min}, max={max})"})
         else:
             logger.error(response)
             self.set_status(403)
@@ -340,7 +340,7 @@ Start consuming from a queue
             'add_consumer', arguments={'queue': queue},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
+            self.write({"message": response[0][workername]['ok']})
         else:
             logger.error(response)
             self.set_status(403)
@@ -398,7 +398,7 @@ Stop consuming from a queue
             'cancel_consumer', arguments={'queue': queue},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
+            self.write({"message": response[0][workername]['ok']})
         else:
             logger.error(response)
             self.set_status(403)
@@ -449,7 +449,7 @@ Revoke a task
         await self.run_blocking(
             'task.revoke', taskid, self.capp.control.revoke,
             taskid, terminate=terminate, signal=signal)
-        self.write(dict(message=f"Revoked '{taskid}'"))
+        self.write({"message": f"Revoked '{taskid}'"})
 
 
 class TaskTimout(ControlHandler):
@@ -509,7 +509,7 @@ Change soft and hard time limits for a task
             destination=destination)
 
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
+            self.write({"message": response[0][workername]['ok']})
         else:
             logger.error(response)
             self.set_status(403)
@@ -571,7 +571,7 @@ Change rate limit for a task
             'task.rate_limit', taskname, self.capp.control.rate_limit,
             taskname, ratelimit, reply=True, destination=destination)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
+            self.write({"message": response[0][workername]['ok']})
         else:
             logger.error(response)
             self.set_status(403)

@@ -22,7 +22,7 @@ def format_duration(seconds):
         return f'{seconds * 1000:.2f} ms'
     if seconds < 60:
         return f'{seconds:.2f} s'
-    minutes, secs = divmod(int(round(seconds)), 60)
+    minutes, secs = divmod(round(seconds), 60)
     hours, minutes = divmod(minutes, 60)
     if hours:
         return f'{hours}h {minutes:02d}m {secs:02d}s'

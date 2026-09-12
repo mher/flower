@@ -19,7 +19,7 @@ def is_safe_redirect(target):
     "check if target is a same-origin local path"
     if not target or not target.startswith('/'):
         return False
-    if target.startswith('//') or target.startswith('/\\'):
+    if target.startswith(('//', '/\\')):
         return False
     parsed = urlparse(target)
     return not parsed.scheme and not parsed.netloc

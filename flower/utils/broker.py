@@ -1,7 +1,6 @@
 import json
 import logging
 import numbers
-import socket
 import ssl
 from urllib.parse import quote, unquote, urljoin, urlparse
 
@@ -73,7 +72,7 @@ class RabbitMQ(BrokerBase):
                 url, auth_username=username, auth_password=password,
                 connect_timeout=1.0, request_timeout=2.0,
                 **self._tls_kwargs())
-        except (socket.error, httpclient.HTTPError) as e:
+        except (OSError, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)
             return []
         finally:

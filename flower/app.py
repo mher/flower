@@ -1,24 +1,21 @@
-import sys
 import logging
+import sys
 import time
-
 from concurrent.futures import ThreadPoolExecutor
 from functools import cached_property
 
 import celery
 import tornado.web
-
 from tornado import ioloop
 from tornado.httpserver import HTTPServer
 from tornado.netutil import bind_sockets
 from tornado.web import url
 
-from .urls import handlers as default_handlers
 from .events import Events
 from .inspector import Inspector
 from .options import default_options
+from .urls import handlers as default_handlers
 from .utils.blocking import BlockingOperationRunner
-
 
 logger = logging.getLogger(__name__)
 

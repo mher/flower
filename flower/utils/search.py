@@ -6,7 +6,6 @@ from functools import lru_cache
 
 from kombu.utils.encoding import safe_str
 
-
 SEARCH_FIELDS = frozenset({'name', 'state', 'worker', 'args', 'kwargs', 'result'})
 EXACT_FIELDS = frozenset({'state'})
 EXACT_INDEX_FIELDS = frozenset({'name', 'state', 'worker'})
@@ -260,8 +259,16 @@ def _kwargs_query_pair(value):
 
 
 class SearchDocument:
-    __slots__ = ('name', 'state', 'worker', 'args', 'kwargs',
-                 'result', 'all_text', 'kwargs_pairs')
+    __slots__ = (
+        'all_text',
+        'args',
+        'kwargs',
+        'kwargs_pairs',
+        'name',
+        'result',
+        'state',
+        'worker',
+    )
 
     # pylint: disable=too-many-arguments
     def __init__(self, name, state, worker, args, kwargs, result,
