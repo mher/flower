@@ -30,11 +30,11 @@
         {% for queue in queues %}
         <tr id="{{ url_escape(queue['name']) }}">
           <td>{{ queue['name'] }}</td>
-          <td class="broker-secondary-column">{{ queue.get('messages', 'N/A') }}</td>
-          <td class="broker-secondary-column">{{ queue.get('messages_unacknowledged', 'N/A') }}</td>
-          <td>{{ queue.get('messages_ready', 'N/A') }}</td>
-          <td>{{ queue.get('consumers', 'N/A') }}</td>
-          <td class="broker-secondary-column">{{ queue.get('idle_since', 'N/A') }}</td>
+          <td class="broker-secondary-column">{% raw format_value(queue.get('messages')) %}</td>
+          <td class="broker-secondary-column">{% raw format_value(queue.get('messages_unacknowledged')) %}</td>
+          <td>{% raw format_value(queue.get('messages_ready')) %}</td>
+          <td>{% raw format_value(queue.get('consumers')) %}</td>
+          <td class="broker-secondary-column">{% raw format_value(queue.get('idle_since')) %}</td>
         </tr>
         {% end %}
         {% if not queues %}

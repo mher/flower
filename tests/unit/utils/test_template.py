@@ -3,7 +3,7 @@ import unittest
 
 from pytz import utc
 
-from flower.utils.template import format_time, humanize, task_link
+from flower.utils.template import format_duration, format_time, format_value, humanize, task_link
 
 
 class TestHumanize(unittest.TestCase):
@@ -66,6 +66,37 @@ class TestHumanize(unittest.TestCase):
         self.assertEqual('Max concurrency', humanize('max-concurrency'))
 
 
+class TestFormatDuration(unittest.TestCase):
+    def test_sub_millisecond(self):
+        self.assertEqual('0.87 ms', format_duration(0.000869922005222179))
+
+    def test_milliseconds(self):
+        self.assertEqual('123.46 ms', format_duration(0.123456))
+
+    def test_seconds(self):
+        self.assertEqual('1.50 s', format_duration(1.5))
+        self.assertEqual('59.99 s', format_duration(59.99))
+
+    def test_minutes(self):
+        self.assertEqual('1m 00s', format_duration(60))
+        self.assertEqual('2m 05s', format_duration(125.4))
+
+    def test_hours(self):
+        self.assertEqual('1h 02m 03s', format_duration(3723))
+
+    def test_string_input(self):
+        self.assertEqual('2.00 s', format_duration('2'))
+
+    def test_humanize_duration(self):
+        self.assertEqual('0.87 ms', humanize(0.000869922005222179, type='duration'))
+
+    def test_humanize_duration_zero(self):
+        self.assertEqual('0.00 ms', humanize(0, type='duration'))
+
+    def test_humanize_duration_none(self):
+        self.assertEqual('', humanize(None, type='duration'))
+
+
 class TestTaskLink(unittest.TestCase):
     def test_full_and_short_spans(self):
         html = task_link('/task/abc', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890')
@@ -80,3 +111,17 @@ class TestTaskLink(unittest.TestCase):
         html = task_link('/task/x', '<script>')
         self.assertNotIn('<script>', html)
         self.assertIn('&lt;script&gt;', html)
+
+
+class TestFormatValue(unittest.TestCase):
+    def test_none_is_dash(self):
+        self.assertEqual('<span class="value-missing">&mdash;</span>', format_value(None))
+
+    def test_zero_is_kept(self):
+        self.assertEqual('0', format_value(0))
+
+    def test_string(self):
+        self.assertEqual('redis', format_value('redis'))
+
+    def test_escapes_markup(self):
+        self.assertEqual('&lt;b&gt;', format_value('<b>'))

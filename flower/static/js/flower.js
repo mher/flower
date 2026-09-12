@@ -99,6 +99,8 @@ var flower = (function () {
             d;
     }
 
+    var MISSING_VALUE = '<span class="value-missing">\u2014</span>';
+
     // DataTables writes cell values straight to innerHTML, so a column that
     // does not build its own markup must be escaped
     function withDefaultRenderer(columnDefs) {
@@ -515,6 +517,25 @@ var flower = (function () {
             'Update failed';
     }
 
+    // Mirrors flower.utils.template.format_duration
+    function formatDuration(seconds) {
+        seconds = Number(seconds);
+        if (seconds < 1) {
+            return (seconds * 1000).toFixed(2) + ' ms';
+        }
+        if (seconds < 60) {
+            return seconds.toFixed(2) + ' s';
+        }
+        var total = Math.round(seconds),
+            hours = Math.floor(total / 3600),
+            minutes = Math.floor((total % 3600) / 60),
+            secs = String(total % 60).padStart(2, '0');
+        if (hours) {
+            return hours + 'h ' + String(minutes).padStart(2, '0') + 'm ' + secs + 's';
+        }
+        return minutes + 'm ' + secs + 's';
+    }
+
     function format_time(timestamp) {
         var time = $('#time').val(),
             prefix = time.startsWith('natural-time') ? 'natural-time' : 'time',
@@ -640,6 +661,9 @@ var flower = (function () {
 
         var workersTable = $('#workers-table').DataTable({
             rowId: 'name',
+            createdRow: function (row, data) {
+                $(row).toggleClass('worker-offline', !data.status);
+            },
             searching: true,
             select: false,
             paging: true,
@@ -740,7 +764,7 @@ var flower = (function () {
                 className: "text-center text-nowrap",
                 render: function (data, type, full, meta) {
                     if (!full.status) {
-                        return 'N/A';
+                        return type === 'display' ? MISSING_VALUE : '';
                     }
                     if (Array.isArray(data)) {
                         if (type !== 'display') {
@@ -757,7 +781,10 @@ var flower = (function () {
                             }).join(', ') + '">' +
                             values.join('') + '</span>';
                     }
-                    return data ? htmlEscapeEntities(String(data)) : 'N/A';
+                    if (!data) {
+                        return type === 'display' ? MISSING_VALUE : '';
+                    }
+                    return htmlEscapeEntities(String(data));
                 }
             }, ]),
         });
@@ -934,10 +961,10 @@ var flower = (function () {
             }, {
                 targets: 8,
                 data: 'runtime',
-                className: "text-center",
+                className: "text-center text-nowrap",
                 visible: isColumnVisible('runtime'),
                 render: function (data, type, full, meta) {
-                    return data === null || data === undefined ? '' : Number(data).toFixed(2) + ' s';
+                    return data === null || data === undefined ? '' : formatDuration(data);
                 }
             }, {
                 targets: 9,

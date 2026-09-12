@@ -60,7 +60,7 @@
           <td>{{ info.get('task-failed', 0) }}</td>
           <td>{{ info.get('task-succeeded', 0) }}</td>
           <td>{{ info.get('task-retried', 0) }}</td>
-          <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
+          <td>{% raw format_value(info.get('loadavg')) %}</td>
         </tr>
         {% end %}
       </tbody>

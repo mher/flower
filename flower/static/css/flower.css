@@ -877,6 +877,11 @@ body.app-body {
   display: none;
 }
 
+.value-missing,
+.workers-table tr.worker-offline > td {
+  color: var(--flower-text-muted);
+}
+
 .workers-table a:hover,
 .tasks-table a:hover {
   text-decoration: underline;

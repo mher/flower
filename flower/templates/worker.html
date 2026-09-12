@@ -95,11 +95,11 @@
                       {% end %}
                       <tr>
                         <td>Worker PID</td>
-                        <td>{{ worker['stats'].get('pid', 'N/A')}}</td>
+                        <td>{% raw format_value(worker['stats'].get('pid')) %}</td>
                       </tr>
                       <tr>
                         <td>Prefetch Count</td>
-                        <td>{{ worker['stats'].get('prefetch_count', 'N/A')}}</td>
+                        <td>{% raw format_value(worker['stats'].get('prefetch_count')) %}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -250,8 +250,8 @@
                   <td>{% raw task_link(reverse_url('task', task['id']), task['id']) %}</td>
                   <td>{{ task['acknowledged'] }}</td>
                   <td>{{ task['worker_pid'] }}</td>
-                  <td><span class="worker-task-args" title="{{ task.get('args', 'N/A') }}">{{ task.get('args', 'N/A') }}</span></td>
-                  <td><span class="worker-task-args" title="{{ task.get('kwargs', 'N/A') }}">{{ task.get('kwargs', 'N/A') }}</span></td>
+                  <td><span class="worker-task-args" title="{{ task.get('args', '') }}">{% raw format_value(task.get('args')) %}</span></td>
+                  <td><span class="worker-task-args" title="{{ task.get('kwargs', '') }}">{% raw format_value(task.get('kwargs')) %}</span></td>
                 </tr>
                 {% end %}
               </tbody>
@@ -391,7 +391,7 @@
                   {% for name, value in worker['stats']['rusage'].items() %}
                   <tr>
                     <td>{{ name }}</td>
-                    <td class="worker-long-value">{{ value }}</td>
+                    <td class="worker-long-value">{{ humanize(value, type='duration') if name in ('utime', 'stime') else value }}</td>
                   </tr>
                   {% end %}
                   {% end %}
@@ -409,7 +409,7 @@
                   {% for name, value in other.items() %}
                   <tr>
                     <td>{{ name }}</td>
-                    <td class="worker-long-value">{{ value }}</td>
+                    <td class="worker-long-value">{{ humanize(value, type='duration') if name == 'uptime' else value }}</td>
                   </tr>
                   {% end %}
                 </tbody>

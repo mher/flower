@@ -16,6 +16,19 @@ def format_time(time, tz):
     return dt.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
 
 
+def format_duration(seconds):
+    seconds = float(seconds)
+    if seconds < 1:
+        return f'{seconds * 1000:.2f} ms'
+    if seconds < 60:
+        return f'{seconds:.2f} s'
+    minutes, secs = divmod(int(round(seconds)), 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours:
+        return f'{hours}h {minutes:02d}m {secs:02d}s'
+    return f'{minutes}m {secs:02d}s'
+
+
 def task_link(url, uuid):
     uuid = xhtml_escape(str(uuid))
     return (f'<a href="{xhtml_escape(url)}" title="{uuid}">'
@@ -23,9 +36,17 @@ def task_link(url, uuid):
             f'<span class="task-uuid-short">{uuid[:8]}</span></a>')
 
 
+def format_value(value):
+    if value is None:
+        return '<span class="value-missing">&mdash;</span>'
+    return xhtml_escape(str(value))
+
+
 def humanize(obj, type=None):
     if obj is None:
         obj = ''
+    elif type == 'duration':
+        obj = format_duration(obj)
     elif type and type.startswith('time'):
         tz = type[len('time'):].lstrip('-')
         tz = timezone(tz) if tz else getattr(current_app, 'timezone', '') or utc
