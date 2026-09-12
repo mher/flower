@@ -51,6 +51,14 @@ class TaskControlsTest(AsyncHTTPTestCase):
     def started_event():
         return Event('task-started', uuid='123', hostname='worker1')
 
+    def test_task_without_a_name_renders(self):
+        # Flower saw this task finish but never saw it received, so it has no name
+        r = self.render_task(Event('task-started', uuid='123', hostname='worker1'))
+        self.assertEqual(200, r.code)
+        body = r.body.decode('utf-8')
+        self.assertIn('<title>Task 123 · Flower</title>', body)
+        self.assertIn('<span class="value-missing">&mdash;</span>', body)
+
     def test_task_name_links_to_tasks_with_that_name(self):
         r = self.render_task(self.received_event(), self.started_event())
         self.assertEqual(200, r.code)

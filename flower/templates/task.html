@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ task.name }} {{ task.uuid[:8] }} · Flower{% end %}
+{% block title %}{{ task.name or 'Task' }} {{ task.uuid[:8] }} · Flower{% end %}
 
 {% block navbar %}
   {% module Template("navbar.html", active_tab="tasks") %}
@@ -27,7 +27,13 @@
     <dl class="detail-list">
       <div class="detail-row task-data-row">
         <dt>Name</dt>
-        <dd class="task-name-value"><a href="{{ reverse_url('tasks') }}?name={{ url_escape(task.name) }}">{{ task.name }}</a></dd>
+        <dd class="task-name-value">
+          {% if task.name %}
+          <a href="{{ reverse_url('tasks') }}?name={{ url_escape(task.name) }}">{{ task.name }}</a>
+          {% else %}
+          <span class="value-missing">&mdash;</span>
+          {% end %}
+        </dd>
       </div>
       <div class="detail-row task-data-row">
         <dt>UUID</dt>
