@@ -222,11 +222,8 @@ class Events(threading.Thread):
                     logger.debug("Capturing events...")
                     recv.capture(limit=None, timeout=None, wakeup=True)
             except (KeyboardInterrupt, SystemExit):
-                try:
-                    import _thread as thread
-                except ImportError:
-                    import thread
-                thread.interrupt_main()
+                import _thread
+                _thread.interrupt_main()
             except Exception as e:
                 logger.error("Failed to capture events: '%s', "
                              "trying again in %s seconds.",

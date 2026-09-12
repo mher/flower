@@ -5,7 +5,7 @@ import socket
 import ssl
 from urllib.parse import quote, unquote, urljoin, urlparse
 
-from tornado import httpclient, ioloop
+from tornado import httpclient
 
 try:
     from redis import asyncio as redis
@@ -46,9 +46,8 @@ class BrokerBase:
 
 
 class RabbitMQ(BrokerBase):
-    def __init__(self, broker_url, http_api, io_loop=None, **kwargs):
+    def __init__(self, broker_url, http_api, **kwargs):
         super().__init__(broker_url)
-        self.io_loop = io_loop or ioloop.IOLoop.instance()
         self.kwargs = kwargs
 
         self.host = self.host or 'localhost'

@@ -1,7 +1,7 @@
 /*jslint browser: true */
 /*global $, WebSocket, jQuery, bootstrap */
 
-var flower = (function () {
+(function () {
     "use strict";
 
     var toastContainer = document.getElementById('toast-container');

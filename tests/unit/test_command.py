@@ -109,7 +109,7 @@ class TestFlowerCommand(AsyncHTTPTestCase):
             self.assertTrue(autodiscover.called)
 
 
-class TestPrintBanner(AsyncHTTPTestCase):
+class TestPrintBanner(unittest.TestCase):
     def test_closes_broker_connection(self):
         celery_app = MagicMock()
         connection = celery_app.connection.return_value
@@ -146,20 +146,20 @@ class TestPrintBanner(AsyncHTTPTestCase):
 
     def test_print_banner_with_address(self):
         celery_app = celery.Celery()
-        with self.assertLogs('', level='INFO') as cm, self.mock_option('address', '0.0.0.0'):
+        with self.assertLogs('', level='INFO') as cm, patch.object(options.mockable(), 'address', '0.0.0.0'):
             print_banner(celery_app, False, options.port)
 
             self.assertTrue('INFO:flower.command:Visit me at http://0.0.0.0:5555' in cm.output)
 
     def test_print_banner_unix_socket(self):
         celery_app = celery.Celery()
-        with self.assertLogs('', level='INFO') as cm, self.mock_option('unix_socket', 'foo'):
+        with self.assertLogs('', level='INFO') as cm, patch.object(options.mockable(), 'unix_socket', 'foo'):
             print_banner(celery_app, True)
 
             self.assertTrue('INFO:flower.command:Visit me via unix socket file: foo' in cm.output)
 
 
-class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
+class TestWarnAboutCeleryArgsUsedInFlowerCommand(unittest.TestCase):
     @patch('flower.command.logger.warning')
     def test_does_not_log_warning(self, mock_warning):
         mock_app_param = Mock(name='app_param', opts=('-A', '--app'))
@@ -197,9 +197,9 @@ class TestWarnAboutCeleryArgsUsedInFlowerCommand(AsyncHTTPTestCase):
         )
 
 
-class TestConfOption(AsyncHTTPTestCase):
+class TestConfOption(unittest.TestCase):
     def test_error_conf(self):
-        with self.mock_option('conf', None):
+        with patch.object(options.mockable(), 'conf', None):
             self.assertRaises(FileNotFoundError, apply_options,
                               'flower', argv=['--conf=foo'])
             self.assertRaises(FileNotFoundError, apply_options,
@@ -208,7 +208,7 @@ class TestConfOption(AsyncHTTPTestCase):
     def test_error_conf_with_default_filename(self):
         with tempfile.TemporaryDirectory() as directory:
             conf = os.path.join(directory, 'flowerconfig.py')
-            with self.mock_option('conf', None):
+            with patch.object(options.mockable(), 'conf', None):
                 self.assertRaises(
                     FileNotFoundError,
                     apply_options,
@@ -221,13 +221,13 @@ class TestConfOption(AsyncHTTPTestCase):
         self.assertEqual('flowerconfig.py', options.conf)
 
     def test_empty_conf(self):
-        with self.mock_option('conf', None):
+        with patch.object(options.mockable(), 'conf', None):
             apply_options('flower', argv=['--conf=/dev/null'])
             self.assertEqual('/dev/null', options.conf)
 
     def test_conf_abs(self):
         with tempfile.NamedTemporaryFile() as cf:
-            with self.mock_option('conf', cf.name), self.mock_option('debug', False):
+            with patch.object(options.mockable(), 'conf', cf.name), patch.object(options.mockable(), 'debug', False):
                 cf.write('debug=True\n'.encode('utf-8'))
                 cf.flush()
                 apply_options('flower', argv=['--conf=%s' % cf.name])
@@ -236,7 +236,7 @@ class TestConfOption(AsyncHTTPTestCase):
 
     def test_conf_relative(self):
         with tempfile.NamedTemporaryFile(dir='.') as cf:
-            with self.mock_option('conf', cf.name), self.mock_option('debug', False):
+            with patch.object(options.mockable(), 'conf', cf.name), patch.object(options.mockable(), 'debug', False):
                 cf.write('debug=True\n'.encode('utf-8'))
                 cf.flush()
                 apply_options('flower', argv=['--conf=%s' % os.path.basename(cf.name)])

@@ -8,7 +8,6 @@ from flower.utils.broker import (Broker, RabbitMQ, Redis, RedisBase,
                                  RedisSentinel, RedisSocket, RedisSsl,
                                  validate_broker_api)
 
-broker.requests = MagicMock()
 broker.redis = MagicMock()
 
 

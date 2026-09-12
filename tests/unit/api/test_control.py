@@ -29,13 +29,10 @@ class UnknownWorkerControlTests(BaseApiTestCase):
 
 class WorkerControlTests(BaseApiTestCase):
     def setUp(self):
-        BaseApiTestCase.setUp(self)
-        self.is_worker = ControlHandler.is_worker
-        ControlHandler.is_worker = lambda *args: True
-
-    def tearDown(self):
-        BaseApiTestCase.tearDown(self)
-        ControlHandler.is_worker = self.is_worker
+        super().setUp()
+        is_worker = patch.object(ControlHandler, 'is_worker', return_value=True)
+        self.addCleanup(is_worker.stop)
+        is_worker.start()
 
     def test_shutdown(self):
         celery = self._app.capp

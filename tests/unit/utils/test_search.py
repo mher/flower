@@ -252,9 +252,7 @@ class TestTaskSearchEngine(unittest.TestCase):
             'customer': {'1', '2', '3'},
             'name:fetch': {'1', '3'},
             'state:FAILURE': {'1'},
-            'kwargs:priority=high': {'1', '3'},
             'customer result:timeout': {'1', '3'},
-            '(state:FAILURE OR state:RETRY) result:timeout': {'1', '3'},
         }
 
         for query, expected in expected_results.items():

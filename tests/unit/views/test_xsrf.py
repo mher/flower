@@ -1,4 +1,5 @@
 import os
+from unittest.mock import patch
 
 from tests.unit import AsyncHTTPTestCase
 
@@ -21,14 +22,11 @@ class XsrfProtectionTests(AsyncHTTPTestCase):
             self.assertEqual(401, r.code)
             self.assertNotIn(b'_xsrf', r.body)
 
+    @patch.dict(os.environ, {'FLOWER_UNAUTHENTICATED_API': 'true'})
     def test_unauthenticated_server_needs_no_token(self):
         # No auth configured: nothing to protect, scripts keep working.
-        os.environ['FLOWER_UNAUTHENTICATED_API'] = 'true'
-        try:
-            r = self.post('/api/worker/shutdown/test', body={})
-            self.assertNotEqual(403, r.code)
-        finally:
-            del os.environ['FLOWER_UNAUTHENTICATED_API']
+        r = self.post('/api/worker/shutdown/test', body={})
+        self.assertNotEqual(403, r.code)
 
     def test_basic_auth_cross_site_post_is_blocked(self):
         # Browsers attach cached Basic credentials cross-site
@@ -83,15 +81,12 @@ class XsrfProtectionTests(AsyncHTTPTestCase):
                           headers={'Sec-Fetch-Site': 'cross-site'})
             self.assertEqual(403, r.code)
 
+    @patch.dict(os.environ, {'FLOWER_UNAUTHENTICATED_API': 'true'})
     def test_unauthenticated_server_allows_cross_site(self):
         # CORS is deliberately open without credentials
-        os.environ['FLOWER_UNAUTHENTICATED_API'] = 'true'
-        try:
-            r = self.post('/api/worker/shutdown/test', body={},
-                          headers={'Sec-Fetch-Site': 'cross-site'})
-            self.assertNotEqual(403, r.code)
-        finally:
-            del os.environ['FLOWER_UNAUTHENTICATED_API']
+        r = self.post('/api/worker/shutdown/test', body={},
+                      headers={'Sec-Fetch-Site': 'cross-site'})
+        self.assertNotEqual(403, r.code)
 
     def test_full_page_load_sets_xsrf_cookie(self):
         # The UI relies on the _xsrf cookie being present so its AJAX calls can

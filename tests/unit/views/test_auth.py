@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from unittest import TestCase
 from unittest.mock import patch
 
 import tornado.auth
@@ -17,7 +18,7 @@ class DummyLoginHandler(BaseHandler):
         self.write('login page')
 
 
-class GithubEmailApiUrlTests(AsyncHTTPTestCase):
+class GithubEmailApiUrlTests(TestCase):
     def test_github_com_uses_api_subdomain(self):
         with patch.object(GithubLoginHandler, '_OAUTH_DOMAIN', 'github.com'):
             self.assertEqual('https://api.github.com/user/emails',
@@ -132,7 +133,7 @@ class BasicAuthTests(AsyncHTTPTestCase):
             self.assertEqual(401, r.code)
 
 
-class AuthTests(AsyncHTTPTestCase):
+class AuthTests(TestCase):
     def test_validate_auth_option(self):
         self.assertTrue(validate_auth_option("mail@example.com"))
         self.assertTrue(validate_auth_option(".*@example.com"))

@@ -1,13 +1,16 @@
 import unittest
-from glob import glob
+from pathlib import Path
 
 import tornado.testing
 
 
 def all():
-    test_modules = list(map(lambda x: x.removesuffix('.py').replace('/', '.'),
-                            glob('tests/unit/*.py') + glob('tests/unit/**/*.py')))
-    return unittest.defaultTestLoader.loadTestsFromNames(test_modules)
+    test_dir = Path(__file__).resolve().parent
+    return unittest.defaultTestLoader.discover(
+        start_dir=str(test_dir),
+        pattern='test_*.py',
+        top_level_dir=str(test_dir.parents[1]),
+    )
 
 
 if __name__ == "__main__":
