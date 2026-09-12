@@ -450,10 +450,39 @@ class TaskTests(BaseApiTestCase):
         self.assertEqual(400, r.code)
         self.assertIn('Invalid sort_by', r.body.decode('utf-8'))
 
-    def test_valid_sort_by_descending(self):
-        r = self.get('/api/tasks?sort_by=-received')
+    def seed_tasks_received_at(self, received):
+        # insertion order differs from both sort orders so the sort has to do the work
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        events = [Event('worker-online', hostname='worker1')]
+        for task_id, timestamp in received.items():
+            for e in task_succeeded_events(worker='worker1', name='task', id=task_id):
+                e['timestamp'] = timestamp
+                events.append(e)
+        for i, e in enumerate(events):
+            e['clock'] = i
+            e['local_received'] = time.time()
+            state.event(e)
+        self._app.events.state = state
 
+    def sorted_task_ids(self, query):
+        r = self.get('/api/tasks?' + query)
         self.assertEqual(200, r.code)
+        return list(json.loads(r.body, object_pairs_hook=OrderedDict))
+
+    def test_valid_sort_by_ascending(self):
+        self.seed_tasks_received_at({'b': 200.0, 'a': 100.0, 'c': 300.0})
+
+        self.assertEqual(['a', 'b', 'c'], self.sorted_task_ids('sort_by=received'))
+        self.assertEqual(['a', 'b'], self.sorted_task_ids('sort_by=received&limit=2'))
+        self.assertEqual(['b', 'c'], self.sorted_task_ids('sort_by=received&limit=2&offset=1'))
+
+    def test_valid_sort_by_descending(self):
+        self.seed_tasks_received_at({'b': 200.0, 'a': 100.0, 'c': 300.0})
+
+        self.assertEqual(['c', 'b', 'a'], self.sorted_task_ids('sort_by=-received'))
+        self.assertEqual(['c', 'b'], self.sorted_task_ids('sort_by=-received&limit=2'))
+        self.assertEqual(['b', 'a'], self.sorted_task_ids('sort_by=-received&limit=2&offset=1'))
 
     def test_invalid_limit(self):
         r = self.get('/api/tasks?limit=xyz')
