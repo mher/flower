@@ -45,7 +45,7 @@ class HtmlTableParser(HTMLParser):
         for r in rows:
             if r.attrib.get('id') == row_id:
                 cells = r.findall('td')
-                return list(map(lambda x: x.text, cells))
+                return [cell.text for cell in cells]
 
 
 def task_succeeded_events(worker, id=None, name=None, runtime=0.1234, retries=0, eta=None):
