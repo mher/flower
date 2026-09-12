@@ -1,14 +1,11 @@
 import ssl
 import unittest
 from unittest import mock
-from unittest.mock import MagicMock
 
 from flower.utils import broker
 from flower.utils.broker import (Broker, RabbitMQ, Redis, RedisBase,
                                  RedisSentinel, RedisSocket, RedisSsl,
                                  validate_broker_api)
-
-broker.redis = MagicMock()
 
 
 class TestRabbitMQ(unittest.TestCase):
