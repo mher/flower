@@ -19,6 +19,9 @@ class WorkersTests(AsyncHTTPTestCase):
     def test_default_page(self):
         r1 = self.get('/')
         r2 = self.get('/workers')
+        self.assertEqual(200, r1.code)
+        self.assertEqual(200, r2.code)
+        self.assertIn('<title>Workers · Flower</title>', r1.body.decode('utf-8'))
         self.assertEqual(r1.body, r2.body)
 
     def test_no_workers(self):
@@ -317,8 +320,10 @@ class WorkersTests(AsyncHTTPTestCase):
 
         res = self.get('/workers?json=1')
         self.assertEqual(200, res.code)
-        data = json.loads(res.body)
-        self.assertTrue("data" in data)
+        data = json.loads(res.body)['data']
+        self.assertEqual(1, len(data))
+        self.assertEqual('worker1', data[0]['hostname'])
+        self.assertTrue(data[0]['status'])
 
     def test_workers_view_refresh(self):
         state = EventsState()

@@ -26,7 +26,9 @@ class XsrfProtectionTests(AsyncHTTPTestCase):
     def test_unauthenticated_server_needs_no_token(self):
         # No auth configured: nothing to protect, scripts keep working.
         r = self.post('/api/worker/shutdown/test', body={})
-        self.assertNotEqual(403, r.code)
+        # the request reaches the handler, which rejects the unknown worker
+        self.assertEqual(404, r.code)
+        self.assertIn(b"Unknown worker 'test'", r.body)
 
     def test_basic_auth_cross_site_post_is_blocked(self):
         # Browsers attach cached Basic credentials cross-site
@@ -86,7 +88,8 @@ class XsrfProtectionTests(AsyncHTTPTestCase):
         # CORS is deliberately open without credentials
         r = self.post('/api/worker/shutdown/test', body={},
                       headers={'Sec-Fetch-Site': 'cross-site'})
-        self.assertNotEqual(403, r.code)
+        self.assertEqual(404, r.code)
+        self.assertIn(b"Unknown worker 'test'", r.body)
 
     def test_full_page_load_sets_xsrf_cookie(self):
         # The UI relies on the _xsrf cookie being present so its AJAX calls can
