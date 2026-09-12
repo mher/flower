@@ -525,14 +525,18 @@ var flower = (function () {
     }
 
     function format_time(timestamp) {
-        var time = $('#time').val(),
-            prefix = time.startsWith('natural-time') ? 'natural-time' : 'time',
-            tz = time.substr(prefix.length + 1) || 'UTC';
+        var time = $('#time').val()
+        var prefix = time.startsWith('natural-time') ? 'natural-time' : 'time'
+        var tz = time.substr(prefix.length + 1) || moment.tz.guess(); // Use browser's local TZ if not set
+
+        var m = moment.unix(timestamp).tz(tz);
+        var fullTime = m.format('YYYY-MM-DD HH:mm:ss.SSS'); // full date/time without TZ
 
         if (prefix === 'natural-time') {
-            return moment.unix(timestamp).tz(tz).fromNow();
+            return '<span title="' + fullTime + ' (' + tz + ')">' + m.fromNow() + '</span>';
         }
-        return moment.unix(timestamp).tz(tz).format('YYYY-MM-DD HH:mm:ss.SSS');
+
+        return '<span title="' + m.fromNow() + ' (' + tz + ')">' + fullTime + '</span>';
     }
 
     function usesNaturalTime() {
@@ -929,8 +933,7 @@ var flower = (function () {
                             return format_time(data);
                         }
                         return '<time datetime="' + moment.unix(data).toISOString() +
-                            '" title="' + moment.unix(data).fromNow() + '">' +
-                            format_time(data) + '</time>';
+                            '">' + format_time(data) + '</time>';
                     }
                     return data;
                 }

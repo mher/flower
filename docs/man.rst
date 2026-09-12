@@ -55,6 +55,7 @@ OPTIONS
                                    basic auth
   --broker-api                     inspect broker e.g.
                                    http://guest:guest@localhost:15672/api/
+  --browser-local-time             show time in the browser's local TZ (default *False*)
   --ca-certs                       path to SSL certificate authority (CA) file
   --certfile                       path to SSL certificate file
   --conf                           flower configuration file path (default *flowerconfig.py*)

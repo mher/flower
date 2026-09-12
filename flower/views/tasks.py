@@ -1,7 +1,10 @@
 import copy
 import logging
+from zoneinfo import ZoneInfo
 
 from tornado import web
+from tzlocal import get_localzone
+from celery.utils.time import LocalTimezone
 
 from ..utils.search import QuerySyntaxError
 from ..utils.tasks import as_dict, get_task_by_id, search_tasks
@@ -96,8 +99,25 @@ class TasksView(BaseHandler):
         capp = self.application.capp
 
         time = 'natural-time' if app.options.natural_time else 'time'
-        if capp.conf.timezone:
-            time += '-' + str(capp.conf.timezone)
+
+        if not app.options.browser_local_time:
+            # Append Celery app timezone in IANA format
+
+            timezone = None
+
+            if capp.timezone:
+                if isinstance(capp.timezone, LocalTimezone):
+                    try:
+                        timezone = get_localzone()
+                    except Exception as ex:
+                        logger.warning("Failed to retrieve local timezone (%s): %s", type(ex).__name__, ex)
+                else:
+                    timezone = capp.timezone
+
+            if timezone is None:
+                timezone = ZoneInfo("UTC")
+
+            time = f'{time}-{timezone}'
 
         self.render(
             "tasks.html",
