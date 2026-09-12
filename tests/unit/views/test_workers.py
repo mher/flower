@@ -397,3 +397,18 @@ class WorkersTests(AsyncHTTPTestCase):
 
     def test_invalid_limit_is_rejected(self):
         self.assertEqual(400, self.worker_page(query='?limit=many').code)
+
+    def test_worker_page_waits_for_task_lists(self):
+        # stats alone come from the global refresh, the page needs the full inspect
+        self.app.inspector.workers['worker1'] = {
+            'stats': {'total': {}, 'broker': {'hostname': 'redis', 'userid': None, 'virtual_host': '/', 'port': 6379}}}
+
+        async def populate(workername=None):
+            self.app.inspector.workers[workername].update(
+                active_queues=[], registered=[], conf={}, scheduled=[], active=[], reserved=[],
+                revoked=['task-from-full-inspect'])
+
+        with patch.object(self.get_app(), "update_workers", side_effect=lambda workername=None: asyncio.ensure_future(populate(workername))):
+            body = self.get('/worker/worker1').body.decode('utf-8')
+
+        self.assertIn('task-from-full-inspect', body)

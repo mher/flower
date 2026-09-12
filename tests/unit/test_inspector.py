@@ -64,7 +64,8 @@ class InspectorConcurrencyTests(IsolatedAsyncioTestCase):
         complete.set()
         await first
 
-    async def test_global_refresh_satisfies_worker_refresh(self):
+    async def test_global_refresh_does_not_satisfy_worker_refresh(self):
+        # the global refresh skips the task lists a worker page needs
         inspector = Inspector(Mock(), Mock(), timeout=1)
         complete = asyncio.Event()
 
@@ -76,9 +77,36 @@ class InspectorConcurrencyTests(IsolatedAsyncioTestCase):
         all_workers = inspector.inspect()
         one_worker = inspector.inspect('worker1')
 
-        self.assertIs(all_workers, one_worker)
+        self.assertIsNot(all_workers, one_worker)
         complete.set()
         await all_workers
+        await one_worker
+
+    async def test_global_refresh_skips_task_lists(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1)
+        called = []
+
+        async def inspect_method(method, workername):
+            called.append((method, workername))
+
+        inspector._inspect_method = inspect_method
+        await inspector.inspect()
+
+        self.assertEqual(
+            [('stats', None), ('active_queues', None), ('registered', None), ('conf', None)],
+            called)
+
+    async def test_worker_refresh_runs_every_method(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1)
+        called = []
+
+        async def inspect_method(method, workername):
+            called.append(method)
+
+        inspector._inspect_method = inspect_method
+        await inspector.inspect('worker1')
+
+        self.assertEqual(list(Inspector.inspect_methods), called)
 
     async def test_bounds_inspector_concurrency(self):
         io_loop = Mock()
@@ -91,9 +119,9 @@ class InspectorConcurrencyTests(IsolatedAsyncioTestCase):
 
         io_loop.run_in_executor.side_effect = run_in_executor
         inspector = Inspector(io_loop, Mock(), timeout=1, max_concurrency=2)
-        inspector.methods = ('stats', 'active', 'conf')
+        inspector.inspect_methods = ('stats', 'active', 'conf')
 
-        operation = inspector.inspect()
+        operation = inspector.inspect('worker1')
         await asyncio.sleep(0)
         await asyncio.sleep(0)
         self.assertEqual(2, len(pending))

@@ -17,7 +17,7 @@ empty_inspect_response = {
 }
 
 
-@mock.patch.object(Inspector, 'methods',
+@mock.patch.object(Inspector, 'inspect_methods',
                    new_callable=mock.PropertyMock,
                    return_value=['inspect_method'])
 class ListWorkersTest(BaseApiTestCase):

@@ -16,9 +16,10 @@ class WorkerView(BaseHandler):
     async def get(self, name):
         try:
             update = self.application.update_workers(workername=name)
-            # wait for inspection only when nothing is cached yet
+            # wait for inspection only when the cache lacks something this page shows
             # cached workers render immediately and refresh in the background
-            if 'stats' not in self.application.workers.get(name, {}):
+            cached = self.application.workers.get(name, {})
+            if any(method not in cached for method in self.application.inspector.inspect_methods):
                 await update
         except Exception as e:
             logger.error(e)
