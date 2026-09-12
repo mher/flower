@@ -1,5 +1,6 @@
 import ssl
 import unittest
+from unittest import mock
 from unittest.mock import MagicMock
 
 from flower.utils import broker
@@ -272,6 +273,20 @@ class TestRedisSentinel(unittest.TestCase):
         self.assertEqual(4444, b.port)
         self.assertEqual(5, b.vhost)
         self.assertEqual('pass', b.password)
+
+    def test_master_client_authenticates_with_url_user(self):
+        options = {'master_name': 'my_redis_master'}
+        with mock.patch.object(broker.redis.sentinel, 'Sentinel') as sentinel:
+            Broker('sentinel://app:secret@host:26379/0', broker_options=options)
+        kwargs = sentinel.call_args.kwargs
+        self.assertEqual('app', kwargs['username'])
+        self.assertEqual('secret', kwargs['password'])
+
+    def test_master_client_without_user_in_url(self):
+        options = {'master_name': 'my_redis_master'}
+        with mock.patch.object(broker.redis.sentinel, 'Sentinel') as sentinel:
+            Broker('sentinel://:secret@host:26379/0', broker_options=options)
+        self.assertFalse(sentinel.call_args.kwargs['username'])
 
 
 class TestRedisSsl(unittest.TestCase):

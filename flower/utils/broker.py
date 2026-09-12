@@ -213,6 +213,7 @@ class RedisSentinel(RedisBase):
             'socket_timeout', self.socket_timeout)
         sentinel_kwargs.setdefault('retry', Retry(NoBackoff(), 0))
         connection_kwargs = {
+            'username': self.username,
             'password': self.password,
             'sentinel_kwargs': sentinel_kwargs,
             'socket_connect_timeout': self.socket_connect_timeout,
