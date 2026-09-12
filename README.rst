@@ -65,7 +65,7 @@ By default, flower runs on port 5555, which can be modified with the `port` opti
 
 You can also run Flower using the docker image ::
 
-    $ docker run -v examples:/data -p 5555:5555 mher/flower celery --app=tasks.app flower
+    $ docker run -v $(pwd)/examples:/data -p 5555:5555 mher/flower celery --app=tasks.app flower
 
 In this example, Flower is using the `tasks.app` defined in the `examples/tasks.py <https://github.com/mher/flower/blob/master/examples/tasks.py>`_ file
 
