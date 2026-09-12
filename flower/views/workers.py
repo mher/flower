@@ -56,8 +56,8 @@ class WorkersView(BaseHandler):
         if refresh:
             try:
                 self.application.update_workers()
-            except Exception as e:
-                logger.exception('Failed to update workers: %s', e)
+            except Exception:
+                logger.exception('Failed to update workers')
 
         workers = {}
         for name, values in events.counter.items():

@@ -69,7 +69,6 @@ def humanize(obj, type=None):
                      lambda m: m.group(0).upper(), obj)
         if obj and obj not in KEYWORDS_DOWN:
             obj = obj[0].upper() + obj[1:]
-    elif isinstance(obj, list):
-        if all(isinstance(x, (int, float, str)) for x in obj):
-            obj = ', '.join(map(str, obj))
+    elif isinstance(obj, list) and all(isinstance(x, (int, float, str)) for x in obj):
+        obj = ', '.join(map(str, obj))
     return obj

@@ -298,7 +298,7 @@ class SearchDocument:
             args,
             kwargs,
             result,
-            '\0'.join((uuid, name, state, worker, args, kwargs, result)),
+            f'{uuid}\x00{name}\x00{state}\x00{worker}\x00{args}\x00{kwargs}\x00{result}',
             _kwargs_pairs(getattr(task, 'kwargs', None)))
 
 
@@ -490,9 +490,7 @@ def _task_in_time_range(task, received_start, received_end):
     received = getattr(task, 'received', None)
     if received_start is not None and received is not None and received < received_start:
         return False
-    if received_end is not None and received is not None and received > received_end:
-        return False
-    return True
+    return received_end is None or received is None or received <= received_end
 
 
 def _task_sort_key(task, sort_by, task_id):

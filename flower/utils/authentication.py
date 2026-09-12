@@ -15,6 +15,4 @@ def validate_auth_option(pattern):
         return False
     if '*' in pattern and '|' in pattern:
         return False
-    if '*' in pattern.rsplit('@', 1)[-1]:
-        return False
-    return True
+    return '*' not in pattern.rsplit('@', 1)[-1]

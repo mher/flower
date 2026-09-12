@@ -97,7 +97,7 @@ class RabbitMQ(BrokerBase):
 
 class RedisBase(BrokerBase):
     DEFAULT_SEP = '\x06\x16'
-    DEFAULT_PRIORITY_STEPS = [0, 3, 6, 9]
+    DEFAULT_PRIORITY_STEPS = (0, 3, 6, 9)
     DEFAULT_SOCKET_CONNECT_TIMEOUT = 1.0
     DEFAULT_SOCKET_TIMEOUT = 2.0
 
@@ -133,8 +133,7 @@ class RedisBase(BrokerBase):
     def _q_for_pri(self, queue, pri):
         if pri not in self.priority_steps:
             raise ValueError('Priority not in priority steps')
-        # pylint: disable=consider-using-f-string
-        return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
+        return f'{queue}{self.sep}{pri}' if pri else queue
 
     async def queues(self, names):
         names = list(names)
