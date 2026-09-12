@@ -1,6 +1,7 @@
 import asyncio
 import os
 import threading
+import time
 from unittest.mock import MagicMock, patch
 
 from kombu.exceptions import OperationalError
@@ -72,9 +73,14 @@ class WorkerControlTests(BaseApiTestCase):
                 await asyncio.sleep(0.01)
             self.assertTrue(started.is_set())
 
+            started_at = time.monotonic()
             healthcheck = await self.http_client.fetch(
                 self.get_url('/healthcheck'))
+            elapsed = time.monotonic() - started_at
             self.assertEqual(200, healthcheck.code)
+            # the control call is still blocked, the healthcheck must not have waited for it
+            self.assertFalse(shutdown.done())
+            self.assertLess(elapsed, 1.0)
         finally:
             release.set()
 
