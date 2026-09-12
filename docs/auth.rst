@@ -162,6 +162,12 @@ See also `GitLab OAuth2 API`_ documentation for more info.
 .. _GitLab OAuth2 API: https://docs.gitlab.com/ee/api/oauth2.html
 .. _Group and project members API: https://docs.gitlab.com/ee/api/members.html
 
+Logging out
+-----------
+
+When OAuth is enabled, the navigation bar shows a logout link that ends the Flower session.
+The OAuth provider keeps its own session, so logging in again may not ask for credentials.
+
 .. _custom-authentication:
 
 Custom authentication providers

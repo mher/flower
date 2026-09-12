@@ -100,6 +100,13 @@ class LoginHandler(BaseHandler):
         return instantiate(options.auth_provider or NotFoundErrorHandler, *args, **kwargs)
 
 
+class LogoutHandler(BaseHandler):
+    def get(self):
+        self.clear_cookie('user')
+        self.current_user = None
+        self.render('logout.html')
+
+
 class GithubLoginHandler(BaseHandler, OAuth2StateMixin, tornado.auth.OAuth2Mixin):
 
     _OAUTH_DOMAIN = os.getenv(

@@ -2,7 +2,9 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import tornado.auth
+from tornado.web import create_signed_value
 
+from flower.urls import settings
 from flower.utils.authentication import authenticate, validate_auth_option
 from flower.views import BaseHandler
 from flower.views.auth import (GithubLoginHandler, OAuth2StateMixin,
@@ -36,6 +38,49 @@ class LoginRouteTests(AsyncHTTPTestCase):
             self.assertEqual(200, r.code)
             r = self.fetch('/login/')
             self.assertEqual(200, r.code)
+
+
+class LogoutTests(AsyncHTTPTestCase):
+    @staticmethod
+    def session_cookie(email='user@example.com'):
+        signed = create_signed_value(settings['cookie_secret'], 'user', email)
+        return {'Cookie': 'user=' + signed.decode()}
+
+    def test_logout_clears_the_session_cookie(self):
+        with self.mock_option('auth', '.*@example.com'):
+            r = self.fetch('/logout', headers=self.session_cookie())
+            self.assertEqual(200, r.code)
+            cleared = [c for c in r.headers.get_list('Set-Cookie') if c.startswith('user=')]
+            self.assertEqual(1, len(cleared))
+            self.assertIn('expires=', cleared[0].lower())
+            body = r.body.decode('utf-8')
+            self.assertIn('You have been logged out', body)
+            self.assertIn('app-navbar', body)
+            self.assertNotIn('/logout"', body)
+
+    def test_logout_page_needs_no_session(self):
+        with self.mock_option('auth', '.*@example.com'):
+            r = self.fetch('/logout', follow_redirects=False)
+            self.assertEqual(200, r.code)
+
+    def test_navbar_shows_logout_for_oauth_sessions(self):
+        with self.mock_option('auth', '.*@example.com'):
+            r = self.fetch('/', headers=self.session_cookie())
+            self.assertEqual(200, r.code)
+            body = r.body.decode('utf-8')
+            self.assertIn('href="/logout"', body)
+            self.assertIn('Log out user@example.com', body)
+
+    def test_navbar_hides_logout_without_oauth(self):
+        r = self.fetch('/')
+        self.assertEqual(200, r.code)
+        self.assertNotIn('/logout', r.body.decode('utf-8'))
+
+    def test_navbar_hides_logout_for_basic_auth(self):
+        with self.mock_option('basic_auth', ['user:pass']):
+            r = self.fetch('/', auth_username='user', auth_password='pass')
+            self.assertEqual(200, r.code)
+            self.assertNotIn('/logout', r.body.decode('utf-8'))
 
 
 class _StateHandler(OAuth2StateMixin):
