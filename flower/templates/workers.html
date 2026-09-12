@@ -46,7 +46,6 @@
           <th class="text-center">Processed</th>
           <th class="text-center">Failed</th>
           <th class="text-center">Succeeded</th>
-          <th class="text-center">Retried</th>
           <th class="text-center">Load Average</th>
         </tr>
       </thead>
@@ -59,7 +58,6 @@
           <td>{{ info.get('task-received', 0) }}</td>
           <td>{{ info.get('task-failed', 0) }}</td>
           <td>{{ info.get('task-succeeded', 0) }}</td>
-          <td>{{ info.get('task-retried', 0) }}</td>
           <td>{% raw format_value(info.get('loadavg')) %}</td>
         </tr>
         {% end %}
@@ -67,7 +65,6 @@
       <tfoot>
         <tr>
           <th>Total</th>
-          <th></th>
           <th></th>
           <th></th>
           <th></th>
