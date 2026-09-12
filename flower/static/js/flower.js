@@ -101,6 +101,28 @@ var flower = (function () {
 
     var MISSING_VALUE = '<span class="value-missing">\u2014</span>';
 
+    function tasksPageUrl(worker, state) {
+        var params = [];
+        if (worker) {
+            params.push('worker=' + encodeURIComponent(worker));
+        }
+        if (state) {
+            params.push('state=' + state);
+        }
+        return url_prefix() + '/tasks' + (params.length ? '?' + params.join('&') : '');
+    }
+
+    // Per-worker task counters link to the tasks page filtered to that worker
+    function taskCountRenderer(state) {
+        return function (data, type, full, meta) {
+            var count = data || 0;
+            if (type !== 'display' || !count) {
+                return count;
+            }
+            return '<a href="' + tasksPageUrl(full.hostname, state) + '">' + count + '</a>';
+        };
+    }
+
     // DataTables writes cell values straight to innerHTML, so a column that
     // does not build its own markup must be escaped
     function withDefaultRenderer(columnDefs) {
@@ -702,8 +724,7 @@ var flower = (function () {
                     var total = api.column(column).data().reduce(sum, 0);
                     var footer = total;
                     if (total !== 0) {
-                        let queryParams = (state !== '' ? `?state=${state}` : '');
-                        footer = '<a href="' + url_prefix() + '/tasks' + queryParams + '">' + total + '</a>';
+                        footer = '<a href="' + tasksPageUrl(null, state) + '">' + total + '</a>';
                     }
                     $(api.column(column).footer()).html(footer);
                 }
@@ -732,31 +753,36 @@ var flower = (function () {
                 data: 'active',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer('STARTED')
             }, {
                 targets: 3,
                 data: 'task-received',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer()
             }, {
                 targets: 4,
                 data: 'task-failed',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer('FAILURE')
             }, {
                 targets: 5,
                 data: 'task-succeeded',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer('SUCCESS')
             }, {
                 targets: 6,
                 data: 'task-retried',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer('RETRY')
             }, {
                 targets: 7,
                 data: 'loadavg',
@@ -804,6 +830,11 @@ var flower = (function () {
         }
 
         var initialState = $.urlParam('state') || '',
+            initialWorker = decodeURIComponent($.urlParam('worker') || ''),
+            initialSearch = [
+                initialState ? 'state:' + initialState : '',
+                initialWorker ? 'worker:' + initialWorker : ''
+            ].filter(Boolean).join(' '),
             tasksTable = $('#tasks-table').DataTable({
             rowId: 'uuid',
             searching: true,
@@ -818,8 +849,8 @@ var flower = (function () {
             pageLength: 15,
             stateSave: true,
             stateLoadParams: function (settings, data) {
-                if (initialState) {
-                    data.search.search = 'state:' + initialState;
+                if (initialSearch) {
+                    data.search.search = initialSearch;
                 }
             },
             initComplete: function () {
@@ -855,7 +886,7 @@ var flower = (function () {
                 [7, "desc"]
             ],
             oSearch: {
-                "sSearch": initialState ? 'state:' + initialState : ''
+                "sSearch": initialSearch
             },
             columnDefs: withDefaultRenderer([{
                 targets: 0,
