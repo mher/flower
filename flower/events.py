@@ -75,6 +75,8 @@ class PrometheusMetrics:
             self.number_of_prefetched_tasks.labels(worker, name).dec()
         elif event_type in ('task-succeeded', 'task-failed') and task.started:
             self.prefetch_time.labels(worker, name).set(0)
+        elif event_type in ('task-revoked', 'task-rejected') and not task.started:
+            self.number_of_prefetched_tasks.labels(worker, name).dec()
 
     def observe_worker(self, worker, event):
         online = {'worker-online': 1, 'worker-heartbeat': 1, 'worker-offline': 0}

@@ -283,6 +283,42 @@ class PrometheusTests(AsyncHTTPTestCase):
             f'flower_worker_prefetched_tasks{{task="{task_name}",worker="{worker_name}"}} 1.0' in metrics
         )
 
+    def gauge_after(self, *events):
+        # metrics are process-wide, a fresh task name keeps each test's labels apart
+        task_name = 'task-' + uuid()
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        received = Event('task-received', uuid='1', name=task_name, args='()', kwargs='{}',
+                         retries=0, eta=None, hostname='worker1')
+        for i, event in enumerate((received, *events)):
+            event['clock'] = i
+            event['local_received'] = time.time()
+            state.event(event)
+        self.app.events.state = state
+        metrics = self.get('/metrics').body.decode('utf-8')
+        line = next(l for l in metrics.splitlines()
+                    if l.startswith(f'flower_worker_prefetched_tasks{{task="{task_name}",worker="worker1"}}'))
+        return float(line.split()[-1])
+
+    def test_received_task_counts_as_prefetched(self):
+        self.assertEqual(1.0, self.gauge_after())
+
+    def test_started_task_leaves_the_prefetch_queue(self):
+        self.assertEqual(0.0, self.gauge_after(Event('task-started', uuid='1', hostname='worker1')))
+
+    def test_task_revoked_before_start_leaves_the_prefetch_queue(self):
+        self.assertEqual(0.0, self.gauge_after(
+            Event('task-revoked', uuid='1', hostname='worker1', terminated=False, expired=True)))
+
+    def test_task_rejected_before_start_leaves_the_prefetch_queue(self):
+        self.assertEqual(0.0, self.gauge_after(
+            Event('task-rejected', uuid='1', hostname='worker1', requeue=False)))
+
+    def test_task_revoked_after_start_is_not_counted_twice(self):
+        self.assertEqual(0.0, self.gauge_after(
+            Event('task-started', uuid='1', hostname='worker1'),
+            Event('task-revoked', uuid='1', hostname='worker1', terminated=True, expired=False)))
+
 
 class HealthcheckTests(AsyncHTTPTestCase):
     def setUp(self):
