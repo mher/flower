@@ -1,7 +1,7 @@
 import json
 import time
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 from urllib.parse import urlencode
 
@@ -130,7 +130,7 @@ class AsyncApplyTests(BaseApiTestCase):
     def test_async_apply_eta(self):
         task = self._app.capp.tasks['foo'] = Mock()
         task.apply_async = Mock(return_value=AsyncResult(123))
-        tomorrow = datetime.utcnow() + timedelta(days=1)
+        tomorrow = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
         r = self.post('/api/task/async-apply/foo',
                       body='{"eta": "%s"}' % tomorrow)
 
@@ -161,7 +161,7 @@ class AsyncApplyTests(BaseApiTestCase):
     def test_async_apply_expires_datetime(self):
         task = self._app.capp.tasks['foo'] = Mock()
         task.apply_async = Mock(return_value=AsyncResult(123))
-        tomorrow = datetime.utcnow() + timedelta(days=1)
+        tomorrow = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
         r = self.post('/api/task/async-apply/foo',
                       body='{"expires": "%s"}' % tomorrow)
 
