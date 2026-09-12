@@ -134,7 +134,7 @@ class AsyncApplyTests(BaseApiTestCase):
         task.apply_async = Mock(return_value=AsyncResult(123))
         tomorrow = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
         r = self.post('/api/task/async-apply/foo',
-                      body=f'{{"eta": "{tomorrow}"}}')
+                      body=json.dumps({'eta': str(tomorrow)}))
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
@@ -165,7 +165,7 @@ class AsyncApplyTests(BaseApiTestCase):
         task.apply_async = Mock(return_value=AsyncResult(123))
         tomorrow = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
         r = self.post('/api/task/async-apply/foo',
-                      body=f'{{"expires": "{tomorrow}"}}')
+                      body=json.dumps({'expires': str(tomorrow)}))
 
         self.assertEqual(200, r.code)
         task.apply_async.assert_called_once_with(
@@ -368,10 +368,9 @@ class TaskTests(BaseApiTestCase):
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
-        firstFetchedTaskName = table[next(iter(table))]['name']
-        lastFetchedTaskName = table[list(table)[-1]]['name']
-        self.assertEqual("task1", firstFetchedTaskName)
-        self.assertEqual("task4", lastFetchedTaskName)
+        names = [task['name'] for task in table.values()]
+        self.assertEqual("task1", names[0])
+        self.assertEqual("task4", names[-1])
 
         # Test limit 4 and offset 1
         params = {'limit': 4, 'offset': 1, 'sort_by': 'name'}
@@ -383,13 +382,12 @@ class TaskTests(BaseApiTestCase):
 
         self.assertEqual(200, r.code)
         self.assertEqual(3, len(table))
-        firstFetchedTaskName = table[next(iter(table))]['name']
-        lastFetchedTaskName = table[list(table)[-1]]['name']
-        self.assertEqual("task2", firstFetchedTaskName)
-        self.assertEqual("task4", lastFetchedTaskName)
+        names = [task['name'] for task in table.values()]
+        self.assertEqual("task2", names[0])
+        self.assertEqual("task4", names[-1])
 
         # Test limit 4 and offset -1 (-1 should act as 0)
-        params = {'limit': 4, 'offset': -1, 'sort_by': "name"}
+        params = {'limit': 4, 'offset': -1, 'sort_by': 'name'}
 
         r = self.get('/api/tasks?' + '&'.join(
             '{}={}'.format(*x) for x in params.items()))
@@ -398,10 +396,9 @@ class TaskTests(BaseApiTestCase):
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
-        firstFetchedTaskName = table[next(iter(table))]['name']
-        lastFetchedTaskName = table[list(table)[-1]]['name']
-        self.assertEqual("task1", firstFetchedTaskName)
-        self.assertEqual("task4", lastFetchedTaskName)
+        names = [task['name'] for task in table.values()]
+        self.assertEqual("task1", names[0])
+        self.assertEqual("task4", names[-1])
 
         # Test limit 2 and offset 1
         params = {'limit': 2, 'offset': 1, 'sort_by': 'name'}
@@ -413,10 +410,9 @@ class TaskTests(BaseApiTestCase):
 
         self.assertEqual(200, r.code)
         self.assertEqual(2, len(table))
-        firstFetchedTaskName = table[next(iter(table))]['name']
-        lastFetchedTaskName = table[list(table)[-1]]['name']
-        self.assertEqual("task2", firstFetchedTaskName)
-        self.assertEqual("task3", lastFetchedTaskName)
+        names = [task['name'] for task in table.values()]
+        self.assertEqual("task2", names[0])
+        self.assertEqual("task3", names[-1])
 
         # Test limit 4 with search
         params = {'limit': 4, 'offset': 0, 'sort_by': 'name', 'search': 'task'}
@@ -428,10 +424,9 @@ class TaskTests(BaseApiTestCase):
 
         self.assertEqual(200, r.code)
         self.assertEqual(4, len(table))
-        firstFetchedTaskName = table[next(iter(table))]['name']
-        lastFetchedTaskName = table[list(table)[-1]]['name']
-        self.assertEqual("task1", firstFetchedTaskName)
-        self.assertEqual("task4", lastFetchedTaskName)
+        names = [task['name'] for task in table.values()]
+        self.assertEqual("task1", names[0])
+        self.assertEqual("task4", names[-1])
 
         # Test limit 4 with search
         params = {'limit': 4, 'offset': 0, 'sort_by': 'name', 'search': 'task1'}
@@ -443,8 +438,8 @@ class TaskTests(BaseApiTestCase):
 
         self.assertEqual(200, r.code)
         self.assertEqual(1, len(table))
-        firstFetchedTaskName = table[next(iter(table))]['name']
-        self.assertEqual("task1", firstFetchedTaskName)
+        names = [task['name'] for task in table.values()]
+        self.assertEqual("task1", names[0])
 
     def test_invalid_sort_by(self):
         r = self.get('/api/tasks?sort_by=bogus')
