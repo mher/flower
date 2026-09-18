@@ -232,6 +232,28 @@ Example::
 
     $ celery flower --persistent=True --db="flower_db"
 
+.. _db_url:
+
+db_url
+~~~~~~
+
+Default: None
+
+Stores the persistent state in an external Redis server instead of the local
+`db`_ file. Accepts a ``redis://`` or ``rediss://`` URL (use ``rediss://`` for
+TLS); the connection details, including the database number, are taken from the
+URL. The `db`_ option is reused as the Redis key under which the state is
+stored.
+
+This is useful when Flower runs in an ephemeral or containerized environment
+where a local file would not survive a restart. It only takes effect when the
+`persistent`_ mode is enabled, and requires the ``redis`` package
+(``pip install flower[redis]``).
+
+Example::
+
+    $ celery flower --persistent=True --db_url="redis://localhost:6379/0" --db="flower"
+
 .. _debug:
 
 debug

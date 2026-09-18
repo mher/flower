@@ -211,6 +211,62 @@ class PersistenceTests(AsyncTestCase):
             self.assertEqual({}, dict(restored.state.counter))
 
 
+class FakeRedis:
+    # A minimal stand-in for a Redis client, avoids a live server in the tests
+    def __init__(self):
+        self.store = {}
+
+    def get(self, key):
+        return self.store.get(key)
+
+    def set(self, key, value):
+        self.store[key] = value
+
+
+class RedisPersistenceTests(AsyncTestCase):
+    url = 'redis://localhost:6379/0'
+
+    def events(self, redis_client, db='flower', **kwargs):
+        with patch('redis.Redis.from_url', return_value=redis_client):
+            return Events(Mock(), self.io_loop, db=db, db_url=self.url,
+                          persistent=True, enable_events=False,
+                          max_tasks_in_memory=10, **kwargs)
+
+    def test_recovers_counters_and_continues_counting(self):
+        redis_client = FakeRedis()
+        events = self.events(redis_client)
+        events.state.counter['worker1']['task-received'] = 2
+        events.state.counter['worker2']['task-failed'] = 3
+        events.save_state()
+
+        restored = self.events(redis_client)
+
+        self.assertEqual(
+            2, restored.state.counter['worker1']['task-received'])
+        self.assertEqual(
+            3, restored.state.counter['worker2']['task-failed'])
+
+    def test_starts_fresh_without_stored_state(self):
+        restored = self.events(FakeRedis())
+
+        self.assertEqual({}, dict(restored.state.counter))
+
+    def test_failed_save_preserves_previous_value(self):
+        redis_client = FakeRedis()
+        events = self.events(redis_client)
+        events.state.counter['worker1']['task-received'] = 2
+        events.save_state()
+
+        events.state.counter['worker1']['task-received'] = 5
+        events.state.counter['worker1']['unpicklable'] = Unpicklable()
+        with self.assertRaises(pickle.PicklingError):
+            events.save_state()
+
+        restored = self.events(redis_client)
+        self.assertEqual(
+            2, restored.state.counter['worker1']['task-received'])
+
+
 class EnableEventsTests(AsyncTestCase):
     def setUp(self):
         super().setUp()

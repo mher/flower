@@ -56,6 +56,9 @@ setup(
     python_requires=">=3.10",
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=get_requirements('default.txt'),
+    extras_require={
+        'redis': ['redis>=4.3.6'],
+    },
     test_suite="tests",
     tests_require=get_requirements('test.txt'),
     package_data={'flower': ['templates/*', 'static/*.*',

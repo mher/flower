@@ -60,6 +60,7 @@ class Flower(tornado.web.Application):
         self.events = events or Events(
             self.capp,
             db=self.options.db,
+            db_url=self.options.db_url,
             persistent=self.options.persistent,
             state_save_interval=self.options.state_save_interval,
             enable_events=self.options.enable_events,

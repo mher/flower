@@ -35,6 +35,10 @@ define("db", type=str, default='flower',
        help="flower database file")
 define("persistent", type=bool, default=False,
        help="enable persistent mode")
+define("db_url", type=str, default=None,
+       help="URL of an external store for persistent state "
+            "('redis://' or 'rediss://'); the db option is used as the key. "
+            "Falls back to the db file when unset")
 define("state_save_interval", type=int, default=0,
        help="state save interval (in milliseconds)")
 define("broker_api", type=str, default=None,

@@ -5,6 +5,7 @@ import signal
 import sys
 from logging import NullHandler
 from pprint import pformat
+from urllib.parse import urlparse
 
 import click
 from celery.bin.base import CeleryCommand
@@ -154,6 +155,21 @@ def extract_settings():
         except ValueError as exc:
             logger.error("Invalid '--broker-api' option: %s", exc)
             sys.exit(1)
+
+    validate_db_url()
+
+
+def validate_db_url():
+    if not options.db_url:
+        return
+    scheme = urlparse(options.db_url).scheme
+    if scheme not in ('redis', 'rediss'):
+        logger.error("Invalid '--db-url' option: only 'redis://' and "
+                     "'rediss://' URLs are supported")
+        sys.exit(1)
+    if not options.persistent:
+        logger.warning("The '--db-url' option only takes effect with "
+                       "'--persistent'")
 
 
 def is_flower_option(arg):

@@ -2,6 +2,7 @@ import collections
 import glob
 import logging
 import os
+import pickle
 import shelve
 import threading
 import time
@@ -153,7 +154,7 @@ class Events(threading.Thread):
     events_enable_interval = 5000
 
     # pylint: disable=too-many-arguments
-    def __init__(self, capp, io_loop, db=None, persistent=False,
+    def __init__(self, capp, io_loop, db=None, db_url=None, persistent=False,
                  enable_events=True, state_save_interval=0,
                  *, max_tasks_in_memory, **kwargs):
         threading.Thread.__init__(self)
@@ -163,11 +164,13 @@ class Events(threading.Thread):
         self.capp = capp
 
         self.db = db
+        self.db_url = db_url
         self.persistent = persistent
         self.enable_events = enable_events
         self.state = None
         self.state_save_timer = None
         self.state_save_interval = state_save_interval
+        self._redis_client = None
 
         if self.persistent:
             self.state = self.load_state()
@@ -231,7 +234,24 @@ class Events(threading.Thread):
                 logger.debug(e, exc_info=True)
                 time.sleep(try_interval)
 
+    def _redis(self):
+        # The redis client owns a connection pool, so build it once and reuse it
+        if self._redis_client is None:
+            try:
+                import redis
+            except ImportError as e:
+                raise RuntimeError(
+                    "The 'redis' package is required for the --db-url option, "
+                    "install it with 'pip install flower[redis]'") from e
+            self._redis_client = redis.Redis.from_url(self.db_url)
+        return self._redis_client
+
     def load_state(self):
+        if self.db_url:
+            return self.load_state_from_redis()
+        return self.load_state_from_shelf()
+
+    def load_state_from_shelf(self):
         logger.debug("Loading state from '%s'...", self.db)
         try:
             with shelve.open(self.db) as state:
@@ -250,9 +270,41 @@ class Events(threading.Thread):
                     os.replace(name, f'{name}.corrupt')
             return None
 
+    def load_state_from_redis(self):
+        logger.debug("Loading state from '%s'...", self.db_url)
+        try:
+            data = self._redis().get(self.db)
+        except Exception as e:
+            logger.error("Failed to load state from '%s': %s", self.db_url, e)
+            return None
+        if not data:
+            return None
+        try:
+            snapshot = pickle.loads(data)
+        except Exception as e:
+            logger.error("Failed to load state from '%s', ignoring the stored "
+                         "value and starting fresh: %s", self.db_url, e)
+            return None
+        events = snapshot['events']
+        events.counter.update(snapshot.get('counter', {}))
+        return events
+
     def save_state(self):
-        logger.debug("Saving state to '%s'...", self.db)
         started = time.monotonic()
+        if self.db_url:
+            self.save_state_to_redis()
+        else:
+            self.save_state_to_shelf()
+
+        elapsed = time.monotonic() - started
+        interval_seconds = self.state_save_interval / 1000
+        if self.state_save_timer and elapsed > interval_seconds / 10:
+            logger.warning(
+                "Saving state took %.1fs, consider increasing "
+                "--state-save-interval or decreasing --max-tasks", elapsed)
+
+    def save_state_to_shelf(self):
+        logger.debug("Saving state to '%s'...", self.db)
         tmp = f'{self.db}.tmp'
         with shelve.open(tmp, flag='n') as state:
             state['events'] = self.state
@@ -261,12 +313,14 @@ class Events(threading.Thread):
         for name in glob.glob(glob.escape(tmp) + '*'):
             os.replace(name, self.db + name[len(tmp):])
 
-        elapsed = time.monotonic() - started
-        interval_seconds = self.state_save_interval / 1000
-        if self.state_save_timer and elapsed > interval_seconds / 10:
-            logger.warning(
-                "Saving state took %.1fs, consider increasing "
-                "--state-save-interval or decreasing --max-tasks", elapsed)
+    def save_state_to_redis(self):
+        logger.debug("Saving state to '%s'...", self.db_url)
+        # Serialize before writing so a pickling error keeps the stored value
+        data = pickle.dumps({
+            'events': self.state,
+            'counter': dict(self.state.counter),
+        })
+        self._redis().set(self.db, data)
 
     async def on_enable_events(self):
         # Periodically enable events for workers
