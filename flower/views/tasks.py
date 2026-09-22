@@ -30,14 +30,14 @@ class TasksDataTable(BaseHandler):
     # pylint: disable=too-many-locals
     def get(self):
         app = self.application
-        draw = self.get_argument('draw', type=int)
-        start = self.get_argument('start', type=int)
-        length = self.get_argument('length', type=int)
-        search = self.get_argument('search[value]', type=str)
+        draw = self.get_argument('draw', type=int, required=True)
+        start = self.get_argument('start', type=int, required=True)
+        length = self.get_argument('length', type=int, required=True)
+        search = self.get_argument('search[value]', '', escape=False)
 
-        column = self.get_argument('order[0][column]', type=int)
-        sort_by = self.get_argument(f'columns[{column}][data]', type=str)
-        sort_order = self.get_argument('order[0][dir]', type=str) == 'desc'
+        column = self.get_argument('order[0][column]', type=int, required=True)
+        sort_by = self.get_argument(f'columns[{column}][data]', '', type=str)
+        sort_order = self.get_argument('order[0][dir]', '', type=str) == 'desc'
 
         try:
             page = search_tasks(
@@ -48,12 +48,12 @@ class TasksDataTable(BaseHandler):
                 offset=start,
                 limit=length)
         except QuerySyntaxError as exc:
-            self.write(dict(
-                draw=draw,
-                data=[],
-                recordsTotal=len(app.events.state.tasks),
-                recordsFiltered=0,
-                searchError=str(exc)))
+            self.write({
+                "draw": draw,
+                "data": [],
+                "recordsTotal": len(app.events.state.tasks),
+                "recordsFiltered": 0,
+                "searchError": str(exc)})
             return
 
         filtered_tasks = []
@@ -69,9 +69,9 @@ class TasksDataTable(BaseHandler):
 
             filtered_tasks.append(task_dict)
 
-        self.write(dict(draw=draw, data=filtered_tasks,
-                        recordsTotal=page.total_count,
-                        recordsFiltered=page.filtered_count))
+        self.write({"draw": draw, "data": filtered_tasks,
+                    "recordsTotal": page.total_count,
+                    "recordsFiltered": page.filtered_count})
 
     @web.authenticated
     def post(self):
@@ -89,6 +89,34 @@ class TasksDataTable(BaseHandler):
         return uuid, args
 
 
+# Every column the tasks page can show, slug to header label
+TASK_COLUMNS = {
+    'name': 'Name',
+    'uuid': 'UUID',
+    'state': 'State',
+    'args': 'args',
+    'kwargs': 'kwargs',
+    'result': 'Result',
+    'received': 'Received',
+    'started': 'Started',
+    'runtime': 'Runtime',
+    'worker': 'Worker',
+    'exchange': 'Exchange',
+    'routing_key': 'Routing Key',
+    'retries': 'Retries',
+    'revoked': 'Revoked',
+    'exception': 'Exception',
+    'expires': 'Expires',
+    'eta': 'ETA',
+}
+
+
+def visible_task_columns(tasks_columns):
+    "Slug and label of each column the tasks page shows, in the order tasks_columns lists them"
+    return [(name, TASK_COLUMNS[name])
+            for name in map(str.strip, tasks_columns.split(',')) if name in TASK_COLUMNS]
+
+
 class TasksView(BaseHandler):
     @web.authenticated
     def get(self):
@@ -101,7 +129,6 @@ class TasksView(BaseHandler):
 
         self.render(
             "tasks.html",
-            tasks=[],
-            columns=app.options.tasks_columns,
+            columns=visible_task_columns(app.options.tasks_columns),
             time=time,
         )

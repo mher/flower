@@ -1,6 +1,7 @@
 import asyncio
 import os
 import threading
+import time
 from unittest.mock import MagicMock, patch
 
 from kombu.exceptions import OperationalError
@@ -18,16 +19,21 @@ class UnknownWorkerControlTests(BaseApiTestCase):
         r = self.post('/api/worker/shutdown/test', body={})
         self.assertEqual(404, r.code)
 
+    def test_unknown_worker_error_is_not_html(self):
+        r = self.post(
+            '/api/worker/shutdown/%3Cimg%20src%3Dx%20onerror%3Dalert(1)%3E',
+            body={})
+        self.assertEqual(404, r.code)
+        self.assertTrue(r.headers['Content-Type'].startswith('text/plain'))
+        self.assertIn(b'<img src=x onerror=alert(1)>', r.body)
+
 
 class WorkerControlTests(BaseApiTestCase):
     def setUp(self):
-        BaseApiTestCase.setUp(self)
-        self.is_worker = ControlHandler.is_worker
-        ControlHandler.is_worker = lambda *args: True
-
-    def tearDown(self):
-        BaseApiTestCase.tearDown(self)
-        ControlHandler.is_worker = self.is_worker
+        super().setUp()
+        is_worker = patch.object(ControlHandler, 'is_worker', return_value=True)
+        self.addCleanup(is_worker.stop)
+        is_worker.start()
 
     def test_shutdown(self):
         celery = self._app.capp
@@ -67,9 +73,14 @@ class WorkerControlTests(BaseApiTestCase):
                 await asyncio.sleep(0.01)
             self.assertTrue(started.is_set())
 
+            started_at = time.monotonic()
             healthcheck = await self.http_client.fetch(
                 self.get_url('/healthcheck'))
+            elapsed = time.monotonic() - started_at
             self.assertEqual(200, healthcheck.code)
+            # the control call is still blocked, the healthcheck must not have waited for it
+            self.assertFalse(shutdown.done())
+            self.assertLess(elapsed, 1.0)
         finally:
             release.set()
 
@@ -188,6 +199,21 @@ class WorkerControlTests(BaseApiTestCase):
             self.assertEqual(403, r.code)
             celery.control.broadcast.assert_not_called()
 
+    def test_add_consumer_missing_queue(self):
+        celery = self._app.capp
+        celery.control.broadcast = MagicMock()
+        r = self.post('/api/worker/queue/add-consumer/test', body={})
+        self.assertEqual(400, r.code)
+        self.assertIn('Missing argument queue', r.body.decode('utf-8'))
+        celery.control.broadcast.assert_not_called()
+
+    def test_cancel_consumer_missing_queue(self):
+        celery = self._app.capp
+        celery.control.broadcast = MagicMock()
+        r = self.post('/api/worker/queue/cancel-consumer/test', body={})
+        self.assertEqual(400, r.code)
+        celery.control.broadcast.assert_not_called()
+
     def test_cancel_consumer(self):
         celery = self._app.capp
         celery.control.broadcast = MagicMock(
@@ -243,6 +269,23 @@ class WorkerControlTests(BaseApiTestCase):
         )
         self.assertEqual(403, r.code)
         self.assertEqual(b"Failed to set timeouts: 'time limits not supported'", r.body)
+
+    def test_task_timeout_missing_workername(self):
+        celery = self._app.capp
+        celery.control.time_limit = MagicMock()
+
+        r = self.post('/api/task/timeout/celery.map', body={'soft': 1.2})
+        self.assertEqual(400, r.code)
+        self.assertIn('Missing argument workername', r.body.decode('utf-8'))
+        celery.control.time_limit.assert_not_called()
+
+    def test_task_ratelimit_missing_workername(self):
+        celery = self._app.capp
+        celery.control.rate_limit = MagicMock()
+
+        r = self.post('/api/task/rate-limit/celery.map', body={'ratelimit': 20})
+        self.assertEqual(400, r.code)
+        celery.control.rate_limit.assert_not_called()
 
     def test_task_ratelimit(self):
         celery = self._app.capp
@@ -344,7 +387,7 @@ class TaskControlTests(BaseApiTestCase):
                                                       signal='SIGUSR1')
 
 
-class ControlAuthTests(WorkerControlTests):
+class ControlAuthTests(BaseApiTestCase):
     def test_auth(self):
         with patch.object(options.mockable(), 'basic_auth', ['user1:password1']):
             app = self._app.capp

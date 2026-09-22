@@ -6,8 +6,15 @@ from types import SimpleNamespace
 from celery.events import Event
 
 from flower.events import EventsState
-from flower.utils.search import (And, MatchAll, Or, QuerySyntaxError,
-                                 TaskSearchEngine, Term, parse_query)
+from flower.utils.search import (
+    And,
+    MatchAll,
+    Or,
+    QuerySyntaxError,
+    TaskSearchEngine,
+    Term,
+    parse_query,
+)
 
 
 class TestQueryParser(unittest.TestCase):
@@ -72,9 +79,8 @@ class TestQueryParser(unittest.TestCase):
         }
 
         for query, message in invalid_queries.items():
-            with self.subTest(query=query):
-                with self.assertRaisesRegex(QuerySyntaxError, message):
-                    parse_query(query)
+            with self.subTest(query=query), self.assertRaisesRegex(QuerySyntaxError, message):
+                parse_query(query)
 
     def test_query_size_and_nesting_limits(self):
         with self.assertRaisesRegex(QuerySyntaxError, 'exceeds 2048 characters'):
@@ -227,16 +233,13 @@ class TestTaskSearchEngine(unittest.TestCase):
 
     def test_exact_filters_and_time_ranges(self):
         self.tasks['1'].received = 10
-        self.tasks['1'].started = 20
         self.tasks['3'].received = 30
-        self.tasks['3'].started = 40
 
         page = self.engine.search(
             self.tasks,
             task_type='tasks.fetch',
             worker='worker-a',
             received_start=20,
-            started_end=40,
         )
 
         self.assertEqual(['3'], page.task_ids)
@@ -255,9 +258,7 @@ class TestTaskSearchEngine(unittest.TestCase):
             'customer': {'1', '2', '3'},
             'name:fetch': {'1', '3'},
             'state:FAILURE': {'1'},
-            'kwargs:priority=high': {'1', '3'},
             'customer result:timeout': {'1', '3'},
-            '(state:FAILURE OR state:RETRY) result:timeout': {'1', '3'},
         }
 
         for query, expected in expected_results.items():

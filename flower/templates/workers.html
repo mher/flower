@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}Workers · Flower{% end %}
+
 {% block navbar %}
 {% module Template("navbar.html", active_tab="workers")%}
 {% end %}
@@ -46,7 +48,6 @@
           <th class="text-center">Processed</th>
           <th class="text-center">Failed</th>
           <th class="text-center">Succeeded</th>
-          <th class="text-center">Retried</th>
           <th class="text-center">Load Average</th>
         </tr>
       </thead>
@@ -55,19 +56,17 @@
         <tr id="{{ url_escape(name) }}">
           <td>{{ name }}</td>
           <td>{{ info.get('status', None) }}</td>
-          <td>{{ info.get('active', 0) or 0 }}</td>
-          <td>{{ info.get('task-received', 0) }}</td>
-          <td>{{ info.get('task-failed', 0) }}</td>
-          <td>{{ info.get('task-succeeded', 0) }}</td>
-          <td>{{ info.get('task-retried', 0) }}</td>
-          <td>{{ humanize(info.get('loadavg', 'N/A')) }}</td>
+          <td>{{ format_count(info.get('active')) }}</td>
+          <td>{{ format_count(info.get('task-received')) }}</td>
+          <td>{{ format_count(info.get('task-failed')) }}</td>
+          <td>{{ format_count(info.get('task-succeeded')) }}</td>
+          <td>{% raw format_value(info.get('loadavg')) %}</td>
         </tr>
         {% end %}
       </tbody>
       <tfoot>
         <tr>
           <th>Total</th>
-          <th></th>
           <th></th>
           <th></th>
           <th></th>

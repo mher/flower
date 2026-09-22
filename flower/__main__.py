@@ -1,5 +1,8 @@
 import sys
-from celery.bin.celery import main as _main, celery
+
+from celery.bin.celery import celery
+from celery.bin.celery import main as _main
+
 from flower.command import flower
 
 

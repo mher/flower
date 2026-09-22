@@ -64,7 +64,7 @@ Shut down a worker
         await self.run_blocking(
             'worker.shutdown', workername, self.capp.control.broadcast,
             'shutdown', destination=[workername])
-        self.write(dict(message="Shutting down!"))
+        self.write({"message": "Shutting down!"})
 
 
 class WorkerPoolRestart(ControlHandler):
@@ -111,7 +111,7 @@ Restart worker's pool
             'pool_restart', arguments={'reload': False},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=f"Restarting '{workername}' worker's pool"))
+            self.write({"message": f"Restarting '{workername}' worker's pool"})
         else:
             logger.error(response)
             self.set_status(403)
@@ -166,7 +166,7 @@ Grow worker's pool
             'worker.pool_grow', workername, self.capp.control.pool_grow,
             n=n, reply=True, destination=[workername])
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=f"Growing '{workername}' worker's pool by {n}"))
+            self.write({"message": f"Growing '{workername}' worker's pool by {n}"})
         else:
             logger.error(response)
             self.set_status(403)
@@ -221,7 +221,7 @@ Shrink worker's pool
             'worker.pool_shrink', workername, self.capp.control.pool_shrink,
             n=n, reply=True, destination=[workername])
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=f"Shrinking '{workername}' worker's pool by {n}"))
+            self.write({"message": f"Shrinking '{workername}' worker's pool by {n}"})
         else:
             logger.error(response)
             self.set_status(403)
@@ -270,8 +270,8 @@ Autoscale worker pool
         if not self.is_worker(workername):
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
-        min = self.get_argument('min', type=int)
-        max = self.get_argument('max', type=int)
+        min = self.get_argument('min', type=int, required=True)
+        max = self.get_argument('max', type=int, required=True)
 
         logger.info("Autoscaling '%s' worker by '%s'",
                     workername, (min, max))
@@ -281,8 +281,8 @@ Autoscale worker pool
             'autoscale', arguments={'min': min, 'max': max},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=f"Autoscaling '{workername}' worker "
-                                    f"(min={min}, max={max})"))
+            self.write({"message": f"Autoscaling '{workername}' worker "
+                                    f"(min={min}, max={max})"})
         else:
             logger.error(response)
             self.set_status(403)
@@ -300,7 +300,7 @@ Start consuming from a queue
 
 .. sourcecode:: http
 
-  POST /api/worker/queue/add-consumer/celery@worker2?queue=sample-queue
+  POST /api/worker/queue/add-consumer/celery@worker2?queue=sample-queue HTTP/1.1
   Content-Length: 0
   Content-Type: application/x-www-form-urlencoded; charset=utf-8
   Host: localhost:5555
@@ -330,7 +330,7 @@ Start consuming from a queue
         if not self.is_worker(workername):
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
-        queue = self.get_argument('queue')
+        queue = self.get_argument('queue', required=True)
 
         logger.info("Adding consumer '%s' to worker '%s'",
                     queue, workername)
@@ -340,7 +340,7 @@ Start consuming from a queue
             'add_consumer', arguments={'queue': queue},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
+            self.write({"message": response[0][workername]['ok']})
         else:
             logger.error(response)
             self.set_status(403)
@@ -358,7 +358,7 @@ Stop consuming from a queue
 
 .. sourcecode:: http
 
-  POST /api/worker/queue/cancel-consumer/celery@worker2?queue=sample-queue
+  POST /api/worker/queue/cancel-consumer/celery@worker2?queue=sample-queue HTTP/1.1
   Content-Length: 0
   Content-Type: application/x-www-form-urlencoded; charset=utf-8
   Host: localhost:5555
@@ -388,7 +388,7 @@ Stop consuming from a queue
         if not self.is_worker(workername):
             raise web.HTTPError(404, f"Unknown worker '{workername}'")
 
-        queue = self.get_argument('queue')
+        queue = self.get_argument('queue', required=True)
 
         logger.info("Canceling consumer '%s' from worker '%s'",
                     queue, workername)
@@ -398,7 +398,7 @@ Stop consuming from a queue
             'cancel_consumer', arguments={'queue': queue},
             destination=[workername], reply=True)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
+            self.write({"message": response[0][workername]['ok']})
         else:
             logger.error(response)
             self.set_status(403)
@@ -416,7 +416,7 @@ Revoke a task
 
 .. sourcecode:: http
 
-  POST /api/task/revoke/1480b55c-b8b2-462c-985e-24af3e9158f9?terminate=true
+  POST /api/task/revoke/1480b55c-b8b2-462c-985e-24af3e9158f9?terminate=true HTTP/1.1
   Content-Length: 0
   Content-Type: application/x-www-form-urlencoded; charset=utf-8
   Host: localhost:5555
@@ -449,7 +449,7 @@ Revoke a task
         await self.run_blocking(
             'task.revoke', taskid, self.capp.control.revoke,
             taskid, terminate=terminate, signal=signal)
-        self.write(dict(message=f"Revoked '{taskid}'"))
+        self.write({"message": f"Revoked '{taskid}'"})
 
 
 class TaskTimout(ControlHandler):
@@ -491,7 +491,7 @@ Change soft and hard time limits for a task
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
 
-        workername = self.get_argument('workername')
+        workername = self.get_argument('workername', required=True)
         hard = self.get_argument('hard', default=None, type=float)
         soft = self.get_argument('soft', default=None, type=float)
 
@@ -509,7 +509,7 @@ Change soft and hard time limits for a task
             destination=destination)
 
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
+            self.write({"message": response[0][workername]['ok']})
         else:
             logger.error(response)
             self.set_status(403)
@@ -556,8 +556,8 @@ Change rate limit for a task
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
 
-        workername = self.get_argument('workername')
-        ratelimit = self.get_argument('ratelimit')
+        workername = self.get_argument('workername', required=True)
+        ratelimit = self.get_argument('ratelimit', required=True)
 
         if taskname not in self.capp.tasks:
             raise web.HTTPError(404, f"Unknown task '{taskname}'")
@@ -571,7 +571,7 @@ Change rate limit for a task
             'task.rate_limit', taskname, self.capp.control.rate_limit,
             taskname, ratelimit, reply=True, destination=destination)
         if response and 'ok' in response[0][workername]:
-            self.write(dict(message=response[0][workername]['ok']))
+            self.write({"message": response[0][workername]['ok']})
         else:
             logger.error(response)
             self.set_status(403)

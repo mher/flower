@@ -29,7 +29,7 @@
       </ul>
 
       <ul class="app-nav app-nav-secondary navbar-nav ms-lg-auto">
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown" data-flower-tooltip data-bs-trigger="hover" data-bs-placement="bottom" title="Theme">
           <svg class="d-none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <symbol id="theme-icon-system" viewBox="0 0 16 16">
               <path d="M8 15A7 7 0 1 0 8 1v14Zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16Z"/>
@@ -46,8 +46,7 @@
           </svg>
 
           <button class="nav-link theme-toggle dropdown-toggle" id="theme-toggle" type="button"
-            data-bs-toggle="dropdown" data-flower-tooltip data-bs-placement="bottom" title="Theme"
-            aria-expanded="false" aria-label="Select theme">
+            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Select theme">
             <svg class="theme-icon" aria-hidden="true">
               <use id="theme-toggle-icon" href="#theme-icon-system"></use>
             </svg>
@@ -82,7 +81,7 @@
         </li>
         <li class="nav-item">
           <a class="app-icon-link nav-link" href="https://flower.readthedocs.io/" target="_blank" rel="noopener"
-            data-flower-tooltip data-bs-placement="bottom" aria-label="Flower documentation" title="Documentation">
+            data-flower-tooltip data-bs-trigger="hover" data-bs-placement="bottom" aria-label="Flower documentation" title="Documentation">
             <svg viewBox="0 0 16 16" aria-hidden="true">
               <path fill="currentColor"
                 d="M1 2.75A1.75 1.75 0 0 1 2.75 1H6a2.5 2.5 0 0 1 2 .999A2.5 2.5 0 0 1 10 1h3.25A1.75 1.75 0 0 1 15 2.75v10.5A1.75 1.75 0 0 1 13.25 15H10a1.5 1.5 0 0 0-1.2.6.999.999 0 0 1-1.6 0A1.5 1.5 0 0 0 6 15H2.75A1.75 1.75 0 0 1 1 13.25V2.75Zm7.5 10.792A3 3 0 0 1 10 13.14h3.25a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25H10A1.5 1.5 0 0 0 8.5 4v9.542Zm-1 0V4A1.5 1.5 0 0 0 6 2.5H2.75a.25.25 0 0 0-.25.25v10.14c0 .138.112.25.25.25H6a3 3 0 0 1 1.5.402Z"/>
@@ -92,7 +91,7 @@
         </li>
         <li class="nav-item">
           <a class="app-icon-link nav-link" href="https://github.com/mher/flower" target="_blank" rel="noopener"
-            data-flower-tooltip data-bs-placement="bottom" aria-label="Flower source code" title="Source code">
+            data-flower-tooltip data-bs-trigger="hover" data-bs-placement="bottom" aria-label="Flower source code" title="Source code">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 499.36"
               aria-hidden="true">
               <path fill="currentColor" fill-rule="evenodd"
@@ -101,6 +100,21 @@
             <span class="visually-hidden">Source code</span>
           </a>
         </li>
+        {% if handler.application.options.auth and current_user %}
+        <li class="nav-item">
+          <a class="app-icon-link nav-link" href="{{ reverse_url('logout') }}"
+            data-flower-tooltip data-bs-trigger="hover" data-bs-placement="bottom"
+            aria-label="Log out {{ current_user }}" title="Log out {{ current_user }}">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path fill="currentColor"
+                d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+              <path fill="currentColor"
+                d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+            </svg>
+            <span class="visually-hidden">Log out</span>
+          </a>
+        </li>
+        {% end %}
       </ul>
     </div>
   </div>

@@ -10,9 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class Inspector:
-    methods = ('stats', 'active_queues', 'registered', 'scheduled',
+    inspect_methods = ('stats', 'active_queues', 'registered', 'scheduled',
                'active', 'reserved', 'revoked', 'conf')
-    max_concurrency = len(methods)
+    # Task lists can be huge, they are fetched only when one worker is inspected
+    task_inspect_methods = ('scheduled', 'active', 'reserved', 'revoked')
+    max_concurrency = len(inspect_methods)
 
     def __init__(self, io_loop, capp, timeout, max_concurrency=None):
         self.io_loop = io_loop
@@ -26,8 +28,6 @@ class Inspector:
 
     def inspect(self, workername=None):
         task = self._inspect_tasks.get(workername)
-        if task is None and workername is not None:
-            task = self._inspect_tasks.get(None)
         if task is None:
             task = asyncio.ensure_future(self._inspect_all(workername))
             self._inspect_tasks[workername] = task
@@ -35,12 +35,18 @@ class Inspector:
                 partial(self._on_inspect_done, workername))
         return task
 
+    def methods_to_inspect(self, workername):
+        if workername is not None:
+            return self.inspect_methods
+        return tuple(method for method in self.inspect_methods if method not in self.task_inspect_methods)
+
     async def _inspect_all(self, workername):
+        methods = self.methods_to_inspect(workername)
         results = await asyncio.gather(*(
             self._inspect_method(method, workername)
-            for method in self.methods
+            for method in methods
         ), return_exceptions=True)
-        for method, result in zip(self.methods, results):
+        for method, result in zip(methods, results):
             if isinstance(result, Exception):
                 logger.error("Inspect method %s failed: %s", method, result)
 

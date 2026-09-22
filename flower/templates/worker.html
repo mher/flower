@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{ worker['name'] }} · Flower{% end %}
+
 {% block navbar %}
 {% module Template("navbar.html", active_tab="workers") %}
 {% end %}
@@ -12,7 +14,7 @@
 <div class="page-section worker-detail-page">
   <header class="worker-detail-header">
     <div>
-      <p class="page-eyebrow">Worker detail</p>
+      <p class="page-eyebrow">Worker details</p>
       <h1 id="workername">{{ worker['name'] }}</h1>
     </div>
 
@@ -95,11 +97,11 @@
                       {% end %}
                       <tr>
                         <td>Worker PID</td>
-                        <td>{{ worker['stats'].get('pid', 'N/A')}}</td>
+                        <td>{% raw format_value(worker['stats'].get('pid')) %}</td>
                       </tr>
                       <tr>
                         <td>Prefetch Count</td>
-                        <td>{{ worker['stats'].get('prefetch_count', 'N/A')}}</td>
+                        <td>{% raw format_value(worker['stats'].get('prefetch_count')) %}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -158,7 +160,7 @@
                   {% for name,value in (worker['stats'].get('consumer', None) or worker['stats'])['broker'].items() %}
                   <tr>
                     <td>{{ humanize(name) }}</td>
-                    <td>{{ value }}</td>
+                    <td class="worker-long-value">{{ value }}</td>
                   </tr>
                   {% end %}
                 </tbody>
@@ -225,7 +227,7 @@
                 {% for name,value in worker['stats']['total'].items() %}
                 <tr>
                   <td>{{ name }}</td>
-                  <td>{{ value }}</td>
+                  <td>{{ format_count(value) }}</td>
                 </tr>
                 {% end %}
               </tbody>
@@ -247,11 +249,11 @@
                 {% for task in worker.get('active', {}) %}
                 <tr>
                   <td>{{ task['name'] }}</td>
-                  <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
+                  <td>{% raw task_link(reverse_url('task', task['id']), task['id']) %}</td>
                   <td>{{ task['acknowledged'] }}</td>
                   <td>{{ task['worker_pid'] }}</td>
-                  <td>{{ task.get('args', 'N/A') }}</td>
-                  <td>{{ task.get('kwargs', 'N/A') }}</td>
+                  <td><span class="worker-task-args" title="{{ task.get('args', '') }}">{% raw format_value(task.get('args')) %}</span></td>
+                  <td><span class="worker-task-args" title="{{ task.get('kwargs', '') }}">{% raw format_value(task.get('kwargs')) %}</span></td>
                 </tr>
                 {% end %}
               </tbody>
@@ -271,9 +273,9 @@
                 {% for task in worker.get('scheduled', {}) %}
                 <tr>
                   <td>{{ task['request']['name'] }}</td>
-                  <td><a href="{{ reverse_url('task', task['request']['id']) }}">{{ task['request']['id'] }}</a></td>
-                  <td>{{ task['request']['args'] }}</td>
-                  <td>{{ task['request']['kwargs'] }}</td>
+                  <td>{% raw task_link(reverse_url('task', task['request']['id']), task['request']['id']) %}</td>
+                  <td><span class="worker-task-args" title="{{ task['request']['args'] }}">{{ task['request']['args'] }}</span></td>
+                  <td><span class="worker-task-args" title="{{ task['request']['kwargs'] }}">{{ task['request']['kwargs'] }}</span></td>
                 </tr>
                 {% end %}
               </tbody>
@@ -293,9 +295,9 @@
                 {% for task in worker.get('reserved', {}) %}
                 <tr>
                   <td>{{ task['name'] }}</td>
-                  <td><a href="{{ reverse_url('task', task['id']) }}">{{ task['id'] }}</a></td>
-                  <td>{{ task['args'] }}</td>
-                  <td>{{ task['kwargs'] }}</td>
+                  <td>{% raw task_link(reverse_url('task', task['id']), task['id']) %}</td>
+                  <td><span class="worker-task-args" title="{{ task['args'] }}">{{ task['args'] }}</span></td>
+                  <td><span class="worker-task-args" title="{{ task['kwargs'] }}">{{ task['kwargs'] }}</span></td>
                 </tr>
                 {% end %}
               </tbody>
@@ -311,7 +313,7 @@
               <tbody>
                 {% for task in worker.get('revoked', []) %}
                 <tr>
-                  <td><a href="{{ reverse_url('task', task) }}">{{ task }}</a></td>
+                  <td>{% raw task_link(reverse_url('task', task), task) %}</td>
                 </tr>
                 {% end %}
               </tbody>
@@ -373,7 +375,7 @@
                     <td><a
                         href="https://docs.celeryq.dev/en/latest/userguide/configuration.html#{{ name.lower().replace('_', '-') }}"
                         target="_blank">{{ name }}</a></td>
-                    <td>{{ value }}</td>
+                    <td class="worker-long-value">{{ value }}</td>
                   </tr>
                   {% end %}
                   {% end %}
@@ -391,7 +393,7 @@
                   {% for name, value in worker['stats']['rusage'].items() %}
                   <tr>
                     <td>{{ name }}</td>
-                    <td>{{ value }}</td>
+                    <td class="worker-long-value">{{ humanize(value, type='duration') if name in ('utime', 'stime') else value }}</td>
                   </tr>
                   {% end %}
                   {% end %}
@@ -409,7 +411,7 @@
                   {% for name, value in other.items() %}
                   <tr>
                     <td>{{ name }}</td>
-                    <td>{{ value }}</td>
+                    <td class="worker-long-value">{{ humanize(value, type='duration') if name == 'uptime' else value }}</td>
                   </tr>
                   {% end %}
                 </tbody>

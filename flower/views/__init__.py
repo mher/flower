@@ -1,22 +1,32 @@
-import re
-import inspect
-import traceback
 import copy
-import logging
 import hmac
-
+import inspect
+import logging
+import os
+import traceback
 from base64 import b64decode
+from urllib.parse import urlparse
 
 import tornado
+import tornado.auth
 
-from ..utils import template, bugreport, strtobool
+from ..utils import bugreport, strtobool, template
+from ..utils.authentication import authenticate
+from ..utils.broker import Broker
 
 logger = logging.getLogger(__name__)
 
 
 class BaseHandler(tornado.web.RequestHandler):
+    @property
+    def unauthenticated_api(self):
+        return strtobool(os.environ.get('FLOWER_UNAUTHENTICATED_API') or 'false')
+
     def set_default_headers(self):
-        if not (self.application.options.basic_auth or self.application.options.auth):
+        self.set_header('X-Content-Type-Options', 'nosniff')
+        options = self.application.options
+        # Cross-origin reads are only for instances explicitly opened to unauthenticated clients
+        if not (options.basic_auth or options.auth) and self.unauthenticated_api:
             self.set_header("Access-Control-Allow-Origin", "*")
             self.set_header("Access-Control-Allow-Headers",
                             "x-requested-with,access-control-allow-origin,authorization,content-type")
@@ -29,21 +39,69 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def render(self, *args, **kwargs):
         app_options = self.application.options
+        # Set the _xsrf cookie so the UI's AJAX calls can echo the token back
+        _ = self.xsrf_token
         functions = inspect.getmembers(template, inspect.isfunction)
-        assert not set(map(lambda x: x[0], functions)) & set(kwargs.keys())
+        assert not {x[0] for x in functions} & set(kwargs.keys())
         kwargs.update(functions)
         kwargs.update(url_prefix=app_options.url_prefix)
         super().render(*args, **kwargs)
+
+    def check_xsrf_cookie(self):
+        options = self.application.options
+        site = self.request.headers.get('Sec-Fetch-Site')
+        origin = self.request.headers.get('Origin')
+
+        # No authentication configured
+        if not (options.basic_auth or options.auth):
+            return
+
+        # Cross-site request
+        if site and site != 'same-origin':
+            raise tornado.web.HTTPError(403, 'Cross-site request forbidden')
+
+        # Mismatched origin, no fetch metadata
+        if not site and origin and urlparse(origin).netloc != self.request.host:
+            raise tornado.web.HTTPError(403, 'Cross-origin request forbidden')
+
+        # Basic auth, no cookie session
+        if not options.auth:
+            return
+
+        # Token client, no cookie session
+        if self.request.headers.get('Authorization'):
+            return
+
+        super().check_xsrf_cookie()
+
+    def set_secure_cookie(self, name, value, expires_days=30, version=None, **kwargs):
+        kwargs.setdefault('httponly', True)
+        kwargs.setdefault('samesite', 'Lax')
+        super().set_secure_cookie(name, value, expires_days, version, **kwargs)
+
+    def log_exception(self, typ, value, tb):
+        # OAuth failures are user errors, not server faults
+        if isinstance(value, tornado.auth.AuthError):
+            logger.warning("Authentication error: %s", value)
+            return
+        super().log_exception(typ, value, tb)
 
     def write_error(self, status_code, **kwargs):
         # Avoid re-running authentication while rendering an error response
         if not hasattr(self, '_current_user'):
             self.current_user = None
 
+        exc_info = kwargs.get('exc_info')
+        if exc_info and isinstance(exc_info[1], tornado.auth.AuthError):
+            self.set_status(403)
+            self.render('404.html',
+                        message=f'{exc_info[1]}. Please try logging in again.')
+            return
+
         if status_code in (404, 403):
             message = ''
             if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
-                message = kwargs['exc_info'][1].log_message
+                message = kwargs['exc_info'][1].get_message()
             self.render('404.html', message=message)
         elif status_code == 500:
             error_trace = "".join(traceback.format_exception(*kwargs['exc_info']))
@@ -60,7 +118,7 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             message = ''
             if 'exc_info' in kwargs and kwargs['exc_info'][0] == tornado.web.HTTPError:
-                message = kwargs['exc_info'][1].log_message
+                message = kwargs['exc_info'][1].get_message()
                 self.set_header('Content-Type', 'text/plain')
                 self.write(str(message))
             self.set_status(status_code)
@@ -91,14 +149,18 @@ class BaseHandler(tornado.web.RequestHandler):
         if user:
             if not isinstance(user, str):
                 user = user.decode()
-            if re.match(self.application.options.auth, user):
+            if authenticate(self.application.options.auth, user):
                 return user
         return None
 
-    # pylint: disable=dangerous-default-value
-    def get_argument(self, name, default=[], strip=True, type=None):
+    # pylint: disable=too-many-arguments
+    def get_argument(self, name, default=None, strip=True, type=None,
+                     required=False, escape=True):
         arg = super().get_argument(name, default, strip)
-        if arg and isinstance(arg, str):
+        if required and (arg is None or arg == ''):
+            raise tornado.web.HTTPError(400, f"Missing argument {name}")
+        # Values that are only parsed, like search queries, must keep quotes and brackets
+        if escape and arg and isinstance(arg, str):
             arg = tornado.escape.xhtml_escape(arg)
         if type is not None:
             try:
@@ -128,13 +190,26 @@ class BaseHandler(tornado.web.RequestHandler):
                 logger.exception("Failed to format '%s' task", task.uuid)
         return task
 
+    def get_broker(self):
+        app = self.application
+        http_api = None
+        if app.transport == 'amqp' and app.options.broker_api:
+            http_api = app.options.broker_api
+        try:
+            return Broker(app.broker_uri_with_password, http_api=http_api,
+                          broker_options=self.capp.conf.broker_transport_options,
+                          broker_use_ssl=self.capp.conf.broker_use_ssl)
+        except NotImplementedError as exc:
+            raise tornado.web.HTTPError(
+                404, f"'{app.transport}' broker is not supported") from exc
+
     def get_active_queue_names(self):
-        queues = set([])
-        for _, info in self.application.workers.items():
+        queues = set()
+        for info in self.application.workers.values():
             for queue in info.get('active_queues', []):
                 queues.add(queue['name'])
 
         if not queues:
-            queues = set([self.capp.conf.task_default_queue]) |\
+            queues = {self.capp.conf.task_default_queue} |\
                 {q.name for q in self.capp.conf.task_queues or [] if q.name}
         return sorted(queues)

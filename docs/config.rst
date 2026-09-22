@@ -6,6 +6,9 @@ Configuration
 Flower is highly customizable. You can pass configuration options through the command line,
 configuration file, or environment variables. For a full list of options, see the `Option Reference`_ section.
 
+When the same option is set in more than one place, the command line takes precedence
+over the configuration file, which takes precedence over environment variables.
+
 Command line
 ------------
 
@@ -52,7 +55,7 @@ For example, to set the basic_auth option to foo:bar, you would set the
     export FLOWER_BASIC_AUTH=foo:bar
     celery flower
 
-.. _options_referance:
+.. _options_reference:
 
 Option Reference
 -----------------
@@ -99,13 +102,19 @@ Enables authentication. `auth` is a regular expression of emails to grant access
 
 The `auth` option allows you to enable authentication in Flower. By default, the `auth` option is set to an empty string, indicating that authentication is disabled.
 
-To enable authentication and restrict access to specific email addresses, set the `auth` option to a regular expression pattern that matches the desired email addresses. The `auth` option supports a basic regex syntax, including:
+To enable authentication and restrict access to specific email addresses, set the `auth` option to one of the following patterns:
 
   - Single email: Use a single email address, such as `user@example.com`.
-  - Wildcard: Use a wildcard pattern with `.*` to match multiple email addresses with the same domain, such as `.*@example.com`.
+  - Wildcard: Use `.*` to match multiple email addresses with the same domain, such as `.*@example.com`.
   - List of emails: Use a list of emails separated by pipes (`|`), such as `one@example.com|two@example.com`.
 
-Please note that for security reasons, the `auth` option only supports a basic regex syntax and does not provide advanced regex features.
+For security reasons, the `auth` option does not accept arbitrary regular expressions. The following rules apply:
+
+  - Only one `.*` wildcard is allowed.
+  - The wildcard must be in the local part of the address. It cannot match the domain, so `user@.*` is rejected.
+  - A wildcard cannot be combined with a pipe-separated list.
+
+Flower refuses to start with an `Invalid '--auth' option` error when the pattern breaks any of these rules.
 
 For more information and detailed usage examples, refer to the :ref:`Authentication` section of the Flower documentation.
 
@@ -152,7 +161,7 @@ The `broker_api` option should be set to the URL of the RabbitMQ HTTP API, inclu
 
 Example::
 
-    $ celery flower broker-api="http://username:password@rabbitmq-server-name:15672/api/"
+    $ celery flower --broker-api="http://username:password@rabbitmq-server-name:15672/api/"
 
 .. Note:: By default, the RabbitMQ Management Plugin is not enabled. To enable it, run the following command::
 
@@ -162,7 +171,7 @@ Example::
 
 For more information refer to the `RabbitMQ Management Plugin`_ documentation.
 
-.. _`RabbitMQ Management Plugin`: https://www.rabbitmq.com/management.html
+.. _`RabbitMQ Management Plugin`: https://www.rabbitmq.com/docs/management
 
 .. _ca_certs:
 
@@ -230,9 +239,9 @@ debug
 
 Default: False
 
-Enables the debug mode
+Enables debug mode.
 
-.. Note:: When debug mode is enabled, Flower may print sensitive information
+.. Note:: When debug mode is enabled, Flower may print sensitive information.
 
 .. _enable_events:
 
@@ -246,7 +255,7 @@ Enabling Celery events allows Flower to receive real-time updates about task eve
 from the Celery workers.
 
 You can also enable events directly when running Celery workers by using the `-E` flag.
-For more information, refer to the `Celery documentation <https://docs.celeryq.dev/en/stable/reference/cli.html#cmdoption-celery-worker-E>`_:
+For more information, refer to the `Celery documentation <https://docs.celeryq.dev/en/stable/reference/cli.html#cmdoption-celery-worker-E>`_.
 
 .. _format_task:
 
@@ -257,12 +266,12 @@ Default: None
 
 Modifies the default task formatting.
 
-The `format_task` function allows to modify the default formatting of tasks.
+The `format_task` function allows you to modify the default formatting of tasks.
 By defining the `format_task` function in the `flowerconfig.py` configuration file,
 you can customize the task object before it is displayed. The `format_task` function accepts a task object
 as a parameter and should return the modified version of the task.
 
-This function is particularly useful for filtering out sensitive information or limiting display lengths of task arguments, kwargs, or results.
+This function is particularly useful for filtering out sensitive information or limiting the display length of task arguments, kwargs, or results.
 
 The example below shows how to filter arguments and limit display lengths:
 
@@ -272,7 +281,7 @@ The example below shows how to filter arguments and limit display lengths:
 
     def format_task(task):
         task.args = humanize(task.args, length=10)
-        task.kwargs.pop('credit_card_number')
+        task.kwargs.pop('credit_card_number', None)
         task.result = humanize(task.result, length=20)
         return task
 
@@ -306,7 +315,7 @@ max_workers
 
 Default: 5000
 
-Sets the maximum number of workers to keep in memory
+Sets the maximum number of workers to keep in memory.
 
 .. _max_tasks:
 
@@ -315,7 +324,7 @@ max_tasks
 
 Default: 100000
 
-Sets the maximum number of tasks to keep in memory
+Sets the maximum number of tasks to keep in memory.
 
 .. _natural_time:
 
@@ -359,7 +368,7 @@ Default: 0
 
 Sets the interval for saving the Flower state.
 
-Flower state includes information about workers, tasks. The state is saved periodically to ensure data persistence and recovery upon restart.
+Flower state includes information about workers and tasks. The state is saved periodically to ensure data persistence and recovery upon restart.
 
 By default, periodic saving is disabled. Flower will not automatically save its state at regular intervals.
 If you want to enable periodic state saving, set the `state_save_interval` option to a positive integer value representing the interval in milliseconds.
@@ -381,12 +390,13 @@ These headers are commonly used in proxy or load balancer configurations to pres
 tasks_columns
 ~~~~~~~~~~~~~
 
-Default: name,uuid,state,args,kwargs,result,received,started,runtime,worker
+Default: name,uuid,state,received,runtime,worker
 
-Specifies the list of comma-delimited columns to display on the `/tasks` page.
+Specifies the list of comma-delimited columns to display on the `/tasks` page, in the order
+they should appear.
 
 The `tasks_columns` option allows you to customize the columns displayed on the `/tasks` page in Flower.
-By default, the specified columns are: name, uuid, state, args, kwargs, result, received, started, runtime, and worker.
+By default, the specified columns are: name, uuid, state, received, runtime, and worker.
 
 Available columns are:
 
@@ -455,7 +465,7 @@ Sets a secret key for signing cookies.
 
 The `cookie_secret` option allows you to set a secret key used for signing cookies in Flower.
 
-By default, the `cookie_secret` option is set to 'token_urlsafe(64)', which generates a random string of length 64 characters as the secret key.
+By default, the `cookie_secret` option is set to 'token_urlsafe(64)', which generates a random string as the secret key.
 This provides a good level of security for signing cookies. If you want to specify a custom secret key, you can set the `cookie_secret` option to the desired string.
 
 .. _auth_provider:
@@ -516,7 +526,7 @@ oauth2_key
 
 Default: None
 
-Sets the OAuth 2.0 key (client ID) issued by the OAuth 2.0 provider
+Sets the OAuth 2.0 key (client ID) issued by the OAuth 2.0 provider.
 
 `oauth2_key` option should be used with :ref:`auth`, :ref:`auth_provider`, :ref:`oauth2_redirect_uri` and :ref:`oauth2_secret` options.
 
@@ -527,7 +537,7 @@ oauth2_secret
 
 Default: None
 
-Sets the OAuth 2.0 secret issued by the OAuth 2.0 provider
+Sets the OAuth 2.0 secret issued by the OAuth 2.0 provider.
 
 `oauth2_secret` option should be used with :ref:`auth`, :ref:`auth_provider`, :ref:`oauth2_redirect_uri` and :ref:`oauth2_key` options.
 
@@ -555,5 +565,5 @@ When read only mode is enabled, Flower will not allow any control operations to 
 
 Example::
 
-    $ celery flower --read_only
+    $ celery flower --read-only
 

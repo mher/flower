@@ -1,4 +1,5 @@
 import os
+from unittest.mock import patch
 
 from tests.unit import AsyncHTTPTestCase
 
@@ -6,8 +7,6 @@ from tests.unit import AsyncHTTPTestCase
 class BaseApiTestCase(AsyncHTTPTestCase):
     def setUp(self):
         super().setUp()
-        os.environ['FLOWER_UNAUTHENTICATED_API'] = 'true'
-
-    def tearDown(self):
-        super().tearDown()
-        del os.environ['FLOWER_UNAUTHENTICATED_API']
+        environment = patch.dict(os.environ, {'FLOWER_UNAUTHENTICATED_API': 'true'})
+        self.addCleanup(environment.stop)
+        environment.start()

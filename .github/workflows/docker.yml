@@ -9,10 +9,22 @@ on:
   pull_request:
     branches:
       - master
+  schedule:
+    # weekly rebuild picks up base image security patches
+    - cron: '30 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
 
@@ -43,3 +55,49 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  rebuild-release:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - id: release
+        run: |
+          tag=$(git tag --list 'v*' | grep -Ex 'v[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n1)
+          version=${tag#v}
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "major_minor=$(echo "$version" | cut -d. -f1,2)" >> "$GITHUB_OUTPUT"
+          echo "revision=$(git rev-parse "$tag^{commit}")" >> "$GITHUB_OUTPUT"
+          echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          # older Dockerfiles install an unpinned flower from PyPI, so build with the current one
+          git archive --prefix=release/ "$tag" | tar -x
+          cp .dockerignore release/
+
+      - uses: docker/setup-qemu-action@v4
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: release
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            mher/flower:latest
+            mher/flower:${{ steps.release.outputs.version }}
+            mher/flower:${{ steps.release.outputs.major_minor }}
+          labels: |
+            org.opencontainers.image.title=flower
+            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.release.outputs.revision }}
+            org.opencontainers.image.created=${{ steps.release.outputs.created }}

@@ -1,12 +1,19 @@
+import ssl
 import unittest
-from unittest.mock import MagicMock
+from typing import ClassVar
+from unittest import mock
 
 from flower.utils import broker
-from flower.utils.broker import (Broker, RabbitMQ, Redis, RedisBase,
-                                 RedisSentinel, RedisSocket, RedisSsl)
-
-broker.requests = MagicMock()
-broker.redis = MagicMock()
+from flower.utils.broker import (
+    Broker,
+    RabbitMQ,
+    Redis,
+    RedisBase,
+    RedisSentinel,
+    RedisSocket,
+    RedisSsl,
+    validate_broker_api,
+)
 
 
 class TestRabbitMQ(unittest.TestCase):
@@ -19,7 +26,7 @@ class TestRabbitMQ(unittest.TestCase):
     def test_url(self):
         b = RabbitMQ('amqp://user:pass@host:10000/vhost', '')
         self.assertEqual('host', b.host)
-        self.assertEqual(10000, b.port)
+        self.assertEqual(15672, b.port)
         self.assertEqual('vhost', b.vhost)
         self.assertEqual('user', b.username)
         self.assertEqual('pass', b.password)
@@ -27,7 +34,7 @@ class TestRabbitMQ(unittest.TestCase):
     def test_url_vhost_slash(self):
         b = RabbitMQ('amqp://user:pass@host:10000//', '')
         self.assertEqual('host', b.host)
-        self.assertEqual(10000, b.port)
+        self.assertEqual(15672, b.port)
         self.assertEqual('/', b.vhost)
         self.assertEqual('user', b.username)
         self.assertEqual('pass', b.password)
@@ -50,13 +57,48 @@ class TestRabbitMQ(unittest.TestCase):
             self.assertEqual(None, b.username)
             self.assertEqual(None, b.password)
 
+    def test_http_api_ignores_amqp_port(self):
+        b = RabbitMQ('amqp://user:pass@host:5672/vhost', None)
+        self.assertEqual('http://user:pass@host:15672/api/vhost', b.http_api)
+
     def test_invalid_http_api(self):
-        with self.assertLogs('', level='ERROR') as cm:
-            RabbitMQ('amqp://user:pass@host:10000/vhost', http_api='ftp://')
-            self.assertEqual(['ERROR:flower.utils.broker:Invalid broker api url: ftp://'], cm.output)
+        for http_api in ['ftp://guest:guest@host:15672/api/', 'http://']:
+            with self.assertRaises(ValueError):
+                validate_broker_api(http_api)
+
+    def test_valid_http_api(self):
+        for http_api in ['http://guest:guest@host:15672/api/',
+                         'https://rabbit.internal:15671/api/']:
+            validate_broker_api(http_api)
+
+    def test_invalid_http_api_does_not_leak_password(self):
+        with self.assertRaises(ValueError) as cm:
+            validate_broker_api('ftp://guest:s3cr3t@host:15672/api/')
+        self.assertNotIn('s3cr3t', str(cm.exception))
+
+    def test_verifies_cert_by_default(self):
+        b = RabbitMQ('amqps://user:pass@host:15672/vhost', '')
+        self.assertEqual({'validate_cert': True}, b._tls_kwargs())
+
+    def test_honors_broker_use_ssl_ca_certs(self):
+        b = RabbitMQ('amqps://user:pass@host:15672/vhost', '',
+                     broker_use_ssl={'ssl_ca_certs': '/etc/ca.pem'})
+        self.assertEqual(
+            {'validate_cert': True, 'ca_certs': '/etc/ca.pem'}, b._tls_kwargs())
+
+    def test_broker_use_ssl_cert_none_disables_verification(self):
+        b = RabbitMQ('amqps://user:pass@host:15672/vhost', '',
+                     broker_use_ssl={'ssl_cert_reqs': ssl.CERT_NONE,
+                                     'ssl_ca_certs': '/etc/ca.pem'})
+        self.assertEqual({'validate_cert': False}, b._tls_kwargs())
 
 
 class TestRedis(unittest.TestCase):
+    def test_invalid_database_error_message(self):
+        with self.assertRaises(ValueError) as cm:
+            Broker('redis://localhost:6379/notanint')
+        self.assertIn('notanint', str(cm.exception))
+
     def test_init(self):
         b = Broker('redis://localhost:6379/0')
         self.assertFalse(isinstance(b, RabbitMQ))
@@ -192,6 +234,12 @@ class TestRedisQueues(unittest.IsolatedAsyncioTestCase):
 
 
 class TestRedisSentinel(unittest.TestCase):
+    def test_invalid_database_error_message(self):
+        options = {'master_name': 'my_redis_master'}
+        with self.assertRaises(ValueError) as cm:
+            Broker('sentinel://localhost:26379/notanint', broker_options=options)
+        self.assertIn('notanint', str(cm.exception))
+
     def test_init(self):
         options = {'master_name': 'my_redis_master'}
         b = Broker('sentinel://localhost:26379/', broker_options=options)
@@ -230,10 +278,24 @@ class TestRedisSentinel(unittest.TestCase):
         self.assertEqual(5, b.vhost)
         self.assertEqual('pass', b.password)
 
+    def test_master_client_authenticates_with_url_user(self):
+        options = {'master_name': 'my_redis_master'}
+        with mock.patch.object(broker.redis.sentinel, 'Sentinel') as sentinel:
+            Broker('sentinel://app:secret@host:26379/0', broker_options=options)
+        kwargs = sentinel.call_args.kwargs
+        self.assertEqual('app', kwargs['username'])
+        self.assertEqual('secret', kwargs['password'])
+
+    def test_master_client_without_user_in_url(self):
+        options = {'master_name': 'my_redis_master'}
+        with mock.patch.object(broker.redis.sentinel, 'Sentinel') as sentinel:
+            Broker('sentinel://:secret@host:26379/0', broker_options=options)
+        self.assertFalse(sentinel.call_args.kwargs['username'])
+
 
 class TestRedisSsl(unittest.TestCase):
 
-    BROKER_USE_SSL_OPTIONS = {
+    BROKER_USE_SSL_OPTIONS: ClassVar[dict] = {
         'ssl_cert_reqs': 0,
         'ssl_certfile': '/path/to/ssl_cert_file',
         'ssl_keyfile': '/path/to/ssl_key_file',

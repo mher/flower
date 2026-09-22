@@ -15,14 +15,14 @@ class HtmlTableParser(HTMLParser):
         if tag == 'table':
             self.inTable = True
         if self.inTable:
-            self.table += '<%s' % tag
-            for attr in attrs:
-                self.table += ' %s="%s"' % attr
+            self.table += f'<{tag}'
+            for name, value in attrs:
+                self.table += f' {name}="{value}"'
             self.table += '>'
 
     def handle_endtag(self, tag):
         if self.inTable:
-            self.table += '</%s>' % tag
+            self.table += f'</{tag}>'
             if tag == 'table':
                 self.inTable = False
 
@@ -45,7 +45,7 @@ class HtmlTableParser(HTMLParser):
         for r in rows:
             if r.attrib.get('id') == row_id:
                 cells = r.findall('td')
-                return list(map(lambda x: getattr(x, 'text'), cells))
+                return [cell.text for cell in cells]
 
 
 def task_succeeded_events(worker, id=None, name=None, runtime=0.1234, retries=0, eta=None):

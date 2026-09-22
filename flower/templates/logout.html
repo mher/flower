@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Logged out · Flower{% end %}
+
+{% block container %}
+<div class="page-section">
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">Session</p>
+      <h1 class="h4 mb-0">You have been logged out</h1>
+      <p class="page-description">Your Flower session has ended.</p>
+    </div>
+  </header>
+  <a class="btn btn-primary" href="{{ reverse_url('main') }}">Log in again</a>
+</div>
+{% end %}

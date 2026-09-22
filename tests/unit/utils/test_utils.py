@@ -44,13 +44,14 @@ class TestAbsPath(unittest.TestCase):
     def test_absolute_path(self):
         self.assertEqual(abs_path('/home/user/file.txt'), '/home/user/file.txt')
 
-    @unittest.skip
     def test_relative_path(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             original_dir = os.getcwd()
             try:
                 os.chdir(tmp_dir)
-                path = abs_path('file.txt')
+                with patch.dict(os.environ):
+                    os.environ.pop('PWD', None)
+                    path = abs_path('file.txt')
                 expected = os.path.join(tmp_dir, 'file.txt')
                 self.assertEqual(path, expected)
             finally:

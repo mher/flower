@@ -20,7 +20,8 @@ class AsyncHTTPTestCase(tornado.testing.AsyncHTTPTestCase):
     def get_app(self, capp=None):
         if not capp:
             capp = self._get_celery_app()
-        events = Events(capp, IOLoop.current())
+        events = Events(capp, IOLoop.current(),
+                        max_tasks_in_memory=options.max_tasks)
         app = Flower(capp=capp, events=events,
                      options=options, handlers=handlers, **settings)
         return app

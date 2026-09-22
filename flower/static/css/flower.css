@@ -444,7 +444,20 @@ body.app-body {
 
 .worker-tab-content .table > :not(caption) > * > * {
   padding: 0.75rem;
+  overflow-wrap: break-word;
+}
+
+.worker-tab-content .table .worker-long-value {
+  min-width: 12rem;
   overflow-wrap: anywhere;
+}
+
+.worker-tab-content .worker-task-args {
+  display: block;
+  max-width: 24rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .worker-tab-content .table caption {
@@ -856,6 +869,19 @@ body.app-body {
   text-decoration: none;
 }
 
+.task-uuid-full {
+  white-space: nowrap;
+}
+
+.task-uuid-short {
+  display: none;
+}
+
+.value-missing,
+.workers-table tr.worker-offline > td {
+  color: var(--flower-text-muted);
+}
+
 .workers-table a:hover,
 .tasks-table a:hover {
   text-decoration: underline;
@@ -885,8 +911,29 @@ body.app-body {
   font-variant-numeric: tabular-nums;
 }
 
+.workers-page .dataTables_scroll,
 .tasks-page .dataTables_scroll {
   border-top: 1px solid var(--bs-border-color);
+}
+
+.tasks-page .dt-footer {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 0.875rem 1rem;
+}
+
+.tasks-page .dt-footer .dataTables_length,
+.tasks-page .dt-footer .dataTables_info,
+.tasks-page .dt-footer .dataTables_paginate {
+  float: none;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.tasks-page .dt-footer .dataTables_info {
+  flex: 1 1 auto;
 }
 
 .broker-table td:first-child {
@@ -955,6 +1002,18 @@ div.dataTables_wrapper .dataTables_filter input {
     align-items: flex-start;
   }
 
+  .workers-table {
+    min-width: 44rem;
+  }
+
+  .task-uuid-full {
+    display: none;
+  }
+
+  .task-uuid-short {
+    display: inline;
+  }
+
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
@@ -998,6 +1057,17 @@ div.dataTables_wrapper .dataTables_filter input {
   .tasks-page .dataTables_info,
   .tasks-page .dataTables_paginate {
     float: none;
+    text-align: center;
+  }
+
+  .tasks-page .dt-footer {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.5rem;
+  }
+
+  .tasks-page .dt-footer .dataTables_info {
+    flex: 1 1 100%;
     text-align: center;
   }
 

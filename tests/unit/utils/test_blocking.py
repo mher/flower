@@ -39,9 +39,11 @@ class BlockingOperationRunnerTests(AsyncTestCase):
         def fail():
             raise OperationalError('broker is down')
 
-        with self.assertLogs('flower.utils.blocking', level='WARNING'):
-            with self.assertRaises(HTTPError) as raised:
-                await runner.run('test.operation', 'test-target', fail)
+        with (
+            self.assertLogs('flower.utils.blocking', level='WARNING'),
+            self.assertRaises(HTTPError) as raised,
+        ):
+            await runner.run('test.operation', 'test-target', fail)
 
         self.assertEqual(503, raised.exception.status_code)
 
@@ -55,11 +57,13 @@ class BlockingOperationRunnerTests(AsyncTestCase):
         def fail():
             raise BackendConnectionError('backend is down')
 
-        with self.assertLogs('flower.utils.blocking', level='WARNING'):
-            with self.assertRaises(HTTPError) as raised:
-                await runner.run(
-                    'test.operation', 'test-target', fail,
-                    connection_errors=(BackendConnectionError,))
+        with (
+            self.assertLogs('flower.utils.blocking', level='WARNING'),
+            self.assertRaises(HTTPError) as raised,
+        ):
+            await runner.run(
+                'test.operation', 'test-target', fail,
+                connection_errors=(BackendConnectionError,))
 
         self.assertEqual(503, raised.exception.status_code)
 
@@ -70,9 +74,11 @@ class BlockingOperationRunnerTests(AsyncTestCase):
         def fail():
             raise ValueError('unexpected')
 
-        with self.assertLogs('flower.utils.blocking', level='ERROR'):
-            with self.assertRaises(HTTPError) as raised:
-                await runner.run('test.operation', 'test-target', fail)
+        with (
+            self.assertLogs('flower.utils.blocking', level='ERROR'),
+            self.assertRaises(HTTPError) as raised,
+        ):
+            await runner.run('test.operation', 'test-target', fail)
 
         self.assertEqual(500, raised.exception.status_code)
         self.assertIsInstance(raised.exception.__cause__, ValueError)

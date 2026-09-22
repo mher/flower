@@ -18,10 +18,10 @@ def bugreport(app=None):
         app = app or celery.Celery()
 
 		# pylint: disable=consider-using-f-string
-        return 'flower   -> flower:%s tornado:%s humanize:%s%s' % (
+        return 'flower   -> flower:{} tornado:{} humanize:{}{}'.format(
             __version__,
             tornado.version,
-            getattr(humanize, '__version__', None) or getattr(humanize, 'VERSION'),
+            getattr(humanize, '__version__', None) or humanize.VERSION,
             app.bugreport()
         )
     except (ImportError, AttributeError) as e:

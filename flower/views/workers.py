@@ -10,10 +10,17 @@ logger = logging.getLogger(__name__)
 
 
 class WorkerView(BaseHandler):
+    list_limit = 50
+
     @web.authenticated
     async def get(self, name):
         try:
-            self.application.update_workers(workername=name)
+            update = self.application.update_workers(workername=name)
+            # wait for inspection only when the cache lacks something this page shows
+            # cached workers render immediately and refresh in the background
+            cached = self.application.workers.get(name, {})
+            if any(method not in cached for method in self.application.inspector.inspect_methods):
+                await update
         except Exception as e:
             logger.error(e)
 
@@ -24,9 +31,16 @@ class WorkerView(BaseHandler):
         if 'stats' not in worker:
             raise web.HTTPError(404, f"Unable to get stats for '{name}' worker")
 
+        worker = dict(worker, name=name)
+        # Scheduled and revoked lists can hold thousands of entries, show the head
+        limit = self.get_argument('limit', self.list_limit, type=int)
+        for key, value in worker.items():
+            if isinstance(value, list):
+                worker[key] = value[:limit]
+
         self.render(
             "worker.html",
-            worker=dict(worker, name=name),
+            worker=worker,
             read_only=self.application.options.read_only,
         )
 
@@ -42,8 +56,8 @@ class WorkersView(BaseHandler):
         if refresh:
             try:
                 self.application.update_workers()
-            except Exception as e:
-                logger.exception('Failed to update workers: %s', e)
+            except Exception:
+                logger.exception('Failed to update workers')
 
         workers = {}
         for name, values in events.counter.items():
@@ -63,15 +77,16 @@ class WorkersView(BaseHandler):
                     continue
 
                 heartbeats = info.get('heartbeats', [])
-                last_heartbeat = int(max(heartbeats)) if heartbeats else None
-                if not last_heartbeat or timestamp - last_heartbeat > options.purge_offline_workers:
+                last_seen = max(heartbeats) if heartbeats else \
+                    getattr(events.workers[name], 'timestamp', None)
+                if not last_seen or timestamp - int(last_seen) >= options.purge_offline_workers:
                     offline_workers.append(name)
 
             for name in offline_workers:
                 workers.pop(name)
 
         if json:
-            self.write(dict(data=list(workers.values())))
+            self.write({"data": list(workers.values())})
         else:
             self.render("workers.html",
                         workers=workers,
@@ -80,20 +95,4 @@ class WorkersView(BaseHandler):
 
     @classmethod
     def _as_dict(cls, worker):
-        if hasattr(worker, '_fields'):
-            return dict((k, getattr(worker, k)) for k in worker._fields)
-        return cls._info(worker)
-
-    @classmethod
-    def _info(cls, worker):
-        _fields = ('hostname', 'pid', 'freq', 'heartbeats', 'clock',
-                   'active', 'processed', 'loadavg', 'sw_ident',
-                   'sw_ver', 'sw_sys')
-
-        def _keys():
-            for key in _fields:
-                value = getattr(worker, key, None)
-                if value is not None:
-                    yield key, value
-
-        return dict(_keys())
+        return {k: getattr(worker, k) for k in worker._fields}

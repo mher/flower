@@ -8,7 +8,6 @@ from kombu.exceptions import ConnectionError as KombuConnectionError
 from kombu.exceptions import OperationalError
 from tornado.web import HTTPError
 
-
 logger = logging.getLogger(__name__)
 
 

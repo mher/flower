@@ -1,24 +1,21 @@
-import sys
 import logging
+import sys
 import time
-
 from concurrent.futures import ThreadPoolExecutor
 from functools import cached_property
 
 import celery
 import tornado.web
-
 from tornado import ioloop
 from tornado.httpserver import HTTPServer
 from tornado.netutil import bind_sockets
 from tornado.web import url
 
-from .urls import handlers as default_handlers
 from .events import Events
 from .inspector import Inspector
 from .options import default_options
+from .urls import handlers as default_handlers
 from .utils.blocking import BlockingOperationRunner
-
 
 logger = logging.getLogger(__name__)
 
@@ -101,9 +98,9 @@ class Flower(tornado.web.Application):
     def stop(self):
         if self.started:
             self.events.stop()
-            logging.debug("Stopping executors...")
+            logger.debug("Stopping executors...")
             self.executor.shutdown(wait=False)
-            logging.debug("Stopping event loop...")
+            logger.debug("Stopping event loop...")
             self.io_loop.stop()
             self.started = False
 
@@ -147,8 +144,9 @@ class Flower(tornado.web.Application):
                 continue
             if worker.alive:
                 continue
-            if not worker.heartbeats or \
-                    now - max(worker.heartbeats) > threshold:
+            last_seen = max(worker.heartbeats) if worker.heartbeats else \
+                getattr(worker, 'timestamp', None)
+            if not last_seen or now - last_seen >= threshold:
                 offline_workers.add(worker_name)
 
         if not offline_workers:

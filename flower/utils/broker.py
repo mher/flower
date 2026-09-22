@@ -1,12 +1,10 @@
-import asyncio
 import json
 import logging
 import numbers
-import socket
-import sys
+import ssl
 from urllib.parse import quote, unquote, urljoin, urlparse
 
-from tornado import httpclient, ioloop
+from tornado import httpclient
 
 try:
     from redis import asyncio as redis
@@ -17,6 +15,16 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
+
+
+def validate_broker_api(http_api):
+    "raise ValueError if the management API url is invalid"
+    url = urlparse(http_api)
+    if url.scheme not in ('http', 'https'):
+        raise ValueError(
+            f"invalid scheme {url.scheme!r}, expected 'http' or 'https'")
+    if not url.netloc:
+        raise ValueError('no host in url')
 
 
 class BrokerBase:
@@ -37,23 +45,18 @@ class BrokerBase:
 
 
 class RabbitMQ(BrokerBase):
-    def __init__(self, broker_url, http_api, io_loop=None, **__):
+    def __init__(self, broker_url, http_api, **kwargs):
         super().__init__(broker_url)
-        self.io_loop = io_loop or ioloop.IOLoop.instance()
+        self.kwargs = kwargs
 
         self.host = self.host or 'localhost'
-        self.port = self.port or 15672
+        self.port = 15672
         self.vhost = quote(self.vhost, '') or '/' if self.vhost != '/' else self.vhost
         self.username = self.username or 'guest'
         self.password = self.password or 'guest'
 
         if not http_api:
             http_api = f"http://{self.username}:{self.password}@{self.host}:{self.port}/api/{self.vhost}"
-
-        try:
-            self.validate_http_api(http_api)
-        except ValueError:
-            logger.error("Invalid broker api url: %s", http_api)
 
         self.http_api = http_api
 
@@ -68,8 +71,8 @@ class RabbitMQ(BrokerBase):
             response = await http_client.fetch(
                 url, auth_username=username, auth_password=password,
                 connect_timeout=1.0, request_timeout=2.0,
-                validate_cert=False)
-        except (socket.error, httpclient.HTTPError) as e:
+                **self._tls_kwargs())
+        except (OSError, httpclient.HTTPError) as e:
             logger.error("RabbitMQ management API call failed: %s", e)
             return []
         finally:
@@ -80,16 +83,21 @@ class RabbitMQ(BrokerBase):
             return [x for x in info if x['name'] in names]
         response.rethrow()
 
-    @classmethod
-    def validate_http_api(cls, http_api):
-        url = urlparse(http_api)
-        if url.scheme not in ('http', 'https'):
-            raise ValueError(f"Invalid http api schema: {url.scheme}")
+    def _tls_kwargs(self):
+        "derive TLS kwargs from Celery's broker_use_ssl config"
+        broker_use_ssl = self.kwargs.get('broker_use_ssl')
+        if isinstance(broker_use_ssl, dict):
+            if broker_use_ssl.get('ssl_cert_reqs') == ssl.CERT_NONE:
+                return {'validate_cert': False}
+            ca_certs = broker_use_ssl.get('ssl_ca_certs')
+            if ca_certs:
+                return {'validate_cert': True, 'ca_certs': ca_certs}
+        return {'validate_cert': True}
 
 
 class RedisBase(BrokerBase):
     DEFAULT_SEP = '\x06\x16'
-    DEFAULT_PRIORITY_STEPS = [0, 3, 6, 9]
+    DEFAULT_PRIORITY_STEPS = (0, 3, 6, 9)
     DEFAULT_SOCKET_CONNECT_TIMEOUT = 1.0
     DEFAULT_SOCKET_TIMEOUT = 2.0
 
@@ -110,11 +118,22 @@ class RedisBase(BrokerBase):
         self.socket_timeout = broker_options.get(
             'socket_timeout', self.DEFAULT_SOCKET_TIMEOUT)
 
+    def _prepare_virtual_host(self, vhost):
+        if not isinstance(vhost, numbers.Integral):
+            if not vhost or vhost == '/':
+                vhost = 0
+            elif vhost.startswith('/'):
+                vhost = vhost[1:]
+            try:
+                vhost = int(vhost)
+            except ValueError as exc:
+                raise ValueError(f'Database is int between 0 and limit - 1, not {vhost}') from exc
+        return vhost
+
     def _q_for_pri(self, queue, pri):
         if pri not in self.priority_steps:
             raise ValueError('Priority not in priority steps')
-        # pylint: disable=consider-using-f-string
-        return '{0}{1}{2}'.format(*((queue, self.sep, pri) if pri else (queue, '', '')))
+        return f'{queue}{self.sep}{pri}' if pri else queue
 
     async def queues(self, names):
         names = list(names)
@@ -148,18 +167,6 @@ class Redis(RedisBase):
         self.vhost = self._prepare_virtual_host(self.vhost)
         self.redis = self._get_redis_client()
 
-    def _prepare_virtual_host(self, vhost):
-        if not isinstance(vhost, numbers.Integral):
-            if not vhost or vhost == '/':
-                vhost = 0
-            elif vhost.startswith('/'):
-                vhost = vhost[1:]
-            try:
-                vhost = int(vhost)
-            except ValueError as exc:
-                raise ValueError(f'Database is int between 0 and limit - 1, not {vhost}') from exc
-        return vhost
-
     def _get_redis_client_args(self):
         return {
             'host': self.host,
@@ -188,18 +195,6 @@ class RedisSentinel(RedisBase):
         self.master_name = self._prepare_master_name(broker_options)
         self.redis = self._get_redis_client(broker_options, broker_use_ssl)
 
-    def _prepare_virtual_host(self, vhost):
-        if not isinstance(vhost, numbers.Integral):
-            if not vhost or vhost == '/':
-                vhost = 0
-            elif vhost.startswith('/'):
-                vhost = vhost[1:]
-            try:
-                vhost = int(vhost)
-            except ValueError as exc:
-                raise ValueError('Database is int between 0 and limit - 1, not {vhost}') from exc
-        return vhost
-
     def _prepare_master_name(self, broker_options):
         try:
             master_name = broker_options['master_name']
@@ -215,6 +210,7 @@ class RedisSentinel(RedisBase):
             'socket_timeout', self.socket_timeout)
         sentinel_kwargs.setdefault('retry', Retry(NoBackoff(), 0))
         connection_kwargs = {
+            'username': self.username,
             'password': self.password,
             'sentinel_kwargs': sentinel_kwargs,
             'socket_connect_timeout': self.socket_connect_timeout,
@@ -292,21 +288,3 @@ class Broker:
 
     async def queues(self, names):
         raise NotImplementedError
-
-
-async def main():
-    broker_url = sys.argv[1] if len(sys.argv) > 1 else 'amqp://'
-    queue_name = sys.argv[2] if len(sys.argv) > 2 else 'celery'
-    if len(sys.argv) > 3:
-        http_api = sys.argv[3]
-    else:
-        http_api = 'http://guest:guest@localhost:15672/api/'
-
-    broker = Broker(broker_url, http_api=http_api)
-    queues = await broker.queues([queue_name])
-    if queues:
-        print(queues)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

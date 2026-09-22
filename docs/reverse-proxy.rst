@@ -3,8 +3,8 @@
 Running behind reverse proxy
 ============================
 
-To run `Flower` behind a reverse proxy, remember to set the correct `Host` 
-header to the request to make sure Flower can generate correct URLs.
+To run `Flower` behind a reverse proxy, remember to pass the correct `Host`
+header to Flower so it can generate correct URLs.
 
 The following block represents the minimal `nginx` configuration:
 
@@ -19,12 +19,12 @@ The following block represents the minimal `nginx` configuration:
         }
     }
 
-If you run Flower behind custom location, make sure :ref:`url_prefix` option
-value equals to the location path.
+If you run Flower under a custom location, make sure the :ref:`url_prefix` option
+matches the location path.
 
-You have to use either environment variable `FLOWER_URL_PREFIX=flower`
-or command parameter `--url_prefix=flower` when you run it
-via `celery`. With that being set you need the following `nginx` configuration:
+Set either the `FLOWER_URL_PREFIX=flower` environment variable
+or the `--url-prefix=flower` command line option. With that set,
+use the following `nginx` configuration:
 
 .. code-block:: nginx
 
@@ -37,12 +37,12 @@ via `celery`. With that being set you need the following `nginx` configuration:
         }
     }
 
-without `url_prefix` Flower frontend won't be able to generate
-correct static links, and without `/flower/` at the end of `proxy_pass`
-parameter, the browser will lead you to 404.
+Without `url_prefix` the Flower frontend cannot generate
+correct static links, and without the trailing `/flower/` in the `proxy_pass`
+parameter the browser ends up at a 404 page.
 
 Note that you should not expose this site to the public internet without
-any sort of authentication! If you have a `htpasswd` file with user
+any sort of authentication. If you have an `htpasswd` file with user
 credentials you can make `nginx` use this file by adding the following
 lines to the location block:
 

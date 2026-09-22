@@ -1,7 +1,7 @@
 /*jslint browser: true */
 /*global $, WebSocket, jQuery, bootstrap */
 
-var flower = (function () {
+(function () {
     "use strict";
 
     var toastContainer = document.getElementById('toast-container');
@@ -9,8 +9,20 @@ var flower = (function () {
     document.querySelectorAll('[data-flower-tooltip]').forEach(function (element) {
         var tooltip = bootstrap.Tooltip.getOrCreateInstance(element);
 
+        element.addEventListener('show.bs.tooltip', function () {
+            document.querySelectorAll('[data-flower-tooltip]').forEach(function (other) {
+                if (other !== element) {
+                    bootstrap.Tooltip.getInstance(other).hide();
+                }
+            });
+        });
+
         element.addEventListener('show.bs.dropdown', function () {
             tooltip.hide();
+            tooltip.disable();
+        });
+        element.addEventListener('hidden.bs.dropdown', function () {
+            tooltip.enable();
         });
     });
 
@@ -66,11 +78,58 @@ var flower = (function () {
         return '';
     }
 
+    function getCookie(name) {
+        var match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return match ? decodeURIComponent(match.pop()) : '';
+    }
+
+    // Send the XSRF token on state-changing requests for the server's CSRF check
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS)$/i.test(settings.type)) {
+                xhr.setRequestHeader('X-XSRFToken', getCookie('_xsrf'));
+            }
+        }
+    });
+
     //https://github.com/DataTables/DataTables/blob/1.10.11/media/js/jquery.dataTables.js#L14882
     function htmlEscapeEntities(d) {
         return typeof d === 'string' ?
             d.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') :
             d;
+    }
+
+    var MISSING_VALUE = '<span class="value-missing">\u2014</span>';
+
+    function tasksPageUrl(filters) {
+        var params = ['worker', 'state', 'name'].filter(function (key) {
+            return filters[key];
+        }).map(function (key) {
+            return key + '=' + encodeURIComponent(filters[key]);
+        });
+        return url_prefix() + '/tasks' + (params.length ? '?' + params.join('&') : '');
+    }
+
+    // Per-worker task counters link to the tasks page filtered to that worker
+    function taskCountRenderer(state) {
+        return function (data, type, full, meta) {
+            var count = data || 0;
+            if (type !== 'display' || !count) {
+                return count;
+            }
+            return '<a href="' + tasksPageUrl({worker: full.hostname, state: state}) + '">' + count.toLocaleString() + '</a>';
+        };
+    }
+
+    // DataTables writes cell values straight to innerHTML, so a column that
+    // does not build its own markup must be escaped
+    function withDefaultRenderer(columnDefs) {
+        columnDefs.forEach(function (def) {
+            if (!def.render) {
+                def.render = htmlEscapeEntities;
+            }
+        });
+        return columnDefs;
     }
 
     function workerNameLink(workerName) {
@@ -478,13 +537,23 @@ var flower = (function () {
             'Update failed';
     }
 
-    function setWorkerColumnVisibility(table, mobile) {
-        var mobileColumns = [0, 1, 2];
-
-        table.columns().every(function (index) {
-            this.visible(!mobile || mobileColumns.indexOf(index) !== -1, false);
-        });
-        table.columns.adjust().draw(false);
+    // Mirrors flower.utils.template.format_duration
+    function formatDuration(seconds) {
+        seconds = Number(seconds);
+        if (seconds < 1) {
+            return (seconds * 1000).toFixed(2) + ' ms';
+        }
+        if (seconds < 60) {
+            return seconds.toFixed(2) + ' s';
+        }
+        var total = Math.round(seconds),
+            hours = Math.floor(total / 3600),
+            minutes = Math.floor((total % 3600) / 60),
+            secs = String(total % 60).padStart(2, '0');
+        if (hours) {
+            return hours + 'h ' + String(minutes).padStart(2, '0') + 'm ' + secs + 's';
+        }
+        return minutes + 'm ' + secs + 's';
     }
 
     function format_time(timestamp) {
@@ -502,51 +571,131 @@ var flower = (function () {
         return $('#time').val().startsWith('natural-time');
     }
 
-    function isColumnVisible(name) {
-        var columns = $('#columns').val();
-        if (columns === "all")
-            return true;
-        if (columns) {
-            columns = columns.split(',').map(function (e) {
-                return e.trim();
-            });
-            return columns.indexOf(name) !== -1;
+    // Column definitions for the tasks table, keyed by column slug
+    var taskColumns = {
+        name: {
+            render: function (data, type, full, meta) {
+                // The uuid column opens the task, the name lists its siblings
+                return '<a href="' + tasksPageUrl({name: data}) + '">' + htmlEscapeEntities(data) + '</a>';
+            }
+        },
+        uuid: {
+            orderable: false,
+            className: "text-nowrap",
+            render: function (data, type, full, meta) {
+                if (type !== 'display') {
+                    return data;
+                }
+                var escapedUuid = htmlEscapeEntities(data);
+                // Mobile width shows only the first uuid block, the link keeps the full id
+                return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(data) +
+                    '" title="' + escapedUuid + '">' +
+                    '<span class="task-uuid-full">' + escapedUuid + '</span>' +
+                    '<span class="task-uuid-short">' + escapedUuid.slice(0, 8) + '</span></a>';
+            }
+        },
+        state: {
+            className: "text-center",
+            render: function (data, type, full, meta) {
+                var badge;
+                switch (data) {
+                case 'SUCCESS':
+                    badge = 'text-bg-success';
+                    break;
+                case 'FAILURE':
+                    badge = 'text-bg-danger';
+                    break;
+                case 'STARTED':
+                    badge = 'task-state-started';
+                    break;
+                case 'RETRY':
+                    badge = 'text-bg-warning';
+                    break;
+                default:
+                    badge = 'text-bg-secondary';
+                }
+                // celery reports unknown task-* events as custom states
+                return '<span class="badge ' + badge + '">' +
+                    htmlEscapeEntities(data) + '</span>';
+            }
+        },
+        args: {
+            className: "text-nowrap overflow-auto",
+            render: htmlEscapeEntities
+        },
+        kwargs: {
+            className: "text-nowrap overflow-auto",
+            render: htmlEscapeEntities
+        },
+        result: {
+            className: "text-nowrap overflow-auto",
+            render: htmlEscapeEntities
+        },
+        received: {
+            className: "text-center text-nowrap",
+            width: "1%",
+            render: function (data, type, full, meta) {
+                if (data) {
+                    if (type !== 'display') {
+                        return data;
+                    }
+                    if (usesNaturalTime()) {
+                        return format_time(data);
+                    }
+                    return '<time datetime="' + moment.unix(data).toISOString() +
+                        '" title="' + moment.unix(data).fromNow() + '">' +
+                        format_time(data) + '</time>';
+                }
+                return data;
+            }
+        },
+        started: {
+            className: "text-center text-nowrap",
+            render: function (data, type, full, meta) {
+                if (data) {
+                    return format_time(data);
+                }
+                return data;
+            }
+        },
+        runtime: {
+            className: "text-center text-nowrap",
+            render: function (data, type, full, meta) {
+                return data === null || data === undefined ? '' : formatDuration(data);
+            }
+        },
+        worker: {
+            render: function (data, type, full, meta) {
+                if (!data) {
+                    return '';
+                }
+                return type === 'display' ? workerNameLink(data) : data;
+            }
+        },
+        exchange: {},
+        routing_key: {},
+        retries: {
+            className: "text-center"
+        },
+        revoked: {
+            className: "text-center text-nowrap",
+            render: function (data, type, full, meta) {
+                if (data) {
+                    return format_time(data);
+                }
+                return data;
+            }
+        },
+        exception: {
+            className: "text-nowrap"
+        },
+        expires: {
+            className: "text-center"
+        },
+        eta: {
+            className: "text-center"
         }
-        return true;
-    }
-
-    var taskColumnNames = [
-            'name', 'uuid', 'state', 'args', 'kwargs', 'result', 'received',
-            'started', 'runtime', 'worker', 'exchange', 'routing_key',
-            'retries', 'revoked', 'exception', 'expires', 'eta'
-        ],
-        defaultTaskColumns = 'name,uuid,state,args,kwargs,result,received,started,runtime,worker',
-        desktopTaskColumns = ['name', 'uuid', 'state', 'received', 'runtime', 'worker'],
-        mobileTaskColumns = ['name', 'state', 'runtime'];
-
-    function usesDefaultTaskColumns() {
-        return ($('#columns').val() || '').replace(/\s/g, '') === defaultTaskColumns;
-    }
-
-    function shouldShowTaskColumn(name, mobile) {
-        if (!isColumnVisible(name)) {
-            return false;
-        }
-        if (usesDefaultTaskColumns()) {
-            var responsiveColumns = mobile ? mobileTaskColumns : desktopTaskColumns;
-            return responsiveColumns.indexOf(name) !== -1;
-        }
-
-        // Custom column selections take precedence over the responsive defaults.
-        return true;
-    }
-
-    function setTaskColumnVisibility(table, mobile) {
-        taskColumnNames.forEach(function (name, index) {
-            table.column(index).visible(shouldShowTaskColumn(name, mobile), false);
-        });
-        table.columns.adjust().draw(false);
-    }
+    };
 
     function updateTaskStateButtons(state) {
         $('.task-state-filter').each(function () {
@@ -612,13 +761,16 @@ var flower = (function () {
             return;
         }
 
-        var mobileWorkers = window.matchMedia('(max-width: 767.98px)'),
-            workersTable = $('#workers-table').DataTable({
+        var workersTable = $('#workers-table').DataTable({
             rowId: 'name',
+            createdRow: function (row, data) {
+                $(row).toggleClass('worker-offline', !data.status);
+            },
             searching: true,
             select: false,
             paging: true,
             lengthChange: false,
+            scrollX: true,
             scrollCollapse: true,
             pageLength: 15,
             language: {
@@ -626,7 +778,7 @@ var flower = (function () {
                 info: 'Showing _START_ to _END_ of _TOTAL_ workers',
                 infoFiltered: '(filtered from _MAX_ total workers)',
                 search: '<span class="visually-hidden">Search workers</span>',
-                searchPlaceholder: 'Search workers',
+                searchPlaceholder: 'celery@hostname or online',
                 emptyTable: 'No workers are available.',
                 zeroRecords: 'No workers match your search.'
             },
@@ -647,18 +799,17 @@ var flower = (function () {
             ],
             footerCallback: function( tfoot, data, start, end, display ) {
                 var api = this.api();
-                var columns = {2:"STARTED", 3:"", 4:"FAILURE", 5:"SUCCESS", 6:"RETRY"};
+                var columns = {2:"STARTED", 3:"", 4:"FAILURE", 5:"SUCCESS"};
                 for (const [column, state] of Object.entries(columns)) {
                     var total = api.column(column).data().reduce(sum, 0);
-                    var footer = total;
+                    var footer = total.toLocaleString();
                     if (total !== 0) {
-                        let queryParams = (state !== '' ? `?state=${state}` : '');
-                        footer = '<a href="' + url_prefix() + '/tasks' + queryParams + '">' + total + '</a>';
+                        footer = '<a href="' + tasksPageUrl({state: state}) + '">' + footer + '</a>';
                     }
                     $(api.column(column).footer()).html(footer);
                 }
             },
-            columnDefs: [{
+            columnDefs: withDefaultRenderer([{
                 targets: 0,
                 data: 'hostname',
                 type: 'natural',
@@ -682,39 +833,37 @@ var flower = (function () {
                 data: 'active',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer('STARTED')
             }, {
                 targets: 3,
                 data: 'task-received',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer()
             }, {
                 targets: 4,
                 data: 'task-failed',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer('FAILURE')
             }, {
                 targets: 5,
                 data: 'task-succeeded',
                 className: "text-center",
                 width: "10%",
-                defaultContent: 0
+                defaultContent: 0,
+                render: taskCountRenderer('SUCCESS')
             }, {
                 targets: 6,
-                data: 'task-retried',
-                className: "text-center",
-                width: "10%",
-                defaultContent: 0
-            }, {
-                targets: 7,
                 data: 'loadavg',
                 width: "18%",
                 className: "text-center text-nowrap",
                 render: function (data, type, full, meta) {
                     if (!full.status) {
-                        return 'N/A';
+                        return type === 'display' ? MISSING_VALUE : '';
                     }
                     if (Array.isArray(data)) {
                         if (type !== 'display') {
@@ -727,18 +876,16 @@ var flower = (function () {
                             });
                         return '<span class="load-average" title="System load averages over 1, 5, and 15 minutes"' +
                             ' aria-label="System load averages: ' + periods.map(function (period, index) {
-                                return period + ' ' + data[index];
+                                return period + ' ' + htmlEscapeEntities(String(data[index]));
                             }).join(', ') + '">' +
                             values.join('') + '</span>';
                     }
-                    return data || 'N/A';
+                    if (!data) {
+                        return type === 'display' ? MISSING_VALUE : '';
+                    }
+                    return htmlEscapeEntities(String(data));
                 }
-            }, ],
-        });
-
-        setWorkerColumnVisibility(workersTable, mobileWorkers.matches);
-        mobileWorkers.addEventListener('change', function (event) {
-            setWorkerColumnVisibility(workersTable, event.matches);
+            }, ]),
         });
 
         var autorefresh_interval = $.urlParam('autorefresh') || 1;
@@ -755,8 +902,16 @@ var flower = (function () {
             return;
         }
 
-        var initialState = $.urlParam('state') || '',
-            mobileTasks = window.matchMedia('(max-width: 767.98px)'),
+        var initialSearch = ['state', 'worker', 'name'].map(function (key) {
+                var value = decodeURIComponent($.urlParam(key) || '');
+                return value ? key + ':' + value : '';
+            }).filter(Boolean).join(' '),
+            // The server renders the header in the configured order
+            headerColumns = $('#tasks-table thead th').map(function () {
+                return $(this).data('column');
+            }).get(),
+            layout = headerColumns.join(','),
+            sortColumn = Math.max(headerColumns.indexOf('received'), 0),
             tasksTable = $('#tasks-table').DataTable({
             rowId: 'uuid',
             searching: true,
@@ -765,22 +920,32 @@ var flower = (function () {
             scrollCollapse: true,
             processing: true,
             serverSide: true,
-            colReorder: true,
-            lengthChange: false,
+            dom: "frt<'dt-footer'lip>",
+            lengthMenu: [15, 30, 50, 100],
             pageLength: 15,
             stateSave: true,
+            stateSaveParams: function (settings, data) {
+                data.layout = layout;
+            },
             stateLoadParams: function (settings, data) {
-                if (initialState) {
-                    data.search.search = 'state:' + initialState;
+                // Sort and visibility saved under another column layout point at the wrong columns
+                if (data.layout !== layout) {
+                    return false;
+                }
+                if (initialSearch) {
+                    data.search.search = initialSearch;
                 }
             },
+            initComplete: function () {
+                $('#tasks-table_length select').attr('aria-label', 'Tasks per page');
+            },
             language: {
-                lengthMenu: 'Show _MENU_ tasks',
+                lengthMenu: '_MENU_',
                 info: 'Showing _START_ to _END_ of _TOTAL_ tasks',
                 infoEmpty: 'No tasks to show',
                 infoFiltered: '(filtered from _MAX_ total tasks)',
                 search: '<span class="visually-hidden">Search tasks</span>',
-                searchPlaceholder: 'Search tasks',
+                searchPlaceholder: 'state:FAILURE worker:celery@hostname',
                 emptyTable: 'No tasks have been received.',
                 zeroRecords: 'No tasks match your search.'
             },
@@ -801,162 +966,14 @@ var flower = (function () {
                 }
             },
             order: [
-                [7, "desc"]
+                [sortColumn, "desc"]
             ],
             oSearch: {
-                "sSearch": initialState ? 'state:' + initialState : ''
+                "sSearch": initialSearch
             },
-            columnDefs: [{
-                targets: 0,
-                data: 'name',
-                visible: isColumnVisible('name'),
-                render: function (data, type, full, meta) {
-                    return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(full.uuid) + '">' +
-                        htmlEscapeEntities(data) + '</a>';
-                }
-            }, {
-                targets: 1,
-                data: 'uuid',
-                visible: isColumnVisible('uuid'),
-                orderable: false,
-                className: "text-nowrap",
-                render: function (data, type, full, meta) {
-                    if (type !== 'display') {
-                        return data;
-                    }
-                    var escapedUuid = htmlEscapeEntities(data);
-                    return '<a href="' + url_prefix() + '/task/' + encodeURIComponent(data) +
-                        '" title="' + escapedUuid + '">' + escapedUuid + '</a>';
-                }
-            }, {
-                targets: 2,
-                data: 'state',
-                visible: isColumnVisible('state'),
-                className: "text-center",
-                render: function (data, type, full, meta) {
-                    switch (data) {
-                    case 'SUCCESS':
-                        return '<span class="badge text-bg-success">' + data + '</span>';
-                    case 'FAILURE':
-                        return '<span class="badge text-bg-danger">' + data + '</span>';
-                    case 'STARTED':
-                        return '<span class="badge task-state-started">' + data + '</span>';
-                    case 'RETRY':
-                        return '<span class="badge text-bg-warning">' + data + '</span>';
-                    default:
-                        return '<span class="badge text-bg-secondary">' + data + '</span>';
-                    }
-                }
-            }, {
-                targets: 3,
-                data: 'args',
-                className: "text-nowrap overflow-auto",
-                visible: isColumnVisible('args'),
-                render: htmlEscapeEntities
-            }, {
-                targets: 4,
-                data: 'kwargs',
-                className: "text-nowrap overflow-auto",
-                visible: isColumnVisible('kwargs'),
-                render: htmlEscapeEntities
-            }, {
-                targets: 5,
-                data: 'result',
-                visible: isColumnVisible('result'),
-                className: "text-nowrap overflow-auto",
-                render: htmlEscapeEntities
-            }, {
-                targets: 6,
-                data: 'received',
-                className: "text-nowrap",
-                width: "1%",
-                visible: isColumnVisible('received'),
-                render: function (data, type, full, meta) {
-                    if (data) {
-                        if (type !== 'display') {
-                            return data;
-                        }
-                        if (usesNaturalTime()) {
-                            return format_time(data);
-                        }
-                        return '<time datetime="' + moment.unix(data).toISOString() +
-                            '" title="' + moment.unix(data).fromNow() + '">' +
-                            format_time(data) + '</time>';
-                    }
-                    return data;
-                }
-            }, {
-                targets: 7,
-                data: 'started',
-                className: "text-nowrap",
-                visible: isColumnVisible('started'),
-                render: function (data, type, full, meta) {
-                    if (data) {
-                        return format_time(data);
-                    }
-                    return data;
-                }
-            }, {
-                targets: 8,
-                data: 'runtime',
-                className: "text-center",
-                visible: isColumnVisible('runtime'),
-                render: function (data, type, full, meta) {
-                    return data === null || data === undefined ? '' : Number(data).toFixed(2) + ' s';
-                }
-            }, {
-                targets: 9,
-                data: 'worker',
-                visible: isColumnVisible('worker'),
-                render: function (data, type, full, meta) {
-                    if (!data) {
-                        return '';
-                    }
-                    return type === 'display' ? workerNameLink(data) : data;
-                }
-            }, {
-                targets: 10,
-                data: 'exchange',
-                visible: isColumnVisible('exchange')
-            }, {
-                targets: 11,
-                data: 'routing_key',
-                visible: isColumnVisible('routing_key')
-            }, {
-                targets: 12,
-                data: 'retries',
-                className: "text-center",
-                visible: isColumnVisible('retries')
-            }, {
-                targets: 13,
-                data: 'revoked',
-                className: "text-nowrap",
-                visible: isColumnVisible('revoked'),
-                render: function (data, type, full, meta) {
-                    if (data) {
-                        return format_time(data);
-                    }
-                    return data;
-                }
-            }, {
-                targets: 14,
-                data: 'exception',
-                className: "text-nowrap",
-                visible: isColumnVisible('exception')
-            }, {
-                targets: 15,
-                data: 'expires',
-                visible: isColumnVisible('expires')
-            }, {
-                targets: 16,
-                data: 'eta',
-                visible: isColumnVisible('eta')
-            }, ],
-        });
-
-        setTaskColumnVisibility(tasksTable, mobileTasks.matches);
-        mobileTasks.addEventListener('change', function (event) {
-            setTaskColumnVisibility(tasksTable, event.matches);
+            columns: withDefaultRenderer(headerColumns.map(function (name) {
+                return $.extend({data: name}, taskColumns[name]);
+            })),
         });
 
         updateTaskStateButtons(taskStateFromSearch(tasksTable.search()));

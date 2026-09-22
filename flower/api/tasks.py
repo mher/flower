@@ -6,13 +6,13 @@ from datetime import datetime
 from celery import states
 from celery.backends.base import DisabledBackend
 from celery.contrib.abortable import AbortableAsyncResult
+from celery.exceptions import TimeoutError as CeleryTimeoutError
 from celery.result import AsyncResult
 from tornado import web
 from tornado.escape import json_decode
 from tornado.web import HTTPError
 
 from ..utils import tasks
-from ..utils.broker import Broker
 from ..utils.search import QuerySyntaxError
 from . import BaseApiHandler
 
@@ -51,9 +51,6 @@ class BaseTaskHandler(BaseApiHandler):
     @staticmethod
     def result_state(result):
         return result.state
-
-    def write_error(self, status_code, **kwargs):
-        self.set_status(status_code)
 
     def update_response_result(self, response, result):
         if result.state == states.FAILURE:
@@ -124,8 +121,10 @@ All other top-level request body properties are passed to ``Task.apply_async``.
 
 :query args: a list of arguments
 :query kwargs: a dictionary of arguments
+:query timeout: timeout in seconds
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
+:statuscode 400: invalid options
 :statuscode 401: unauthorized request
 :statuscode 403: read only mode is enabled
 :statuscode 404: unknown task
@@ -142,6 +141,12 @@ All other top-level request body properties are passed to ``Task.apply_async``.
         except KeyError as exc:
             raise HTTPError(404, f"Unknown task '{taskname}'") from exc
 
+        timeout = options.pop('timeout', None)
+        try:
+            timeout = float(timeout) if timeout is not None else None
+        except (TypeError, ValueError) as exc:
+            raise HTTPError(400, 'Invalid timeout') from exc
+
         try:
             self.normalize_options(options)
         except ValueError as exc:
@@ -154,13 +159,17 @@ All other top-level request body properties are passed to ``Task.apply_async``.
 
         response = await self.run_blocking(
             'task.result_wait', result.task_id, self.wait_results,
-            result, response,
+            result, response, timeout,
             connection_errors=self.backend_connection_errors(result))
         self.write(response)
 
-    def wait_results(self, result, response):
+    def wait_results(self, result, response, timeout=None):
         # Wait until task finished and do not raise anything
-        result.get(propagate=False)
+        try:
+            result.get(propagate=False, timeout=timeout)
+        except CeleryTimeoutError:
+            response.update(state=result.state)
+            return response
         # Write results and finish async function
         self.update_response_result(response, result)
         if self.backend_configured(result):
@@ -286,7 +295,6 @@ All other top-level request body properties are passed to ``Celery.send_task``.
 :statuscode 200: no error
 :statuscode 401: unauthorized request
 :statuscode 403: read only mode is enabled
-:statuscode 404: unknown task
         """
         if self.application.options.read_only:
             raise web.HTTPError(403, "Read only mode is enabled")
@@ -337,11 +345,11 @@ Get a task result
 :query timeout: how long to wait, in seconds, before the operation times out
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
+:statuscode 400: invalid timeout
 :statuscode 401: unauthorized request
 :statuscode 503: result backend is not configured
         """
-        timeout = self.get_argument('timeout', None)
-        timeout = float(timeout) if timeout is not None else None
+        timeout = self.get_argument('timeout', None, type=float)
 
         result = AsyncResult(taskid)
         if not self.backend_configured(result):
@@ -354,7 +362,10 @@ Get a task result
     def read_result(self, result, timeout):
         response = {'task-id': result.id, 'state': result.state}
         if timeout:
-            result.get(timeout=timeout, propagate=False)
+            try:
+                result.get(timeout=timeout, propagate=False)
+            except CeleryTimeoutError:
+                return response
             self.update_response_result(response, result)
         elif result.ready():
             self.update_response_result(response, result)
@@ -405,7 +416,7 @@ Abort a running task
             'task.abort', taskid, result.abort,
             connection_errors=self.backend_connection_errors(result))
 
-        self.write(dict(message=f"Aborted '{taskid}'"))
+        self.write({'message': f"Aborted '{taskid}'"})
 
 
 class GetQueueLengths(BaseTaskHandler):
@@ -418,7 +429,7 @@ Return length of all active queues
 
 .. sourcecode:: http
 
-  GET /api/queues/length
+  GET /api/queues/length HTTP/1.1
   Host: localhost:5555
 
 **Example response**:
@@ -439,18 +450,9 @@ Return length of all active queues
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
 :statuscode 401: unauthorized request
-:statuscode 503: result backend is not configured
+:statuscode 404: broker is not supported
         """
-        app = self.application
-
-        http_api = None
-        if app.transport == 'amqp' and app.options.broker_api:
-            http_api = app.options.broker_api
-
-        broker = Broker(app.broker_uri_with_password,
-                        http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
-                        broker_use_ssl=self.capp.conf.broker_use_ssl)
-
+        broker = self.get_broker()
         queues = await broker.queues(self.get_active_queue_names())
         self.write({'active_queues': queues})
 
@@ -548,11 +550,11 @@ List tasks
 :query search: search task details using the task-filter query syntax
 :reqheader Authorization: optional OAuth token to authenticate
 :statuscode 200: no error
-:statuscode 400: invalid search query
+:statuscode 400: invalid query parameters
 :statuscode 401: unauthorized request
         """
         app = self.application
-        limit = self.get_argument('limit', None)
+        limit = self.get_argument('limit', None, type=int)
         offset = self.get_argument('offset', default=0, type=int)
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
@@ -560,13 +562,18 @@ List tasks
         received_start = self.get_argument('received_start', None)
         received_end = self.get_argument('received_end', None)
         sort_by = self.get_argument('sort_by', None)
-        search = self.get_argument('search', None)
+        search = self.get_argument('search', None, escape=False)
 
-        limit = limit and int(limit)
         offset = max(offset, 0)
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
+
+        if sort_by and sort_by.lstrip('-') not in tasks.SORT_KEYS:
+            raise HTTPError(
+                400,
+                f"Invalid sort_by '{sort_by}', expected one of "
+                f"{', '.join(sorted(tasks.SORT_KEYS))}")
 
         result = []
         try:
@@ -587,6 +594,10 @@ List tasks
             self.set_status(400)
             self.write({'error': str(exc)})
             return
+        except ValueError as exc:
+            raise HTTPError(
+                400, "Invalid received_start or received_end, "
+                "expected format 'YYYY-MM-DD HH:MM'") from exc
         self.write(OrderedDict(result))
 
 

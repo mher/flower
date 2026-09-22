@@ -1,9 +1,12 @@
 import json
+import re
 import time
+from urllib.parse import urlencode
 
 from celery.events import Event
 
 from flower.events import EventsState
+from flower.views.tasks import visible_task_columns
 from tests.unit import AsyncHTTPTestCase
 from tests.unit.utils import task_failed_events, task_succeeded_events
 
@@ -14,15 +17,14 @@ class TaskTest(AsyncHTTPTestCase):
         self.assertEqual(404, r.code)
         self.assertTrue('Unknown task' in str(r.body))
 
+    def test_unknown_task_error_preserves_percent(self):
+        r = self.get('/task/foo%25bar')
+        self.assertEqual(404, r.code)
+        self.assertIn('foo%bar', r.body.decode('utf-8'))
+        self.assertNotIn('foo%%bar', r.body.decode('utf-8'))
+
 
 class TaskControlsTest(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def render_task(self, *task_events):
         state = EventsState()
         state.get_or_create_worker('worker1')
@@ -31,7 +33,7 @@ class TaskControlsTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
         return self.get('/task/123')
 
     @staticmethod
@@ -43,6 +45,23 @@ class TaskControlsTest(AsyncHTTPTestCase):
     @staticmethod
     def started_event():
         return Event('task-started', uuid='123', hostname='worker1')
+
+    def test_task_without_a_name_renders(self):
+        # Flower saw this task finish but never saw it received, so it has no name
+        r = self.render_task(Event('task-started', uuid='123', hostname='worker1'))
+        self.assertEqual(200, r.code)
+        body = r.body.decode('utf-8')
+        self.assertIn('<title>Task 123 · Flower</title>', body)
+        self.assertIn('<span class="value-missing">&mdash;</span>', body)
+
+    def test_task_name_links_to_tasks_with_that_name(self):
+        r = self.render_task(self.received_event(), self.started_event())
+        self.assertEqual(200, r.code)
+        self.assertIn('<a href="/tasks?name=task1">task1</a>', str(r.body))
+
+    def test_task_page_title_has_name_and_short_id(self):
+        r = self.render_task(self.received_event(), self.started_event())
+        self.assertIn('<title>task1 123 · Flower</title>', r.body.decode('utf-8'))
 
     def test_started_task_has_terminate_button(self):
         r = self.render_task(self.received_event(), self.started_event())
@@ -68,29 +87,23 @@ class TaskControlsTest(AsyncHTTPTestCase):
 
 
 class TasksTest(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def test_no_task(self):
         r = self.get('/tasks')
         self.assertEqual(200, r.code)
         self.assertTrue('UUID' in str(r.body))
+        self.assertIn('<title>Tasks · Flower</title>', r.body.decode('utf-8'))
         self.assertNotIn('<tr id=', str(r.body))
         self.assertIn('tasks_filter.html', str(r.body))
 
     def test_invalid_search_returns_inline_error(self):
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = 'ab'
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode('utf-8'))
         self.assertEqual(200, r.code)
@@ -112,16 +125,16 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -134,6 +147,40 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('123', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
 
+    def datatable_rows(self, search):
+        params = {'draw': 1, 'start': 0, 'length': 10}
+        params['search[value]'] = search
+        params['order[0][column]'] = 0
+        params['columns[0][data]'] = 'name'
+        params['order[0][dir]'] = 'asc'
+        r = self.get('/tasks/datatable?' + urlencode(params))
+        self.assertEqual(200, r.code)
+        return json.loads(r.body.decode('utf-8'))
+
+    def test_search_with_quoted_phrase(self):
+        state = EventsState()
+        for uuid, args in (('1', ['hello world']), ('2', ['hello there'])):
+            state.event(Event(
+                'task-received', uuid=uuid, name='task1', args=args, kwargs={},
+                retries=0, eta=None, hostname='worker1', clock=int(uuid),
+                local_received=time.time()))
+        self._app.events.state = state
+
+        table = self.datatable_rows('args:"hello world"')
+        self.assertEqual(['1'], [task['uuid'] for task in table['data']])
+
+    def test_search_with_special_characters(self):
+        state = EventsState()
+        for uuid, args in (('1', ['<order>']), ('2', ['order'])):
+            state.event(Event(
+                'task-received', uuid=uuid, name='task1', args=args, kwargs={},
+                retries=0, eta=None, hostname='worker1', clock=int(uuid),
+                local_received=time.time()))
+        self._app.events.state = state
+
+        table = self.datatable_rows('args:<order>')
+        self.assertEqual(['1'], [task['uuid'] for task in table['data']])
+
     def test_search_task_with_list_args(self):
         state = EventsState()
         event = Event(
@@ -141,16 +188,16 @@ class TasksTest(AsyncHTTPTestCase):
             args=['needle', 2], kwargs={}, retries=0, eta=None,
             hostname='worker1', clock=1, local_received=time.time())
         state.event(event)
-        self.app.events.state = state
+        self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = 'needle'
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode('utf-8'))
         self.assertEqual(200, r.code)
@@ -168,16 +215,16 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -206,16 +253,16 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'runtime'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -254,16 +301,16 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'runtime'
         params['order[0][dir]'] = 'asc'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -295,9 +342,9 @@ class TasksTest(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
-        params = dict(draw=1, start=0, length=10)
+        params = {'draw': 1, 'start': 0, 'length': 10}
         params['search[value]'] = ''
         params['order[0][column]'] = 0
         params['columns[0][data]'] = 'name'
@@ -306,7 +353,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['length'] = '1'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -324,7 +371,7 @@ class TasksTest(AsyncHTTPTestCase):
         params['length'] = '1'
 
         r = self.get('/tasks/datatable?' + '&'.join(
-            map(lambda x: '%s=%s' % x, params.items())))
+            '{}={}'.format(*x) for x in params.items()))
 
         table = json.loads(r.body.decode("utf-8"))
         self.assertEqual(200, r.code)
@@ -337,3 +384,26 @@ class TasksTest(AsyncHTTPTestCase):
         self.assertEqual('task2', tasks[0]['name'])
         self.assertEqual('456', tasks[0]['uuid'])
         self.assertEqual('worker1', tasks[0]['worker'])
+
+
+class TaskColumnsTest(AsyncHTTPTestCase):
+    def header_columns(self):
+        r = self.get('/tasks')
+        self.assertEqual(200, r.code)
+        return re.findall(r'<th data-column="(\w+)"', r.body.decode('utf-8'))
+
+    def test_listed_columns_keep_the_given_order(self):
+        self.assertEqual([('worker', 'Worker'), ('name', 'Name'), ('state', 'State')],
+                         visible_task_columns('worker,name,state'))
+
+    def test_unknown_columns_are_dropped(self):
+        self.assertEqual([('uuid', 'UUID'), ('name', 'Name')],
+                         visible_task_columns(' uuid, bogus,name'))
+
+    def test_header_renders_the_selected_columns_in_order(self):
+        with self.mock_option('tasks_columns', 'worker,name,state'):
+            self.assertEqual(['worker', 'name', 'state'], self.header_columns())
+
+    def test_default_header(self):
+        self.assertEqual(['name', 'uuid', 'state', 'received', 'runtime', 'worker'],
+                         self.header_columns())

@@ -1,4 +1,5 @@
 import os
+from unittest import TestCase
 from unittest.mock import patch
 
 from tornado.web import url
@@ -46,20 +47,23 @@ class URLPrefixTests(AsyncHTTPTestCase):
         self.assertEqual(404, r.code)
 
 
-class RewriteHandlerTests(AsyncHTTPTestCase):
+class RewriteHandlerTests(TestCase):
     def target(self):
         return None
 
     def test_url_rewrite_using_URLSpec(self):
-        old_handler = url(r"/", self.target, name='test')
+        old_handler = url(r"/", self.target, {'example': 'value'}, name='test')
         new_handler = rewrite_handler(old_handler, 'test_root')
         self.assertIsInstance(new_handler, url)
         self.assertTrue(new_handler.regex.match('/test_root/'))
         self.assertFalse(new_handler.regex.match('/'))
-        self.assertFalse(new_handler.regex.match('/'))
+        self.assertIs(new_handler.handler_class, old_handler.handler_class)
+        self.assertEqual(new_handler.kwargs, {'example': 'value'})
+        self.assertEqual(new_handler.name, 'test')
 
     def test_url_rewrite_using_tuple(self):
         old_handler = (r"/", self.target)
         new_handler = rewrite_handler(old_handler, 'test_root')
         self.assertIsInstance(new_handler, tuple)
         self.assertEqual(new_handler[0], '/test_root/')
+        self.assertIs(new_handler[1], old_handler[1])

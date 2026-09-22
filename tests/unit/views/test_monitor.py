@@ -1,6 +1,6 @@
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from celery.events import Event
 from kombu import uuid
@@ -11,13 +11,6 @@ from tests.unit.utils import task_failed_events, task_succeeded_events
 
 
 class PrometheusTests(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def test_metrics(self):
         state = EventsState()
         worker_name = 'worker1'
@@ -32,7 +25,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
         events = dict(re.findall('flower_events_total{task="task1",type="(task-.*)",worker="worker1"} (.*)', metrics))
@@ -43,6 +36,28 @@ class PrometheusTests(AsyncHTTPTestCase):
 
         self.assertTrue(f'flower_worker_online{{worker="{worker_name}"}} 1.0' in metrics)
         self.assertTrue(f'flower_worker_number_of_currently_executing_tasks{{worker="{worker_name}"}} 1.0' in metrics)
+
+    def test_task_runtime_metric_observed_from_events(self):
+        state = EventsState()
+        worker_name = 'runtime-worker'
+        task_name = 'runtime-task'
+        state.get_or_create_worker(worker_name)
+        events = task_succeeded_events(
+            worker=worker_name, name=task_name, id='321', runtime=0.5)
+        for i, e in enumerate(events):
+            e['clock'] = i
+            e['local_received'] = time.time()
+            state.event(e)
+        self._app.events.state = state
+
+        metrics = self.get('/metrics').body.decode('utf-8')
+
+        self.assertIn(
+            f'flower_task_runtime_seconds_count{{task="{task_name}",worker="{worker_name}"}} 1.0',
+            metrics)
+        self.assertIn(
+            f'flower_task_runtime_seconds_sum{{task="{task_name}",worker="{worker_name}"}} 0.5',
+            metrics)
 
     def test_task_prefetch_time_metric(self):
         state = EventsState()
@@ -61,7 +76,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -86,7 +101,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -111,7 +126,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             if e['type'] == 'task-started':
                 e['timestamp'] = task_started
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -126,13 +141,13 @@ class PrometheusTests(AsyncHTTPTestCase):
         state.get_or_create_worker(worker_name)
         events = [Event('worker-online', hostname=worker_name)]
         events += task_succeeded_events(
-            worker=worker_name, name=task_name, id='567', eta=datetime.now() + timedelta(hours=4)
+            worker=worker_name, name=task_name, id='567', eta=datetime.now(timezone.utc) + timedelta(hours=4)
         )
         for i, e in enumerate(events):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -149,7 +164,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -170,8 +185,8 @@ class PrometheusTests(AsyncHTTPTestCase):
         state.metrics.prefetch_time.labels(worker_name, task_name).set(1)
         state.metrics.number_of_prefetched_tasks.labels(
             worker_name, task_name).set(1)
-        self.app.events.state = state
-        self.app.inspector.workers[worker_name] = {'stats': {}}
+        self._app.events.state = state
+        self._app.inspector.workers[worker_name] = {'stats': {}}
 
         self.assertFalse(state.workers[worker_name].alive)
         with self.mock_option('purge_offline_workers', 60):
@@ -182,7 +197,7 @@ class PrometheusTests(AsyncHTTPTestCase):
         self.assertNotIn(worker_name, next_metrics)
         self.assertIn(worker_name, state.counter)
         self.assertIn(worker_name, state.workers)
-        self.assertIn(worker_name, self.app.inspector.workers)
+        self.assertIn(worker_name, self._app.inspector.workers)
 
     def test_metrics_keep_live_worker(self):
         state = EventsState()
@@ -192,8 +207,8 @@ class PrometheusTests(AsyncHTTPTestCase):
             'worker-heartbeat', hostname=worker_name,
             timestamp=timestamp, local_received=timestamp,
             freq=2, active=1))
-        self.app.events.state = state
-        self.app.inspector.workers[worker_name] = {'stats': {}}
+        self._app.events.state = state
+        self._app.inspector.workers[worker_name] = {'stats': {}}
 
         with self.mock_option('purge_offline_workers', 60):
             metrics = self.get('/metrics').body.decode('utf-8')
@@ -202,7 +217,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             f'flower_worker_online{{worker="{worker_name}"}} 1.0', metrics)
         self.assertIn(worker_name, state.counter)
         self.assertIn(worker_name, state.workers)
-        self.assertIn(worker_name, self.app.inspector.workers)
+        self.assertIn(worker_name, self._app.inspector.workers)
 
     def test_metrics_purge_worker_without_heartbeat_metric(self):
         state = EventsState()
@@ -212,7 +227,7 @@ class PrometheusTests(AsyncHTTPTestCase):
         state.counter[worker_name]['task-succeeded'] += 1
         state.metrics.events.labels(
             worker_name, 'task-succeeded', task_name).inc()
-        self.app.events.state = state
+        self._app.events.state = state
 
         with self.mock_option('purge_offline_workers', 60):
             metrics = self.get('/metrics').body.decode('utf-8')
@@ -253,7 +268,7 @@ class PrometheusTests(AsyncHTTPTestCase):
             e['clock'] = i
             e['local_received'] = time.time()
             state.event(e)
-        self.app.events.state = state
+        self._app.events.state = state
 
         metrics = self.get('/metrics').body.decode('utf-8')
 
@@ -261,15 +276,44 @@ class PrometheusTests(AsyncHTTPTestCase):
             f'flower_worker_prefetched_tasks{{task="{task_name}",worker="{worker_name}"}} 1.0' in metrics
         )
 
+    def gauge_after(self, *events):
+        # metrics are process-wide, a fresh task name keeps each test's labels apart
+        task_name = 'task-' + uuid()
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        received = Event('task-received', uuid='1', name=task_name, args='()', kwargs='{}',
+                         retries=0, eta=None, hostname='worker1')
+        for i, event in enumerate((received, *events)):
+            event['clock'] = i
+            event['local_received'] = time.time()
+            state.event(event)
+        self._app.events.state = state
+        metrics = self.get('/metrics').body.decode('utf-8')
+        line = next(l for l in metrics.splitlines()
+                    if l.startswith(f'flower_worker_prefetched_tasks{{task="{task_name}",worker="worker1"}}'))
+        return float(line.split()[-1])
+
+    def test_received_task_counts_as_prefetched(self):
+        self.assertEqual(1.0, self.gauge_after())
+
+    def test_started_task_leaves_the_prefetch_queue(self):
+        self.assertEqual(0.0, self.gauge_after(Event('task-started', uuid='1', hostname='worker1')))
+
+    def test_task_revoked_before_start_leaves_the_prefetch_queue(self):
+        self.assertEqual(0.0, self.gauge_after(
+            Event('task-revoked', uuid='1', hostname='worker1', terminated=False, expired=True)))
+
+    def test_task_rejected_before_start_leaves_the_prefetch_queue(self):
+        self.assertEqual(0.0, self.gauge_after(
+            Event('task-rejected', uuid='1', hostname='worker1', requeue=False)))
+
+    def test_task_revoked_after_start_is_not_counted_twice(self):
+        self.assertEqual(0.0, self.gauge_after(
+            Event('task-started', uuid='1', hostname='worker1'),
+            Event('task-revoked', uuid='1', hostname='worker1', terminated=True, expired=False)))
+
 
 class HealthcheckTests(AsyncHTTPTestCase):
-    def setUp(self):
-        self.app = super().get_app()
-        super().setUp()
-
-    def get_app(self, capp=None):
-        return self.app
-
     def test_healthcheck_route(self):
         response = self.get('/healthcheck').body.decode('utf-8')
         self.assertEqual(response, 'OK')

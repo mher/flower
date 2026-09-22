@@ -1,0 +1,8 @@
+*
+!flower
+!requirements
+!setup.py
+!setup.cfg
+!MANIFEST.in
+!README.rst
+**/__pycache__

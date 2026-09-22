@@ -18,6 +18,8 @@ It provides real-time information about the status of Celery workers and tasks.
 Features
 --------
 
+.. features-start
+
 - Real-time monitoring using Celery Events
     - View task progress and history
     - View task details (arguments, start time, runtime, and more)
@@ -36,6 +38,10 @@ Features
 - HTTP Basic Auth, Google, Github, Gitlab and Okta OAuth
 - Prometheus integration
 - API
+
+.. features-end
+
+.. install-start
 
 Installation
 ------------
@@ -59,34 +65,36 @@ Or use the configuration of `celery application <https://docs.celeryq.dev/en/sta
 
     $ celery -A tasks.app flower
 
-By default, flower runs on port 5555, which can be modified with the `port` option ::
+By default, flower runs on port 5555, which can be modified with the `port <https://flower.readthedocs.io/en/latest/config.html#port>`_ option ::
 
     $ celery -A tasks.app flower --port=5001
 
 You can also run Flower using the docker image ::
 
-    $ docker run -v examples:/data -p 5555:5555 mher/flower celery --app=tasks.app flower
+    $ docker run -v $(pwd)/examples:/data -p 5555:5555 mher/flower celery --app=tasks.app flower
 
 In this example, Flower is using the `tasks.app` defined in the `examples/tasks.py <https://github.com/mher/flower/blob/master/examples/tasks.py>`_ file
+
+.. install-end
 
 API
 ---
 
-Flower API enables to manage the cluster via HTTP `REST API`.
+The Flower API lets you manage the cluster over HTTP.
 
-For example you can restart worker's pool by: ::
+For example you can grow a worker's pool by: ::
 
-    $ curl -X POST http://localhost:5555/api/worker/pool/restart/myworker
+    $ curl -X POST -d 'n=1' http://localhost:5555/api/worker/pool/grow/celery@$(hostname)
 
 Or call a task by: ::
 
     $ curl -X POST -d '{"args":[1,2]}' http://localhost:5555/api/task/async-apply/tasks.add
 
-Or terminate executing task by: ::
+Or terminate a running task by: ::
 
     $ curl -X POST -d 'terminate=True' http://localhost:5555/api/task/revoke/8a4da87b-e12b-4547-b89a-e92e4d1f8efd
 
-For more info checkout `API Reference`_
+For more info, see the `API Reference`_
 
 .. _API Reference: https://flower.readthedocs.io/en/latest/api.html
 

@@ -2,7 +2,6 @@ import logging
 
 from tornado import web
 
-from ..utils.broker import Broker
 from ..views import BaseHandler
 
 logger = logging.getLogger(__name__)
@@ -11,20 +10,7 @@ logger = logging.getLogger(__name__)
 class BrokerView(BaseHandler):
     @web.authenticated
     async def get(self):
-        app = self.application
-
-        http_api = None
-        if app.transport == 'amqp' and app.options.broker_api:
-            http_api = app.options.broker_api
-
-        try:
-            broker = Broker(app.broker_uri_with_password,
-                            http_api=http_api, broker_options=self.capp.conf.broker_transport_options,
-                            broker_use_ssl=self.capp.conf.broker_use_ssl)
-        except NotImplementedError as exc:
-            raise web.HTTPError(
-                404, f"'{app.transport}' broker is not supported") from exc
-
+        broker = self.get_broker()
         try:
             queues = await broker.queues(self.get_active_queue_names())
         except Exception as e:
@@ -32,5 +18,5 @@ class BrokerView(BaseHandler):
             logger.error("Unable to get queues: '%s'", e)
 
         self.render("broker.html",
-                    broker_url=app.broker_uri,
+                    broker_url=self.application.broker_uri,
                     queues=queues)

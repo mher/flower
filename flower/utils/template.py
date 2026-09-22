@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from celery import current_app
 from humanize import naturaltime
 from pytz import timezone, utc
+from tornado.escape import xhtml_escape
 
 KEYWORDS_UP = ('ssl', 'uri', 'url', 'uuid', 'eta')
 KEYWORDS_DOWN = ('args', 'kwargs')
@@ -15,9 +16,41 @@ def format_time(time, tz):
     return dt.strftime("%Y-%m-%d %H:%M:%S.%f %Z")
 
 
-def humanize(obj, type=None, length=None):
+def format_duration(seconds):
+    seconds = float(seconds)
+    if seconds < 1:
+        return f'{seconds * 1000:.2f} ms'
+    if seconds < 60:
+        return f'{seconds:.2f} s'
+    minutes, secs = divmod(round(seconds), 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours:
+        return f'{hours}h {minutes:02d}m {secs:02d}s'
+    return f'{minutes}m {secs:02d}s'
+
+
+def task_link(url, uuid):
+    uuid = xhtml_escape(str(uuid))
+    return (f'<a href="{xhtml_escape(url)}" title="{uuid}">'
+            f'<span class="task-uuid-full">{uuid}</span>'
+            f'<span class="task-uuid-short">{uuid[:8]}</span></a>')
+
+
+def format_count(value):
+    return f'{int(value or 0):,}'
+
+
+def format_value(value):
+    if value is None:
+        return '<span class="value-missing">&mdash;</span>'
+    return xhtml_escape(str(value))
+
+
+def humanize(obj, type=None):
     if obj is None:
         obj = ''
+    elif type == 'duration':
+        obj = format_duration(obj)
     elif type and type.startswith('time'):
         tz = type[len('time'):].lstrip('-')
         tz = timezone(tz) if tz else getattr(current_app, 'timezone', '') or utc
@@ -36,9 +69,6 @@ def humanize(obj, type=None, length=None):
                      lambda m: m.group(0).upper(), obj)
         if obj and obj not in KEYWORDS_DOWN:
             obj = obj[0].upper() + obj[1:]
-    elif isinstance(obj, list):
-        if all(isinstance(x, (int, float, str)) for x in obj):
-            obj = ', '.join(map(str, obj))
-    if length is not None and len(obj) > length:
-        obj = obj[:length - 4] + ' ...'
+    elif isinstance(obj, list) and all(isinstance(x, (int, float, str)) for x in obj):
+        obj = ', '.join(map(str, obj))
     return obj

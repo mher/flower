@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{ task.name or 'Task' }} {{ task.uuid[:8] }} · Flower{% end %}
+
 {% block navbar %}
   {% module Template("navbar.html", active_tab="tasks") %}
 {% end %}
@@ -9,7 +11,7 @@
   <p id="taskid" class="d-none">{{ task.uuid }}</p>
 
   <header class="detail-page-header">
-    <p class="page-eyebrow">Task detail</p>
+    <p class="page-eyebrow">Task details</p>
     <div class="detail-actions">
       {% if not read_only %}
       {% if task.state == "STARTED" %}
@@ -25,7 +27,13 @@
     <dl class="detail-list">
       <div class="detail-row task-data-row">
         <dt>Name</dt>
-        <dd class="task-name-value">{{ getattr(task, 'name', None) }}</dd>
+        <dd class="task-name-value">
+          {% if task.name %}
+          <a href="{{ reverse_url('tasks') }}?name={{ url_escape(task.name) }}">{{ task.name }}</a>
+          {% else %}
+          <span class="value-missing">&mdash;</span>
+          {% end %}
+        </dd>
       </div>
       <div class="detail-row task-data-row">
         <dt>UUID</dt>
@@ -76,6 +84,8 @@
         <dd>
           {% if name in ['sent', 'received', 'started', 'succeeded', 'retried', 'timestamp', 'failed', 'revoked'] %}
           {{ humanize(getattr(task, name, None), type='time') }}
+          {% elif name == 'runtime' %}
+          {{ humanize(getattr(task, name, None), type='duration') }}
           {% elif name == 'worker' %}
           <a href="{{ reverse_url('worker', task.worker.hostname) }}">{{ task.worker.hostname }}</a>
           {% elif name == 'traceback' %}
@@ -91,10 +101,10 @@
             <pre class="detail-code"><code>{{ getattr(task, name, None) }}</code></pre>
           </div>
           {% elif name in ['parent_id', 'root_id'] %}
-          <a href="{{ reverse_url('task', getattr(task, name, None)) }}">{{ getattr(task, name, None) }}</a>
+          {% raw task_link(reverse_url('task', getattr(task, name, None)), getattr(task, name, None)) %}
           {% elif name == 'children' %}
             {% for child in getattr(task, name, {}) %}
-            <a href="{{ reverse_url('task', child.id) }}">{{ child.id }}</a><br>
+            {% raw task_link(reverse_url('task', child.id), child.id) %}<br>
             {% end %}
           {% else %}
           {{ getattr(task, name, None) }}
