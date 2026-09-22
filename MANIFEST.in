@@ -1,5 +1,3 @@
-include AUTHORS
-include CHANGES
 include LICENSE
 include MANIFEST.in
 include README.rst
@@ -8,3 +6,5 @@ recursive-include flower/static *
 recursive-include flower/templates *
 recursive-include tests *
 recursive-include requirements *.txt
+global-exclude __pycache__/* *.py[co] .*
+include docs/_static/.keep
