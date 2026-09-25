@@ -63,11 +63,27 @@ define("natural_time", type=bool, default=False,
        help="show time in relative format")
 define("tasks_columns", type=str, default="name,uuid,state,received,runtime,worker",
        help="slugs of columns on /tasks/ page in display order, delimited by comma")
+define("workers_columns", type=str, default="name,status,active,task_received,task_failed,task_succeeded,loadavg",
+       help="slugs of columns on /workers/ page in display order, delimited by comma")
+define("worker_hosts", type=str, default=None,
+       help="comma-separated list of host names to filter/group workers on /workers/ page")
 define("auth_provider", default=None, type=str, help="auth handler class")
 define("url_prefix", type=str, help="base url prefix")
 define("task_runtime_metric_buckets", type=float, default=list(Histogram.DEFAULT_BUCKETS),
        multiple=True, help="histogram latency bucket value")
 define("read_only", type=bool, default=False,
        help="enable read only mode, disabling all operations")
+define("app_name", type=str, default="Flower",
+       help="application name/title")
+define("brand_logo", type=str, default=None,
+       help="custom brand logo URL or file path")
+define("brand_favicon", type=str, default=None,
+       help="custom brand favicon URL or file path")
+define("primary_color", type=str, default=None,
+       help="primary brand color hex or css color code")
+define("secondary_color", type=str, default=None,
+       help="secondary brand color hex or css color code")
+define("custom_css", type=str, default=None,
+       help="custom css URL or file path")
 
 default_options = options

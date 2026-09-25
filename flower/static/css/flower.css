@@ -675,7 +675,8 @@ body.app-body {
   font-variant-numeric: tabular-nums;
 }
 
-.task-state-filters {
+.task-state-filters,
+.worker-host-filters {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
@@ -683,7 +684,8 @@ body.app-body {
   scrollbar-width: thin;
 }
 
-.task-state-filter {
+.task-state-filter,
+.worker-host-filter {
   flex: 0 0 auto;
   padding: 0.45rem 0.8rem;
   color: var(--flower-text-muted);
@@ -692,14 +694,17 @@ body.app-body {
   background: var(--flower-surface);
   border: 1px solid var(--bs-border-color);
   border-radius: 999px;
+  cursor: pointer;
 }
 
-.task-state-filter:hover {
+.task-state-filter:hover,
+.worker-host-filter:hover {
   color: var(--bs-body-color);
   border-color: var(--bs-primary);
 }
 
-.task-state-filter.active {
+.task-state-filter.active,
+.worker-host-filter.active {
   color: var(--bs-primary);
   background: var(--bs-primary-bg-subtle);
   border-color: var(--bs-primary-border-subtle);

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Workers · Flower{% end %}
+{% block title %}Workers · {{ app_name }}{% end %}
 
 {% block navbar %}
 {% module Template("navbar.html", active_tab="workers")%}
@@ -37,42 +37,57 @@
     </article>
   </section>
 
+  {% if hosts %}
+  <nav class="worker-host-filters" aria-label="Filter workers by host">
+    <button class="worker-host-filter active" type="button" data-worker-host="" aria-pressed="true">All Hosts</button>
+    {% for host in hosts %}
+    <button class="worker-host-filter" type="button" data-worker-host="{{ host }}" aria-pressed="false">{{ host }}</button>
+    {% end %}
+  </nav>
+  {% end %}
+
   <section class="workers-table-card" aria-label="Workers">
     <figure class="table-responsive mb-0">
       <table id="workers-table" class="workers-table table table-hover align-middle w-100 mb-0">
       <thead>
         <tr>
-          <th>Worker</th>
-          <th class="text-center">Status</th>
-          <th class="text-center">Active</th>
-          <th class="text-center">Processed</th>
-          <th class="text-center">Failed</th>
-          <th class="text-center">Succeeded</th>
-          <th class="text-center">Load Average</th>
+          {% for name, label in columns %}
+          <th data-column="{{ name }}" class="{% if name != 'name' %}text-center{% end %}">{{ label }}</th>
+          {% end %}
         </tr>
       </thead>
       <tbody>
         {% for name, info in workers.items() %}
         <tr id="{{ url_escape(name) }}">
-          <td>{{ name }}</td>
-          <td>{{ info.get('status', None) }}</td>
-          <td>{{ format_count(info.get('active')) }}</td>
-          <td>{{ format_count(info.get('task-received')) }}</td>
-          <td>{{ format_count(info.get('task-failed')) }}</td>
-          <td>{{ format_count(info.get('task-succeeded')) }}</td>
-          <td>{% raw format_value(info.get('loadavg')) %}</td>
+          {% for col_name, _ in columns %}
+            {% if col_name == 'name' %}
+              <td>{{ name }}</td>
+            {% elif col_name == 'status' %}
+              <td class="text-center">{{ info.get('status', None) }}</td>
+            {% elif col_name == 'active' %}
+              <td class="text-center">{{ format_count(info.get('active')) }}</td>
+            {% elif col_name == 'task_received' %}
+              <td class="text-center">{{ format_count(info.get('task-received')) }}</td>
+            {% elif col_name == 'task_failed' %}
+              <td class="text-center">{{ format_count(info.get('task-failed')) }}</td>
+            {% elif col_name == 'task_succeeded' %}
+              <td class="text-center">{{ format_count(info.get('task-succeeded')) }}</td>
+            {% elif col_name == 'loadavg' %}
+              <td class="text-center">{% raw format_value(info.get('loadavg')) %}</td>
+            {% end %}
+          {% end %}
         </tr>
         {% end %}
       </tbody>
       <tfoot>
         <tr>
-          <th>Total</th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
+          {% for idx, (col_name, _) in enumerate(columns) %}
+            {% if idx == 0 %}
+              <th>Total</th>
+            {% else %}
+              <th class="text-center"></th>
+            {% end %}
+          {% end %}
         </tr>
       </tfoot>
       </table>

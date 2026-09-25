@@ -45,6 +45,36 @@ class WorkerView(BaseHandler):
         )
 
 
+# Every column the workers page can show, slug to header label
+WORKER_COLUMNS = {
+    'name': 'Worker',
+    'status': 'Status',
+    'active': 'Active',
+    'task_received': 'Processed',
+    'task_failed': 'Failed',
+    'task_succeeded': 'Succeeded',
+    'loadavg': 'Load Average',
+}
+
+COLUMN_ALIASES = {
+    'task-received': 'task_received',
+    'task-failed': 'task_failed',
+    'task-succeeded': 'task_succeeded',
+    'hostname': 'name',
+    'worker': 'name',
+}
+
+
+def visible_worker_columns(workers_columns):
+    "Slug and label of each column the workers page shows, in the order workers_columns lists them"
+    result = []
+    for raw_name in map(str.strip, workers_columns.split(',')):
+        name = COLUMN_ALIASES.get(raw_name, raw_name)
+        if name in WORKER_COLUMNS:
+            result.append((name, WORKER_COLUMNS[name]))
+    return result
+
+
 class WorkersView(BaseHandler):
     @web.authenticated
     async def get(self):
@@ -85,11 +115,20 @@ class WorkersView(BaseHandler):
             for name in offline_workers:
                 workers.pop(name)
 
+        available_hosts = sorted(set(name.split('@', 1)[1] if '@' in name else name for name in workers.keys()))
+        configured_hosts = self.application.options.worker_hosts
+        if configured_hosts:
+            hosts = [h.strip() for h in configured_hosts.split(',') if h.strip()]
+        else:
+            hosts = available_hosts if len(available_hosts) > 1 else []
+
         if json:
             self.write({"data": list(workers.values())})
         else:
             self.render("workers.html",
                         workers=workers,
+                        hosts=hosts,
+                        columns=visible_worker_columns(self.application.options.workers_columns),
                         broker=self.application.broker_uri,
                         autorefresh=1 if self.application.options.auto_refresh else 0)
 

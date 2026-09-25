@@ -58,7 +58,69 @@ class WorkersTests(AsyncHTTPTestCase):
         self.assertTrue(table.get_row('worker1'))
         self.assertEqual(['worker1', 'False', '0', '0', '0', '0', None],
                          table.get_row('worker1'))
+
+    def test_workers_columns_customization(self):
+        state = EventsState()
+        state.get_or_create_worker('worker1')
+        state.event(Event('worker-online', hostname='worker1',
+                          local_received=time.time()))
+        self._app.events.state = state
+
+        with self.mock_option('workers_columns', 'name,status,active'):
+            r = self.get('/workers')
+            self.assertEqual(200, r.code)
+            body = r.body.decode('utf-8')
+            self.assertIn('data-column="name"', body)
+            self.assertIn('data-column="status"', body)
+            self.assertIn('data-column="active"', body)
+            self.assertNotIn('data-column="loadavg"', body)
+            self.assertNotIn('data-column="task_failed"', body)
+
+            table = HtmlTableParser()
+            table.parse(str(r.body))
+            self.assertEqual(['worker1', 'True', '0'], table.get_row('worker1'))
         self.assertFalse(table.get_row('worker2'))
+
+    def test_worker_host_subtabs(self):
+        state = EventsState()
+        state.get_or_create_worker('celery@GH-HDDM23')
+        state.get_or_create_worker('worker2@server-b')
+        state.event(Event('worker-online', hostname='celery@GH-HDDM23', local_received=time.time()))
+        state.event(Event('worker-online', hostname='worker2@server-b', local_received=time.time()))
+        self._app.events.state = state
+
+        r = self.get('/workers')
+        self.assertEqual(200, r.code)
+        body = r.body.decode('utf-8')
+        self.assertIn('data-worker-host=""', body)
+        self.assertIn('data-worker-host="GH-HDDM23"', body)
+        self.assertIn('data-worker-host="server-b"', body)
+
+    def test_single_host_no_subtabs_by_default(self):
+        state = EventsState()
+        state.get_or_create_worker('celery@GH-HDDM23')
+        state.event(Event('worker-online', hostname='celery@GH-HDDM23', local_received=time.time()))
+        self._app.events.state = state
+
+        r = self.get('/workers')
+        self.assertEqual(200, r.code)
+        body = r.body.decode('utf-8')
+        self.assertNotIn('worker-host-filters', body)
+        self.assertNotIn('data-worker-host', body)
+
+    def test_configured_worker_hosts(self):
+        state = EventsState()
+        state.get_or_create_worker('celery@GH-HDDM23')
+        state.event(Event('worker-online', hostname='celery@GH-HDDM23', local_received=time.time()))
+        self._app.events.state = state
+
+        with self.mock_option('worker_hosts', 'GH-HDDM23,host-prod-1,host-prod-2'):
+            r = self.get('/workers')
+            self.assertEqual(200, r.code)
+            body = r.body.decode('utf-8')
+            self.assertIn('data-worker-host="GH-HDDM23"', body)
+            self.assertIn('data-worker-host="host-prod-1"', body)
+            self.assertIn('data-worker-host="host-prod-2"', body)
 
     def test_purge_offline_workers(self):
         state = EventsState()

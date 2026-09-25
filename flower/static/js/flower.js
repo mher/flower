@@ -761,6 +761,94 @@
             return;
         }
 
+        var headerColumns = $('#workers-table thead th').map(function () {
+                return $(this).data('column');
+            }).get(),
+            layout = headerColumns.join(','),
+            statusIdx = headerColumns.indexOf('status'),
+            columnDefsMap = {
+                'name': {
+                    data: 'hostname',
+                    type: 'natural',
+                    render: function (data, type, full, meta) {
+                        return type === 'display' ? workerNameLink(data) : data;
+                    }
+                },
+                'status': {
+                    data: 'status',
+                    className: "text-center",
+                    width: "10%",
+                    render: function (data, type, full, meta) {
+                        if (data) {
+                            return '<span class="badge bg-success">Online</span>';
+                        } else {
+                            return '<span class="badge bg-secondary">Offline</span>';
+                        }
+                    }
+                },
+                'active': {
+                    data: 'active',
+                    className: "text-center",
+                    width: "10%",
+                    defaultContent: 0,
+                    render: taskCountRenderer('STARTED')
+                },
+                'task_received': {
+                    data: 'task-received',
+                    className: "text-center",
+                    width: "10%",
+                    defaultContent: 0,
+                    render: taskCountRenderer()
+                },
+                'task_failed': {
+                    data: 'task-failed',
+                    className: "text-center",
+                    width: "10%",
+                    defaultContent: 0,
+                    render: taskCountRenderer('FAILURE')
+                },
+                'task_succeeded': {
+                    data: 'task-succeeded',
+                    className: "text-center",
+                    width: "10%",
+                    defaultContent: 0,
+                    render: taskCountRenderer('SUCCESS')
+                },
+                'loadavg': {
+                    data: 'loadavg',
+                    width: "18%",
+                    className: "text-center text-nowrap",
+                    render: function (data, type, full, meta) {
+                        if (!full.status) {
+                            return type === 'display' ? MISSING_VALUE : '';
+                        }
+                        if (Array.isArray(data)) {
+                            if (type !== 'display') {
+                                return data.join(' ');
+                            }
+                            var periods = ['1m', '5m', '15m'],
+                                values = data.slice(0, periods.length).map(function (value) {
+                                    return '<span class="load-average-value">' +
+                                        htmlEscapeEntities(String(value)) + '</span>';
+                                });
+                            return '<span class="load-average" title="System load averages over 1, 5, and 15 minutes"' +
+                                ' aria-label="System load averages: ' + periods.map(function (period, index) {
+                                    return period + ' ' + htmlEscapeEntities(String(data[index]));
+                                }).join(', ') + '">' +
+                                values.join('') + '</span>';
+                        }
+                        if (!data) {
+                            return type === 'display' ? MISSING_VALUE : '';
+                        }
+                        return htmlEscapeEntities(String(data));
+                    }
+                }
+            },
+            dynamicColumnDefs = headerColumns.map(function (colName, index) {
+                var def = columnDefsMap[colName] || { data: colName };
+                return $.extend({}, def, { targets: index });
+            });
+
         var workersTable = $('#workers-table').DataTable({
             rowId: 'name',
             createdRow: function (row, data) {
@@ -773,6 +861,15 @@
             scrollX: true,
             scrollCollapse: true,
             pageLength: 15,
+            stateSave: true,
+            stateSaveParams: function (settings, data) {
+                data.layout = layout;
+            },
+            stateLoadParams: function (settings, data) {
+                if (data.layout !== layout) {
+                    return false;
+                }
+            },
             language: {
                 lengthMenu: 'Show _MENU_ workers',
                 info: 'Showing _START_ to _END_ of _TOTAL_ workers',
@@ -795,98 +892,64 @@
                 }
             },
             order: [
-                [1, "des"]
+                [statusIdx !== -1 ? statusIdx : 0, "desc"]
             ],
             footerCallback: function( tfoot, data, start, end, display ) {
                 var api = this.api();
-                var columns = {2:"STARTED", 3:"", 4:"FAILURE", 5:"SUCCESS"};
-                for (const [column, state] of Object.entries(columns)) {
-                    var total = api.column(column).data().reduce(sum, 0);
-                    var footer = total.toLocaleString();
-                    if (total !== 0) {
-                        footer = '<a href="' + tasksPageUrl({state: state}) + '">' + footer + '</a>';
-                    }
-                    $(api.column(column).footer()).html(footer);
-                }
-            },
-            columnDefs: withDefaultRenderer([{
-                targets: 0,
-                data: 'hostname',
-                type: 'natural',
-                render: function (data, type, full, meta) {
-                    return type === 'display' ? workerNameLink(data) : data;
-                }
-            }, {
-                targets: 1,
-                data: 'status',
-                className: "text-center",
-                width: "10%",
-                render: function (data, type, full, meta) {
-                    if (data) {
-                        return '<span class="badge bg-success">Online</span>';
-                    } else {
-                        return '<span class="badge bg-secondary">Offline</span>';
-                    }
-                }
-            }, {
-                targets: 2,
-                data: 'active',
-                className: "text-center",
-                width: "10%",
-                defaultContent: 0,
-                render: taskCountRenderer('STARTED')
-            }, {
-                targets: 3,
-                data: 'task-received',
-                className: "text-center",
-                width: "10%",
-                defaultContent: 0,
-                render: taskCountRenderer()
-            }, {
-                targets: 4,
-                data: 'task-failed',
-                className: "text-center",
-                width: "10%",
-                defaultContent: 0,
-                render: taskCountRenderer('FAILURE')
-            }, {
-                targets: 5,
-                data: 'task-succeeded',
-                className: "text-center",
-                width: "10%",
-                defaultContent: 0,
-                render: taskCountRenderer('SUCCESS')
-            }, {
-                targets: 6,
-                data: 'loadavg',
-                width: "18%",
-                className: "text-center text-nowrap",
-                render: function (data, type, full, meta) {
-                    if (!full.status) {
-                        return type === 'display' ? MISSING_VALUE : '';
-                    }
-                    if (Array.isArray(data)) {
-                        if (type !== 'display') {
-                            return data.join(' ');
+                var stateMap = {
+                    'active': "STARTED",
+                    'task_received': "",
+                    'task_failed': "FAILURE",
+                    'task_succeeded': "SUCCESS"
+                };
+                headerColumns.forEach(function (colName, index) {
+                    if (stateMap.hasOwnProperty(colName)) {
+                        var state = stateMap[colName];
+                        var total = api.column(index).data().reduce(sum, 0);
+                        var footer = total.toLocaleString();
+                        if (total !== 0) {
+                            footer = '<a href="' + tasksPageUrl({state: state}) + '">' + footer + '</a>';
                         }
-                        var periods = ['1m', '5m', '15m'],
-                            values = data.slice(0, periods.length).map(function (value) {
-                                return '<span class="load-average-value">' +
-                                    htmlEscapeEntities(String(value)) + '</span>';
-                            });
-                        return '<span class="load-average" title="System load averages over 1, 5, and 15 minutes"' +
-                            ' aria-label="System load averages: ' + periods.map(function (period, index) {
-                                return period + ' ' + htmlEscapeEntities(String(data[index]));
-                            }).join(', ') + '">' +
-                            values.join('') + '</span>';
+                        $(api.column(index).footer()).html(footer);
                     }
-                    if (!data) {
-                        return type === 'display' ? MISSING_VALUE : '';
-                    }
-                    return htmlEscapeEntities(String(data));
-                }
-            }, ]),
+                });
+            },
+            columnDefs: withDefaultRenderer(dynamicColumnDefs),
         });
+
+        function updateWorkerHostButtons(selectedHost) {
+            $('.worker-host-filter').each(function () {
+                var btn = $(this),
+                    host = btn.data('worker-host') || '',
+                    isActive = String(host) === String(selectedHost || '');
+                btn.toggleClass('active', isActive).attr('aria-pressed', isActive ? 'true' : 'false');
+            });
+        }
+
+        $('.worker-host-filter').on('click', function () {
+            var host = $(this).data('worker-host') || '',
+                nameIdx = headerColumns.indexOf('name'),
+                filterPattern = host ? '(@|^)' + $.fn.dataTable.util.escapeRegex(host) + '$' : '';
+
+            if (nameIdx !== -1) {
+                workersTable.column(nameIdx).search(filterPattern, true, false).draw();
+            } else {
+                workersTable.search(filterPattern, true, false).draw();
+            }
+            updateWorkerHostButtons(host);
+        });
+
+        var initialHost = $.urlParam('host');
+        if (initialHost) {
+            var nameColIdx = headerColumns.indexOf('name'),
+                initPattern = '(@|^)' + $.fn.dataTable.util.escapeRegex(initialHost) + '$';
+            if (nameColIdx !== -1) {
+                workersTable.column(nameColIdx).search(initPattern, true, false).draw();
+            } else {
+                workersTable.search(initPattern, true, false).draw();
+            }
+            updateWorkerHostButtons(initialHost);
+        }
 
         var autorefresh_interval = $.urlParam('autorefresh') || 1;
         if (autorefresh !== 0) {
