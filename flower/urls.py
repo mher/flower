@@ -6,6 +6,7 @@ from .api import control, tasks, workers
 from .utils import gen_cookie_secret
 from .views import auth, monitor
 from .views.broker import BrokerView
+from .views.custom import CustomAssetHandler
 from .views.error import NotFoundErrorHandler
 from .views.tasks import TasksDataTable, TasksView, TaskView
 from .views.workers import WorkersView, WorkerView
@@ -55,6 +56,8 @@ handlers = [
     # Metrics
     (r"/metrics", monitor.Metrics),
     (r"/healthcheck", monitor.Healthcheck),
+    # Custom Assets
+    (r"/custom-asset/(logo|favicon|css)", CustomAssetHandler),
     # Static
     (r"/static/(.*)", StaticFileHandler,
      {"path": settings['static_path']}),

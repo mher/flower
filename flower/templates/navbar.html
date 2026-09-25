@@ -1,8 +1,8 @@
 <nav class="app-navbar navbar navbar-expand-lg sticky-top" aria-label="Primary navigation">
   <div class="container-fluid">
     <a class="app-brand navbar-brand" href="{{ reverse_url('main') }}">
-      <img src="{{ static_url('favicon.ico') }}" width="32" height="32" class="app-brand-mark" alt="">
-      <span>Flower</span>
+      <img src="{% if brand_logo %}{{ brand_logo }}{% elif brand_favicon %}{{ brand_favicon }}{% else %}{{ static_url('favicon.ico') }}{% end %}" width="32" height="32" class="app-brand-mark" alt="">
+      <span>{{ app_name }}</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#primary-navigation"
       aria-controls="primary-navigation" aria-expanded="false" aria-label="Toggle navigation">

@@ -4,12 +4,124 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Flower{% end %}</title>
-    <link rel="icon" href="{{ static_url('favicon.ico') }}">
+    <title>{% block title %}{{ app_name }}{% end %}</title>
+    <link rel="icon" href="{% if brand_favicon %}{{ brand_favicon }}{% else %}{{ static_url('favicon.ico') }}{% end %}">
     <script src="{{ static_url('js/theme.js') }}"></script>
   	<link rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}">
 	  <link rel="stylesheet" href="{{ static_url('css/datatables-1.13.4.min.css') }}">
 	  <link href="{{ static_url('css/flower.css') }}" rel="stylesheet">
+    {% if primary_color or secondary_color %}
+    <style>
+      :root {
+        {% if primary_color %}
+        --bs-primary: {{ primary_color }};
+        --bs-primary-bg-subtle: color-mix(in srgb, {{ primary_color }} 12%, transparent);
+        --bs-primary-border-subtle: color-mix(in srgb, {{ primary_color }} 28%, transparent);
+        --bs-link-color: {{ primary_color }};
+        --bs-link-hover-color: color-mix(in srgb, {{ primary_color }} 80%, black);
+        --flower-active: {{ primary_color }};
+        --brand-primary: {{ primary_color }};
+        {% end %}
+        {% if secondary_color %}
+        --bs-secondary: {{ secondary_color }};
+        --brand-secondary: {{ secondary_color }};
+        --flower-surface-subtle: color-mix(in srgb, {{ secondary_color }} 8%, #ffffff);
+        {% end %}
+      }
+
+      [data-bs-theme="dark"] {
+        {% if primary_color %}
+        --bs-primary: {{ primary_color }};
+        --bs-primary-bg-subtle: color-mix(in srgb, {{ primary_color }} 20%, transparent);
+        --bs-primary-border-subtle: color-mix(in srgb, {{ primary_color }} 40%, transparent);
+        --bs-link-color: color-mix(in srgb, {{ primary_color }} 85%, white);
+        --bs-link-hover-color: color-mix(in srgb, {{ primary_color }} 65%, white);
+        --flower-active: color-mix(in srgb, {{ primary_color }} 90%, white);
+        {% end %}
+        {% if secondary_color %}
+        --bs-secondary: {{ secondary_color }};
+        --flower-surface-subtle: color-mix(in srgb, {{ secondary_color }} 15%, #121710);
+        {% end %}
+      }
+
+      {% if primary_color %}
+      /* Primary Buttons */
+      .btn-primary {
+        --bs-btn-bg: {{ primary_color }};
+        --bs-btn-border-color: {{ primary_color }};
+        --bs-btn-hover-bg: color-mix(in srgb, {{ primary_color }} 85%, black);
+        --bs-btn-hover-border-color: color-mix(in srgb, {{ primary_color }} 85%, black);
+        --bs-btn-active-bg: color-mix(in srgb, {{ primary_color }} 75%, black);
+        --bs-btn-active-border-color: color-mix(in srgb, {{ primary_color }} 75%, black);
+      }
+
+      .btn-outline-primary {
+        --bs-btn-color: {{ primary_color }};
+        --bs-btn-border-color: {{ primary_color }};
+        --bs-btn-hover-bg: {{ primary_color }};
+        --bs-btn-hover-border-color: {{ primary_color }};
+        --bs-btn-active-bg: {{ primary_color }};
+        --bs-btn-active-border-color: {{ primary_color }};
+      }
+
+      /* Navigation & Tabs */
+      .app-nav .nav-link.active {
+        color: {{ primary_color }} !important;
+        background: color-mix(in srgb, {{ primary_color }} 14%, transparent) !important;
+      }
+
+      .worker-tabs-nav .nav-link.active {
+        color: {{ primary_color }} !important;
+        border-bottom-color: {{ primary_color }} !important;
+      }
+
+      .task-state-filter.active {
+        color: #ffffff !important;
+        background: {{ primary_color }} !important;
+        border-color: {{ primary_color }} !important;
+      }
+
+      /* Forms & Controls */
+      .form-check-input:checked {
+        background-color: {{ primary_color }};
+        border-color: {{ primary_color }};
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: color-mix(in srgb, {{ primary_color }} 60%, transparent);
+        box-shadow: 0 0 0 0.25rem color-mix(in srgb, {{ primary_color }} 25%, transparent);
+      }
+
+      /* Pagination & DataTables */
+      .page-item.active .page-link,
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background: {{ primary_color }} !important;
+        border-color: {{ primary_color }} !important;
+        color: #ffffff !important;
+      }
+
+      /* Metric card active border */
+      .metric-card-active {
+        border-color: color-mix(in srgb, {{ primary_color }} 40%, transparent);
+      }
+      .metric-card-active .metric-value {
+        color: {{ primary_color }};
+      }
+      {% end %}
+
+      {% if secondary_color %}
+      .btn-secondary {
+        --bs-btn-bg: {{ secondary_color }};
+        --bs-btn-border-color: {{ secondary_color }};
+      }
+      {% end %}
+    </style>
+    {% end %}
+    {% if custom_css %}
+    <link rel="stylesheet" href="{{ custom_css }}">
+    {% end %}
   </head>
   <body class="app-body">
     <a class="skip-link" href="#main-content">Skip to main content</a>

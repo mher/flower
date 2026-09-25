@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ worker['name'] }} · Flower{% end %}
+{% block title %}{{ worker['name'] }} · {{ app_name }}{% end %}
 
 {% block navbar %}
 {% module Template("navbar.html", active_tab="workers") %}

@@ -35,16 +35,43 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def options(self, *_, **__):
         self.set_status(204)
-        self.finish()
+    def _resolve_asset_url(self, asset, asset_type):
+        if not asset:
+            return None
+        if asset.startswith(('http://', 'https://', '//', 'data:')):
+            return asset
+        if os.path.isfile(asset):
+            prefix = getattr(self.application.options, 'url_prefix', None)
+            endpoint = f"/custom-asset/{asset_type}"
+            if prefix:
+                endpoint = f"/{prefix.strip('/')}{endpoint}"
+            return endpoint
+        if asset.startswith('/'):
+            prefix = getattr(self.application.options, 'url_prefix', None)
+            if prefix and not asset.startswith(f"/{prefix.strip('/')}/"):
+                return f"/{prefix.strip('/')}{asset}"
+            return asset
+        return asset
+
+    def get_template_namespace(self):
+        namespace = super().get_template_namespace()
+        app_options = self.application.options
+        functions = dict(inspect.getmembers(template, inspect.isfunction))
+        namespace.update(functions)
+        namespace.update(
+            url_prefix=getattr(app_options, 'url_prefix', None),
+            app_name=getattr(app_options, 'app_name', 'Flower'),
+            brand_logo=self._resolve_asset_url(getattr(app_options, 'brand_logo', None), 'logo'),
+            brand_favicon=self._resolve_asset_url(getattr(app_options, 'brand_favicon', None), 'favicon'),
+            custom_css=self._resolve_asset_url(getattr(app_options, 'custom_css', None), 'css'),
+            primary_color=getattr(app_options, 'primary_color', None),
+            secondary_color=getattr(app_options, 'secondary_color', None),
+        )
+        return namespace
 
     def render(self, *args, **kwargs):
-        app_options = self.application.options
         # Set the _xsrf cookie so the UI's AJAX calls can echo the token back
         _ = self.xsrf_token
-        functions = inspect.getmembers(template, inspect.isfunction)
-        assert not {x[0] for x in functions} & set(kwargs.keys())
-        kwargs.update(functions)
-        kwargs.update(url_prefix=app_options.url_prefix)
         super().render(*args, **kwargs)
 
     def check_xsrf_cookie(self):

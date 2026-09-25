@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ task.name or 'Task' }} {{ task.uuid[:8] }} · Flower{% end %}
+{% block title %}{{ task.name or 'Task' }} {{ task.uuid[:8] }} · {{ app_name }}{% end %}
 
 {% block navbar %}
   {% module Template("navbar.html", active_tab="tasks") %}
