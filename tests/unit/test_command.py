@@ -59,6 +59,62 @@ class TestFlowerCommand(AsyncHTTPTestCase):
             apply_options('flower', argv=['--address=foo'])
             self.assertEqual('foo', options.address)
 
+    def test_branding_options_command_line(self):
+        with self.mock_option('app_name', 'Flower'), \
+             self.mock_option('brand_logo', None), \
+             self.mock_option('brand_favicon', None), \
+             self.mock_option('primary_color', None), \
+             self.mock_option('secondary_color', None), \
+             self.mock_option('custom_css', None):
+            apply_options('flower', argv=[
+                '--app-name=CustomPlatform',
+                '--brand-logo=/path/to/logo.png',
+                '--brand-favicon=/path/to/favicon.ico',
+                '--primary-color=#123456',
+                '--secondary-color=#abcdef',
+                '--custom-css=/path/to/custom.css',
+            ])
+            self.assertEqual('CustomPlatform', options.app_name)
+            self.assertEqual('/path/to/logo.png', options.brand_logo)
+            self.assertEqual('/path/to/favicon.ico', options.brand_favicon)
+            self.assertEqual('#123456', options.primary_color)
+            self.assertEqual('#abcdef', options.secondary_color)
+            self.assertEqual('/path/to/custom.css', options.custom_css)
+
+    def test_branding_options_env_vars(self):
+        with self.mock_option('app_name', 'Flower'), \
+             self.mock_option('brand_logo', None), \
+             self.mock_option('brand_favicon', None), \
+             self.mock_option('primary_color', None), \
+             self.mock_option('secondary_color', None), \
+             self.mock_option('custom_css', None), \
+             patch.dict(os.environ, {
+                 'FLOWER_APP_NAME': 'EnvPlatform',
+                 'FLOWER_BRAND_LOGO': 'https://example.com/logo.svg',
+                 'FLOWER_BRAND_FAVICON': 'https://example.com/fav.ico',
+                 'FLOWER_PRIMARY_COLOR': '#112233',
+                 'FLOWER_SECONDARY_COLOR': '#445566',
+                 'FLOWER_CUSTOM_CSS': 'https://example.com/theme.css',
+             }):
+            apply_env_options()
+            self.assertEqual('EnvPlatform', options.app_name)
+            self.assertEqual('https://example.com/logo.svg', options.brand_logo)
+            self.assertEqual('https://example.com/fav.ico', options.brand_favicon)
+            self.assertEqual('#112233', options.primary_color)
+            self.assertEqual('#445566', options.secondary_color)
+            self.assertEqual('https://example.com/theme.css', options.custom_css)
+
+    def test_workers_columns_read_from_cmd_line(self):
+        with self.mock_option('workers_columns', 'name,status,active,task_received,task_failed,task_succeeded,loadavg'):
+            apply_options('flower', argv=['--workers-columns=name,status,active'])
+            self.assertEqual('name,status,active', options.workers_columns)
+
+    def test_workers_columns_read_from_env(self):
+        with self.mock_option('workers_columns', 'name,status,active,task_received,task_failed,task_succeeded,loadavg'), \
+                patch.dict(os.environ, {"FLOWER_WORKERS_COLUMNS": "name,status,active"}):
+            apply_env_options()
+            self.assertEqual('name,status,active', options.workers_columns)
+
     def test_invalid_broker_api_exits(self):
         for broker_api in ['ftp://guest:s3cr3t@rabbit:15672/api/', 'http://']:
             with self.mock_option('broker_api', broker_api):
@@ -238,31 +294,39 @@ class TestConfOption(unittest.TestCase):
 
     def test_empty_conf(self):
         with patch.object(options.mockable(), 'conf', None):
-            apply_options('flower', argv=['--conf=/dev/null'])
-            self.assertEqual('/dev/null', options.conf)
+            apply_options('flower', argv=[f'--conf={os.devnull}'])
+            self.assertEqual(os.devnull, options.conf)
 
     def test_conf_abs(self):
-        with (
-            tempfile.NamedTemporaryFile() as cf,
-            patch.object(options.mockable(), 'conf', cf.name),
-            patch.object(options.mockable(), 'debug', False),
-        ):
+        cf = tempfile.NamedTemporaryFile(delete=False)
+        try:
             cf.write(b'debug=True\n')
-            cf.flush()
-            apply_options('flower', argv=[f'--conf={cf.name}'])
-            self.assertEqual(cf.name, options.conf)
-            self.assertTrue(options.debug)
+            cf.close()
+            with (
+                patch.object(options.mockable(), 'conf', cf.name),
+                patch.object(options.mockable(), 'debug', False),
+            ):
+                apply_options('flower', argv=[f'--conf={cf.name}'])
+                self.assertEqual(cf.name, options.conf)
+                self.assertTrue(options.debug)
+        finally:
+            if os.path.exists(cf.name):
+                os.unlink(cf.name)
 
     def test_conf_relative(self):
-        with (
-            tempfile.NamedTemporaryFile(dir='.') as cf,
-            patch.object(options.mockable(), 'conf', cf.name),
-            patch.object(options.mockable(), 'debug', False),
-        ):
+        cf = tempfile.NamedTemporaryFile(dir='.', delete=False)
+        try:
             cf.write(b'debug=True\n')
-            cf.flush()
-            apply_options('flower', argv=[f'--conf={os.path.basename(cf.name)}'])
-            self.assertTrue(options.debug)
+            cf.close()
+            with (
+                patch.object(options.mockable(), 'conf', cf.name),
+                patch.object(options.mockable(), 'debug', False),
+            ):
+                apply_options('flower', argv=[f'--conf={os.path.basename(cf.name)}'])
+                self.assertTrue(options.debug)
+        finally:
+            if os.path.exists(cf.name):
+                os.unlink(cf.name)
 
     def test_all_options_documented(self):
         defined = set(options.group_dict(flower_options.__file__))

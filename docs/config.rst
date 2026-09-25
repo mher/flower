@@ -422,6 +422,33 @@ Example::
 
 In the above example, all available columns are displayed.
 
+.. _workers_columns:
+
+workers_columns
+~~~~~~~~~~~~~~~
+
+Default: name,status,active,task_received,task_failed,task_succeeded,loadavg
+
+Specifies the list of comma-delimited columns to display on the `/workers` page, in the order
+they should appear.
+
+The `workers_columns` option allows you to customize the columns displayed on the `/workers` page in Flower.
+By default, the specified columns are: name, status, active, task_received, task_failed, task_succeeded, and loadavg.
+
+Available columns are:
+
+  - `name`
+  - `status`
+  - `active`
+  - `task_received`
+  - `task_failed`
+  - `task_succeeded`
+  - `loadavg`
+
+Example::
+
+    $ celery flower --workers-columns='name,status,active,task_succeeded,task_failed'
+
 .. _url_prefix:
 
 url_prefix
@@ -566,4 +593,105 @@ When read only mode is enabled, Flower will not allow any control operations to 
 Example::
 
     $ celery flower --read-only
+
+
+.. _app_name:
+
+app_name
+~~~~~~~~
+
+Default: 'Flower'
+
+Sets the custom application name/title shown in navigation headers and page titles.
+
+Example::
+
+    $ celery flower --app-name='My Platform'
+
+
+.. _brand_logo:
+
+brand_logo
+~~~~~~~~~~
+
+Default: None
+
+Sets the URL or local file path of a custom logo image for the navigation bar.
+
+Example::
+
+    $ celery flower --brand-logo='/path/to/logo.svg'
+
+
+.. _brand_favicon:
+
+brand_favicon
+~~~~~~~~~~~~~
+
+Default: None
+
+Sets the URL or local file path of a custom favicon icon.
+
+Example::
+
+    $ celery flower --brand-favicon='/path/to/favicon.ico'
+
+
+.. _primary_color:
+
+primary_color
+~~~~~~~~~~~~~
+
+Default: None
+
+Sets the primary brand color (hex or CSS color string) used for primary accents, buttons, and links.
+
+Example::
+
+    $ celery flower --primary-color='#4f46e5'
+
+
+.. _secondary_color:
+
+secondary_color
+~~~~~~~~~~~~~~~
+
+Default: None
+
+Sets the secondary brand color (hex or CSS color string) used for subtle surfaces and secondary accents.
+
+Example::
+
+    $ celery flower --secondary-color='#e0e7ff'
+
+
+.. _custom_css:
+
+custom_css
+~~~~~~~~~~
+
+Default: None
+
+Sets the URL or local file path of a custom CSS stylesheet to be loaded into all pages.
+
+Example::
+
+    $ celery flower --custom-css='/path/to/custom.css'
+
+
+.. _worker_hosts:
+
+worker_hosts
+~~~~~~~~~~~~
+
+Default: None
+
+Specifies a comma-separated list of host names to show as sub-tabs/filters on the workers dashboard.
+If not specified, all unique host names found across connected workers will be displayed.
+
+Example::
+
+    $ celery flower --worker-hosts='GH-HDDM23,worker-host-1,worker-host-2'
+
+
 
