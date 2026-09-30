@@ -10,6 +10,13 @@ app = Celery("tasks",
              backend=os.environ.get('CELERY_RESULT_BACKEND', 'redis'))
 app.conf.accept_content = ['pickle', 'json', 'msgpack', 'yaml']
 app.conf.worker_send_task_events = True
+app.conf.beat_schedule = {
+    'add-every-30-seconds': {
+        'task': 'tasks.add',
+        'schedule': 30.0,
+        'args': (16, 16),
+    },
+}
 
 
 @app.task

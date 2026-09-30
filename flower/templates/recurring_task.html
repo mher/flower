@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recurring_task['name'] }} · Flower{% end %}
+
+{% block navbar %}
+  {% module Template("navbar.html", active_tab="recurring_tasks") %}
+{% end %}
+
+{% block container %}
+<div id="recurring-task-page" class="detail-page page-section">
+  <header class="detail-page-header">
+    <p class="page-eyebrow">Recurring task details</p>
+    <div class="detail-actions d-flex gap-2">
+      {% if recurring_task['task'] %}
+      <a href="{{ reverse_url('tasks') }}?name={{ url_escape(recurring_task['task']) }}" class="btn btn-outline-secondary text-nowrap" title="View all executions of this task in Tasks">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+          <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+          <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+        </svg>
+        View task history
+      </a>
+      {% end %}
+      {% if not read_only %}
+      <button class="btn btn-primary btn-run-recurring-task text-nowrap"
+              data-task="{{ recurring_task['task'] }}"
+              data-args="{{ json_encode(recurring_task['args']) }}"
+              data-kwargs="{{ json_encode(recurring_task['kwargs']) }}"
+              data-options="{{ json_encode(recurring_task['options']) }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+          <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+        </svg>
+        Run now
+      </button>
+      {% end %}
+    </div>
+  </header>
+
+  <section class="detail-card task-details-card" aria-label="Recurring task details">
+    <dl class="detail-list">
+      <div class="detail-row task-data-row">
+        <dt>Name</dt>
+        <dd class="fw-bold">{{ recurring_task['name'] }}</dd>
+      </div>
+      <div class="detail-row task-data-row">
+        <dt>Task</dt>
+        <dd>
+          {% if recurring_task['task'] %}
+          <a href="{{ reverse_url('tasks') }}?name={{ url_escape(recurring_task['task']) }}" class="task-name-link font-monospace">
+            {{ recurring_task['task'] }}
+          </a>
+          {% else %}
+          <span class="value-missing">&mdash;</span>
+          {% end %}
+        </dd>
+      </div>
+      <div class="detail-row task-data-row">
+        <dt>Schedule</dt>
+        <dd>
+          <span class="badge text-bg-light border font-monospace">{{ recurring_task['schedule'] }}</span>
+          {% if recurring_task['schedule_raw'] and recurring_task['schedule_raw'] != recurring_task['schedule'] %}
+          <span class="text-muted ms-2 small">({{ recurring_task['schedule_raw'] }})</span>
+          {% end %}
+        </dd>
+      </div>
+      <div class="detail-row detail-row-code task-data-row">
+        <dt>Arguments (args)</dt>
+        <dd><pre class="detail-code"><code>{{ json_encode(recurring_task['args']) }}</code></pre></dd>
+      </div>
+      <div class="detail-row detail-row-code task-data-row">
+        <dt>Keyword arguments (kwargs)</dt>
+        <dd><pre class="detail-code"><code>{{ json_encode(recurring_task['kwargs']) }}</code></pre></dd>
+      </div>
+      <div class="detail-row detail-row-code task-data-row">
+        <dt>Options</dt>
+        <dd><pre class="detail-code"><code>{{ json_encode(recurring_task['options']) }}</code></pre></dd>
+      </div>
+      <div class="detail-row task-data-row">
+        <dt>Last execution</dt>
+        <dd>
+          {% if recurring_task['last_execution'] %}
+          <div class="d-flex align-items-center gap-2">
+            {% if recurring_task['last_execution']['state'] == "SUCCESS" %}
+            <span class="badge text-bg-success">{{ recurring_task['last_execution']['state'] }}</span>
+            {% elif recurring_task['last_execution']['state'] == "FAILURE" %}
+            <span class="badge text-bg-danger">{{ recurring_task['last_execution']['state'] }}</span>
+            {% elif recurring_task['last_execution']['state'] == "STARTED" %}
+            <span class="badge task-state-started">{{ recurring_task['last_execution']['state'] }}</span>
+            {% elif recurring_task['last_execution']['state'] == "RETRY" %}
+            <span class="badge text-bg-warning">{{ recurring_task['last_execution']['state'] }}</span>
+            {% else %}
+            <span class="badge text-bg-secondary">{{ recurring_task['last_execution']['state'] }}</span>
+            {% end %}
+            {% raw task_link(reverse_url('task', recurring_task['last_execution']['uuid']), recurring_task['last_execution']['uuid']) %}
+            {% if recurring_task['last_execution']['received'] %}
+            <span class="text-muted ms-2 small">
+              {{ humanize(recurring_task['last_execution']['received'], type=time) }}
+            </span>
+            {% end %}
+          </div>
+          {% else %}
+          <span class="text-muted small">Not seen in current session</span>
+          {% end %}
+        </dd>
+      </div>
+      {% if recurring_task['last_execution'] and recurring_task['last_execution'].get('result') is not None %}
+      <div class="detail-row detail-row-code task-data-row">
+        <dt>Last result</dt>
+        <dd><pre class="detail-code"><code>{{ recurring_task['last_execution']['result'] }}</code></pre></dd>
+      </div>
+      {% end %}
+    </dl>
+  </section>
+</div>
+{% end %}

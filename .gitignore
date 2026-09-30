@@ -31,3 +31,4 @@ Pipfile*
 .vscode/
 data/
 .python-version
+celerybeat-schedule*
