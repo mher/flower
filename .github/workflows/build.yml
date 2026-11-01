@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.15']
         celery-version: ['5.2.*', '5.3.*', '5.4.*', '5.5.*', '5.6.*']
         tornado-version: ['6.5.7']
         exclude:
@@ -28,6 +28,14 @@ jobs:
           - python-version: '3.14'
             celery-version: '5.4.*'
           - python-version: '3.14'
+            celery-version: '5.5.*'
+          - python-version: '3.15'
+            celery-version: '5.2.*'
+          - python-version: '3.15'
+            celery-version: '5.3.*'
+          - python-version: '3.15'
+            celery-version: '5.4.*'
+          - python-version: '3.15'
             celery-version: '5.5.*'
 
     steps:
