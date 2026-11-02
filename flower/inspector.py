@@ -8,6 +8,9 @@ from kombu.exceptions import OperationalError
 
 logger = logging.getLogger(__name__)
 
+# Celery uses the same mask for the settings that it hides
+SETTING_MASK = '*' * 8
+
 
 class Inspector:
     inspect_methods = ('stats', 'active_queues', 'registered', 'scheduled',
@@ -16,10 +19,13 @@ class Inspector:
     task_inspect_methods = ('scheduled', 'active', 'reserved', 'revoked')
     max_concurrency = len(inspect_methods)
 
-    def __init__(self, io_loop, capp, timeout, max_concurrency=None):
+    def __init__(self, io_loop, capp, timeout, max_concurrency=None,
+                 masked_settings=None):
         self.io_loop = io_loop
         self.capp = capp
         self.timeout = timeout
+        self.masked_settings = frozenset(
+            name.strip().lower() for name in masked_settings or () if name.strip())
         self.workers = collections.defaultdict(dict)
         self._inspect_tasks = {}
         self._inspect_max_concurrency = (
@@ -70,10 +76,23 @@ class Inspector:
             broker = consumer.get('broker', {})
             # Temporary fix for issue #1512, until Celery sanitizes broker statistics.
             broker.pop('alternates', None)
+        elif method == 'conf' and self.masked_settings:
+            response = self._mask_settings(response)
 
         info = self.workers[workername]
         info[method] = response
         info['timestamp'] = time.time()
+
+    def _mask_settings(self, conf):
+        masked = {}
+        for name, value in conf.items():
+            if name.lower() in self.masked_settings:
+                masked[name] = SETTING_MASK
+            elif isinstance(value, dict):
+                masked[name] = self._mask_settings(value)
+            else:
+                masked[name] = value
+        return masked
 
     def _inspect(self, method, workername):
         destination = [workername] if workername else None

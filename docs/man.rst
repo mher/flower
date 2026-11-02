@@ -43,6 +43,8 @@ OPTIONS
   --inspect-timeout                inspect timeout (in milliseconds) (default
                                    *1000*)
   --keyfile                        path to SSL key file
+  --masked-worker-settings         comma-separated names of worker configuration
+                                   settings to hide
   --max-workers                    maximum number of workers to keep in memory
                                    (default *5000*)
   --max-tasks                      maximum number of tasks to keep in memory

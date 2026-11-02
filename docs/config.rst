@@ -567,3 +567,33 @@ Example::
 
     $ celery flower --read-only
 
+.. _masked_worker_settings:
+
+masked_worker_settings
+~~~~~~~~~~~~~~~~~~~~~~
+
+Default: None
+
+Hides the values of the worker configuration settings that you list.
+Use a comma-separated list of setting names.
+
+Celery hides some settings automatically, for example settings with names that contain
+`PASS`, `SECRET`, `TOKEN`, `KEY` or `API`. It also hides the passwords in broker and
+result backend URLs. Use this option to hide other settings, for example settings that
+contain credentials.
+
+Flower shows `********` in place of each hidden value. This applies to the Config tab
+of the worker page and to the `conf` data in the `/api/workers` response.
+
+Flower compares full setting names, not parts of names. The names are not case-sensitive.
+Flower also hides keys with these names inside dictionary settings.
+
+Example::
+
+    $ celery flower --masked-worker-settings=sentry_dsn,elastic_cloud_id
+
+Example of the configuration file:
+
+.. code-block:: python
+
+    masked_worker_settings = ['sentry_dsn', 'elastic_cloud_id']

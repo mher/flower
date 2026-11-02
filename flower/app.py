@@ -55,7 +55,9 @@ class Flower(tornado.web.Application):
         self.io_loop.set_default_executor(self.executor)
         self.blocking_runner = BlockingOperationRunner(self.executor)
 
-        self.inspector = Inspector(self.io_loop, self.capp, self.options.inspect_timeout / 1000.0)
+        self.inspector = Inspector(
+            self.io_loop, self.capp, self.options.inspect_timeout / 1000.0,
+            masked_settings=self.options.masked_worker_settings)
 
         self.events = events or Events(
             self.capp,
