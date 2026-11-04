@@ -2,11 +2,12 @@ import os
 
 from tornado.web import StaticFileHandler, url
 
-from .api import control, tasks, workers
+from .api import control, recurring_tasks, tasks, workers
 from .utils import gen_cookie_secret
 from .views import auth, monitor
 from .views.broker import BrokerView
 from .views.error import NotFoundErrorHandler
+from .views.recurring_tasks import RecurringTasksView, RecurringTaskView
 from .views.tasks import TasksDataTable, TasksView, TaskView
 from .views.workers import WorkersView, WorkerView
 
@@ -29,6 +30,13 @@ handlers = [
     url(r"/tasks", TasksView, name='tasks'),
     url(r"/tasks/datatable", TasksDataTable),
     url(r"/broker", BrokerView, name='broker'),
+    url(r"/recurring-tasks", RecurringTasksView, name='recurring_tasks'),
+    url(r"/recurring_tasks", RecurringTasksView, name='recurring_tasks_alias'),
+    url(r"/recurring-task/(.+)", RecurringTaskView, name='recurring_task'),
+    url(r"/recurring_task/(.+)", RecurringTaskView, name='recurring_task_alias'),
+    # Recurring Tasks API
+    (r"/api/recurring-tasks", recurring_tasks.ListRecurringTasks),
+    (r"/api/recurring_tasks", recurring_tasks.ListRecurringTasks),
     # Worker API
     (r"/api/workers", workers.ListWorkers),
     (r"/api/worker/shutdown/(.+)", control.WorkerShutDown),

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Recurring Tasks · Flower{% end %}
+
+{% block navbar %}
+{% module Template("navbar.html", active_tab="recurring_tasks") %}
+{% end %}
+
+{% block container %}
+<input type="hidden" value="{{ time }}" id='time'>
+<input type="hidden" value="{{ autorefresh }}" id='autorefresh'>
+
+<div class="page-section tasks-page">
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">Recurring tasks</p>
+    </div>
+  </header>
+
+  <nav class="task-state-filters" aria-label="Filter recurring tasks by type">
+    <button class="task-state-filter recurring-task-type-filter active" type="button" data-recurring-task-type=""
+      aria-pressed="true">All</button>
+    <button class="task-state-filter recurring-task-type-filter" type="button" data-recurring-task-type="crontab"
+      aria-pressed="false">Crontab</button>
+    <button class="task-state-filter recurring-task-type-filter" type="button" data-recurring-task-type="interval"
+      aria-pressed="false">Interval</button>
+    <button class="task-state-filter recurring-task-type-filter" type="button" data-recurring-task-type="solar"
+      aria-pressed="false">Solar</button>
+  </nav>
+
+  <section class="tasks-table-card" aria-label="Recurring tasks">
+    <table id="recurring-tasks-table" class="tasks-table table table-hover align-middle w-100 mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Task</th>
+          <th>Schedule</th>
+          <th>Last Execution</th>
+          {% if not read_only %}
+          <th class="text-end">Actions</th>
+          {% end %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for task_entry in recurring_tasks %}
+        <tr id="recurring-task-{{ url_escape(task_entry['name']) }}" data-schedule-type="{{ task_entry.get('type', 'custom') }}">
+          <td>
+            <a href="{{ reverse_url('recurring_task', task_entry['name']) }}" class="task-name-link fw-semibold">
+              {{ task_entry['name'] }}
+            </a>
+          </td>
+          <td>
+            {% if task_entry['task'] %}
+            <a href="{{ reverse_url('tasks') }}?name={{ url_escape(task_entry['task']) }}"
+              class="task-name-link font-monospace small" title="View task history in Tasks tab">
+              {{ task_entry['task'] }}
+            </a>
+            {% else %}
+            <span class="value-missing">&mdash;</span>
+            {% end %}
+          </td>
+          <td>
+            <span class="badge text-bg-light border font-monospace" data-flower-tooltip
+              title="{{ task_entry['schedule_raw'] }}">
+              {{ task_entry['schedule'] }}
+            </span>
+          </td>
+          <td>
+            {% if task_entry['last_execution'] %}
+            <div class="d-flex align-items-center gap-2">
+              {% if task_entry['last_execution']['state'] == 'SUCCESS' %}
+              <span class="badge text-bg-success">{{ task_entry['last_execution']['state'] }}</span>
+              {% elif task_entry['last_execution']['state'] == 'FAILURE' %}
+              <span class="badge text-bg-danger">{{ task_entry['last_execution']['state'] }}</span>
+              {% elif task_entry['last_execution']['state'] == 'STARTED' %}
+              <span class="badge task-state-started">{{ task_entry['last_execution']['state'] }}</span>
+              {% elif task_entry['last_execution']['state'] == 'RETRY' %}
+              <span class="badge text-bg-warning">{{ task_entry['last_execution']['state'] }}</span>
+              {% else %}
+              <span class="badge text-bg-secondary">{{ task_entry['last_execution']['state'] }}</span>
+              {% end %}
+              <div class="small">
+                {% raw task_link(reverse_url('task', task_entry['last_execution']['uuid']),
+                task_entry['last_execution']['uuid']) %}
+                {% if task_entry['last_execution']['received'] %}
+                <div class="text-muted" style="font-size: 0.75rem;">
+                  {{ humanize(task_entry['last_execution']['received'], type=time) }}
+                </div>
+                {% end %}
+              </div>
+            </div>
+            {% else %}
+            <span class="text-muted small">Not seen in current session</span>
+            {% end %}
+          </td>
+          {% if not read_only %}
+          <td class="text-end">
+            <button type="button" class="btn btn-sm btn-outline-primary btn-run-recurring-task text-nowrap"
+              data-task="{{ task_entry['task'] }}" data-args="{{ json_encode(task_entry['args']) }}"
+              data-kwargs="{{ json_encode(task_entry['kwargs']) }}"
+              data-options="{{ json_encode(task_entry['options']) }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"
+                class="me-1">
+                <path
+                  d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
+              </svg>
+              Run now
+            </button>
+          </td>
+          {% end %}
+        </tr>
+        {% end %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{% end %}

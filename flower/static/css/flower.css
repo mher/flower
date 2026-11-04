@@ -712,7 +712,8 @@ body.app-body {
 
 .workers-table-card,
 .tasks-table-card,
-.broker-table-card {
+.broker-table-card,
+.schedules-table-card {
   overflow: hidden;
   background: var(--flower-surface);
   border: 1px solid var(--bs-border-color);
@@ -721,7 +722,8 @@ body.app-body {
 }
 
 .workers-page .dataTables_wrapper,
-.tasks-page .dataTables_wrapper {
+.tasks-page .dataTables_wrapper,
+.schedules-page .dataTables_wrapper {
   padding-top: 0.875rem;
   border: 0;
 }
@@ -733,14 +735,20 @@ body.app-body {
 .tasks-page .dataTables_length,
 .tasks-page .dataTables_filter,
 .tasks-page .dataTables_info,
-.tasks-page .dataTables_paginate {
+.tasks-page .dataTables_paginate,
+.schedules-page .dataTables_length,
+.schedules-page .dataTables_filter,
+.schedules-page .dataTables_info,
+.schedules-page .dataTables_paginate {
   margin: 0 1rem 0.875rem;
 }
 
 .workers-page .dataTables_filter input,
 .workers-page .dataTables_length select,
 .tasks-page .dataTables_filter input,
-.tasks-page .dataTables_length select {
+.tasks-page .dataTables_length select,
+.schedules-page .dataTables_filter input,
+.schedules-page .dataTables_length select {
   min-height: 2.5rem;
   color: var(--bs-body-color);
   background: var(--flower-surface);
@@ -749,13 +757,15 @@ body.app-body {
 }
 
 .workers-page .dataTables_filter input,
-.tasks-page .dataTables_filter input {
+.tasks-page .dataTables_filter input,
+.schedules-page .dataTables_filter input {
   flex: 1 1 auto;
   padding: 0.45rem 0.75rem;
 }
 
 .workers-page .dataTables_filter,
-.tasks-page .dataTables_filter {
+.tasks-page .dataTables_filter,
+.schedules-page .dataTables_filter {
   float: none;
   width: auto;
   margin: 0 0.5rem 0.875rem;
@@ -763,7 +773,8 @@ body.app-body {
 }
 
 .workers-page .dataTables_filter label,
-.tasks-page .dataTables_filter label {
+.tasks-page .dataTables_filter label,
+.schedules-page .dataTables_filter label {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -771,7 +782,8 @@ body.app-body {
 }
 
 .workers-page div.dataTables_wrapper .dataTables_filter input,
-.tasks-page div.dataTables_wrapper .dataTables_filter input {
+.tasks-page div.dataTables_wrapper .dataTables_filter input,
+.schedules-page div.dataTables_wrapper .dataTables_filter input {
   width: 100%;
   margin-right: 0;
   margin-left: 0;
@@ -835,7 +847,8 @@ body.app-body {
 
 .workers-table,
 .tasks-table,
-.broker-table {
+.broker-table,
+.schedules-table {
   --bs-table-bg: transparent;
   --bs-table-hover-bg: var(--flower-surface-subtle);
   --bs-table-border-color: var(--bs-border-color);
@@ -843,14 +856,16 @@ body.app-body {
 
 .workers-table > :not(caption) > * > *,
 .tasks-table > :not(caption) > * > *,
-.broker-table > :not(caption) > * > * {
+.broker-table > :not(caption) > * > *,
+.schedules-table > :not(caption) > * > * {
   padding: 0.875rem 1rem;
   border-bottom-width: 1px;
 }
 
 .workers-table thead th,
 .tasks-table thead th,
-.broker-table thead th {
+.broker-table thead th,
+.schedules-table thead th {
   color: var(--flower-text-muted);
   font-size: 0.75rem;
   font-weight: 700;
@@ -864,7 +879,8 @@ body.app-body {
 }
 
 .workers-table a,
-.tasks-table a {
+.tasks-table a,
+.schedules-table a {
   font-weight: 600;
   text-decoration: none;
 }

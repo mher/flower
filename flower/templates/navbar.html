@@ -22,6 +22,11 @@
             {% if active_tab == 'tasks' %}aria-current="page"{% end %}>Tasks</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link{% if active_tab == 'recurring_tasks' %} active{% end %}"
+            href="{{ reverse_url('recurring_tasks') }}"
+            {% if active_tab == 'recurring_tasks' %}aria-current="page"{% end %}>Recurring Tasks</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link{% if active_tab == 'broker' %} active{% end %}"
             href="{{ reverse_url('broker') }}"
             {% if active_tab == 'broker' %}aria-current="page"{% end %}>Broker</a>

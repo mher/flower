@@ -989,4 +989,157 @@
 
     });
 
+    $(document).ready(function () {
+        if (!active_page('/recurring-tasks') && !active_page('/recurring_tasks')) {
+            return;
+        }
+
+        var recurringTasksTable = $('#recurring-tasks-table').DataTable({
+            searching: true,
+            select: false,
+            paging: true,
+            scrollX: true,
+            scrollCollapse: true,
+            dom: "frt<'dt-footer'lip>",
+            pageLength: 15,
+            lengthMenu: [15, 30, 50, 100],
+            language: {
+                lengthMenu: '_MENU_',
+                info: 'Showing _START_ to _END_ of _TOTAL_ recurring tasks',
+                infoEmpty: 'No recurring tasks to show',
+                infoFiltered: '(filtered from _MAX_ total tasks)',
+                search: '<span class="visually-hidden">Search recurring tasks</span>',
+                searchPlaceholder: 'Search recurring tasks…',
+                emptyTable: 'No recurring tasks configured.',
+                zeroRecords: 'No recurring tasks match your search.'
+            },
+            initComplete: function () {
+                $('#recurring-tasks-table_length select').attr('aria-label', 'Recurring tasks per page');
+            }
+        });
+
+        var activeRecurringTypeFilter = '';
+
+        $.fn.dataTable.ext.search.push(
+            function (settings, data, dataIndex, rowData, counter) {
+                if (!settings || !settings.nTable || settings.nTable.id !== 'recurring-tasks-table') {
+                    return true;
+                }
+                if (!activeRecurringTypeFilter) {
+                    return true;
+                }
+                var rowNode = settings.aoData[dataIndex] && settings.aoData[dataIndex].nTr;
+                if (!rowNode) {
+                    return true;
+                }
+                var rowType = $(rowNode).attr('data-schedule-type') || '';
+                return rowType === activeRecurringTypeFilter;
+            }
+        );
+
+        $('.recurring-task-type-filter').on('click', function () {
+            var type = $(this).data('recurring-task-type') || '';
+            activeRecurringTypeFilter = type;
+            $('.recurring-task-type-filter').each(function () {
+                var selected = $(this).data('recurring-task-type') === type;
+                $(this).toggleClass('active', selected).attr('aria-pressed', selected ? 'true' : 'false');
+            });
+            recurringTasksTable.draw();
+        });
+
+        var autorefresh_param = $.urlParam('autorefresh'),
+            default_autorefresh = $('#autorefresh').val(),
+            autorefresh_interval = 3;
+
+        if (autorefresh_param !== 0 && autorefresh_param !== '0') {
+            if (autorefresh_param) {
+                autorefresh_interval = parseInt(autorefresh_param, 10);
+            } else if (default_autorefresh === '0' || default_autorefresh === 0) {
+                autorefresh_interval = 0;
+            }
+        } else {
+            autorefresh_interval = 0;
+        }
+
+        if (autorefresh_interval > 0) {
+            setInterval(function () {
+                $.ajax({
+                    url: url_prefix() + '/api/recurring-tasks',
+                    dataType: 'json',
+                    success: function (response) {
+                        var tasks = (response && response.recurring_tasks) || [];
+                        tasks.forEach(function (task) {
+                            var safeSelector = '#recurring-task-' + encodeURIComponent(task.name).replace(/[%!\"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, '\\$&');
+                            var row = $(safeSelector);
+                            if (!row.length) {
+                                return;
+                            }
+                            var lastExecCell = row.find('td:nth-child(4)');
+                            if (lastExecCell.length && task.last_execution) {
+                                var state = task.last_execution.state || '';
+                                var stateBadgeClass = 'text-bg-secondary';
+                                if (state === 'SUCCESS') stateBadgeClass = 'text-bg-success';
+                                else if (state === 'FAILURE') stateBadgeClass = 'text-bg-danger';
+                                else if (state === 'STARTED') stateBadgeClass = 'task-state-started';
+                                else if (state === 'RETRY') stateBadgeClass = 'text-bg-warning';
+
+                                var taskLink = '<a href="' + url_prefix() + '/task/' + encodeURIComponent(task.last_execution.uuid) + '">' +
+                                    htmlEscapeEntities(task.last_execution.uuid) + '</a>';
+
+                                var html = '<div class="d-flex align-items-center gap-2">' +
+                                    '<span class="badge ' + stateBadgeClass + '">' + htmlEscapeEntities(state) + '</span>' +
+                                    '<div class="small">' + taskLink + '</div>' +
+                                    '</div>';
+                                lastExecCell.html(html);
+                            }
+                        });
+                    }
+                });
+            }, autorefresh_interval * 1000);
+        }
+
+        $(document).on('click', '.btn-run-recurring-task, .btn-run-schedule', function (event) {
+            event.preventDefault();
+            var btn = $(this),
+                taskName = btn.data('task');
+
+            if (!taskName) {
+                return;
+            }
+
+            var args = btn.data('args') || [],
+                kwargs = btn.data('kwargs') || {},
+                options = btn.data('options') || {},
+                payload = $.extend({}, options, {
+                    args: args,
+                    kwargs: kwargs
+                });
+
+            btn.prop('disabled', true);
+            $.ajax({
+                type: 'POST',
+                url: url_prefix() + '/api/task/send-task/' + encodeURIComponent(taskName),
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(payload),
+                success: function (data) {
+                    btn.prop('disabled', false);
+                    if (data && data['task-id']) {
+                        show_alert('Triggered task ' + taskName + ' (' + data['task-id'].substring(0, 8) + ')', 'success');
+                    } else {
+                        show_alert('Task triggered successfully', 'success');
+                    }
+                },
+                error: function (xhr) {
+                    btn.prop('disabled', false);
+                    if (xhr.status === 403) {
+                        show_alert('Action not allowed: Read-only mode is enabled', 'danger');
+                    } else {
+                        var msg = xhr.responseText || 'Failed to trigger task';
+                        show_alert('Error: ' + msg, 'danger');
+                    }
+                }
+            });
+        });
+    });
+
 }(jQuery));
