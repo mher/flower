@@ -69,5 +69,11 @@ define("task_runtime_metric_buckets", type=float, default=list(Histogram.DEFAULT
        multiple=True, help="histogram latency bucket value")
 define("read_only", type=bool, default=False,
        help="enable read only mode, disabling all operations")
+define("elasticsearch", type=bool, default=False, help="Whether to support history lookups with elasticsearch (at least by default)")
+define("elasticsearch_index_bulk_size", type=int, default=200, help="Elasticsearch indexer size for bulk indexing")
+define("elasticsearch_index_timeout", type=int, default=10, help="Elasticsearch indexer timeout on indexing")
+define("elasticsearch_day_retention", type=int, default=21, help="Elasticsearch indexer number of days of tasks to retain in the index")
+define("elasticsearch_url", type=str, default="http://localhost:9200/", help="Elasticsearch URL for indexer and standard flower for history lookup")
+define("elasticsearch_dashboard", type=bool, default=False, help="Whether to lookup the dashboard information from Elasticsearch")
 
 default_options = options

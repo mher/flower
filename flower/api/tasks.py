@@ -12,6 +12,16 @@ from tornado import web
 from tornado.escape import json_decode
 from tornado.web import HTTPError
 
+try:
+    from flower.api.elasticsearch_history import AlternativeBackendError
+except ImportError:
+    AlternativeBackendError = None
+
+try:
+    from flower.api.elasticsearch_history import list_tasks_elastic_search
+except ImportError:
+    list_tasks_elastic_search = None
+
 from ..utils import tasks
 from ..utils.search import QuerySyntaxError
 from . import BaseApiHandler
@@ -458,8 +468,8 @@ Return length of all active queues
 
 
 class ListTasks(BaseTaskHandler):
-    @web.authenticated
     # pylint: disable=too-many-locals
+    @web.authenticated
     def get(self):
         """
 List tasks
@@ -553,23 +563,30 @@ List tasks
 :statuscode 400: invalid query parameters
 :statuscode 401: unauthorized request
         """
+        use_es = self.application.options.elasticsearch
+
         app = self.application
         limit = self.get_argument('limit', None, type=int)
         offset = self.get_argument('offset', default=0, type=int)
         worker = self.get_argument('workername', None)
         type = self.get_argument('taskname', None)
         state = self.get_argument('state', None)
+        use_es = self.get_argument('es', use_es)
         received_start = self.get_argument('received_start', None)
         received_end = self.get_argument('received_end', None)
         sort_by = self.get_argument('sort_by', None)
         search = self.get_argument('search', None, escape=False)
+        started_start = self.get_argument('started_start', None)
+        started_end = self.get_argument('started_end', None)
+        root_id = self.get_argument('root_id', None)
+        parent_id = self.get_argument('parent_id', None)
 
         offset = max(offset, 0)
         worker = worker if worker != 'All' else None
         type = type if type != 'All' else None
         state = state if state != 'All' else None
 
-        if sort_by and sort_by.lstrip('-') not in tasks.SORT_KEYS:
+        if sort_by and sort_by.lstrip('-') not in tasks.SORT_KEYS:  # type: ignore[union-attr]
             raise HTTPError(
                 400,
                 f"Invalid sort_by '{sort_by}', expected one of "
@@ -577,19 +594,26 @@ List tasks
 
         result = []
         try:
-            task_iterator = tasks.iter_tasks(
-                    app.events, limit=limit, offset=offset, sort_by=sort_by, type=type,
-                    worker=worker, state=state,
-                    received_start=received_start,
-                    received_end=received_end,
-                    search=search
-            )
-            for task_id, task in task_iterator:
-                task = tasks.as_dict(task)
-                worker = task.pop('worker', None)
-                if worker is not None:
-                    task['worker'] = worker.hostname
-                result.append((task_id, task))
+            if use_es:
+                try:
+                    result = list_tasks_elastic_search(self)
+                except AlternativeBackendError:
+                    use_es = False
+            if not use_es:
+                for task_id, task in tasks.iter_tasks(
+                        app.events, limit=limit, offset=offset, sort_by=sort_by, type=type,
+                        worker=worker, state=state,
+                        received_start=received_start,
+                        received_end=received_end,
+                        search=search,
+                        started_start=started_start, started_end=started_end,
+                        root_id=root_id, parent_id=parent_id
+                ):
+                    task = tasks.as_dict(task)
+                    worker = task.pop('worker', None)
+                    if worker is not None:
+                        task['worker'] = worker.hostname
+                    result.append((task_id, task))
         except QuerySyntaxError as exc:
             self.set_status(400)
             self.write({'error': str(exc)})
