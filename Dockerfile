@@ -7,7 +7,7 @@ RUN apk add --no-cache ca-certificates tzdata && \
 
 # Install flower from the build context so the image always matches the checkout
 COPY . /opt/flower
-RUN pip install --no-cache-dir redis /opt/flower && \
+RUN pip install --no-cache-dir "celery[redis]" /opt/flower && \
     pip uninstall -y pip
 
 # PYTHONUNBUFFERED: Force stdin, stdout and stderr to be totally unbuffered. (equivalent to `python -u`)
