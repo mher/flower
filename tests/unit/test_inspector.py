@@ -47,6 +47,57 @@ class InspectorTests(TestCase):
         connection.close.assert_called_once_with()
 
 
+class InspectorMaskedSettingsTests(TestCase):
+    conf = {
+        'broker_url': 'redis://localhost:6379/0',
+        'SENTRY_DSN': 'https://secret@sentry.example.com/1',
+        'broker_transport_options': {'master_name': 'mymaster', 'socket_timeout': 5},
+    }
+
+    def test_settings_are_unchanged_by_default(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1)
+
+        inspector._on_update('worker1', 'conf', self.conf)
+
+        self.assertIs(self.conf, inspector.workers['worker1']['conf'])
+
+    def test_ignores_empty_setting_names(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1, masked_settings=['', ' '])
+
+        inspector._on_update('worker1', 'conf', self.conf)
+
+        self.assertIs(self.conf, inspector.workers['worker1']['conf'])
+
+    def test_masks_settings_by_name_case_insensitively(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1,
+                              masked_settings=['sentry_dsn', ' Master_Name '])
+
+        inspector._on_update('worker1', 'conf', self.conf)
+
+        self.assertEqual({
+            'broker_url': 'redis://localhost:6379/0',
+            'SENTRY_DSN': '********',
+            'broker_transport_options': {'master_name': '********', 'socket_timeout': 5},
+        }, inspector.workers['worker1']['conf'])
+        self.assertEqual('mymaster', self.conf['broker_transport_options']['master_name'])
+
+    def test_masks_whole_nested_setting(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1,
+                              masked_settings=['broker_transport_options'])
+
+        inspector._on_update('worker1', 'conf', self.conf)
+
+        self.assertEqual('********', inspector.workers['worker1']['conf']['broker_transport_options'])
+
+    def test_masks_only_conf_responses(self):
+        inspector = Inspector(Mock(), Mock(), timeout=1, masked_settings=['sentry_dsn'])
+        stats = {'SENTRY_DSN': 'not a setting'}
+
+        inspector._on_update('worker1', 'stats', stats)
+
+        self.assertEqual('not a setting', inspector.workers['worker1']['stats']['SENTRY_DSN'])
+
+
 class InspectorConcurrencyTests(IsolatedAsyncioTestCase):
     async def test_coalesces_refreshes_for_the_same_worker(self):
         inspector = Inspector(Mock(), Mock(), timeout=1)

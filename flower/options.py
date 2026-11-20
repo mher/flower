@@ -69,5 +69,7 @@ define("task_runtime_metric_buckets", type=float, default=list(Histogram.DEFAULT
        multiple=True, help="histogram latency bucket value")
 define("read_only", type=bool, default=False,
        help="enable read only mode, disabling all operations")
+define("masked_worker_settings", type=str, default=None, multiple=True,
+       help="names of worker configuration settings to hide")
 
 default_options = options

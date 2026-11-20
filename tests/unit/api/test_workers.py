@@ -70,3 +70,18 @@ class ListWorkersTest(BaseApiTestCase):
             [],
             self._app.workers['celery@worker1']['inspect_method']
         )
+
+
+class MaskedWorkerSettingsTest(BaseApiTestCase):
+    def get_app(self, capp=None):
+        with self.mock_option('masked_worker_settings', ['sentry_dsn']):
+            return super().get_app(capp)
+
+    def test_masks_settings(self):
+        self._app.inspector._on_update('worker1', 'conf', {
+            'SENTRY_DSN': 'https://secret@sentry.example.com/1', 'worker_concurrency': 4})
+
+        r = self.get('/api/workers?workername=worker1')
+
+        body = json.loads(r.body.decode('utf-8'))
+        self.assertEqual({'SENTRY_DSN': '********', 'worker_concurrency': 4}, body['worker1']['conf'])
